@@ -18,6 +18,6 @@ env.AppendUnique(LIBS=LIBS)
 env.AppendUnique(CPPDEFINES=['MESSAGE'])
 
 target = '_amlPymodule'
-py_dir = '../amlPy'
+py_dir = '../aml'
 env.ALEAWrapper( py_dir, target, sources )
 

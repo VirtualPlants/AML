@@ -9,21 +9,14 @@ namespace = 'openalea'
 # Scons build directory
 build_prefix= "build-scons"
  
-LONG_DESC = """
-AmlPy provides a robust Python interface to the aml
-programming language.  It can manage all kinds of AML objects and can
-execute arbitrary AML functions. All the errors from the AML language are
-converted to Python exceptions.
-"""
 
 if __name__ == '__main__':
     
     setup(name=packagename,
           version='2.0.0',
-          author='',
+          author='C. Godin, Y. Guédon, C.Pradal',
           author_email='',
-          description='aml and amlPylibraries',
-          long_description=LONG_DESC,
+          description='aml and amlPy libraries',
           url='',
           license='GPL',
  
@@ -34,8 +27,9 @@ if __name__ == '__main__':
  
         
           # Packages
-          packages=find_packages(where='src', namespace=namespace),
-          package_dir=find_package_dir(where='src', namespace=namespace), 
+          packages=[namespace+".aml", "amlPy"],
+          package_dir={namespace+".aml" : "src/aml",
+                       "amlPy" : "src/amlPy"},
       
           # Add package platform libraries if any
           include_package_lib=True,
