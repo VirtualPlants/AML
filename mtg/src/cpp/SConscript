@@ -1,0 +1,69 @@
+# -*-python-*-
+
+from openalea.sconsx.config import BisonFlex
+
+import os
+bn = os.path.basename
+
+Import( "env" )
+
+lib_env = env.Copy()
+
+# Export symbols for windows platform
+if lib_env['compiler'] == 'mingw':
+    LINKFLAGS=["-enable-stdcall-fixup",
+               "-enable-auto-import",
+               "-enable-runtime-pseudo-reloc",
+               "-s"]
+    lib_env.AppendUnique(LINKFLAGS=LINKFLAGS)
+
+
+lib_env.EnableQt4Modules(['QtCore','QtOpenGL'])
+
+# Select files
+
+includes= lib_env.ALEAGlob('*.h')
+sources = lib_env.ALEAGlob('*.cpp')
+pgllibs = ['pglalgo', 'pglgui', 'pglsg', 'pgltool']
+
+# Add hpp files
+hpp = Split("""
+utils_template.cpp
+""")
+
+includes += hpp
+sources = [ x for x in sources if bn(x) not in hpp]
+
+# Bison
+
+bflex = BisonFlex(env,
+                  "lsystemToMTG_parser.y",
+                  "lsystemToMTG_scanner.l",
+                  "lsystemToMTG_yy" )
+sources.extend(bflex)
+
+bflex = BisonFlex(env, "parser.y", "scanner.l", "" )
+sources.extend(bflex)
+
+# Add header in include
+if env.get('BISON_HPP'):
+  includes.append( 'lsystemToMTG_parser.hpp' )
+  includes.append( 'parser.hpp' )
+else:
+  includes.append( 'lsystemToMTG_parser.cpp.h' )
+  includes.append( 'parser.cpp.h' )
+    
+
+lib_env.AppendUnique(LIBS=['vptool', 'vpamlobj'] + pgllibs)
+
+inc = lib_env.ALEAIncludes("mtg", includes)
+
+lib = lib_env.ALEALibrary("vpmtg", sources)
+
+
+
+
+
+
+
+

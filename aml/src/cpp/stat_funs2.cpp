@@ -1,0 +1,3441 @@
+/* -*-c++-*-
+ *  ----------------------------------------------------------------------------
+ *
+ *       AMAPmod: Exploring and Modeling Plant Architecture
+ *
+ *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *
+ *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *
+ *       $Source$
+ *       $Id$
+ *
+ *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *
+ *  ----------------------------------------------------------------------------
+ *
+ *                      GNU General Public Licence
+ *
+ *       This program is free software; you can redistribute it and/or
+ *       modify it under the terms of the GNU General Public License as
+ *       published by the Free Software Foundation; either version 2 of
+ *       the License, or (at your option) any later version.
+ *
+ *       This program is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS For A PARTICULAR PURPOSE. See the
+ *       GNU General Public License for more details.
+ *
+ *       You should have received a copy of the GNU General Public
+ *       License along with this program; see the file COPYING. If not,
+ *       write to the Free Software Foundation, Inc., 59
+ *       Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ *  ----------------------------------------------------------------------------
+ */
+
+
+
+#include <iostream>
+
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/mixture.h"
+#include "stat_tool/convolution.h"
+#include "stat_tool/compound.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/regression.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/distance_matrix.h"
+
+#include "sequence_analysis/renewal.h"
+#include "sequence_analysis/sequences.h"
+#include "sequence_analysis/markov.h"
+#include "sequence_analysis/hidden_markov.h"
+#include "sequence_analysis/variable_order_markov.h"
+#include "sequence_analysis/hidden_variable_order_markov.h"
+#include "sequence_analysis/semi_markov.h"
+#include "sequence_analysis/hidden_semi_markov.h"
+#include "sequence_analysis/tops.h"
+#include "sequence_analysis/sequence_label.h"
+
+#include "ammodel.h"
+#include "parseraml.h"
+#include "kernel_err.h"
+#include "amstring.h"
+#include "array.h"
+
+#include "stat_module.h"
+
+
+#define ERR_MSG_ARRAY STAT_err_msgs_aml
+#define MODULE_NAME   "Statistics"
+
+
+extern const char *STAT_err_msgs_aml[];
+
+
+extern int nb_required_computation(const AMObjVector &args);
+extern double* buildRealFilterArray(const AMObjVector &args , int arg_index , const char *function ,
+                                    int output_index , int &nb_element);
+extern RWCollectable* STAT_binary_read(Format_error &error , const char *path);
+
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Lecture des parametres d'une loi.
+ *
+ *--------------------------------------------------------------*/
+
+static int parameter_input(const AMObjVector &args , int ident , int &inf_bound ,
+                           int &sup_bound , double &parameter , double &probability ,
+                           const char *function , int min_inf_bound)
+
+{
+  bool status = true , lstatus;
+
+
+  sup_bound = I_DEFAULT;
+  parameter = D_DEFAULT;
+  probability = D_DEFAULT;
+
+  if (args[1].tag() != AMObjType::INTEGER) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , function , 2 ,
+                args[1].tag.string().data() , "INT");
+  }
+  else {
+    inf_bound = args[1].val.i;
+    if ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND)) {
+      status = false;
+      genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 2);
+    }
+  }
+
+  if ((ident == BINOMIAL) || (ident == UNIFORM)) {
+    if (args[2].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , function , 3 ,
+                  args[2].tag.string().data() , "INT");
+    }
+
+    else {
+      sup_bound = args[2].val.i;
+
+      switch (ident) {
+
+      case BINOMIAL : {
+        if ((sup_bound <= inf_bound) || (sup_bound - inf_bound > MAX_DIFF_BOUND)) {
+          status = false;
+          genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 3);
+        }
+        break;
+      }
+
+      case UNIFORM : {
+        if ((sup_bound < inf_bound) || (sup_bound - inf_bound > MAX_DIFF_BOUND)) {
+          status = false;
+          genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 3);
+        }
+        break;
+      }
+      }
+    }
+  }
+
+  else {
+    switch (args[2].tag()) {
+    case AMObjType::INTEGER :
+      parameter = args[2].val.i;
+      break;
+    case AMObjType::REAL :
+      parameter = args[2].val.r;
+      break;
+    default :
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , function , 3 ,
+                  args[2].tag.string().data() , "INT or REAL");
+      break;
+    }
+
+    if ((parameter <= 0.) || ((ident == POISSON) && (parameter > MAX_MEAN))) {
+      status = false;
+      genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 3);
+    }
+  }
+
+  if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL)) {
+    switch (args[3].tag()) {
+    case AMObjType::INTEGER :
+      probability = args[3].val.i;
+      break;
+    case AMObjType::REAL :
+      probability = args[3].val.r;
+      break;
+    default :
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , function , 4 ,
+                  args[3].tag.string().data() , "INT or REAL");
+      break;
+    }
+
+    lstatus = true;
+
+    switch (ident) {
+
+    case BINOMIAL : {
+      if ((probability < 0.) || (probability > 1.)) {
+        lstatus = false;
+      }
+      break;
+    }
+
+    case NEGATIVE_BINOMIAL : {
+      if ((probability <= 0.) || (probability >= 1.)) {
+        lstatus = false;
+      }
+      else if (parameter * (1. - probability) / probability > MAX_MEAN) {
+        lstatus = false;
+      }
+      break;
+    }
+    }
+
+    if (!lstatus) {
+      status = false;
+      genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 4);
+    }
+  }
+
+  return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une loi a partir d'un fichier ou a partir
+ *  de son identificateur et de ses parametres.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Distribution(const AMObjVector &args)
+
+{
+  CHECKCONDVA(args.length() >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Distribution"));
+  CHECKCONDVA(args[0].tag() == AMObjType::STRING ,
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Distribution" , 1 ,
+                          args[0].tag.string().data() , "STRING"));
+
+  if (args.length() == 1) {
+    Parametric_model *dist;
+    Format_error error;
+
+
+    dist = parametric_ascii_read(error , ((AMString*)args[0].val.p)->data());
+
+    if (dist) {
+      STAT_model* model = new STAT_model(dist);
+      return AMObj(AMObjType::DISTRIBUTION , model);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "Distribution");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  else {
+    RWCString *pstr;
+    bool status = true;
+    register int i;
+    int ident , inf_bound , sup_bound;
+    double parameter , probability;
+    Parametric_model *dist;
+
+
+    pstr = (AMString*)args[0].val.p;
+    for (i = BINOMIAL;i <= UNIFORM;i++) {
+      if ((*pstr == STAT_distribution_word[i]) || (*pstr == STAT_distribution_letter[i])) {
+        ident = i;
+        break;
+      }
+    }
+
+    if (i == UNIFORM + 1) {
+      status = false;
+      genAMLError(ERRORMSG(DISTRIBUTION_NAME_sds) , "Distribution" , 1 ,
+                  "BINOMIAL(B) or POISSON(P) or NEGATIVE_BINOMIAL(NB) or UNIFORM(U)");
+    }
+
+    else {
+      if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL)) {
+        if (args.length() != 4) {
+          status = false;
+          genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Distribution" , 4);
+        }
+      }
+      else if ((ident == POISSON) || (ident == UNIFORM)) {
+        if (args.length() != 3) {
+          status = false;
+          genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Distribution" , 3);
+        }
+      }
+    }
+
+    if (status) {
+      status = parameter_input(args , ident , inf_bound , sup_bound , parameter ,
+                               probability , "Distribution" , 0);
+    }
+
+    if (!status) {
+      return AMObj(AMObjType::ERROR);
+    }
+
+    dist = new Parametric_model(ident , inf_bound , sup_bound , parameter , probability);
+
+    STAT_model* model = new STAT_model(dist);
+    return AMObj(AMObjType::DISTRIBUTION , model);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un melange a partir d'un fichier ou a partir
+ *  de poids et de lois elementaires.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Mixture(const AMObjVector &args)
+
+{
+  Mixture *mixt;
+  Format_error error;
+
+
+  CHECKCONDVA(args.length() >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Mixture"));
+
+  if (args[0].tag() == AMObjType::STRING) {
+    CHECKCONDVA(args.length() == 1 ,
+                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Mixture"));
+    CHECKCONDVA(args[0].tag() == AMObjType::STRING ,
+                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Mixture" ,
+                            args[0].tag.string().data() , "STRING"));
+
+    mixt = mixture_ascii_read(error , ((AMString*)args[0].val.p)->data());
+  }
+
+  else {
+    bool status = true;
+    register int i;
+    int nb_component = args.length() / 2;
+    double weight[MIXTURE_NB_COMPONENT];
+    const Parametric *component[MIXTURE_NB_COMPONENT];
+
+
+    CHECKCONDVA(args.length() % 2 == 0 ,
+                genAMLError(ERRORMSG(UNEVEN_NB_ARG_s) , "Mixture"));
+    CHECKCONDVA((nb_component >= 2) && (nb_component <= MIXTURE_NB_COMPONENT) ,
+                genAMLError(ERRORMSG(NB_DIST_sd) , "Mixture" , MIXTURE_NB_COMPONENT));
+
+    for (i = 0;i < nb_component;i++) {
+      if (args[i * 2].tag() != AMObjType::REAL) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Mixture" , i * 2 + 1 ,
+                    args[i * 2].tag.string().data() , "REAL");
+      }
+      else {
+        weight[i] = args[i * 2].val.r;
+      }
+
+      switch (args[i * 2 + 1].tag()) {
+      case AMObjType::DISTRIBUTION :
+        component[i] = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
+        break;
+      case AMObjType::MIXTURE :
+        component[i] = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
+        break;
+      case AMObjType::CONVOLUTION :
+        component[i] = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
+        break;
+      case AMObjType::COMPOUND :
+        component[i] = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
+        break;
+      default :
+        component[i] = 0;
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Mixture" , i * 2 + 2 , args[i * 2 + 1].tag.string().data() ,
+                    "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+        break;
+      }
+    }
+
+    if (status) {
+      mixt = mixture_building(error , nb_component , weight , component);
+    }
+
+    for (i = 0;i < nb_component;i++) {
+      delete component[i];
+    }
+
+    if (!status) {
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  if (mixt) {
+    STAT_model* model = new STAT_model(mixt);
+    return AMObj(AMObjType::MIXTURE , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "Mixture");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un produit de convolution a partir d'un fichier ou
+ *  a partir de lois elementaires.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Convolution(const AMObjVector &args)
+
+{
+  Convolution *convol;
+  Format_error error;
+
+
+  CHECKCONDVA(args.length() >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Convolution"));
+
+  if (args[0].tag() == AMObjType::STRING) {
+    CHECKCONDVA(args.length() == 1 ,
+                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Convolution"));
+    CHECKCONDVA(args[0].tag() == AMObjType::STRING ,
+                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Convolution" ,
+                            args[0].tag.string().data() , "STRING"));
+
+    convol = convolution_ascii_read(error , ((AMString*)args[0].val.p)->data());
+  }
+
+  else {
+    bool status = true;
+    register int i;
+    int nb_dist = args.length();
+    const Parametric *dist[CONVOLUTION_NB_DISTRIBUTION];
+
+
+    CHECKCONDVA((nb_dist >= 2) && (nb_dist <= CONVOLUTION_NB_DISTRIBUTION) ,
+                genAMLError(ERRORMSG(NB_DIST_sd) , "Convolution" , CONVOLUTION_NB_DISTRIBUTION));
+
+    for (i = 0;i < nb_dist;i++) {
+      switch (args[i].tag()) {
+      case AMObjType::DISTRIBUTION :
+        dist[i] = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[i].val.p)->pt)));
+        break;
+      case AMObjType::MIXTURE :
+        dist[i] = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[i].val.p)->pt)));
+        break;
+      case AMObjType::CONVOLUTION :
+        dist[i] = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[i].val.p)->pt)));
+        break;
+      case AMObjType::COMPOUND :
+        dist[i] = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[i].val.p)->pt)));
+        break;
+      default :
+        dist[i] = 0;
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Convolution" , i + 1 , args[i].tag.string().data() ,
+                    "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+        break;
+      }
+    }
+
+    if (status) {
+      convol = convolution_building(error , nb_dist , dist);
+    }
+
+    for (i = 0;i < nb_dist;i++) {
+      delete dist[i];
+    }
+
+    if (!status) {
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  if (convol) {
+    STAT_model* model = new STAT_model(convol);
+    return AMObj(AMObjType::CONVOLUTION , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "Convolution");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une loi composee a partir d'un fichier ou
+ *  d'une loi de la somme et d'une loi elementaire
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Compound(const AMObjVector &args)
+
+{
+  Compound *cdist;
+  Format_error error;
+
+
+  CHECKCONDVA(args.length() >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Compound"));
+
+  if (args[0].tag() == AMObjType::STRING) {
+    CHECKCONDVA(args.length() == 1 ,
+                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Compound"));
+    CHECKCONDVA(args[0].tag() == AMObjType::STRING ,
+                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Compound" ,
+                            args[0].tag.string().data() , "STRING"));
+
+    cdist = compound_ascii_read(error , ((AMString*)args[0].val.p)->data());
+  }
+
+  else {
+    bool status = true;
+    register int i;
+    Parametric *dist[2];
+
+
+    CHECKCONDVA(args.length() == 2 ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Compound" , 2));
+
+    for (i = 0;i < 2;i++) {
+      switch (args[i].tag()) {
+      case AMObjType::DISTRIBUTION :
+        dist[i] = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[i].val.p)->pt)));
+        break;
+      case AMObjType::MIXTURE :
+        dist[i] = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[i].val.p)->pt)));
+        break;
+      case AMObjType::CONVOLUTION :
+        dist[i] = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[i].val.p)->pt)));
+        break;
+      case AMObjType::COMPOUND :
+        dist[i] = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[i].val.p)->pt)));
+        break;
+      default :
+        dist[i] = 0;
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Compound" , i + 1 , args[i].tag.string().data() ,
+                    "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+        break;
+      }
+    }
+
+    if (status) {
+      cdist = new Compound(*dist[0] , *dist[1]);
+    }
+
+    for (i = 0;i < 2;i++) {
+      delete dist[i];
+    }
+
+    if (!status) {
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  if (cdist) {
+    STAT_model* model = new STAT_model(cdist);
+    return AMObj(AMObjType::COMPOUND , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "Compound");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un histogramme a partir d'un objet de type
+ *  ARRAY(INT) ou a partir d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Histogram(const AMObjVector &args)
+
+{
+  Distribution_data *histo;
+
+
+  CHECKCONDVA(args.length() == 1 ,
+              genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Histogram"));
+
+  switch (args[0].tag()) {
+
+  case AMObjType::ARRAY : {
+    bool status = true;
+    register int i;
+    int nb_element , *element;
+    Array* parray = (Array*)args[0].val.p;
+
+
+    CHECKCONDVA(parray->entries() > 0 ,
+                genAMLError(ERRORMSG(EMPTY_ARRAY_s) , "Histogram"));
+
+    CHECKCONDVA(parray->surfaceType() == AMObjType::INTEGER ,
+                genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_sss) , "Histogram" ,
+                            (parray->surfaceType()).string().data() , "INT"));
+
+    nb_element = parray->entries();
+    element = new int[nb_element];
+
+    ArrayIter* pnext = parray->iterator();
+    ArrayIter& next = *pnext;
+
+    i = 0;
+
+    while (next()) {
+      if ((next.key()).tag() != AMObjType::INTEGER) {
+        status = false;
+        genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_2_sdss) , "Histogram" , i + 1 ,
+                    (next.key()).tag.string().data() , "INT");
+      }
+
+      else {
+        if ((next.key()).val.i < 0) {
+          status = false;
+          genAMLError(ERRORMSG(ARRAY_ELEMENT_VALUE_sd) , "Histogram" , i + 1);
+        }
+        else {
+          element[i] = (next.key()).val.i;
+        }
+      }
+
+      i++;
+    }
+
+    delete pnext;
+
+    if (status) {
+      histo = new Distribution_data(nb_element , element);
+    }
+    delete [] element;
+
+    if (!status) {
+      return AMObj(AMObjType::ERROR);
+    }
+
+    STAT_model* model = new STAT_model(histo);
+    return AMObj(AMObjType::HISTOGRAM , model);
+  }
+
+  case AMObjType::STRING : {
+    Format_error error;
+
+
+    histo = histogram_ascii_read(error , ((AMString*)args[0].val.p)->data());
+
+    if (histo) {
+      STAT_model* model = new STAT_model(histo);
+      return AMObj(AMObjType::HISTOGRAM , model);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "Histogram");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  default : {
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Histogram" ,
+                args[0].tag.string().data() , "ARRAY or STRING");
+    return AMObj(AMObjType::ERROR);
+  }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un tableau d'entiers a partir d'une objet de type ARRAY(INT).
+ *
+ *--------------------------------------------------------------*/
+
+int* buildIntArray(const AMObjVector &args , int arg_index , const char *function ,
+                   int output_index , int &nb_element)
+
+{
+  bool status = true;
+  register int i;
+  int *element = 0;
+
+
+  Array* parray = (Array*)args[arg_index].val.p;
+
+  if (parray->surfaceType() != AMObjType::INTEGER) {
+    status = false;
+    genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_1_sdss) , function , output_index ,
+                (parray->surfaceType()).string().data() , "INT");
+  }
+
+  else {
+    if (nb_element == I_DEFAULT) {
+      nb_element = parray->entries();
+    }
+    else if (parray->entries() != nb_element) {
+      status = false;
+      genAMLError(ERRORMSG(ARRAY_SIZE_sdd) , function , output_index , nb_element);
+    }
+
+    if (status) {
+      element = new int[nb_element];
+
+      ArrayIter* pnext = parray->iterator();
+      ArrayIter& next = *pnext;
+
+      i = 0;
+      while (next()) {
+        if ((next.key()).tag() != AMObjType::INTEGER) {
+          status = false;
+          genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_sddss) , function , output_index ,
+                      i + 1 , (next.key()).tag.string().data() , "INT");
+        }
+        else {
+          element[i] = (next.key()).val.i;
+        }
+
+        i++;
+      }
+
+      delete pnext;
+
+      if (!status) {
+        delete [] element;
+        element = 0;
+      }
+    }
+  }
+
+  return element;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un ensemble de vecteurs a partir d'un objet
+ *  de type ARRAY(ARRAY(INT)), a partir d'un ensemble de sequences ou
+ *  a partir d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Vectors(const AMObjVector &args)
+
+{
+  Vectors *vec;
+
+
+  CHECKCONDVA(args.length() >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Vectors"));
+
+  if (args[0].tag() == AMObjType::ARRAY) {
+    bool status = true;
+    register int i , j;
+    int nb_required , nb_variable = 0 , dim , nb_vector , *identifier = 0 , **vector = 0;
+    const Array* parray = (Array*)args[0].val.p , *pvector;
+    Format_error error;
+
+
+    nb_required = 1;
+
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Vectors"));
+
+    CHECKCONDVA(parray->surfaceType() == AMObjType::ARRAY ,
+                genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_1_sdss) , "Vectors" , 1 ,
+                            (parray->surfaceType()).string().data() , "ARRAY"));
+
+    nb_vector = parray->entries();
+
+    // argument obligatoire
+
+    ArrayIter* pnext = parray->iterator();
+    ArrayIter& next = *pnext;
+
+    i = 0;
+
+    while (next()) {
+      if ((next.key()).tag() != AMObjType::ARRAY) {
+        status = false;
+        genAMLError(ERRORMSG(VECTOR_ARRAY_ELEMENT_TYPE_sdss) , "Vectors" , i + 1 ,
+                    (next.key()).tag.string().data() , "ARRAY");
+      }
+
+      else {
+        pvector = (Array*)(next.key()).val.p;
+
+        if (pvector->surfaceType() != AMObjType::INTEGER) {
+          status = false;
+          genAMLError(ERRORMSG(VECTOR_ARRAY_ELEMENT_TYPE_sdss) , "Vectors" , i + 1 ,
+                      (pvector->surfaceType()).string().data() , "INT");
+        }
+
+        else {
+          dim = pvector->entries();
+
+          if (nb_variable == 0) {
+            nb_variable = dim;
+            vector = new int*[nb_vector];
+            for (j = 0;j < nb_vector;j++) {
+              vector[j] = new int[nb_variable];
+            }
+          }
+
+          else if (dim != nb_variable) {
+            status = false;
+            genAMLError(ERRORMSG(VECTOR_ARRAY_SIZE_sdd) , "Vectors" , i + 1 ,
+                        nb_variable);
+            break;
+          }
+
+          ArrayIter* pvector_next = pvector->iterator();
+          ArrayIter& vector_next = *pvector_next;
+
+          j = 0;
+
+          while (vector_next()) {
+            if ((vector_next.key()).tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(VECTOR_ARRAY_ELEMENT_TYPE_sddss) , "Vectors" , i + 1 ,
+                          j + 1 , (vector_next.key()).tag.string().data() , "INT");
+            }
+            else {
+              vector[i][j] = (vector_next.key()).val.i;
+            }
+
+            j++;
+          }
+
+          delete pvector_next;
+        }
+      }
+
+      i++;
+    }
+
+    delete pnext;
+
+    // argument optionnel
+
+    if (args.length() == nb_required + 2) {
+      if (args[nb_required].tag() != AMObjType::OPTION) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Vectors" , nb_required + 1 ,
+                    args[nb_required].tag.string().data() , "OPTION");
+      }
+      else {
+        if (*((AMString*)args[nb_required].val.p) != "Identifiers") {
+          status = false;
+          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Vectors" , nb_required + 1 ,
+                      "Identifiers");
+        }
+      }
+
+      if (args[nb_required + 1].tag() != AMObjType::ARRAY) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Vectors" , nb_required + 1 ,
+                    args[nb_required + 1].tag.string().data() , "ARRAY");
+      }
+      else {
+        identifier = buildIntArray(args , nb_required + 1 , "Vectors" ,
+                                   nb_required + 1 , nb_vector);
+        if (!identifier) {
+          status = false;
+        }
+        else {
+          for (i = 0;i < nb_vector;i++) {
+            if (identifier[i] <= 0) {
+              status = false;
+              genAMLError(ERRORMSG(ARRAY_ELEMENT_VALUE_sdd) , "Vectors" ,
+                          nb_required + 1 , i + 1);
+            }
+          }
+        }
+      }
+    }
+
+    if (status) {
+      vec = new Vectors(nb_variable , nb_vector , vector , identifier);
+
+      status = vec->check(error);
+
+      if (!status) {
+        delete vec;
+        AMLOUTPUT << "\n" << error;
+        genAMLError(ERRORMSG(STAT_MODULE_s) , "Vectors");
+      }
+    }
+
+    delete [] identifier;
+
+    if (vector) {
+      for (i = 0;i < nb_vector;i++) {
+        delete [] vector[i];
+      }
+      delete [] vector;
+    }
+
+    if (!status) {
+      return AMObj(AMObjType::ERROR);
+    }
+
+    STAT_model* model = new STAT_model(vec);
+    return AMObj(AMObjType::VECTORS , model);
+  }
+
+  if ((args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
+      (args[0].tag() == AMObjType::MARKOV_DATA) || (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
+      (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) || (args[0].tag() == AMObjType::TOPS)) {
+    bool status = true , index_variable = false;
+    int nb_required;
+    Sequences *seq;
+
+
+    nb_required = 1;
+
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Vectors"));
+
+    // argument obligatoire
+
+    switch (args[0].tag()) {
+    case AMObjType::SEQUENCES :
+      seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::MARKOVIAN_SEQUENCES :
+      seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::MARKOV_DATA :
+      seq = (Markov_data*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+      seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::SEMI_MARKOV_DATA :
+      seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::TOPS :
+      seq = (Tops*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    }
+
+    // argument optionnel
+
+    if (args.length() == nb_required + 2) {
+      if (args[nb_required].tag() != AMObjType::OPTION) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Vectors" , nb_required + 1 ,
+                    args[nb_required].tag.string().data() , "OPTION");
+      }
+      else {
+        if (*((AMString*)args[nb_required].val.p) != "IndexVariable") {
+          status = false;
+          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Vectors" , nb_required + 1 ,
+                      "IndexVariable");
+        }
+      }
+
+      if (args[nb_required + 1].tag() != AMObjType::BOOL) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Vectors" , nb_required + 1 ,
+                    args[nb_required + 1].tag.string().data() , "BOOL");
+      }
+      else {
+        index_variable = args[nb_required + 1].val.b;
+      }
+
+      if (!status) {
+        return AMObj(AMObjType::ERROR);
+      }
+    }
+
+    vec = seq->build_vectors(index_variable);
+
+    STAT_model* model = new STAT_model(vec);
+    return AMObj(AMObjType::VECTORS , model);
+  }
+
+  if (args[0].tag() == AMObjType::STRING) {
+    Format_error error;
+
+
+    CHECKCONDVA(args.length() == 1 ,
+                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Vectors"));
+
+    vec = vectors_ascii_read(error , ((AMString*)args[0].val.p)->data());
+
+    if (vec) {
+      STAT_model* model = new STAT_model(vec);
+      return AMObj(AMObjType::VECTORS , model);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "Vectors");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Vectors" , args[0].tag.string().data() ,
+              "ARRAY or SEQUENCES or MARKOVIAN_SEQUENCES or MARKOV_DATA or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or TOPS or STRING");
+  return AMObj(AMObjType::ERROR);
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction des parametres de definition d'une distance entre vecteurs
+ *  a partir d'un fichier ou a partir des types des variables donnes un par un.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_VectorDistance(const AMObjVector &args)
+
+{
+  RWCString *pstr;
+  bool status;
+  register int i , j;
+  int nb_required , scale , nb_variable , distance_type = ABSOLUTE_VALUE ,
+      variable_type[VECTOR_NB_VARIABLE];
+  double *weight;
+  Vector_distance *vector_dist;
+  Format_error error;
+
+
+  nb_required = nb_required_computation(args);
+
+  CHECKCONDVA(nb_required >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "VectorDistance"));
+
+  // arguments obligatoires
+
+  if (args[0].tag() == AMObjType::STRING) {
+    pstr = (AMString*)args[0].val.p;
+    for (i = SYMBOLIC;i <= NUMERIC;i++) {
+      if ((*pstr == STAT_variable_word[i]) || (*pstr == STAT_variable_letter[i])) {
+        break;
+      }
+    }
+
+    if (i == NUMERIC + 1) {
+      CHECKCONDVA(args.length() == 1 ,
+                  genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "VectorDistance"));
+
+      vector_dist = vector_distance_ascii_read(error , ((AMString*)args[0].val.p)->data());
+
+      if (vector_dist) {
+        STAT_model* model = new STAT_model(vector_dist);
+        return AMObj(AMObjType::VECTOR_DISTANCE , model);
+      }
+      else {
+        AMLOUTPUT << "\n" << error;
+        genAMLError(ERRORMSG(STAT_MODULE_s) , "VectorDistance");
+        return AMObj(AMObjType::ERROR);
+      }
+    }
+
+    scale = 1;
+  }
+
+  else if (args[0].tag() == AMObjType::REAL) {
+    CHECKCONDVA(nb_required % 2 == 0 ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "VectorDistance"));
+    scale = 2;
+  }
+
+  else {
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "VectorDistance" , 1 ,
+                args[0].tag.string().data() , "STRING or REAL");
+    return AMObj(AMObjType::ERROR);
+  }
+
+  nb_variable = nb_required / scale;
+
+  CHECKCONDVA((nb_variable >= 1) && (nb_variable <= VECTOR_NB_VARIABLE) ,
+              genAMLError(ERRORMSG(NB_VARIABLE_1_sd) , "VectorDistance" , VECTOR_NB_VARIABLE));
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "VectorDistance"));
+
+  switch (scale) {
+  case 1 :
+    weight = 0;
+    break;
+  case 2 :
+    weight = new double[nb_variable];
+    break;
+  }
+
+  status = true;
+
+  for (i = 0;i < nb_variable;i++) {
+    if (weight) {
+      if (args[i * scale].tag() != AMObjType::REAL) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "VectorDistance" , i * scale + 1 ,
+                    args[i * scale].tag.string().data() , "REAL");
+      }
+      else {
+        weight[i] = args[i * scale].val.r;
+      }
+    }
+
+    if (args[(i + 1) * scale - 1].tag() != AMObjType::STRING) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "VectorDistance" , (i + 1) * scale ,
+                  args[(i + 1) * scale - 1].tag.string().data() , "STRING");
+    }
+
+    else {
+      pstr = (AMString*)args[(i + 1) * scale - 1].val.p;
+      for (j = SYMBOLIC;j <= NUMERIC;j++) {
+        if ((*pstr == STAT_variable_word[j]) || (*pstr == STAT_variable_letter[j])) {
+          variable_type[i] = j;
+          break;
+        }
+      }
+
+      if (j == NUMERIC + 1) {
+        status = false;
+        genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "VectorDistance" , (i + 1) * scale ,
+                    "SYMBOLIC(S) or ORDINAL(O) or NUMERIC(N)");
+      }
+    }
+  }
+
+  // argument optionnel
+
+  if (args.length() == nb_required + 2) {
+    if (args[nb_required].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "VectorDistance" , nb_required + 1 ,
+                  args[nb_required].tag.string().data() , "OPTION");
+    }
+    else {
+      if (*((AMString*)args[nb_required].val.p) != "Distance") {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "VectorDistance" , nb_required + 1 ,
+                    "Distance");
+      }
+    }
+
+    if (args[nb_required + 1].tag() != AMObjType::STRING) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "VectorDistance" , nb_required + 1 ,
+                  args[nb_required + 1].tag.string().data() , "STRING");
+    }
+    else {
+      pstr = (AMString*)args[nb_required + 1].val.p;
+      for (j = ABSOLUTE_VALUE;j <= QUADRATIC;j++) {
+        if (*pstr == STAT_distance_word[j]) {
+          distance_type = j;
+          break;
+        }
+      }
+
+      if (j == QUADRATIC + 1) {
+        status = false;
+        genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "VectorDistance" , nb_required + 1 ,
+                    "ABSOLUTE_VALUE or QUADRATIC");
+      }
+    }
+  }
+
+  if (!status) {
+    delete [] weight;
+    return AMObj(AMObjType::ERROR);
+  }
+
+  vector_dist = new Vector_distance(nb_variable , variable_type , weight , distance_type);
+  delete [] weight;
+
+  STAT_model* model = new STAT_model(vector_dist);
+  return AMObj(AMObjType::VECTOR_DISTANCE , model);
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un processus de renouvellement a partir d'un fichier,
+ *  a partir de l'identificateur et des parametres de la loi inter-evenement ou
+ *  a partir de la loi inter-evenement.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Renewal(const AMObjVector &args)
+
+{
+  RWCString *pstr;
+  char type = 'e';
+  bool status = true , type_option = false , time_option = false;
+  register int i;
+  int nb_required , time = DEFAULT_TIME , ident , inf_bound , sup_bound;
+  double parameter , probability;
+  Parametric *inter_event;
+  Renewal *renew;
+  Format_error error;
+
+
+  nb_required = nb_required_computation(args);
+
+  CHECKCONDVA(nb_required >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Renewal"));
+
+  inter_event = 0;
+
+  // arguments obligatoires
+
+  if (args[0].tag() == AMObjType::STRING) {
+    if (nb_required > 1) {
+      pstr = (AMString*)args[0].val.p;
+      for (i = BINOMIAL;i <= NEGATIVE_BINOMIAL;i++) {
+        if ((*pstr == STAT_distribution_word[i]) || (*pstr == STAT_distribution_letter[i])) {
+          ident = i;
+          break;
+        }
+      }
+
+      if (i == NEGATIVE_BINOMIAL + 1) {
+        status = false;
+        genAMLError(ERRORMSG(DISTRIBUTION_NAME_sds) , "Renewal" , 1 ,
+                    "BINOMIAL(B) or POISSON(P) or NEGATIVE_BINOMIAL(NB)");
+      }
+
+      else {
+        if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL)) {
+          if (nb_required != 4) {
+            status = false;
+            genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Renewal");
+          }
+        }
+        else if (ident == POISSON) {
+          if (nb_required != 3) {
+            status = false;
+            genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Renewal");
+          }
+        }
+      }
+
+      if (status) {
+        status = parameter_input(args , ident , inf_bound , sup_bound , parameter ,
+                                 probability , "Renewal" , 1);
+      }
+    }
+  }
+
+  else {
+    if (nb_required != 1) {
+      status = false;
+      genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Renewal");
+    }
+
+    switch (args[0].tag()) {
+    case AMObjType::DISTRIBUTION :
+      inter_event = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[0].val.p)->pt)));
+      break;
+    case AMObjType::MIXTURE :
+      inter_event = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[0].val.p)->pt)));
+      break;
+    case AMObjType::CONVOLUTION :
+      inter_event = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[0].val.p)->pt)));
+      break;
+    case AMObjType::COMPOUND :
+      inter_event = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[0].val.p)->pt)));
+      break;
+    default :
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Renewal" , 1 , args[0].tag.string().data() ,
+                  "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+      break;
+    }
+
+    if (inter_event->offset == 0) {
+      status = false;
+      genAMLError(ERRORMSG(INTER_EVENT_DISTRIBUTION_LOWER_BOUND_sd) , "Renewal" , 1);
+    }
+  }
+
+  if ((args.length() != nb_required) && (args.length() != nb_required + 2) &&
+      (args.length() != nb_required + 4)) {
+    delete inter_event;
+    genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Renewal");
+    return AMObj(AMObjType::ERROR);
+  }
+
+  // arguments optionnels
+
+  for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+    if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Renewal" , nb_required + i + 1 ,
+                  args[nb_required + i * 2].tag.string().data() , "OPTION");
+    }
+
+    else {
+      pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+      if (*pstr == "Type") {
+        switch (type_option) {
+
+        case false : {
+          type_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Renewal" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+          }
+
+          else {
+            pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+            if (*pstr == "Ordinary") {
+              type = 'o';
+            }
+            else if (*pstr == "Equilibrium") {
+              type = 'e';
+            }
+            else {
+              status = false;
+              genAMLError(ERRORMSG(STOCHASTIC_PROCESS_TYPE_sds) , "Renewal" ,
+                          nb_required + i + 1 , "Ordinary or Equilibrium");
+            }
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Renewal" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "ObservationTime") {
+        switch (time_option) {
+
+        case false : {
+          time_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Renewal" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+          }
+
+          else {
+            time = args[nb_required + i * 2 + 1].val.i;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Renewal" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Renewal" ,
+                    nb_required + i + 1 , "Type or ObservationTime");
+      }
+    }
+  }
+
+  if (!status) {
+    delete inter_event;
+    return AMObj(AMObjType::ERROR);
+  }
+
+  if (args[0].tag() == AMObjType::STRING) {
+    if (nb_required == 1) {
+      renew = renewal_ascii_read(error , ((AMString*)args[0].val.p)->data() , type , time);
+    }
+
+    else {
+      inter_event = new Parametric(ident , inf_bound , sup_bound , parameter ,
+                                   probability , RENEWAL_THRESHOLD);
+
+      renew = renewal_building(error , *inter_event , type , time);
+      delete inter_event;
+    }
+  }
+
+  else {
+    renew = renewal_building(error , *inter_event , type , time);
+    delete inter_event;
+  }
+
+  if (renew) {
+    STAT_model* model = new STAT_model(renew);
+    return AMObj(AMObjType::RENEWAL , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "Renewal");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une structure de donnees renouvellement a partir
+ *  d'un ensemble de sequences, d'un histogramme ou d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_TimeEvents(const AMObjVector &args)
+
+{
+  Time_events *timev;
+  Format_error error;
+
+
+  CHECKCONDVA(args.length() >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "TimeEvents"));
+
+  if (args[0].tag() == AMObjType::SEQUENCES) {
+    RWCString *pstr;
+    bool status = true , previous_date_option = false , next_date_option = false;
+    register int i;
+    int nb_required , nb_variable , variable , offset , begin_date , end_date ,
+        previous_date = I_DEFAULT , next_date = I_DEFAULT;
+    Sequences *seq;
+
+
+    seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = seq->get_nb_variable();
+    offset = (nb_variable == 2 ? 1 : 2);
+
+    nb_required = nb_required_computation(args);
+
+    CHECKCONDVA(nb_required == offset + 2 ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "TimeEvents"));
+
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+                (args.length() == nb_required + 4) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "TimeEvents"));
+
+    // arguments obligatoires
+
+    if (nb_variable == 2) {
+      variable = 2;
+    }
+
+    else {
+      if (args[1].tag() != AMObjType::INTEGER) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , 2 ,
+                    args[1].tag.string().data() , "INT");
+      }
+      else {
+        variable = args[1].val.i;
+      }
+    }
+
+    if (args[offset].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , offset + 1 ,
+                  args[offset].tag.string().data() , "INT");
+    }
+    else {
+      begin_date = args[offset].val.i;
+    }
+
+    if (args[offset + 1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , offset + 2 ,
+                  args[offset + 1].tag.string().data() , "INT");
+    }
+    else {
+      end_date = args[offset + 1].val.i;
+    }
+
+    // arguments optionnels
+
+    for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+      if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , nb_required + i + 1 ,
+                    args[nb_required + i * 2].tag.string().data() , "OPTION");
+      }
+
+      else {
+        pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+        if (*pstr == "PreviousDate") {
+          switch (previous_date_option) {
+
+          case false : {
+            previous_date_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+            }
+            else {
+              previous_date = args[nb_required + i * 2 + 1].val.i;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "TimeEvents" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "NextDate") {
+          switch (next_date_option) {
+
+          case false : {
+            next_date_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+            }
+            else {
+              next_date = args[nb_required + i * 2 + 1].val.i;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "TimeEvents" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else {
+          status = false;
+          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "TimeEvents" ,
+                      nb_required + i + 1 , "PreviousDate or NextDate");
+        }
+      }
+    }
+
+    if (!status) {
+      return AMObj(AMObjType::ERROR);
+    }
+
+    timev = seq->extract_time_events(error , variable , begin_date , end_date ,
+                                     previous_date , next_date);
+
+    if (timev) {
+      STAT_model* model = new STAT_model(timev);
+      return AMObj(AMObjType::TIME_EVENTS , model);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "TimeEvents");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  if ((args[0].tag() == AMObjType::HISTOGRAM) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+      (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
+    Histogram *histo;
+
+
+    CHECKCONDVA(args.length() == 2 ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "TimeEvents" , 2));
+
+    switch (args[0].tag()) {
+    case AMObjType::HISTOGRAM :
+      histo = (Histogram*)((Distribution_data*)((STAT_model*)args[0].val.p)->pt);
+      break;
+    case AMObjType::MIXTURE_DATA :
+      histo = (Histogram*)((Mixture_data*)((STAT_model*)args[0].val.p)->pt);
+      break;
+    case AMObjType::CONVOLUTION_DATA :
+      histo = (Histogram*)((Convolution_data*)((STAT_model*)args[0].val.p)->pt);
+      break;
+    case AMObjType::COMPOUND_DATA :
+      histo = (Histogram*)((Compound_data*)((STAT_model*)args[0].val.p)->pt);
+      break;
+    }
+
+    CHECKCONDVA(args[1].tag() == AMObjType::INTEGER ,
+                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , 2 ,
+                            args[1].tag.string().data() , "INT"));
+
+    timev = histo->build_time_events(error , args[1].val.i);
+
+    if (timev) {
+      STAT_model* model = new STAT_model(timev);
+      return AMObj(AMObjType::TIME_EVENTS , model);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "TimeEvents");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  if (args[0].tag() == AMObjType::STRING) {
+    CHECKCONDVA(args.length() == 1 ,
+                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Time_events"));
+
+    timev = time_events_ascii_read(error , ((AMString*)args[0].val.p)->data());
+
+    if (timev) {
+      STAT_model* model = new STAT_model(timev);
+      return AMObj(AMObjType::TIME_EVENTS , model);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "TimeEvents");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , 1 , args[0].tag.string().data() ,
+              "SEQUENCES or HISTOGRAM or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA or STRING");
+  return AMObj(AMObjType::ERROR);
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une structure de donnees renouvellement a partir
+ *  d'un ensemble de sequences.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_RenewalData(const AMObjVector &args)
+
+{
+  bool status = true;
+  int nb_variable , variable , offset , begin_index , end_index;
+  const Sequences *seq;
+  Time_events *timev;
+  Format_error error;
+
+
+  CHECKCONDVA(args.length() >= 3 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "RenewalData"));
+
+  switch (args[0].tag()) {
+  case AMObjType::SEQUENCES :
+    seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::MARKOVIAN_SEQUENCES :
+    seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::MARKOV_DATA :
+    seq = (Markov_data*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+    seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::SEMI_MARKOV_DATA :
+    seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  default :
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "RenewalData" , 1 , args[0].tag.string().data() ,
+                "SEQUENCES or MARKOVIAN_SEQUENCES or MARKOV_DATA or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA");
+    return AMObj(AMObjType::ERROR);
+  }
+
+  nb_variable = seq->get_nb_variable();
+  offset = (nb_variable == 1 ? 1 : 2);
+
+  CHECKCONDVA(args.length() == offset + 2 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "RenewalData" , offset + 2));
+
+  if (nb_variable == 1) {
+    variable = 1;
+  }
+
+  else {
+    if (args[1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "RenewalData" , 2 ,
+                  args[1].tag.string().data() , "INT");
+    }
+    else {
+      variable = args[1].val.i;
+    }
+  }
+
+  if (args[offset].tag() != AMObjType::INTEGER) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "RenewalData" , offset + 1 ,
+                args[offset].tag.string().data() , "INT");
+  }
+  else {
+    begin_index = args[offset].val.i;
+  }
+
+  if (args[offset + 1].tag() != AMObjType::INTEGER) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "RenewalData" , offset + 2 ,
+                args[offset + 1].tag.string().data() , "INT");
+  }
+  else {
+    end_index = args[offset + 1].val.i;
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  timev = seq->extract_renewal_data(error , variable , begin_index , end_index);
+
+  if (timev) {
+    STAT_model* model = new STAT_model(timev);
+    return AMObj(AMObjType::RENEWAL_DATA , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "TimeEvents");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une chaine de Markov a partir d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Markov(const AMObjVector &args)
+
+{
+  bool status = true;
+  int nb_required , length = DEFAULT_LENGTH;
+  Markov *markov;
+  Format_error error;
+
+
+  nb_required = 1;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Markov"));
+
+  // argument obligatoire
+
+  if (args[0].tag() != AMObjType::STRING) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Markov" , 1 ,
+                args[0].tag.string().data() , "STRING");
+  }
+
+  // argument optionnel
+
+  if (args.length() == nb_required + 2) {
+    if (args[nb_required].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Markov" , nb_required + 1 ,
+                  args[nb_required].tag.string().data() , "OPTION");
+    }
+    else {
+      if (*((AMString*)args[nb_required].val.p) != "Length") {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Markov" , nb_required + 1 ,
+                    "Length");
+      }
+    }
+
+    if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Markov" , nb_required + 1 ,
+                  args[nb_required + 1].tag.string().data() , "INT");
+    }
+    else {
+      length = args[nb_required + 1].val.i;
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  markov = markov_ascii_read(error , ((AMString*)args[0].val.p)->data() , length);
+
+  if (markov) {
+    STAT_model* model = new STAT_model(markov);
+    return AMObj(AMObjType::MARKOV , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "Markov");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un "Mixture Transition Distribution" modele a partir
+ *  d'une chaine de Markov d'ordre 1 et de poids..
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_MTDModel(const AMObjVector &args)
+
+{
+  bool status = true;
+  int nb_required , order , length = DEFAULT_LENGTH;
+  double *weight;
+  Markov *markov;
+  Format_error error;
+
+
+  nb_required = 2;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "MTDModel"));
+
+  // arguments obligatoires
+
+  if (args[0].tag() != AMObjType::MARKOV) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "MTDModel" , 1 ,
+                args[0].tag.string().data() , "STRING");
+  }
+
+  weight = 0;
+
+  if (args[1].tag() == AMObjType::ARRAY) {
+    Array* parray = (Array*)args[1].val.p;
+
+    if (parray->surfaceType() == AMObjType::REAL) {
+      weight = buildRealFilterArray(args , 1 , "MTDModel" , 2 , order);
+      if (!weight) {
+        status = false;
+      }
+    }
+
+    else {
+      status = false;
+      genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_1_sdss) , "MTDModel" , 2 ,
+                  (parray->surfaceType()).string().data() , "REAL");
+    }
+  }
+
+  // argument optionnel
+
+  if (args.length() == nb_required + 2) {
+    if (args[nb_required].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "MTDModel" , nb_required + 1 ,
+                  args[nb_required].tag.string().data() , "OPTION");
+    }
+    else {
+      if (*((AMString*)args[nb_required].val.p) != "Length") {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "MTDModel" , nb_required + 1 ,
+                    "Length");
+      }
+    }
+
+    if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "MTDModel" , nb_required + 1 ,
+                  args[nb_required + 1].tag.string().data() , "INT");
+    }
+    else {
+      length = args[nb_required + 1].val.i;
+    }
+  }
+
+  if (!status) {
+    delete [] weight;
+    return AMObj(AMObjType::ERROR);
+  }
+
+  markov = ((Markov*)((STAT_model*)args[0].val.p)->pt)->MTD_model_building(error , AMLOUTPUT , order + 1 , weight , length);
+  delete [] weight;
+
+  if (markov) {
+    STAT_model* model = new STAT_model(markov);
+    return AMObj(AMObjType::MARKOV , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "MTDModel");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une chaine de Markov cachee a partir d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_HiddenMarkov(const AMObjVector &args)
+
+{
+  RWCString *pstr;
+  bool status = true , length_option = false , format_option = false , old_format = false;
+  register int i;
+  int nb_required , length = DEFAULT_LENGTH;
+  Hidden_markov *hmarkov;
+  Format_error error;
+
+
+  nb_required = 1;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+              (args.length() == nb_required + 4) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "HiddenMarkov"));
+
+  // argument obligatoire
+
+  if (args[0].tag() != AMObjType::STRING) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenMarkov" , 1 ,
+                args[0].tag.string().data() , "STRING");
+  }
+
+  // arguments optionnels
+
+  for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+    if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenMarkov" , nb_required + i + 1 ,
+                  args[nb_required + i * 2].tag.string().data() , "OPTION");
+    }
+
+    else {
+      pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+      if (*pstr == "Length") {
+        switch (length_option) {
+
+        case false : {
+          length_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenMarkov" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+          }
+          else {
+            length = args[nb_required + i * 2 + 1].val.i;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenMarkov" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "Format") {
+        switch (format_option) {
+
+        case false : {
+          format_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenMarkov" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+          }
+          else {
+            pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+
+            if (*pstr == "Current") {
+              old_format = false;
+            }
+            else if (*pstr == "Old") {
+              old_format = true;
+            }
+            else {
+              status = false;
+              genAMLError(ERRORMSG(K_FILE_FORMAT_ERR_sds) , "HiddenMarkov" ,
+                          nb_required + i + 1 , "Current or Old");
+            }
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenMarkov" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "HiddenMarkov" ,
+                    nb_required + i + 1 , "Length or Format");
+      }
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  hmarkov = hidden_markov_ascii_read(error , ((AMString*)args[0].val.p)->data() , length , old_format);
+
+  if (hmarkov) {
+    STAT_model* model = new STAT_model(hmarkov);
+    return AMObj(AMObjType::HIDDEN_MARKOV , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "HiddenMarkov");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une chaine de Markov d'ordre variable a partir d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_VariableOrderMarkov(const AMObjVector &args)
+
+{
+  bool status = true;
+  int nb_required , length = DEFAULT_LENGTH;
+  Variable_order_markov *markov;
+  Format_error error;
+
+
+  nb_required = 1;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "VariableOrderMarkov"));
+
+  // argument obligatoire
+
+  if (args[0].tag() != AMObjType::STRING) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "VariableOrderMarkov" , 1 ,
+                args[0].tag.string().data() , "STRING");
+  }
+
+  // argument optionnel
+
+  if (args.length() == nb_required + 2) {
+    if (args[nb_required].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "VariableOrderMarkov" , nb_required + 1 ,
+                  args[nb_required].tag.string().data() , "OPTION");
+    }
+    else {
+      if (*((AMString*)args[nb_required].val.p) != "Length") {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "VariableOrderMarkov" , nb_required + 1 ,
+                    "Length");
+      }
+    }
+
+    if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "VariableOrderMarkov" , nb_required + 1 ,
+                  args[nb_required + 1].tag.string().data() , "INT");
+    }
+    else {
+      length = args[nb_required + 1].val.i;
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  markov = variable_order_markov_ascii_read(error , ((AMString*)args[0].val.p)->data() , length);
+
+  if (markov) {
+    STAT_model* model = new STAT_model(markov);
+    return AMObj(AMObjType::VARIABLE_ORDER_MARKOV , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "VariableOrderMarkov");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une chaine de Markov d'ordre variable cachee a partir d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_HiddenVariableOrderMarkov(const AMObjVector &args)
+
+{
+  bool status = true;
+  int nb_required , length = DEFAULT_LENGTH;
+  Hidden_variable_order_markov *hmarkov;
+  Format_error error;
+
+
+  nb_required = 1;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "HiddenVariableOrderMarkov"));
+
+  // argument obligatoire
+
+  if (args[0].tag() != AMObjType::STRING) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenVariableOrderMarkov" , 1 ,
+                args[0].tag.string().data() , "STRING");
+  }
+
+  // argument optionnel
+
+  if (args.length() == nb_required + 2) {
+    if (args[nb_required].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenVariableOrderMarkov" , nb_required + 1 ,
+                  args[nb_required].tag.string().data() , "OPTION");
+    }
+    else {
+      if (*((AMString*)args[nb_required].val.p) != "Length") {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "HiddenVariableOrderMarkov" , nb_required + 1 ,
+                    "Length");
+      }
+    }
+
+    if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenVariableOrderMarkov" , nb_required + 1 ,
+                  args[nb_required + 1].tag.string().data() , "INT");
+    }
+    else {
+      length = args[nb_required + 1].val.i;
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  hmarkov = hidden_variable_order_markov_ascii_read(error , ((AMString*)args[0].val.p)->data() , length);
+
+  if (hmarkov) {
+    STAT_model* model = new STAT_model(hmarkov);
+    return AMObj(AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "HiddenVariableOrderMarkov");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une semi-chaine de Markov a partir d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_SemiMarkov(const AMObjVector &args)
+
+{
+  RWCString *pstr;
+  bool status = true , length_option = false , counting_option = false , counting_flag = true;
+  register int i;
+  int nb_required , length = DEFAULT_LENGTH;
+  Semi_markov *smarkov;
+  Format_error error;
+
+
+  nb_required = 1;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+              (args.length() == nb_required + 4) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "SemiMarkov"));
+
+  // argument obligatoire
+
+  if (args[0].tag() != AMObjType::STRING) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SemiMarkov" , 1 ,
+                args[0].tag.string().data() , "STRING");
+  }
+
+  // arguments optionnels
+
+  for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+    if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SemiMarkov" , nb_required + i + 1 ,
+                  args[nb_required + i * 2].tag.string().data() , "OPTION");
+    }
+
+    else {
+      pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+      if (*pstr == "Length") {
+        switch (length_option) {
+
+        case false : {
+          length_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SemiMarkov" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+          }
+          else {
+            length = args[nb_required + i * 2 + 1].val.i;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "SemiMarkov" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "Counting") {
+        switch (counting_option) {
+
+        case false : {
+          counting_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SemiMarkov" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            counting_flag = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "SemiMarkov" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "SemiMarkov" ,
+                    nb_required + i + 1 , "Length or Counting");
+      }
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  smarkov = semi_markov_ascii_read(error , ((AMString*)args[0].val.p)->data() ,
+                                   length , counting_flag);
+
+  if (smarkov) {
+    STAT_model* model = new STAT_model(smarkov);
+    return AMObj(AMObjType::SEMI_MARKOV , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "SemiMarkov");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une semi-chaine de Markov cachee a partir d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_HiddenSemiMarkov(const AMObjVector &args)
+
+{
+  RWCString *pstr;
+  bool status = true , length_option = false , counting_option = false ,
+       counting_flag = true , format_option = false , old_format = false;
+  register int i;
+  int nb_required , length = DEFAULT_LENGTH;
+  Hidden_semi_markov *hsmarkov;
+  Format_error error;
+
+
+  nb_required = 1;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+              (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "HiddenSemiMarkov"));
+
+  // argument obligatoire
+
+  if (args[0].tag() != AMObjType::STRING) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenSemiMarkov" , 1 ,
+                args[0].tag.string().data() , "STRING");
+  }
+
+  // arguments optionnels
+
+  for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+    if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenSemiMarkov" , nb_required + i + 1 ,
+                  args[nb_required + i * 2].tag.string().data() , "OPTION");
+    }
+
+    else {
+      pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+      if (*pstr == "Length") {
+        switch (length_option) {
+
+        case false : {
+          length_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenSemiMarkov" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+          }
+          else {
+            length = args[nb_required + i * 2 + 1].val.i;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenSemiMarkov" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "Counting") {
+        switch (counting_option) {
+
+        case false : {
+          counting_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenSemiMarkov" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            counting_flag = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenSemiMarkov" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+
+      else if (*pstr == "Format") {
+        switch (format_option) {
+
+        case false : {
+          format_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenSemiMarkov" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+          }
+          else {
+            pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+
+            if (*pstr == "Current") {
+              old_format = false;
+            }
+            else if (*pstr == "Old") {
+              old_format = true;
+            }
+            else {
+              status = false;
+              genAMLError(ERRORMSG(K_FILE_FORMAT_ERR_sds) , "HiddenSemiMarkov" ,
+                          nb_required + i + 1 , "Current or Old");
+            }
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenSemiMarkov" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "HiddenSemiMarkov" ,
+                    nb_required + i + 1 , "Length or Counting or Format");
+      }
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  hsmarkov = hidden_semi_markov_ascii_read(error , ((AMString*)args[0].val.p)->data() ,
+                                           length , counting_flag , OCCUPANCY_THRESHOLD ,
+                                           old_format);
+
+  if (hsmarkov) {
+    STAT_model* model = new STAT_model(hsmarkov);
+    return AMObj(AMObjType::HIDDEN_SEMI_MARKOV , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "HiddenSemiMarkov");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une sequence a partir d'un objet de type ARRAY(INT).
+ *
+ *--------------------------------------------------------------*/
+
+static int** buildIntSequence(const Array *parray , int seq_index ,
+                              int &nb_variable , int &length)
+
+{
+  bool status;
+  register int i;
+  int **sequence = 0;
+
+
+  if (nb_variable == 0) {
+    nb_variable = 1;
+  }
+
+  length = parray->entries();
+
+  sequence = new int*[nb_variable];
+  sequence[0] = new int[length];
+
+  ArrayIter* pnext = parray->iterator();
+  ArrayIter& next = *pnext;
+
+  status = true;
+  i = 0;
+
+  while (next()) {
+    if ((next.key()).tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sddss) , "Sequences" ,
+                  seq_index + 1 , i + 1 , (next.key()).tag.string().data() , "INT");
+    }
+    else {
+      sequence[0][i] = (next.key()).val.i;
+    }
+
+    i++;
+  }
+
+  delete pnext;
+
+  if (!status) {
+    delete [] sequence[0];
+    delete [] sequence;
+
+    sequence = 0;
+  }
+
+  return sequence;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une sequence a partir d'un objet de type ARRAY(ARRAY(INT)).
+ *
+ *--------------------------------------------------------------*/
+
+static int** buildArraySequence(const Array *parray , int seq_index , int &nb_variable ,
+                                int &length , const char *function , int type)
+
+{
+  bool status = true;
+  register int i , j;
+  int dim , **sequence = 0;
+  const Array *pvector;
+
+
+  length = parray->entries();
+  if (type == POSITION) {
+    length--;
+  }
+
+  if (nb_variable > 0) {
+    sequence = new int*[nb_variable];
+    sequence[0] = new int[type == POSITION ? length + 1 : length];
+    for (i = 1;i < nb_variable;i++) {
+      sequence[i] = new int[length];
+    }
+  }
+
+  ArrayIter* pnext = parray->iterator();
+  ArrayIter& next = *pnext;
+
+  i = 0;
+
+  while (next()) {
+    if ((next.key()).tag() != AMObjType::ARRAY) {
+      status = false;
+      genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sddss) , function , seq_index + 1 ,
+                  i + 1 , (next.key()).tag.string().data() , "ARRAY");
+    }
+
+    else {
+      pvector = (Array*)(next.key()).val.p;
+
+      if (pvector->surfaceType() != AMObjType::INTEGER) {
+        status = false;
+        genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sddss) , function , seq_index + 1 ,
+                    i + 1 , (pvector->surfaceType()).string().data() , "INT");
+      }
+
+      else {
+        dim = pvector->entries();
+
+        if (nb_variable == 0) {
+          nb_variable = dim;
+          sequence = new int*[nb_variable];
+          sequence[0] = new int[type == POSITION ? length + 1 : length];
+          for (j = 1;j < nb_variable;j++) {
+            sequence[j] = new int[length];
+          }
+        }
+
+        else if (dim != nb_variable) {
+          status = false;
+          genAMLError(ERRORMSG(SEQUENCE_ARRAY_SIZE_sddd) , function , seq_index + 1 ,
+                      i + 1 , nb_variable);
+          break;
+        }
+
+        ArrayIter* pvector_next = pvector->iterator();
+        ArrayIter& vector_next = *pvector_next;
+
+        j = 0;
+
+        while (vector_next()) {
+          if ((vector_next.key()).tag() != AMObjType::INTEGER) {
+            status = false;
+            genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdddss) , function , seq_index + 1 ,
+                        i + 1 , j + 1 , (vector_next.key()).tag.string().data() , "INT");
+          }
+
+          else {
+            if ((j == 0) && ((type == POSITION) || (type == TIME)) &&
+                (vector_next.key()).val.i < 0) {
+              status = false;
+              genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_VALUE_sddd) , function ,
+                          seq_index + 1 , i + 1 , j + 1);
+            }
+            else {
+              sequence[j][i] = (vector_next.key()).val.i;
+            }
+          }
+
+          if ((type == POSITION) && (i == length) && (j == 0)) {
+            break;
+          }
+
+          j++;
+        }
+
+        delete pvector_next;
+      }
+    }
+
+    i++;
+  }
+
+  delete pnext;
+
+  if ((!status) && (sequence)) {
+    for (i = 0;i < nb_variable;i++) {
+      delete [] sequence[i];
+    }
+    delete [] sequence;
+
+    sequence = 0;
+  }
+
+  return sequence;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un ensemble de sequences a partir d'un objet
+ *  de type ARRAY(ARRAY(INT)), ARRAY(ARRAY(ARRAY(INT))) ou RENEWAL_DATA ou
+ *  a partir d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Sequences(const AMObjVector &args)
+
+{
+  CHECKCONDVA(args.length() >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Sequences"));
+
+  // argument obligatoire
+
+  switch (args[0].tag()) {
+
+  case AMObjType::ARRAY : {
+    RWCString *pstr;
+    bool status = true , index_parameter_option = false , identifier_option = false;
+    register int i , j;
+    int nb_required , nb_sequence , itype = INT_VALUE , *identifier = 0;
+
+
+    nb_required = 1;
+
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+                (args.length() == nb_required + 4) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Sequences"));
+
+    nb_sequence = ((Array*)args[0].val.p)->entries();
+
+    // arguments optionnels
+
+    for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+      if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Sequences" , nb_required + i + 1 ,
+                    args[nb_required + i * 2].tag.string().data() , "OPTION");
+      }
+
+      else {
+        pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+        if (*pstr == "Identifiers") {
+          switch (identifier_option) {
+
+          case false : {
+            identifier_option = true;
+
+            if (args[nb_required + 1].tag() != AMObjType::ARRAY) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Sequences" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "ARRAY");
+            }
+            else {
+              identifier = buildIntArray(args , nb_required + i * 2 + 1 , "Sequences" ,
+                                         nb_required + i + 1 , nb_sequence);
+              if (!identifier) {
+                status = false;
+              }
+              else {
+                for (j = 0;j < nb_sequence;j++) {
+                  if (identifier[j] <= 0) {
+                    status = false;
+                    genAMLError(ERRORMSG(ARRAY_ELEMENT_VALUE_sdd) , "Sequences" ,
+                                nb_required + i + 1 , j + 1);
+                  }
+                }
+              }
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Sequences" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "IndexParameter") {
+          switch (index_parameter_option) {
+
+          case false : {
+            index_parameter_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Sequences" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+            }
+            else {
+              pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+
+              if (*pstr == "Position") {
+                itype = POSITION;
+              }
+              else if (*pstr == "Time") {
+                itype = TIME;
+              }
+              else {
+                status = false;
+                genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "Sequences" ,
+                            nb_required + i + 1 , "Position or Time");
+              }
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Sequences" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else {
+          status = false;
+          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Sequences" ,
+                      nb_required + i + 1 , "Identifiers or IndexParameter");
+        }
+      }
+    }
+
+    Array* parray = (Array*)args[0].val.p;
+
+    if (parray->surfaceType() != AMObjType::ARRAY) {
+      delete [] identifier;
+
+      genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_1_sdss) , "Sequences" , 1 ,
+                  (parray->surfaceType()).string().data() , "ARRAY");
+      return AMObj(AMObjType::ERROR);
+    }
+
+    else {
+      register int j;
+      int nb_variable = 0 , *type , *length , ***sequence;
+      const Array *seq_array;
+      Sequences *seq;
+      Markovian_sequences *markovian_seq;
+      Format_error error;
+
+
+      length = new int[nb_sequence];
+      sequence = new int**[nb_sequence];
+      for (i = 0;i < nb_sequence;i++) {
+        sequence[i] = 0;
+      }
+
+      ArrayIter* pnext = parray->iterator();
+      ArrayIter& next = *pnext;
+
+      i = 0;
+      while (next()) {
+        seq_array = (Array*)(next.key()).val.p;
+
+        switch ((seq_array->surfaceType())()) {
+        case AMObjType::INTEGER :
+          sequence[i] = buildIntSequence(seq_array , i , nb_variable , length[i]);
+          break;
+        case AMObjType::ARRAY :
+          sequence[i] = buildArraySequence(seq_array , i , nb_variable , length[i] ,
+                                           "Sequences" , itype);
+          break;
+        default :
+          genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdss) , "Sequences" , i + 1 ,
+                      (seq_array->surfaceType()).string().data() , "INT or ARRAY");
+          break;
+        }
+
+        if (!sequence[i]) {
+          status = false;
+          break;
+        }
+        i++;
+      }
+
+      delete pnext;
+
+      if ((index_parameter_option) && (nb_variable == 1)) {
+        status = false;
+        genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdss) , "Sequences" , 1 ,
+                    (seq_array->surfaceType()).string().data() , "ARRAY");
+      }
+
+      if (status) {
+        type = new int[nb_variable];
+        type[0] = itype;
+        for (i = 1;i < nb_variable;i++) {
+          type[i] = INT_VALUE;
+        }
+
+        seq = new Sequences(nb_variable , type , nb_sequence , length , sequence , identifier);
+        delete [] type;
+
+        status = seq->check(error , SEQ_label[SEQL_SEQUENCE]);
+
+        if (!status) {
+          delete seq;
+          AMLOUTPUT << "\n" << error;
+          genAMLError(ERRORMSG(STAT_MODULE_s) , "Sequences");
+        }
+      }
+
+      delete [] identifier;
+
+      delete [] length;
+      for (i = 0;i < nb_sequence;i++) {
+        if (sequence[i]) {
+          for (j = 0;j < nb_variable;j++) {
+            delete [] sequence[i][j];
+          }
+          delete [] sequence[i];
+        }
+      }
+      delete [] sequence;
+
+      if (!status) {
+        return AMObj(AMObjType::ERROR);
+      }
+
+      markovian_seq = seq->markovian_sequences(error);
+      if (markovian_seq) {
+        delete seq;
+        STAT_model* model = new STAT_model(markovian_seq);
+        return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
+      }
+      else {
+        AMLOUTPUT << "\n";
+        error.ascii_write(AMLOUTPUT , WARNING);
+        STAT_model* model = new STAT_model(seq);
+        return AMObj(AMObjType::SEQUENCES , model);
+      }
+    }
+  }
+
+  case AMObjType::RENEWAL_DATA : {
+    Sequences *seq;
+    Markovian_sequences *markovian_seq;
+    Format_error error;
+
+
+    CHECKCONDVA(args.length() == 1 ,
+                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Sequences"));
+
+    seq = new Sequences(*((Renewal_data*)((STAT_model*)args[0].val.p)->pt));
+
+    markovian_seq = seq->markovian_sequences(error);
+    if (markovian_seq) {
+      delete seq;
+      STAT_model* model = new STAT_model(markovian_seq);
+      return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
+    }
+    else {
+      AMLOUTPUT << "\n";
+      error.ascii_write(AMLOUTPUT , WARNING);
+      STAT_model* model = new STAT_model(seq);
+      return AMObj(AMObjType::SEQUENCES , model);
+    }
+  }
+
+  case AMObjType::STRING : {
+    Sequences *seq;
+    Markovian_sequences *markovian_seq;
+    Format_error error;
+
+
+    CHECKCONDVA(args.length() == 1 ,
+                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Sequences"));
+
+    seq = sequences_ascii_read(error , ((AMString*)args[0].val.p)->data());
+
+    if (seq) {
+      markovian_seq = seq->markovian_sequences(error);
+      if (markovian_seq) {
+        delete seq;
+        STAT_model* model = new STAT_model(markovian_seq);
+        return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
+      }
+      else {
+        AMLOUTPUT << "\n";
+        error.ascii_write(AMLOUTPUT , WARNING);
+        STAT_model* model = new STAT_model(seq);
+        return AMObj(AMObjType::SEQUENCES , model);
+      }
+    }
+
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "Sequences");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  default : {
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Sequences" ,
+                args[0].tag.string().data() , "ARRAY or RENEWAL_DATA or STRING");
+    return AMObj(AMObjType::ERROR);
+  }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction des parametres d'une cime a partir d'un fichier ou
+ *  a partir des parametres donnes un par un.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_TopParameters(const AMObjVector &args)
+
+{
+  bool status = true;
+  int nb_required , max_position = DEFAULT_MAX_POSITION;
+  double probability , axillary_probability = D_DEFAULT , rhythm_ratio = D_DEFAULT;
+  Top_parameters *parameters;
+  Format_error error;
+
+
+  CHECKCONDVA(args.length() >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "TopParameters"));
+
+  // argument obligatoire
+
+  if (args[0].tag() == AMObjType::STRING) {
+    nb_required = 1;
+
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "TopParameters"));
+  }
+
+  else if ((args[0].tag() == AMObjType::INTEGER) || (args[0].tag() == AMObjType::REAL)) {
+    nb_required = 3;
+
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "TopParameters"));
+
+    switch (args[0].tag()) {
+    case AMObjType::INTEGER :
+      probability = args[0].val.i;
+      break;
+    case AMObjType::REAL :
+      probability = args[0].val.r;
+      break;
+    }
+    if ((probability < TOP_MIN_PROBABILITY) || (probability > 1.)) {
+      status = false;
+      genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , "TopParameters" , 1);
+    }
+
+    switch (args[1].tag()) {
+    case AMObjType::INTEGER :
+      axillary_probability = args[1].val.i;
+      break;
+    case AMObjType::REAL :
+      axillary_probability = args[1].val.r;
+      break;
+    default :
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TopParameters" , 2 ,
+                  args[1].tag.string().data() , "INT or REAL");
+      break;
+    }
+    if ((axillary_probability != D_DEFAULT) &&
+        ((axillary_probability < TOP_MIN_PROBABILITY) || (axillary_probability > 1.))) {
+      status = false;
+      genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , "TopParameters" , 2);
+    }
+
+    switch (args[2].tag()) {
+    case AMObjType::INTEGER :
+      rhythm_ratio = args[2].val.i;
+      break;
+    case AMObjType::REAL :
+      rhythm_ratio = args[2].val.r;
+      break;
+    default :
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TopParameters" , 3 ,
+                  args[2].tag.string().data() , "INT or REAL");
+      break;
+    }
+    if ((rhythm_ratio != D_DEFAULT) &&
+        ((rhythm_ratio < MIN_RHYTHM_RATIO) || (rhythm_ratio > 1. / MIN_RHYTHM_RATIO))) {
+      status = false;
+      genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , "TopParameters" , 3);
+    }
+  }
+
+  else {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TopParameters" , 1 ,
+                args[0].tag.string().data() , "STRING or INT or REAL");
+  }
+
+  // argument optionnel
+
+  if (args.length() == nb_required + 2) {
+    if (args[nb_required].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TopParameters" , nb_required + 1 ,
+                  args[nb_required].tag.string().data() , "OPTION");
+    }
+    else {
+      if (*((AMString*)args[nb_required].val.p) != "MaxPosition") {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "TopParameters" , nb_required + 1 ,
+                    "MaxPosition");
+      }
+    }
+
+    if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TopParameters" , nb_required + 1 ,
+                  args[nb_required + 1].tag.string().data() , "INT");
+    }
+    else {
+      max_position = args[nb_required + 1].val.i;
+      if ((max_position < 1) || (max_position > MAX_POSITION)) {
+        status = false;
+        genAMLError(ERRORMSG(MAX_POSITION_sd) , "TopParameters" , nb_required + 1);
+      }
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  if (args[0].tag() == AMObjType::STRING) {
+    parameters = top_parameters_ascii_read(error , ((AMString*)args[0].val.p)->data() , max_position);
+
+    if (parameters) {
+      STAT_model* model = new STAT_model(parameters);
+      return AMObj(AMObjType::TOP_PARAMETERS , model);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "TopParameters");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  else {
+    parameters = new Top_parameters(probability , axillary_probability , rhythm_ratio , max_position);
+
+    STAT_model* model = new STAT_model(parameters);
+    return AMObj(AMObjType::TOP_PARAMETERS , model);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un ensemble de cimes a partir d'un objet de type
+ *  ARRAY(ARRAY(ARRAY(INT))) ou a partir d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Tops(const AMObjVector &args)
+
+{
+  CHECKCONDVA(args.length() >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Tops"));
+
+  switch (args[0].tag()) {
+
+  case AMObjType::ARRAY : {
+    bool status = true;
+    register int i , j;
+    int nb_required , nb_sequence , nb_variable = 0 , *type , *length ,
+        *identifier = 0 , ***sequence;
+    const Array *parray = (Array*)args[0].val.p , *seq_array;
+    Sequences *seq;
+    Tops *tops;
+    Format_error error;
+
+
+    nb_required = 1;
+
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Tops"));
+
+    CHECKCONDVA(parray->surfaceType() == AMObjType::ARRAY ,
+                genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_1_sdss) , "Tops" , 1 ,
+                            (parray->surfaceType()).string().data() , "ARRAY"));
+
+    nb_sequence = parray->entries();
+
+    // argument obligatoire
+
+    length = new int[nb_sequence];
+    sequence = new int**[nb_sequence];
+    for (i = 0;i < nb_sequence;i++) {
+      sequence[i] = 0;
+    }
+
+    ArrayIter* pnext = parray->iterator();
+    ArrayIter& next = *pnext;
+
+    i = 0;
+    while (next()) {
+      seq_array = (Array*)(next.key()).val.p;
+ 
+      if (seq_array->surfaceType() != AMObjType::ARRAY) {
+        genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdss) , "Tops" , i + 1 ,
+                    (seq_array->surfaceType()).string().data() , "ARRAY");
+      }
+      else {
+        sequence[i] = buildArraySequence(seq_array , i , nb_variable , length[i] ,
+                                         "Tops" , true);
+      }
+
+      if (!sequence[i]) {
+        status = false;
+        break;
+      }
+      i++;
+    }
+
+    delete pnext;
+
+    if (nb_variable != 2) {
+      status = false;
+      genAMLError(ERRORMSG(NB_VARIABLE_2_sd) , "Tops" , 2);
+    }
+
+    // argument optionnel
+
+    if (args.length() == nb_required + 2) {
+      if (args[nb_required].tag() != AMObjType::OPTION) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Tops" , nb_required + 1 ,
+                    args[nb_required].tag.string().data() , "OPTION");
+      }
+      else {
+        if (*((AMString*)args[nb_required].val.p) != "Identifiers") {
+          status = false;
+          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Tops" , nb_required + 1 ,
+                      "Identifiers");
+        }
+      }
+
+      if (args[nb_required + 1].tag() != AMObjType::ARRAY) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Tops" , nb_required + 1 ,
+                    args[nb_required + 1].tag.string().data() , "ARRAY");
+      }
+      else {
+        identifier = buildIntArray(args , nb_required + 1 , "Tops" ,
+                                   nb_required + 1 , nb_sequence);
+        if (!identifier) {
+          status = false;
+        }
+        else {
+          for (i = 0;i < nb_sequence;i++) {
+            if (identifier[i] <= 0) {
+              status = false;
+              genAMLError(ERRORMSG(ARRAY_ELEMENT_VALUE_sdd) , "Tops" ,
+                          nb_required + 1 , i + 1);
+            }
+          }
+        }
+      }
+    }
+
+    if (status) {
+      type = new int[nb_variable];
+      type[0] = POSITION;
+      type[1] = NB_INTERNODE;
+
+      seq = new Sequences(nb_variable , type , nb_sequence , length , sequence , identifier);
+      delete [] type;
+
+      status = seq->check(error , SEQ_label[SEQL_TOP]);
+
+      if (!status) {
+        delete seq;
+        AMLOUTPUT << "\n" << error;
+        genAMLError(ERRORMSG(STAT_MODULE_s) , "Tops");
+      }
+    }
+
+    delete [] identifier;
+
+    delete [] length;
+    for (i = 0;i < nb_sequence;i++) {
+      if (sequence[i]) {
+        for (j = 0;j < nb_variable;j++) {
+          delete [] sequence[i][j];
+        }
+        delete [] sequence[i];
+      }
+    }
+    delete [] sequence;
+
+    if (!status) {
+      return AMObj(AMObjType::ERROR);
+    }
+
+    tops = seq->tops(error);
+    delete seq;
+
+    if (tops) {
+      STAT_model* model = new STAT_model(tops);
+      return AMObj(AMObjType::TOPS , model);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "Tops");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  case AMObjType::STRING : {
+    Tops *tops;
+    Format_error error;
+
+
+    CHECKCONDVA(args.length() == 1 ,
+                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Tops"));
+
+    tops = tops_ascii_read(error , ((AMString*)args[0].val.p)->data());
+
+    if (tops) {
+      STAT_model* model = new STAT_model(tops);
+      return AMObj(AMObjType::TOPS , model);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "Tops");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  default : {
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Tops" ,
+                args[0].tag.string().data() , "ARRAY or STRING");
+    return AMObj(AMObjType::ERROR);
+  }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Chargement d'un objet du module STAT a partir d'un fichier binaire.
+ *
+ *--------------------------------------------------------------*/
+
+/* AMObj STAT_Load(const AMObjVector &args)
+
+{
+  RWCollectable *obj;
+  Format_error error;
+  STAT_model *model;
+
+
+  CHECKCONDVA(args.length() == 1 ,
+              genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Load"));
+  CHECKCONDVA(args[0].tag() == AMObjType::STRING ,
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Load" ,
+                          args[0].tag.string().data() , "STRING"));
+
+  obj = STAT_binary_read(error , ((AMString*)args[0].val.p)->data());
+
+  if (obj) {
+    if (obj->isA() == STATI_PARAMETRIC_MODEL) {
+      model = new STAT_model((Parametric_model*)obj);
+      return AMObj(AMObjType::DISTRIBUTION , model);
+    }
+    if (obj->isA() == STATI_MIXTURE) {
+      model = new STAT_model((Mixture*)obj);
+      return AMObj(AMObjType::MIXTURE , model);
+    }
+    if (obj->isA() == STATI_CONVOLUTION) {
+      model = new STAT_model((Convolution*)obj);
+      return AMObj(AMObjType::CONVOLUTION , model);
+    }
+    if (obj->isA() == STATI_COMPOUND) {
+      model = new STAT_model((Compound*)obj);
+      return AMObj(AMObjType::COMPOUND , model);
+    }
+    if (obj->isA() == STATI_DISTRIBUTION_DATA) {
+      model = new STAT_model((Distribution_data*)obj);
+      return AMObj(AMObjType::HISTOGRAM , model);
+    }
+    if (obj->isA() == STATI_MIXTURE_DATA) {
+      model = new STAT_model((Mixture_data*)obj);
+      return AMObj(AMObjType::MIXTURE_DATA , model);
+    }
+    if (obj->isA() == STATI_CONVOLUTION_DATA) {
+      model = new STAT_model((Convolution_data*)obj);
+      return AMObj(AMObjType::CONVOLUTION_DATA , model);
+    }
+    if (obj->isA() == STATI_COMPOUND_DATA) {
+      model = new STAT_model((Compound_data*)obj);
+      return AMObj(AMObjType::COMPOUND_DATA , model);
+    }
+
+    if (obj->isA() == STATI_VECTORS) {
+      model = new STAT_model((Vectors*)obj);
+      return AMObj(AMObjType::VECTORS , model);
+    }
+    if (obj->isA() == STATI_REGRESSION) {
+      model = new STAT_model((Regression*)obj);
+      return AMObj(AMObjType::REGRESSION , model);
+    }
+
+    if (obj->isA() == STATI_RENEWAL) {
+      model = new STAT_model((Renewal*)obj);
+      return AMObj(AMObjType::RENEWAL , model);
+    }
+    if (obj->isA() == STATI_TIME_EVENTS) {
+      model = new STAT_model((Time_events*)obj);
+      return AMObj(AMObjType::TIME_EVENTS , model);
+    }
+    if (obj->isA() == STATI_RENEWAL_DATA) {
+      model = new STAT_model((Renewal_data*)obj);
+      return AMObj(AMObjType::RENEWAL_DATA , model);
+    }
+
+    if (obj->isA() == STATI_MARKOV) {
+      model = new STAT_model((Markov*)obj);
+      return AMObj(AMObjType::MARKOV , model);
+    }
+    if (obj->isA() == STATI_SEMI_MARKOV) {
+      model = new STAT_model((Semi_markov*)obj);
+      return AMObj(AMObjType::SEMI_MARKOV , model);
+    }
+    if (obj->isA() == STATI_HIDDEN_MARKOV) {
+      model = new STAT_model((Hidden_markov*)obj);
+      return AMObj(AMObjType::HIDDEN_MARKOV , model);
+    }
+    if (obj->isA() == STATI_HIDDEN_SEMI_MARKOV) {
+      model = new STAT_model((Hidden_semi_markov*)obj);
+      return AMObj(AMObjType::HIDDEN_SEMI_MARKOV , model);
+    }
+
+    if (obj->isA() == STATI_SEQUENCES) {
+      Sequences *seq;
+      Markovian_sequences *markovian_seq;
+      Format_error error;
+
+
+      seq = (Sequences*)obj;
+
+      markovian_seq = seq->markovian_sequences(error);
+      if (markovian_seq) {
+        delete seq;
+        model = new STAT_model(markovian_seq);
+        return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
+      }
+      else {
+        AMLOUTPUT << "\n";
+        error.ascii_write(AMLOUTPUT , WARNING);
+        model = new STAT_model(seq);
+        return AMObj(AMObjType::SEQUENCES , model);
+      }
+    }
+
+    if (obj->isA() == STATI_MARKOVIAN_SEQUENCES) {
+      model = new STAT_model((Markovian_sequences*)obj);
+      return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
+    }
+    if (obj->isA() == STATI_MARKOV_DATA) {
+      model = new STAT_model((Markov_data*)obj);
+      return AMObj(AMObjType::MARKOV_DATA , model);
+    }
+    if (obj->isA() == STATI_SEMI_MARKOV_DATA) {
+      model = new STAT_model((Semi_markov_data*)obj);
+      return AMObj(AMObjType::SEMI_MARKOV_DATA , model);
+    }
+    if (obj->isA() == STATI_CORRELATION) {
+      model = new STAT_model((Correlation*)obj);
+      return AMObj(AMObjType::CORRELATION , model);
+    }
+
+    if (obj->isA() == STATI_DISTANCE_MATRIX) {
+      model = new STAT_model((Distance_matrix*)obj);
+      return AMObj(AMObjType::DISTANCE_MATRIX , model);
+    }
+    if (obj->isA() == STATI_CLUSTERS) {
+      model = new STAT_model((Clusters*)obj);
+      return AMObj(AMObjType::CLUSTERS , model);
+    }
+
+    if (obj->isA() == STATI_TOP_PARAMETERS) {
+      model = new STAT_model((Top_parameters*)obj);
+      return AMObj(AMObjType::TOP_PARAMETERS , model);
+    }
+    if (obj->isA() == STATI_TOPS) {
+      model = new STAT_model((Tops*)obj);
+      return AMObj(AMObjType::TOPS , model);
+    }
+
+    genAMLError(ERRORMSG(STAT_TYPE_ss) , "Load" , args[0].tag.string().data());
+    delete obj;
+    return AMObj(AMObjType::ERROR);
+  }
+
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "Load");
+    return AMObj(AMObjType::ERROR);
+  }
+} */

@@ -1,0 +1,23 @@
+# -*-python-*-
+
+Import( "env" )
+import os 
+pj = os.path.join
+
+sources = env.ALEAGlob('*.cpp')
+
+if env['compiler'] == 'mingw':
+    LINKFLAGS=["-enable-stdcall-fixup",
+               "-enable-auto-import",
+               "-enable-runtime-pseudo-reloc",
+               "-s"]
+    env.AppendUnique(LINKFLAGS=LINKFLAGS)
+
+LIBS = ['vpamlobj','vpaml']
+env.AppendUnique(LIBS=LIBS)
+env.AppendUnique(CPPDEFINES=['MESSAGE'])
+
+target = '_amlPymodule'
+py_dir = '../amlPy'
+env.ALEAWrapper( py_dir, target, sources )
+
