@@ -1,4 +1,5 @@
 # -+- python -+-
+# -*- coding: latin-1 -*-
 
 from openalea.distx import setup, find_packages, find_package_dir, Shortcut 
 from os.path import join as pj
