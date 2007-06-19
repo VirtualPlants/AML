@@ -28,8 +28,9 @@ if __name__ == '__main__':
  
         
           # Packages
-          packages=[namespace+".aml", "amlPy"],
+          packages=[namespace+".aml", namespace+".aml.amldoc", "amlPy"],
           package_dir={namespace+".aml" : "src/aml",
+                       namespace+".aml.amldoc" : "src/aml/amldoc",
                        "amlPy" : "src/amlPy"},
       
           # Add package platform libraries if any

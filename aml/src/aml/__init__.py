@@ -51,10 +51,18 @@ _amlPy = _amlPymodule
 # installation time and amlPy should have been compiled properly. So,
 # don't complain.
 try:
-    from Numeric import *
+    import Numeric
 except ImportError:
     pass
 
+
+try:
+    import openalea.plantgl.all
+except ImportError:
+   try:
+      import PlantGL
+   except ImportError:
+      pass
 
 
 
@@ -66,6 +74,8 @@ except ImportError:
 ###########################################################################
 ########################### Conversion system #############################
 ###########################################################################
+
+   
 # Manage the global mode
 
 def setmode(mode):
@@ -76,7 +86,7 @@ def getmode():
 
 setmode(1)
 
-class AML:
+class AML(object):
     """ main class """
 
     # called when the attribute is not found,
@@ -93,7 +103,7 @@ class AML:
     # enables the instance to be callable eg: aml("AML code")
     def __call__(self, s):
         #print "__call__", s
-        return aml.eval(aml.parse(text=s))
+        return self.eval(self.parse(text=s))
 
 # main instance
 aml = AML()
@@ -103,27 +113,27 @@ aml = AML()
 # Equivalent AMAPmod function in Python
 import math, os
 
-Acos= math.acos
-Asin= math.asin
-Atan= math.atan
-Cos= math.cos
-Log= math.log
-Log10= math.log10
-Sin= math.sin
-Sqrt= math.sqrt
-Tan= math.tan
+Acos = math.acos
+Asin = math.asin
+Atan = math.atan
+Cos = math.cos
+Log = math.log
+Log10 = math.log10
+Sin = math.sin
+Sqrt = math.sqrt
+Tan = math.tan
 
-Abs=abs
+Abs = abs
 
-Pwd=os.getcwd
-Cd=os.chdir
-Dir=os.getcwd
+Pwd = os.getcwd
+Cd = os.chdir
+Dir = os.getcwd
 #Ls=os.listdir(Dir())
-Rm=os.remove
-Mkdir=os.mkdir
+Rm = os.remove
+Mkdir = os.mkdir
 
-Max=max
-Min=min
+Max = max
+Min = min
 
 def Swich(x, dict, default):
     """
@@ -133,7 +143,7 @@ def Swich(x, dict, default):
     return dict.get( x, default )
 
 
-__liste= """
+__liste = """
 AMAPMOD_DIR
 Abs
 Activate
@@ -381,7 +391,31 @@ Vectors
 WordCount
 """
 
-__liste= __liste.split()
-__dictionnary=globals()
+__liste = __liste.split()
+__dictionnary = globals()
+
+
 for fct in __liste:
-    __dictionnary[fct]=aml.__getattr__(fct)
+    __dictionnary[fct] = aml.__getattr__(fct)
+
+
+def amlhelp(name):
+   """ Display the AML documentation of the specified Function """
+
+   try:
+      baseimp = "openalea.aml.amldoc." + name.lower()
+      docmodule = __import__(baseimp, globals(), locals(), ['__doc__'])
+      help(docmodule)
+
+   except Exception, e:
+      print "Documentation unavailable:", e
+
+
+
+for fct in __liste:
+   baseimp = "openalea.aml.amldoc." + fct.lower()
+   try:
+      docmodule = __import__(baseimp, globals(), locals(), ['__doc__'])
+   except:
+      print fct, "NO DOC"
+   

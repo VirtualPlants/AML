@@ -685,7 +685,7 @@ static PyTypeObject AMObj_Type = {
   0,                      /*tp_clear*/
   0,                      /*tp_richcompare*/
   0,                      /*tp_weaklistoffset*/
- (getiterfunc)AMObj_getiter,/*tp_iter*/
+  (getiterfunc)AMObj_getiter,/*tp_iter*/
   (iternextfunc)AMObj_next,/*tp_iternext*/
   0,//AMObj_methods,           /*tp_methods*/
   0,                      /*tp_members*/
