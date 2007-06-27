@@ -395,22 +395,38 @@ __liste = __liste.split()
 __dictionnary = globals()
 
 
-for fct in __liste:
-    __dictionnary[fct] = aml.__getattr__(fct)
+def doc_wrapper(func, name):
+   """ Wrap aml instance in a function """
 
-
-def amlhelp(name):
-   """ Display the AML documentation of the specified Function """
-
+   # Get Documentation
    try:
       baseimp = "openalea.aml.amldoc." + name.lower()
       docmodule = __import__(baseimp, globals(), locals(), ['__doc__'])
-      help(docmodule)
-
+      docstr = docmodule.__doc__
+   
    except Exception, e:
-      print "Documentation unavailable:", e
+      docstr = "AML Function : Documentation unavailable"
+
+   def wrapped(*args):
+      """ dummy documentation (changed later) """
+      # call function
+      func(*args)
+
+   # Add doc
+   wrapped.__doc__ = docstr
+   wrapped.__name__ = name
+
+   return wrapped
 
 
+# Update globals() with aml functions
+for fct in __liste:
+    __dictionnary[fct] = doc_wrapper(aml.__getattr__(fct), fct)
+
+
+
+# Test
+cpt = 0
 
 for fct in __liste:
    baseimp = "openalea.aml.amldoc." + fct.lower()
@@ -418,4 +434,7 @@ for fct in __liste:
       docmodule = __import__(baseimp, globals(), locals(), ['__doc__'])
    except:
       print fct, "NO DOC"
+      cpt += 1
+
+if(cpt>0) : print cpt
    
