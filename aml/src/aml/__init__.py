@@ -122,8 +122,9 @@ Log10 = math.log10
 Sin = math.sin
 Sqrt = math.sqrt
 Tan = math.tan
-
+Exp = math.exp
 Abs = abs
+Pi = math.pi
 
 Pwd = os.getcwd
 Cd = os.chdir
@@ -143,9 +144,32 @@ def Swich(x, dict, default):
     return dict.get( x, default )
 
 
-__liste = """
+__var= """
 AMAPMOD_DIR
-Abs
+Black
+Blue 
+LightBlue
+CurrentMTG
+CurrentPlottedObj
+CurrentWindow 
+CWD
+DateFormat
+DateUnit
+Day
+DefaultWindow
+Green
+HOME
+Hour
+Minute
+Red
+ROOTDIR
+Second
+Undef
+Violet
+White
+Yellow
+"""
+__function = """
 Activate
 Active
 AlgHeight
@@ -160,8 +184,6 @@ Array
 Axis          
 Azimuth       
 Beta          
-Black
-Blue 
 BottomCoord   
 BottomDiameter
 Ceil          
@@ -173,16 +195,8 @@ Components
 Coord         
 Copy          
 Cov
-CurrentMTG
-CurrentPlottedObj
-CurrentWindow 
-CWD
 Date          
-DateFormat
 DateSample    
-DateUnit
-Day
-DefaultWindow
 Defined       
 Delete        
 Descendants   
@@ -196,7 +210,6 @@ EdgeType
 ElectricalModel
 EulerAngles   
 Exists        
-Exp
 ExpSequence   
 Extract       
 Extremities   
@@ -208,11 +221,8 @@ FirstDefinedFeature
 Flatten       
 Floor         
 GeomScene     
-Green
 Head          
 Height        
-HOME
-Hour
 Identity      
 IfThenElse    
 Index         
@@ -222,7 +232,6 @@ Interval
 Invert        
 LastDefinedFeature
 Length        
-LightBlue
 List          
 Location
 Ls
@@ -233,7 +242,6 @@ MTGRoot
 MatchingExtract
 Mean          
 Minus         
-Minute
 Mod
 NewPlot       
 NextDate      
@@ -242,7 +250,6 @@ Octree
 Order         
 PDir          
 Path          
-Pi
 PlantFrame    
 Plot
 Plus
@@ -253,7 +260,6 @@ Print
 Prod          
 ProdSeries    
 Rank          
-Red
 RelBottomCoord
 RelTopCoord   
 Rand          
@@ -262,13 +268,11 @@ RemoveAt
 Rename        
 Rint          
 Root
-ROOTDIR
 SDir          
 SProd         
 Save          
 SaveMTG       
 Scale         
-Second
 Select        
 Series        
 Set
@@ -299,19 +303,15 @@ TreeMatching
 TreeMatchingLoad
 Truncate      
 Trunk         
-Undef
 Union         
 VProd         
 Var
 ViewerHelp    
 ViewerIsRunning
 ViewerSelection
-Violet
 VirtualPattern
 VtxList       
 WaitViewer    
-White
-Yellow
 
 AddAbsorbingRun
 Cluster
@@ -391,7 +391,9 @@ Vectors
 WordCount
 """
 
-__liste = __liste.split()
+__function= __function.split()
+__var= __var.split()
+__liste = __function + __var
 __dictionnary = globals()
 
 
@@ -407,10 +409,10 @@ def doc_wrapper(func, name):
    except Exception, e:
       docstr = "AML Function : Documentation unavailable"
 
-   def wrapped(*args):
+   def wrapped(*args, **kwds):
       """ dummy documentation (changed later) """
       # call function
-      func(*args)
+      return func(*args, **kwds)
 
    # Add doc
    wrapped.__doc__ = docstr
@@ -420,21 +422,27 @@ def doc_wrapper(func, name):
 
 
 # Update globals() with aml functions
-for fct in __liste:
+for fct in __function:
     __dictionnary[fct] = doc_wrapper(aml.__getattr__(fct), fct)
 
+for fct in __var:
+    __dictionnary[fct] = aml.__getattr__(fct)
 
+_DEBUG = False
+if _DEBUG:
+    # Test
+    cpt = 0
 
-# Test
-cpt = 0
+    for fct in __function:
+        baseimp = "amldoc." + fct.lower()
+        try:
+            docmodule = __import__(baseimp, globals(), locals(), ['__doc__'])
+        except:
+            print fct, "NO DOC"
+            cpt += 1
 
-for fct in __liste:
-   baseimp = "openalea.aml.amldoc." + fct.lower()
-   try:
-      docmodule = __import__(baseimp, globals(), locals(), ['__doc__'])
-   except:
-      print fct, "NO DOC"
-      cpt += 1
-
-if(cpt>0) : print cpt
+    if(cpt > 0): 
+        print cpt
+    del cpt
    
+del _DEBUG

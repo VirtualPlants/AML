@@ -25,11 +25,11 @@ ComponentRoots
 	Trunk.
 
 Examples
-	AML> v=MTGRoot() # racine globale du MTG
+	>>> v=MTGRoot() # global MTG root
 	<ARRAY(VTX)>0
-	AML> ComponentRoots(v) # ensemble des premiers vertex des plantes à l'échelle 1
+	>>> ComponentRoots(v) # set of first vertices at scale 1
 	<ARRAY(VTX)>[1,34,76,100,199,255]
-	AML> ComponentRoots(v, Scale> 2) # ensemble des premiers vertex des plantes à l'échelle 2
+	>>> ComponentRoots(v, Scale> 2) # set of first vertices at scale 2
 	<ARRAY(VTX)>[2,35,77,101,200,256]
 
 

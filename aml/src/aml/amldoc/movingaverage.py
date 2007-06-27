@@ -30,7 +30,7 @@ MovingAverage
 	Consider a symmetric smoothing filter of half width q applied to a sequence of length t. Whenever a symmetric smoothing filter is chosen, there is likely to be an end-effect problem for t<q or t>t - q - 1. We chose to apply the following solution to the first and the last q terms of the sequences: we define Xt:=X0 for t<0 and Xt:=Xt-1 for t>t-1.
 	
   Returned Object
-	An object of type sequences or discrete_sequences is returned. An object of type discrete_sequences is returned if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is £ 15.
+	An object of type sequences or discrete_sequences is returned. An object of type discrete_sequences is returned if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is <= 15.
 	
   See Also
 	

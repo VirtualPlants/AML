@@ -32,7 +32,7 @@ Transcode
 	AddVariable (bool): addition (instead of simple replacement) of the variable to which the transcoding is applied (default value: False). This optional argument can only be used if the first argument is of type discrete_sequences, markov_data, semi-markov_data.
 	
   Returned Object
-	If the new values are in same number as the old values and are consecutive from 0, an object of type HISTOGRAM is returned (respectively vectors, sequences or discrete_sequences), otherwise no object is returned. In the case of a first argument of type sequences, the returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is £ 15.	
+	If the new values are in same number as the old values and are consecutive from 0, an object of type HISTOGRAM is returned (respectively vectors, sequences or discrete_sequences), otherwise no object is returned. In the case of a first argument of type sequences, the returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is <= 15.	
   Background
 	The function Cluster with the mode "Limit" can be seen as a dedicated interface of the more general function Transcode.
 	

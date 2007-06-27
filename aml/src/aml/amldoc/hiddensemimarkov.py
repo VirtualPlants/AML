@@ -15,7 +15,7 @@ HiddenSemiMarkov
   Returned Object
 	If the construction succeeds, an object of type hidden_semi-markov is returned, otherwise no object is returned.	
   Background
-	A hidden semi-Markov chain is constructed from an underlying semi-Markov chain (first-order Markov chain representing transition between distinct states and state occupancy distributions associated to the nonabsorbing states) and nonparametric observation (or state-dependent) distributions. The state occupancy distributions are defined as object of type distribution with the additional constraint that the minimum time spent in a given state is 1 (inf_bound ³ 1).
+	A hidden semi-Markov chain is constructed from an underlying semi-Markov chain (first-order Markov chain representing transition between distinct states and state occupancy distributions associated to the nonabsorbing states) and nonparametric observation (or state-dependent) distributions. The state occupancy distributions are defined as object of type distribution with the additional constraint that the minimum time spent in a given state is 1 (inf_bound <= 1).
 	
   See Also
 	Save, 

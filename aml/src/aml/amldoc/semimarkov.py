@@ -15,7 +15,7 @@ SemiMarkov
   Returned Object
 	If the construction succeeds, an object of type semi-markov is returned, otherwise no object is returned.	
   Background
-	A semi-Markov chain is constructed from a first-order Markov chain representing transition between distinct states and state occupancy distributions associated to the nonabsorbing states. The state occupancy distributions are defined as object of type distribution with the additional constraint that the minimum time spent in a given state is at least 1 (inf_bound ³ 1).
+	A semi-Markov chain is constructed from a first-order Markov chain representing transition between distinct states and state occupancy distributions associated to the nonabsorbing states. The state occupancy distributions are defined as object of type distribution with the additional constraint that the minimum time spent in a given state is at least 1 (inf_bound >= 1).
 	
   See Also
 	Save, 

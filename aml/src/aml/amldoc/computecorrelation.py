@@ -22,8 +22,8 @@ ComputeCorrelation
 	Normalization (STRING): normalization of the correlation coefficients: "Approximated" (the default - usual convention for time series analysis) or "Exact", (highly recommended for sample of short sequences). This optional argument can only be used if the optional argument Type is set at "Pearson" or "Spearman".
 	
   Returned Object
-	If variable, or variable1 and variable2 are valid indices of variables (and are different if two indices are given) and if 0 £
- MaxLag < (maximum length of sequences), an object of type correlation is returned, otherwise no object is returned.	
+	If variable, or variable1 and variable2 are valid indices of variables (and are different if two indices are given) 
+    and if 0 < MaxLag < (maximum length of sequences), an object of type correlation is returned, otherwise no object is returned.	
   Background
 	In the univariate case or if only variable is given, a sample autocorrelation function is computed. If variable1 and variable2 are given, a sample cross-correlation function is computed.
 	

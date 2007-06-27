@@ -19,7 +19,7 @@ Clustering
 	Prototypes (array(int)): cluster prototypes.
 	
   Returned Object
-	If the second mandatory argument is ''Partitioning'' and if 2 £ nb_cluster < (number of patterns), an object of type clusters is returned, otherwise no object is returned.
+	If the second mandatory argument is ''Partitioning'' and if 2 < nb_cluster < (number of patterns), an object of type clusters is returned, otherwise no object is returned.
   Description
 	In the case where the composition of clusters is a priori fixed, the function Clustering simply performs an evaluation of the a priori fixed partition.
 	

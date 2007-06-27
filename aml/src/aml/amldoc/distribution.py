@@ -15,7 +15,7 @@ Distribution
 	sup_bound (int): upper bound to the range of possible values (only relevant for binomial or uniform distributions),
 	param (int, real): parameter of either the Poisson distribution or the negative binomial distribution.
 	proba (int, real): probability of ‘success’ (only relevant for binomial or negative binomial distributions),
-	Remark: the names of the parametric discrete distributions can be summarized by their first letters: "B" ("BINOMIAL"), "P" ("POISSON"), "NB" ("NEGATIVE_BINOMIAL"), "U" ("UNIFORM"),
+	Remark: the names of the parametric discrete distributions can be summarized by their first letters: 'B' ('BINOMIAL'), 'P' ('POISSON'), 'NB' ('NEGATIVE_BINOMIAL'), 'U' ('UNIFORM'),
 	
 	file_name (string).
 	

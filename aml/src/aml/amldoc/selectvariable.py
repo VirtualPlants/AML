@@ -21,7 +21,7 @@ SelectVariable
 	Mode (string): conservation or rejection of the selected variables: "Keep" (the default) or "Reject".
 	
   Returned Object
-	If either variable or variables@1, ..., variables@n are valid indices of variables, an object of type vectors (respectively sequences or discrete_sequences) is returned, otherwise no object is returned. In the case of a first argument of type sequences, the returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is £ 15.
+	If either variable or variables@1, ..., variables@n are valid indices of variables, an object of type vectors (respectively sequences or discrete_sequences) is returned, otherwise no object is returned. In the case of a first argument of type sequences, the returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is <= 15.
 	
   See Also
 	

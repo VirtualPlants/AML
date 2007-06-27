@@ -44,11 +44,21 @@ Cluster
   Optional Arguments 
 	AddVariable (BOOL) : addition (instead of simple replacement) of the variable corresponding to the clustering of values (default value: False). This optional argument can only be used if the first argument is of type DISCRETE_SEQUENCES, MARKOV_DATA or SEMI-MARKOV_DATA. The addition of the clustered variable is particularly useful if one wants to evaluate a lumpability hypothesis.
   Returned Object 
-	 If step > 0, or if 0 £
-		 information_ratio £
-		 1, or if 0 < limits@1 < limits@2 < … < limits@nb_class - 1 < (maximum possible value of histo), an object of type HISTOGRAM is returned, otherwise no object is returned.
-	 If variable is a valid index of a variable and if step > 0, or if 0 < limits@1 < limits@2 < … < limits@nb_class - 1 < (maximum possible value taken by the selected variable of vec1 or vecn), an object of type vectors is returned, otherwise no object is returned.
-	 If variable is a valid index of a variable of type STATE and if step > 0, or if 0 < limits@1 < limits@2 < … < limits@nb_class - 1 < (maximum possible value taken by the selected variable of seq1, seqn, discrete_seq1 or discrete_seqn), an object of type sequences or discrete_sequences is returned, otherwise no object is returned. In the case of a first argument of type sequences, an object of type discrete_sequences is returned if all the variables are of type STATE, if the possible values taken by each variable are consecutive from 0 and if the number of possible values for each variable is £15.
+    If step > 0, or if 0 <= information_ratio <= 1, 
+    or if 0 < limits[0] < limits[1] < ... < limits[nb_class - 1] < (maximum possible value of histo), 
+    an object of type HISTOGRAM is returned, otherwise no object is returned.
+    If variable is a valid index of a variable and if step > 0, 
+    or if 0 < limits[0] < limits[1] < ... < limits[nb_class - 1] < (maximum possible value taken by the selected variable of vec1 or vecn), 
+    an object of type vectors is returned, otherwise no object is returned.
+
+    If variable is a valid index of a variable of type STATE 
+    and if step > 0, or if 0 < limits[0] < limits[1] < ... < limits[nb_class - 1] 
+    < (maximum possible value taken by the selected variable of seq1, seqn, discrete_seq1 or discrete_seqn), 
+    an object of type sequences or discrete_sequences is returned, otherwise no object is returned. 
+    In the case of a first argument of type sequences, an object of type discrete_sequences is returned 
+    if all the variables are of type STATE, 
+    if the possible values taken by each variable are consecutive from 0 
+    and if the number of possible values for each variable is < 15.
 	
 Description 
 	In the case of the clustering of values of a frequency distribution on the basis of an information measure criterion (argument "Information"), both the information measure ratio and the selected optimal step are given in the shell window.

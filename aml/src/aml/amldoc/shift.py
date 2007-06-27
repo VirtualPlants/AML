@@ -24,7 +24,7 @@ Shift
 	seqn (sequences): multivariate sequences.
 	
   Returned Object
-	If the shifting makes that the lower bound to the possible values is positive, an object of type HISTOGRAM (respectively vectors, sequences or sequences) is returned, otherwise no object is returned. In the case of a first argument of type sequences, the returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is £ 15.
+	If the shifting makes that the lower bound to the possible values is positive, an object of type HISTOGRAM (respectively vectors, sequences or sequences) is returned, otherwise no object is returned. In the case of a first argument of type sequences, the returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is <= 15.
 	
   See Also
 	 

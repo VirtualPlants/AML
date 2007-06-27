@@ -18,7 +18,8 @@ MergeVariable
   Returned Object
 	
 	 If the arguments are of type vectors and if the number of vectors is the same for each sample, an object of type vectors is returned, otherwise no object is returned.
-	 If the arguments are of type sequences, discrete_sequences, markov_data, semi-markov_data, if all the variables are of type STATE, and if the number and the lengths of sequences are the same for each sample, an object of type sequences or discrete_sequences is returned, otherwise no object is returned. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is £15.
+
+	 If the arguments are of type sequences, discrete_sequences, markov_data, semi-markov_data, if all the variables are of type STATE, and if the number and the lengths of sequences are the same for each sample, an object of type sequences or discrete_sequences is returned, otherwise no object is returned. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is <15.
 	
   See Also
 	Merge,

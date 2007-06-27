@@ -1,5 +1,4 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
-
 """
 ExtractDistribution
 	Extraction of a distribution from an object of type 'model'.

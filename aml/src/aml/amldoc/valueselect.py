@@ -37,7 +37,7 @@ ValueSelect
 	Mode (string): conservation or rejection of selected individuals: "Keep" (the default) or "Reject".
 	
   Returned Object
-	If either value³ 0 or if 0 £ min_value £ max_value and if the range of values defined either by value or by min_value and max_value enables to select individuals, an object of type HISTOGRAM is returned (respectively vectors, sequences or discrete_sequences), otherwise no object is returned. In the case of a first argument of type sequences, discrete_sequences, markov_data or semi-markov_data, the returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is £ 15.
+	If either value >= 0 or if 0 <= min_value <= max_value and if the range of values defined either by value or by min_value and max_value enables to select individuals, an object of type HISTOGRAM is returned (respectively vectors, sequences or discrete_sequences), otherwise no object is returned. In the case of a first argument of type sequences, discrete_sequences, markov_data or semi-markov_data, the returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is <= 15.
 	
   See Also
 	Cluster, 
