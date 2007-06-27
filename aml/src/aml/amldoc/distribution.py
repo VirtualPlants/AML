@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Distribution
 	Construction of a parametric discrete distribution (either binomial, Poisson, negative binomial or uniform) from the name and the parameters of the distribution or from an ASCII file.
   Usage

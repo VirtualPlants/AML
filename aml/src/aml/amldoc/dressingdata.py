@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 DressingData
 	Data and default geometric parameters used to compute the geometric interpretation of a MTG (i.e. a PLANTFRAME)
   Usage

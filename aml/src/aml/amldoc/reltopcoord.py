@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 RelTopCoord
 	Top coordinates of the geometric model of a component expressed in the global reference system translated at the origin of the plant (basis of the trunk).
   Usage

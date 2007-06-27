@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ExtractDistribution
 	Extraction of a distribution from an object of type 'model'.
   Usage

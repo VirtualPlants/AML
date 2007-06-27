@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 RecurrenceTimeSequences
 	Computation of recurrence time sequences for a given value (and for a given variable).
   Usage

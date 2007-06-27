@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Markov
 	Construction of a Markov chain from an ASCII file.
   Usage

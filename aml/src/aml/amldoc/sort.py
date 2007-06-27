@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Sort
 	Sorts the order of the elements of an array or a set.
 Usage

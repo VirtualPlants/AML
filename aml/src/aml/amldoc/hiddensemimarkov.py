@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 HiddenSemiMarkov
 	Construction of an object of type hidden_semi-markov from an ASCII file.
   Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Alpha
 	Angle defining the angle between the principal direction of the geometric model of vertex and the z axis of the global coordinate system.
   Usage

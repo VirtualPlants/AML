@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ExtractData
 	Extraction of the 'data' part of an object of type 'model'.
   Usage

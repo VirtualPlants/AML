@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Regression
 	Simple regression (with a single explanatory variable).
   Usage

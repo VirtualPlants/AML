@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 AddAbsorbingRun
   	Addition of a run of absorbing vectors at the end of sequences.
   Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ComputeWhiteNoiseCorrelation
 	Computation of the sample autocorrelation or cross-correlation function induced on a white noise sequence by filtering.
   Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 RemoveApicalInternodes
 	Removal of the apical internodes of the parent shoot of a 'top'.
   Usage

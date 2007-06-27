@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Histogram
 	Construction of a frequency distribution from an object of type array(int) or from an ASCII file.
   Usage

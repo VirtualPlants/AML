@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Arithmetic operators
 	+,-,*,/ Classical arithmetic operators. Addition of a value to ARRAYs, SETs,
 	LISTs, STRINGs and DATEs.

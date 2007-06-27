@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 TimeSelect
 	Selection of data item of type {time interval between two observation dates, number of events occurring between these two observation dates} according to a length of the observation period criterion.
   Usage

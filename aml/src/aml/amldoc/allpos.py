@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 AllPos
 	The set of all positions of an element in an array or a list.
 Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Angle
 	Angle made by the vectors corresponding to two arrays of reals.
 Usage

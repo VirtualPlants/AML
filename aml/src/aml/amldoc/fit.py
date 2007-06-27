@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 FitTest
 	Fit of a frequency distribution by a theoretical distribution.
   Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 PreviousDate
 	Previous date at which a vertex has been observed before a specified date
   Usage

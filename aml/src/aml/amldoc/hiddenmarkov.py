@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 HiddenMarkov
 	Construction of an object of type hidden_markov from an ASCII file.
   Usage

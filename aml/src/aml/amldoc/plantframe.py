@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 PlantFrame
 	Constructs e geometric interpretation of a MTG.
   Usage

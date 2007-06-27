@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Size
 	Gives the number of elements of an array, a set or a list.
 Usage

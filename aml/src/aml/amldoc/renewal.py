@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Renewal
 	Construction of a (either ordinary or equilibrium) renewal process from an inter-event distribution or from an ASCII file.
   Usage

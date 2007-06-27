@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Tops
 	Construction of a set of 'tops' from a multidimensional array of integers or from an ASCII file.
   Usage

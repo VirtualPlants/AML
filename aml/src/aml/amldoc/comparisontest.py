@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ComparisonTest
 	Test of comparaison of frequency distributions.
   Usage

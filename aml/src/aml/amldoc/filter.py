@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Filter
 	Applies a linear filter to an array, which outputs an array made of locally weighted mean values of the initial array. 
 

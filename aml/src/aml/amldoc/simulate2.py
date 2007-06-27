@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Simulate
 	Generation of a random sample from a renewal process.
   Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Convolution
 	Construction of an object of type convolution from elementary distributions or from an ASCII file.
   Usage

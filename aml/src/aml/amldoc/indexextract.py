@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 IndexExtract
 	Extraction of sub-sequences corresponding to a range of index parameters.
   Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Merge
 	Merging of objects of the same 'data' type or merging of sample correlation functions.
   Usage

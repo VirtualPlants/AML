@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ToDistribution
 	Cast an object of type HISTOGRAM into an object of type distribution.
   Usage

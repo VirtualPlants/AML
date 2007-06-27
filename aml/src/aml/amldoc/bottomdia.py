@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 BottomDiameter
 	Bottom diameter of the geometric model of a vertex
   Usage

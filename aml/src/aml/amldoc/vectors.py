@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Vectors
 	Construction of a set of vectors from a multidimensional array, from a set of sequences or from an ASCII file.
   Usage

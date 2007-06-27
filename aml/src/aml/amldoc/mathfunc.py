@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Mathematical functions
 	Sqrt, Power (^), Log, Log10, Exp
 Usage

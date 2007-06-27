@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Display
 	ASCII output of an object of the STAT module (Print: ASCII printing of an object of the STAT module. Print takes the same arguments as Display).
   Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Sons
 	Set of vertices borne or preceded by a vertex
   Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Clustering
   	Application of clustering methods (either partioning methods or hierarchical methods) to dissimilatirty matrices between partterns.
   Usage

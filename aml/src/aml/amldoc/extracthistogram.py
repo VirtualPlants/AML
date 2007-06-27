@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ExtractHistogram
 	Extraction of a frequency distribution from an object of type 'data'.
   Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Trunk
 	Array of vertices constituting the bearing botanical axis of a branching system.
   Usage

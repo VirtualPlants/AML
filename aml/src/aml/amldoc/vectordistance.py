@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 VectorDistance
 	Construction of an object of type vector_distance from types (and eventually weights) of variables or from an ASCII file.
   Usage

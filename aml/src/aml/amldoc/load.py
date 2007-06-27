@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Load
 	Restoration of an object of the STAT module from a binary file (object persistence).
   Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Descendants
 	Set of vertices in the branching system borne by a vertex.
   Usage

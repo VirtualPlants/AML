@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 DisplayAllNames, DisplayAllUserNames
 	Display user or system variables and functions, ?, ??
 Usage

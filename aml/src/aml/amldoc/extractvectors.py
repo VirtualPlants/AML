@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ExtractVectors
 	Extraction of vectors from global characteristics of sequences (length or counting characteristics).
   Usage

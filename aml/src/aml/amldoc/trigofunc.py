@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Trigonometric functions
 	Sin, Cos, Tan, Acos, Asin, Atan.
 Usage

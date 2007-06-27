@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Multiple Choices
 The document name you requested (/amapmod/refermanual18/stat/estimate.html) could not be found on this server.
 However, we found documents with names similar to the one you requested.Available documents:

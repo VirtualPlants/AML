@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ModelSelectionTest
 	Test of the order of a Markov chain or of a possible partition of the original state space (lumpability hypothesis).
   Usage

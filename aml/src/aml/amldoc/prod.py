@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Prod
 	Computes the product of the elements of an array or a set.
 Usage

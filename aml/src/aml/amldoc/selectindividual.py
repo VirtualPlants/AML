@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 SelectIndividual
 	Selection of vectors, sequences, tops or patterns (in a dissimilarity matrix).
   Usage

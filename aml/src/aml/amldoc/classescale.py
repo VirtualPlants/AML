@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ClassScale
 	Scale at which appears a given class of vertex
   Usage

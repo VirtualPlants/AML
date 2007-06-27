@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ComputeSelfTransition
 	Computation of the self-transition probabilities as a function of the index parameter from discrete sequences.
   Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 NextDate
 	Next date at which a vertex has been observed after a specified date
   Usage

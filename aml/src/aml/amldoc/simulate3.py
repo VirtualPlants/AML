@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Simulate
 	Generation of a sample of sequences from a (hidden) Markovian process.
   Usage

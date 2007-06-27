@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 EchoOn / EchoOff
 	Put echo on during batch reading of a file
 Usage

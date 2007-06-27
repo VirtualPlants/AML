@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 EDist
 	Euclidean distance between two points represented by two arrays.
 Usage

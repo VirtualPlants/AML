@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 BottomCoord
 	Coordinates of the bottom of the geometric model of a component
   Usage

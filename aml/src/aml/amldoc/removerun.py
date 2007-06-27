@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 RemoveRun
 	Removal of the first or last run of a given value (for a given variable) in a sequence.
   Usage

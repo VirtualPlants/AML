@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Plot, NewPlot
 	Graphical output of an object of the STAT module using the GNUPLOT software.
   Usage

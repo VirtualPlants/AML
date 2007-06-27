@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 EulerAngles
 	Computes the Euler angles corresponding to the local coordinate system of a vertex with respect to the global coordinate system.
   Usage

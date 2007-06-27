@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ProdSeries
 	Computes the series of incremental products associated with a given sequence of numerical values.
 Usage

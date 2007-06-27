@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 NbEventSelect
 	Selection of data item of type {time interval between two observation dates, number of events occurring between these two observation dates} according to a number of events criterion.
   Usage

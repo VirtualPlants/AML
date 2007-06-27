@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Successor
 	Vertex that is connected to a given vertex by a '<' edge type (i.e. in the same botanical axis).
   Usage

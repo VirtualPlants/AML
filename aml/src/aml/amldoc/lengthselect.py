@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 LengthSelect
 	Selection of sequences according to a length criterion.
   Usage

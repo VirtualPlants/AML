@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ComputeCorrelation
 	Computation of sample autocorrelation or cross-correlation functions.
   Usage

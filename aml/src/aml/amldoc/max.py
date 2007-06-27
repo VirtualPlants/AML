@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Max
 	Computes the maximum value of the elements of an array or a set.
 Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 VirtualPattern
 	Object containing the specification to add (virtual) components to an existing PLANTFRAME.
   Usage

@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 TopParameters
 	Construction of 'top' parameters from the three parameters or from an ASCII file.
   Usage

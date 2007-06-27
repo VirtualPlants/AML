@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Series
 	Computes the mathematical series associated with a given sequence of numerical values.
 Usage

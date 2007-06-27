@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 ToDistanceMatrix
   	Cast and object of type CLUSTERS into an object of type DISTANCE_MATRIX.
   Usage

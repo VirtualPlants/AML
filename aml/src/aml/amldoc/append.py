@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Append
 	Appends a value to ARRAYs, SETs, STRINGs.
 Usage

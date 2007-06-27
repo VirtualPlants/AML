@@ -1,6 +1,6 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-__doc__ = """
+"""
 Compound
 	Construction of an object of type compound from a ‘sum’ distribution and an ‘elementary’ distribution or from an ASCII file.
   Usage
