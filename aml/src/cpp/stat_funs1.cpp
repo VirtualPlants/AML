@@ -959,10 +959,13 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
         else if (*pstr == "Mean") {
           variable_type[i] = MEAN_CHANGE;
         }
+        else if (*pstr == "Variance") {
+          variable_type[i] = VARIANCE_CHANGE;
+        }
         else {
           status = false;
           genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "Display" , i + 4 ,
-                      "Symbolic or Ordinal or Numeric or Poisson or Mean");
+                      "Symbolic or Ordinal or Numeric or Poisson or Mean or Variance");
         }
       }
     }
@@ -1807,10 +1810,13 @@ AMObj STAT_model::save(const AMObjVector &args) const
         else if (*pstr == "Mean") {
           variable_type[i] = MEAN_CHANGE;
         }
+        else if (*pstr == "Variance") {
+          variable_type[i] = VARIANCE_CHANGE;
+        }
         else {
           status = false;
           genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "Save" , i + 5 ,
-                      "Symbolic or Ordinal or Numeric or Poisson or Mean");
+                      "Symbolic or Ordinal or Numeric or Poisson or Mean or Variance");
         }
       }
     }
@@ -2695,10 +2701,13 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
             else if (*pstr == "Mean") {
               variable_type[i] = MEAN_CHANGE;
             }
+            else if (*pstr == "Variance") {
+              variable_type[i] = VARIANCE_CHANGE;
+            }
             else {
               status = false;
               genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "Plot" , i + 4 ,
-                          "Symbolic or Ordinal or Numeric or Poisson or Mean");
+                          "Symbolic or Ordinal or Numeric or Poisson or Mean or Variance");
             }
           }
         }

@@ -5143,10 +5143,10 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
 {
   RWCString *pstr;
   char *file_name = 0 , format = 'a';
-  bool status = true , begin_option = false , begin = false , laplace_option = false ,
-       laplace = false , file_name_option = false , format_option = false;
+  bool status = true , begin_option = false , begin = false , estimator_option = false ,
+       file_name_option = false , format_option = false;
   register int i;
-  int nb_required;
+  int nb_required , estimator = LAPLACE;
   const Markovian_sequences *seq;
   Format_error error;
 
@@ -5222,19 +5222,39 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
         }
       }
 
-      else if (*pstr == "Laplace") {
-        switch (laplace_option) {
+      else if (*pstr == "Estimator") {
+        switch (estimator_option) {
 
         case false : {
-          laplace_option = true;
+          estimator_option = true;
 
-          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
             status = false;
             genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TransitionCount" , nb_required + i + 1 ,
-                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+                        args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
           }
           else {
-            laplace = args[nb_required + i * 2 + 1].val.b;
+            pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+            if (*pstr == "MaximumLikelihood") {
+              estimator = MAXIMUM_LIKELIHOOD;
+            }
+            else if (*pstr == "Laplace") {
+              estimator = LAPLACE;
+            }
+            else if (*pstr == "AdaptativeLaplace") {
+              estimator = ADAPTATIVE_LAPLACE;
+            }
+            else if (*pstr == "UniformSubset") {
+              estimator = UNIFORM_SUBSET;
+            }
+            else if (*pstr == "UniformCardinality") {
+              estimator = UNIFORM_CARDINALITY;
+            }
+            else {
+              status = false;
+              genAMLError(ERRORMSG(ESTIMATOR_NAME_sds) , "TransitionCount" ,
+                          nb_required + i + 1 , "MaximumLikelihood or Laplace or AdaptativeLaplace or UniformSubset or UniformCardinality");
+            }
           }
           break;
         }
@@ -5272,7 +5292,7 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
         }
       }
 
-      else if (*pstr == "Format") {
+/*      else if (*pstr == "Format") {
         switch (format_option) {
 
         case false : {
@@ -5307,28 +5327,28 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
           break;
         }
         }
-      }
+      } */
 
       else {
         status = false;
         genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "TransitionCount" ,
+                    nb_required + i + 1 , "Begin or Estimator or FileName");
 //                    nb_required + i + 1 , "Begin or FileName or Format");
-                    nb_required + i + 1 , "Begin or Laplace");
       }
     }
   }
 
-  if ((!file_name_option) && (format_option)) {
+/*  if ((!file_name_option) && (format_option)) {
     status = false;
     genAMLError(ERRORMSG(MISSING_FILE_NAME_OPTION_s) , "TransitionCount");
-  }
+  } */
 
   if (!status) {
     return AMObj(AMObjType::ERROR);
   }
 
+  status = seq->transition_count(error , AMLOUTPUT , args[1].val.i , begin , estimator , file_name);
 //  status = seq->transition_count_0(error , AMLOUTPUT , args[1].val.i , begin , file_name , format);
-  status = seq->transition_count(error , AMLOUTPUT , args[1].val.i , begin , laplace);
 
   if (status) {
     return AMObj(AMObjType::VOID);
@@ -5785,10 +5805,13 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           else if (*pstr == "Mean") {
             variable_type[i] = MEAN_CHANGE;
           }
+          else if (*pstr == "Variance") {
+            variable_type[i] = VARIANCE_CHANGE;
+          }
           else {
             status = false;
             genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "Segmentation" , i + 3 ,
-                        "Symbolic or Ordinal or Numeric or Poisson or Mean");
+                        "Symbolic or Ordinal or Numeric or Poisson or Mean or Variance");
           }
         }
       }
@@ -5984,10 +6007,13 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           else if (*pstr == "Mean") {
             variable_type[i] = MEAN_CHANGE;
           }
+          else if (*pstr == "Variance") {
+            variable_type[i] = VARIANCE_CHANGE;
+          }
           else {
             status = false;
             genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "Segmentation" , i + 4 ,
-                        "Symbolic or Ordinal or Numeric or Poisson or Mean");
+                        "Symbolic or Ordinal or Numeric or Poisson or Mean or Variance");
           }
         }
       }

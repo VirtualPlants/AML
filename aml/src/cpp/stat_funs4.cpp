@@ -2610,17 +2610,18 @@ static AMObj STAT_EstimateVariableOrderMarkov(const Markovian_sequences *seq , c
 
   case AMObjType::STRING : {
     char type = 'v';
-    bool algorithm_option = false , global_sample_option = false , global_sample = true ,
-         min_order_option = false , max_order_option = false , order_estimation = true ,
-         threshold_option = false;
-    int algorithm = LOCAL_BIC , min_order = 0 , max_order = ORDER;
+    bool algorithm_option = false , estimator_option = false , global_sample_option = false ,
+         global_sample = true , min_order_option = false , max_order_option = false ,
+         order_estimation = true , threshold_option = false;
+    int algorithm = LOCAL_BIC , estimator = LAPLACE , min_order = 0 , max_order = ORDER;
     double threshold = LOCAL_BIC_THRESHOLD;
 
 
     CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
                 (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
                 (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
-                (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ,
+                (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ||
+                (args.length() == nb_required + 16) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
     // argument obligatoire
@@ -2663,7 +2664,13 @@ static AMObj STAT_EstimateVariableOrderMarkov(const Markovian_sequences *seq , c
             }
             else {
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
-              if (*pstr == "LocalBIC") {
+              if (*pstr == "BIC") {
+                algorithm = CTM_BIC;
+              }
+              else if (*pstr == "KT") {
+                algorithm = CTM_KT;
+              }
+              else if (*pstr == "LocalBIC") {
                 algorithm = LOCAL_BIC;
               }
               else if (*pstr == "Context") {
@@ -2672,7 +2679,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const Markovian_sequences *seq , c
               else {
                 status = false;
                 genAMLError(ERRORMSG(ALGORITHM_NAME_sds) , "Estimate" ,
-                            nb_required + i + 1 , "LocalBIC or Context");
+                            nb_required + i + 1 , "BIC or LocalBIC");
               }
             }
             break;
@@ -2699,6 +2706,51 @@ static AMObj STAT_EstimateVariableOrderMarkov(const Markovian_sequences *seq , c
             }
             else {
               counting_flag = args[nb_required + i * 2 + 1].val.b;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "Estimator") {
+          switch (estimator_option) {
+
+          case false : {
+            estimator_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+            }
+            else {
+              pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+              if (*pstr == "MaximumLikelihood") {
+                estimator = MAXIMUM_LIKELIHOOD;
+              }
+              else if (*pstr == "Laplace") {
+                estimator = LAPLACE;
+              }
+              else if (*pstr == "AdaptativeLaplace") {
+                estimator = ADAPTATIVE_LAPLACE;
+              }
+              else if (*pstr == "UniformSubset") {
+                estimator = UNIFORM_SUBSET;
+              }
+              else if (*pstr == "UniformCardinality") {
+                estimator = UNIFORM_CARDINALITY;
+              }
+              else {
+                status = false;
+                genAMLError(ERRORMSG(ESTIMATOR_NAME_sds) , "Estimate" ,
+                            nb_required + i + 1 , "MaximumLikelihood or Laplace or AdaptativeLaplace or UniformSubset or UniformCardinality");
+              }
             }
             break;
           }
@@ -2848,30 +2900,51 @@ static AMObj STAT_EstimateVariableOrderMarkov(const Markovian_sequences *seq , c
         else {
           status = false;
           genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Estimate" , nb_required + i + 1 ,
-                      "Algorithm or Counting or GlobalInitialTransition or GlobalSample or MinOrder or MaxOrder or Order or Threshold");
+                      "Algorithm or Counting or Estimator or GlobalInitialTransition or MinOrder or MaxOrder or Order or Threshold");
         }
       }
     }
 
-    if ((algorithm == CONTEXT) && (!threshold_option)) {
-      threshold = CONTEXT_THRESHOLD;
+    if ((algorithm != LOCAL_BIC) && (!threshold_option)) {
+      switch (algorithm) {
+      case CTM_BIC :
+        threshold = CTM_BIC_THRESHOLD;
+        break;
+      case CTM_KT :
+        threshold = CTM_KT_THRESHOLD;
+        break;
+      case CONTEXT :
+        threshold = CONTEXT_THRESHOLD;
+        break;
+      }
     }
 
-    if ((!order_estimation) && (algorithm_option)) {
+    if ((algorithm == CTM_KT) && (estimator_option)) {
       status = false;
-      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Algorithm");
+      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Estimator");
     }
-    if ((!order_estimation) && (global_sample_option)) {
-      status = false;
-      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "GlobalSample");
-    }
-    if ((!order_estimation) && (min_order_option)) {
-      status = false;
-      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MinOrder");
-    }
-    if ((!order_estimation) && (threshold_option)) {
-      status = false;
-      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Threshold");
+
+    if (!order_estimation) {
+      if (algorithm_option) {
+        status = false;
+        genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Algorithm");
+      }
+      if (estimator_option) {
+        status = false;
+        genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Estimator");
+      }
+      if (global_sample_option) {
+        status = false;
+        genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "GlobalSample");
+      }
+      if (min_order_option) {
+        status = false;
+        genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MinOrder");
+      }
+      if (threshold_option) {
+        status = false;
+        genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Threshold");
+      }
     }
 
     if ((type == 'e') && (global_initial_transition_option)) {
@@ -2891,8 +2964,8 @@ static AMObj STAT_EstimateVariableOrderMarkov(const Markovian_sequences *seq , c
     case true :
       markov = seq->variable_order_markov_estimation(error , AMLOUTPUT , type , min_order ,
                                                      max_order , algorithm , threshold ,
-                                                     global_sample , global_initial_transition ,
-                                                     counting_flag);
+                                                     estimator , global_initial_transition ,
+                                                     global_sample , counting_flag);
       break;
     }
     break;
