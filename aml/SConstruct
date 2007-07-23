@@ -18,7 +18,7 @@ options = Options(['../options.py', 'options.py'], ARGUMENTS)
 # Dependencies
 wrapper_tools = ['python', 'alea']
 plantgl_tools = ['qt4']
-cpp_tools = ['alea','flex']
+cpp_tools = ['alea','flex','install']
 
 wrapper_conf= ALEAConfig(name, wrapper_tools)
 cpp_conf = ALEAConfig(name, cpp_tools + plantgl_tools)
@@ -42,14 +42,13 @@ prefix = opt_env['build_prefix']
 BuildDir(prefix, '.')
 
 
-cpp_env = ALEAEnvironment(cpp_conf, 'options.py', ARGUMENTS)
+cpp_env = ALEAEnvironment(cpp_conf, options=options)
 cpp_env.Append(CPPPATH='$build_includedir')
 cpp_env.AppendUnique(CPPPATH=[pj(cpp_env['openalea_includes'],'aml')])
 
 
-wrapper_env = ALEAEnvironment(wrapper_conf, 'options.py', ARGUMENTS)
+wrapper_env = ALEAEnvironment(wrapper_conf, options=options)
 wrapper_env.Append(CPPPATH='$build_includedir/aml')
-#wrapper_env.AppendUnique(CPPPATH=[pj(cpp_env['openalea_includes'],'amlobj')])
 wrapper_env.AppendUnique(CPPPATH=[pj(cpp_env['openalea_includes'],'aml')])
 
 # Build stage
