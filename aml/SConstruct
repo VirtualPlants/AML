@@ -20,7 +20,7 @@ wrapper_tools = ['python', 'alea']
 plantgl_tools = ['qt4']
 cpp_tools = ['alea','flex','install']
 
-wrapper_conf= ALEAConfig(name, wrapper_tools)
+wrapper_conf= ALEAConfig(name, wrapper_tools+plantgl_tools)
 cpp_conf = ALEAConfig(name, cpp_tools + plantgl_tools)
 opt_conf = ALEAConfig(name, wrapper_tools + cpp_tools + plantgl_tools)
 
