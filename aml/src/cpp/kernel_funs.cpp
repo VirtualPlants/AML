@@ -49,30 +49,30 @@
 //#include <rw/tvsrtvec.h>
 //#include <rw/locale.h>
 
-#include "erroraml.h"
-#include "parseraml.h"
-#include "fnode.h"
+#include "aml/erroraml.h"
+#include "aml/parseraml.h"
+#include "aml/fnode.h"
 
 #include "mtg/utils.h"
-#include "date.h"
+#include "aml/date.h"
 
 #include "tool/dirnames.h"
 
-#include "gnuplot.h"
+#include "aml/gnuplot.h"
 
-#include "set.h"
-#include "array.h"
-#include "list.h"
+#include "aml/set.h"
+#include "aml/array.h"
+#include "aml/list.h"
 
-#include "kernel_funs.h"
-#include "kernel_err.h"
-#include "global.h"
+#include "aml/kernel_funs.h"
+#include "aml/kernel_err.h"
+#include "aml/global.h"
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "sequence_analysis/sequences.h"
-#include "stat_module.h"
+#include "aml/stat_module.h"
 
 #define  ERR_MSG_ARRAY          kernel_err_msgs_aml
 #define  MODULE_NAME            "Kernel"

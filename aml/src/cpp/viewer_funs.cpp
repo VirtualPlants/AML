@@ -35,18 +35,18 @@
  */
 
 
-#include "viewer_funs.h"
+#include "aml/viewer_funs.h"
 
-#include "erroraml.h"
-#include "parseraml.h"
-#include "fnode.h"
-#include "kernel_err.h"
-#include "kernel_funs.h"
-#include "global.h"
+#include "aml/erroraml.h"
+#include "aml/parseraml.h"
+#include "aml/fnode.h"
+#include "aml/kernel_err.h"
+#include "aml/kernel_funs.h"
+#include "aml/global.h"
 
-#include "set.h"
-#include "array.h"
-#include "list.h"
+#include "aml/set.h"
+#include "aml/array.h"
+#include "aml/list.h"
 
 #include "plantgl/gui/viewer/pglapplication.h"
 

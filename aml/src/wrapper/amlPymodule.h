@@ -34,9 +34,9 @@
 #else
 #include <Python.h>
 #endif
-#include "list.h"
-#include "array.h"
-#include "set.h"
+#include "aml/list.h"
+#include "aml/array.h"
+#include "aml/set.h"
 
 /*********************************************************************************/
 /************************************* AMObject **********************************/

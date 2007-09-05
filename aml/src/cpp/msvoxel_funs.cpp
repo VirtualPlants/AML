@@ -34,13 +34,13 @@
  *  ----------------------------------------------------------------------------
  */
 
-#include "parseraml.h"
-#include "fnode.h"
-#include "array.h"
+#include "aml/parseraml.h"
+#include "aml/fnode.h"
+#include "aml/array.h"
 
-#include "kernel_funs.h"
-#include "kernel_err.h"
-#include "msvoxel_funs.h"
+#include "aml/kernel_funs.h"
+#include "aml/kernel_err.h"
+#include "aml/msvoxel_funs.h"
 
 #include "msvoxel/mvs_msvoxel.h"
 #include "plantgl/algo/grid/octree.h"
@@ -49,7 +49,7 @@
 
 #include "mtg/linetree.h"
 
-#include "geomscene_funs.h"
+#include "aml/geomscene_funs.h"
 
 TOOLS_USING_NAMESPACE
 using namespace std;

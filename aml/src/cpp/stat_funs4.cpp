@@ -57,12 +57,12 @@
 #include "sequence_analysis/hidden_semi_markov.h"
 #include "sequence_analysis/tops.h"
 
-#include "ammodel.h"
-#include "parseraml.h"
-#include "kernel_err.h"
-#include "amstring.h"
+#include "aml/ammodel.h"
+#include "aml/parseraml.h"
+#include "aml/kernel_err.h"
+#include "aml/amstring.h"
 
-#include "stat_module.h"
+#include "aml/stat_module.h"
 
 
 #define ERR_MSG_ARRAY STAT_err_msgs_aml

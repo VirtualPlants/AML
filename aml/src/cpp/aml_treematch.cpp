@@ -40,10 +40,8 @@
 
 
 
+#include "aml/aml_treematch.h"
 
-
-
-#include "aml_treematch.h"
 #define  ERR_MSG_ARRAY mtg_err_msgs_aml
 #define  MODULE_NAME   "Tree Matching"
 AMObj AML_TreeMatch::save(const AMObjVector& args) const

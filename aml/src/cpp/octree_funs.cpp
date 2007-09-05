@@ -34,13 +34,13 @@
  *  ----------------------------------------------------------------------------
  */
 
-#include "parseraml.h"
-#include "fnode.h"
-#include "array.h"
+#include "aml/parseraml.h"
+#include "aml/fnode.h"
+#include "aml/array.h"
 
-#include "kernel_funs.h"
-#include "kernel_err.h"
-#include "octree_funs.h"
+#include "aml/kernel_funs.h"
+#include "aml/kernel_err.h"
+#include "aml/octree_funs.h"
 
 #include "MSVoxel/mvs_octree.h"
 #include "GEOM/view_application.h"

@@ -42,7 +42,7 @@
 #ifndef FLUX_FUNS_HEADER
 #define FLUX_FUNS_HEADER
 
-#include "amobj.h"
+#include "aml/amobj.h"
 
 extern void installFLUXModule();
 

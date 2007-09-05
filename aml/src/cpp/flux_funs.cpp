@@ -43,14 +43,14 @@
 #include "tool/rw_hset.h"
 //#include <rw/tvsrtvec.h>
 
-#include "fnode.h"
-#include "array.h"
+#include "aml/fnode.h"
+#include "aml/array.h"
 
-#include "parseraml.h"
-#include "mtg_funs.h"
-#include "kernel_err.h"
-#include "kernel_funs.h"
-#include "flux_funs.h"
+#include "aml/parseraml.h"
+#include "aml/mtg_funs.h"
+#include "aml/kernel_err.h"
+#include "aml/kernel_funs.h"
+#include "aml/flux_funs.h"
 #include "flux/electrical_model.h"
 
 

@@ -42,18 +42,18 @@
 
 #include "file_funs.h"
 
-#include "erroraml.h"
-#include "parseraml.h"
-#include "fnode.h"
-#include "kernel_err.h"
-#include "kernel_funs.h"
-#include "global.h"
+#include "aml/erroraml.h"
+#include "aml/parseraml.h"
+#include "aml/fnode.h"
+#include "aml/kernel_err.h"
+#include "aml/kernel_funs.h"
+#include "aml/global.h"
 
-#include "set.h"
-#include "array.h"
-#include "list.h"
+#include "aml/set.h"
+#include "aml/array.h"
+#include "aml/list.h"
 
-#include "file_funs2.h"
+#include "aml/file_funs2.h"
 
 #define  ERR_MSG_ARRAY  	kernel_err_msgs_aml
 #define  MODULE_NAME		"File"        

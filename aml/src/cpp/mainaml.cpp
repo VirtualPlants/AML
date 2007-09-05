@@ -49,24 +49,24 @@
 #include <signal.h>
 #include <setjmp.h>
 
-#include "date.h"
+#include "aml/date.h"
 #include "tool/util_enviro.h"
 #include "tool/dirnames.h"
 
 #ifdef _WIN32
-#include "guicon.h"
+#include "aml/guicon.h"
 #endif
 
-#include "readline.h"
-#include "fnode.h"
-#include "amobj.h"
-#include "parseraml.h"
-#include "global.h"
-#include "gnuplot_pipe.h"
+#include "aml/readline.h"
+#include "aml/fnode.h"
+#include "aml/amobj.h"
+#include "aml/parseraml.h"
+#include "aml/global.h"
+#include "aml/gnuplot_pipe.h"
 
-#include "install.h"
+#include "aml/install.h"
 
-#include "release.h"
+#include "aml/release.h"
 
 TOOLS_USING_NAMESPACE
 using namespace std;

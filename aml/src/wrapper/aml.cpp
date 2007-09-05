@@ -34,10 +34,10 @@
 #include "aml.h"
 
 // required for installAMLModules()
-#include "install.h"
-#include "global.h"
-#include "amobjtable.h"
-#include "parseraml.h"
+#include "aml/install.h"
+#include "aml/global.h"
+#include "aml/amobjtable.h"
+#include "aml/parseraml.h"
 
 
 using namespace std;

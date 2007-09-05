@@ -28,8 +28,8 @@
 
 
 #include <Python.h>
-#include "amobj.h"
-#include "fnode.h"
+#include "aml/amobj.h"
+#include "aml/fnode.h"
 
 
 class PyFNode : public FNode

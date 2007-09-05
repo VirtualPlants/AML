@@ -40,7 +40,7 @@
 #ifndef MTG_FUNS_HEADER
 #define MTG_FUNS_HEADER
 
-#include "amobj.h"
+#include "aml/amobj.h"
 
 
 class MTG;

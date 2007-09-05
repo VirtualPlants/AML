@@ -50,14 +50,14 @@
 
 #include "mtg/mtg.h"
 
-#include "ammodel.h"
-#include "parseraml.h"
-#include "fnode.h"
-#include "erroraml.h"
-#include "array.h"
-#include "kernel_funs.h"
-#include "kernel_err.h"
-#include "amobj.h"
+#include "aml/ammodel.h"
+#include "aml/parseraml.h"
+#include "aml/fnode.h"
+#include "aml/erroraml.h"
+#include "aml/array.h"
+#include "aml/kernel_funs.h"
+#include "aml/kernel_err.h"
+#include "aml/amobj.h"
 //#include "STAT/vectors.h"
 
 #include "tree_matching/definitions.h"

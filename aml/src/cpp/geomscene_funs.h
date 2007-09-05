@@ -41,9 +41,9 @@
 #define GEOMSCENE_FUNS_HEADER
 
 
-#include "parseraml.h"
-#include "fnode.h"
-#include "array.h"
+#include "aml/parseraml.h"
+#include "aml/fnode.h"
+#include "aml/array.h"
 
 #include "plantgl/scenegraph/scene/scene.h"
 

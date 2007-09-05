@@ -40,16 +40,16 @@
 #include <fstream>
 
 
-#include "parseraml.h"
-#include "fnode.h"
+#include "aml/parseraml.h"
+#include "aml/fnode.h"
 
-#include "set.h"
-#include "array.h"
-#include "list.h"
+#include "aml/set.h"
+#include "aml/array.h"
+#include "aml/list.h"
 
-#include "kernel_funs.h"
-#include "kernel_err.h"
-#include "mtg_funs.h"
+#include "aml/kernel_funs.h"
+#include "aml/kernel_err.h"
+#include "aml/mtg_funs.h"
 
 #include "mtg/plantframe.h"
 #include "mtg/virtualelements.h"
@@ -70,10 +70,10 @@
 #include "tool/gparser.h"
 
 #include "tree_matching/treematch.h"
-#include "aml_treematch.h"
+#include "aml/aml_treematch.h"
 
 #include "stat_tool/distance_matrix.h"
-#include "stat_module.h"
+#include "aml/stat_module.h"
 
 #ifndef SYSTEM_IS__IRIX
 #include "plantgl/gui/viewer/pglapplication.h"

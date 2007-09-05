@@ -34,10 +34,10 @@
  *  ----------------------------------------------------------------------------
  */
 
-#include "geomscene_funs.h"
+#include "aml/geomscene_funs.h"
 
-#include "kernel_funs.h"
-#include "kernel_err.h"
+#include "aml/kernel_funs.h"
+#include "aml/kernel_err.h"
 
 
 #include "plantgl/gui/viewer/pglapplication.h"

@@ -36,18 +36,18 @@
 
 
 
-#include "file_funs.h"
+#include "aml/file_funs.h"
 
-#include "erroraml.h"
-#include "parseraml.h"
-#include "fnode.h"
-#include "kernel_err.h"
-#include "kernel_funs.h"
-#include "global.h"
+#include "aml/erroraml.h"
+#include "aml/parseraml.h"
+#include "aml/fnode.h"
+#include "aml/kernel_err.h"
+#include "aml/kernel_funs.h"
+#include "aml/global.h"
 
-#include "set.h"
-#include "array.h"
-#include "list.h"
+#include "aml/set.h"
+#include "aml/array.h"
+#include "aml/list.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -77,8 +77,8 @@
 #endif
 
 
-#include "../tool/dirnames.h"
-#include "../tool/util_enviro.h"
+#include "tool/dirnames.h"
+#include "tool/util_enviro.h"
 #include "plantgl/gui/viewer/pglapplication.h"
 
 TOOLS_USING_NAMESPACE
