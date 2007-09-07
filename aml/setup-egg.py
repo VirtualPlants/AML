@@ -48,6 +48,7 @@ if __name__ == '__main__':
           package_dir={namespace+".aml" : "src/aml",
                        namespace+".aml.amldoc" : "src/aml/amldoc",
                        "amlPy" : "src/amlPy"},
+          package_data = {'' : ['*.pyd'],},
 
       
           # Add package platform libraries if any
