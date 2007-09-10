@@ -48,10 +48,11 @@ if __name__ == '__main__':
           package_dir={namespace+".aml" : "src/aml",
                        namespace+".aml.amldoc" : "src/aml/amldoc",
                        "amlPy" : "src/amlPy"},
-          package_data = {'' : ['*.pyd'],},
+          package_data = {'' : ['*.pyd', '*.so'],},
 
       
           # Add package platform libraries if any
+          package_data = {'' : ['*.pyd', '*.so'],},
           include_package_data=True,
           zip_safe = False,
 
