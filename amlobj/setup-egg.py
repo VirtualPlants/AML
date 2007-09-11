@@ -23,7 +23,7 @@ else:
 if __name__ == '__main__':
     
     setup(name='VPlants.AmlObj',
-          version='0.1',
+          version='0.1.1',
           author='',
           author_email='',
           description='aml objects',
@@ -35,10 +35,6 @@ if __name__ == '__main__':
           # Scons parameters  
           scons_parameters=scons_parameters,
         
-          # Packages
-          #packages=
-          #package_dir=
-      
           # Add package platform libraries if any
           include_package_data=True,
           zip_safe = False,

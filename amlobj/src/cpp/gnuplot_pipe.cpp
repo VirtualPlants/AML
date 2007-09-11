@@ -175,6 +175,7 @@ int GnuplotWindow::open(ostream &os)
   
   if( fWrite == NULL )
     {
+#if AMAPMOD
       std::string command =  getAMAPmodDir() + "\\Gnuplot\\bin\\pgnuplot.exe";
       if(!exists(command)){
 	status = FALSE;
@@ -198,6 +199,25 @@ int GnuplotWindow::open(ostream &os)
 	  close(os);
 	}
       }
+#else
+      std::string command =  "pgnuplot.exe";
+      fWrite =  popen(command.c_str(),"wt");
+      if( fWrite == NULL )
+        {
+          status = FALSE;
+          cerr << "Command : '" << command << '\'' << endl;
+          system_error(os , "*** Error on command popen");
+          close(os);
+        }
+      else if( ferror(fWrite) )
+        {
+          fWrite = NULL;
+          status = FALSE;
+          cerr << "Command : '" << command << '\'' << endl;
+          system_error(os , "*** Ferror on command popen");
+          close(os);
+        }
+#endif //AMAPMOD
     }
   
 #else
