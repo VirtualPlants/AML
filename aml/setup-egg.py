@@ -12,8 +12,8 @@ scons_parameters=["build_prefix="+build_prefix]
 
 # platform dependencies
 if("win" in sys.platform):
-    install_requires = ["boostpython"]
-    setup_requires = install_requires + []
+    install_requires = ["boostpython","gnuplot"]
+    setup_requires = install_requires 
 else:
     install_requires = []
     setup_requires = []
@@ -23,12 +23,10 @@ common_deps = ['vplants.amlobj', 'vplants.sequence_analysis',
          'vplants.tree_matching', 'vplants.flux', 'vplants.msvoxel',
          ]
 
-
-
 if __name__ == '__main__':
     
     setup(name='VPlants.Aml',
-          version='2.0.0',
+          version='2.0.1',
           author='C. Godin, Y. Guedon, C.Pradal',
           description='aml and amlPy libraries',
           url='',
@@ -48,11 +46,9 @@ if __name__ == '__main__':
           package_dir={namespace+".aml" : "src/aml",
                        namespace+".aml.amldoc" : "src/aml/amldoc",
                        "amlPy" : "src/amlPy"},
-          package_data = {'' : ['*.pyd', '*.so'],},
-
       
           # Add package platform libraries if any
-          package_data = {'' : ['*.pyd', '*.so'],},
+          package_data = {namespace+".aml" : ['*.pyd', '*.so'],},
           include_package_data=True,
           zip_safe = False,
 
