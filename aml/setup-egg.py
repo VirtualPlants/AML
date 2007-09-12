@@ -42,9 +42,10 @@ if __name__ == '__main__':
           namespace_packages = [namespace],
           create_namespaces = True,
 
-          packages=[namespace+".aml", namespace+".aml.amldoc", "amlPy"],
+          packages=[namespace+".aml", namespace+".aml.amldoc",namespace+".aml.wralea", "amlPy"],
           package_dir={namespace+".aml" : "src/aml",
                        namespace+".aml.amldoc" : "src/aml/amldoc",
+                       namespace+".aml.wralea" : "src/aml/wralea",
                        "amlPy" : "src/amlPy"},
       
           # Add package platform libraries if any
