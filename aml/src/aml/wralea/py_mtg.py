@@ -65,7 +65,7 @@ Ouput : MTG object if the parsing process succeeds.
         from amlPy import MTG as mtg
 
         # We prefer here to get the value by key
-        fn = self.get_input_by_key("filename")
+        fn = self.get_input("filename")
         if fn:
             return (mtg(fn),)
         else:
@@ -103,7 +103,7 @@ Output:
         from amlPy import Active, Activate
 
         # We prefer here to get the value by key
-        g= self.get_input_by_key("MTG")
+        g= self.get_input("MTG")
         if not g:
             g= Active()
         else:
@@ -112,7 +112,7 @@ Output:
         if not g:
             return ([],)
         
-        scale = self.get_input_by_key("Scale")
+        scale = self.get_input("Scale")
 
         max_scale= max_mtg_scale(g)
 
@@ -153,7 +153,7 @@ Output:
         self.add_output( name = "VtxFunction", interface = None)
 
     def __call__(self, inputs):
-        func_name= self.get_input_by_key("Name")
+        func_name= self.get_input("Name")
         return (self.vtx_func.get(func_name,None),)
 
 #//////////////////////////////////////////////////////////////////////////////
@@ -193,7 +193,7 @@ Output:
         self.add_output( name = "f", interface = None)
 
     def __call__(self, inputs):
-        func_name= self.get_input_by_key("name")
+        func_name= self.get_input("name")
         return (self.vtx_func.get(func_name,None),)
 
 #//////////////////////////////////////////////////////////////////////////////
@@ -218,7 +218,7 @@ class Complex(UnaryVtxFunc):
         self.add_input(name= "Scale", interface= IInt, value= 1 )
 
     def __call__(self, inputs):
-        scale= self.get_input_by_key("Scale")
+        scale= self.get_input("Scale")
         g= lambda x: self.f(x,Scale= scale)
         return (g,)
 
@@ -231,7 +231,7 @@ class Components(UnaryVtxFunc):
         self.add_input(name= "Scale", interface= IInt, value= 1 )
 
     def __call__(self, inputs):
-        scale= self.get_input_by_key("Scale")
+        scale= self.get_input("Scale")
         g= lambda x: self.f(x,Scale= scale)
         return (g,)
 
@@ -253,7 +253,7 @@ Input:
         self.add_input( name = "obj", interface = None, value = []) 
 
     def __call__(self, inputs):
-        obj= self.get_input_by_key("obj")
+        obj= self.get_input("obj")
         if obj:
           amlPy.Plot(obj)
 

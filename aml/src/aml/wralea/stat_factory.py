@@ -41,7 +41,7 @@ def define_factory(package):
                   category = "STAT", 
                   nodemodule = "py_stat",
                   nodeclass = "py_compound_ascii",
-                  inputs=tuple(dict(name='filename',interface=IFileStr)),
+                  inputs=(dict(name='filename',interface=IFileStr),),
                   )
     package.add_factory( nf )
 
@@ -58,7 +58,7 @@ def define_factory(package):
                   category = "STAT", 
                   nodemodule = "py_stat",
                   nodeclass = "py_convolution_ascii",
-                  inputs=tuple(dict(name='filename',interface=IFileStr)),
+                  inputs=(dict(name='filename',interface=IFileStr),),
                   )
     package.add_factory( nf )
 
@@ -67,7 +67,7 @@ def define_factory(package):
                   category = "STAT", 
                   nodemodule = "py_stat",
                   nodeclass = "py_distribution_ascii",
-                  inputs=tuple(dict(name='filename',interface=IFileStr)),
+                  inputs=(dict(name='filename',interface=IFileStr),),
                   )
     package.add_factory( nf )
 
@@ -139,7 +139,7 @@ def define_factory(package):
                   category = "STAT", 
                   nodemodule = "py_stat",
                   nodeclass = "py_mixture",
-                  inputs=tuple(dict(name='filename', interface=IFileStr)),
+                  inputs=(dict(name='filename', interface=IFileStr),),
                   )
     package.add_factory( nf )
     # TODO Mixture with a set of dist and proba
@@ -236,8 +236,7 @@ def define_factory(package):
                   category = "STAT", 
                   nodemodule = "py_stat",
                   nodeclass = "py_histogram",
-                  inputs=tuple(dict(name='sequence',interface=ISequence,value=[])),
-                  outputs=tuple(dict(name='histogram')),
+                  inputs=(dict(name='sequence',interface=ISequence,value=[]),),
                   )
     package.add_factory( nf )
     nf = Factory( name= "Histogram_from_file", 
@@ -245,8 +244,7 @@ def define_factory(package):
                   category = "STAT", 
                   nodemodule = "py_stat",
                   nodeclass = "py_histogram_ascii",
-                  inputs=tuple(dict(name='filename',interface=IFileStr)),
-                  outputs=tuple(dict(name='histogram')),
+                  inputs=(dict(name='filename',interface=IFileStr),),
                   )
     package.add_factory( nf )
 

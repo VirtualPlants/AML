@@ -113,28 +113,28 @@ class PyRenewal(Node):
     def __init__(self):
         Node.__init__(self)
         self.Types=["Equilibriun","Ordinary"]
-        self.add_input(name="inter_event")
-        self.add_input(name="Type", interface = IEnumStr(self.Types), value = self.Types[0]) 
-        self.add_input(name="ObservationTime", interface=IInt, value=20)
+        self.add_input(dict(name="inter_event"))
+        self.add_input(dict(name="Type", interface = IEnumStr(self.Types), value = self.Types[0]))
+        self.add_input(dict(name="ObservationTime", interface=IInt, value=20))
 
     def __call__(self, inputs):
-        inter_event= self.get_input_by_key("inter_event")
-        Type=self.get_input_by_key("Type")
-        obs_time=self.get_input_by_key("ObservationTime")
+        inter_event= self.get_input("inter_event")
+        Type=self.get_input("Type")
+        obs_time=self.get_input("ObservationTime")
         return (Renewal(inter_event,Type,obs_time),)
 
 class PyRenewalAscii(Node):
     def __init__(self):
         Node.__init__(self)
         self.Types=["Equilibriun","Ordinary"]
-        self.add_input(name="filename", interface=IFileStr)
-        self.add_input(name="Type", interface = IEnumStr(self.Types), value = self.Types[0]) 
-        self.add_input(name="ObservationTime", interface=IInt, value=20)
+        self.add_input(dict(name="filename", interface=IFileStr))
+        self.add_input(dict(name="Type", interface = IEnumStr(self.Types), value = self.Types[0]))
+        self.add_input(dict(name="ObservationTime", interface=IInt, value=20))
 
     def __call__(self, inputs):
-        filename= self.get_input_by_key("filename")
-        Type=self.get_input_by_key("Type")
-        obs_time=self.get_input_by_key("ObservationTime")
+        filename= self.get_input("filename")
+        Type=self.get_input("Type")
+        obs_time=self.get_input("ObservationTime")
         if filename:
             return (Renewal(filename,Type,obs_time),)
 
@@ -156,7 +156,7 @@ def py_histogram( seq = [] ):
         Histogram model
     """
     
-    if hasattr(seq,'__iter__'):
+    if hasattr(seq,'__iter__') and (len(seq)>0):
         return (Histogram(seq),)
 
 def py_histogram_ascii(filename):
