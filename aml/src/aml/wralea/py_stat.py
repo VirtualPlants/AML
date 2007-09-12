@@ -49,9 +49,9 @@ def py_convolution_ascii( filename ):
 
 #//////////////////////////////////////////////////////////////////////////////
 
-def py_convolution( dist ):
-    if dist:
-        return (Convolution(dist),)
+def py_convolution( list_of_dist ):
+    if hasattr(list_of_dist,'__iter__'):
+        return (Convolution(list_of_dist),)
 
 #//////////////////////////////////////////////////////////////////////////////
 
@@ -81,6 +81,72 @@ def py_dist_uniform( inf_bound= 2, sup_bound = 5 ):
 
 #//////////////////////////////////////////////////////////////////////////////
 
+def py_hiddenmarkov( filename, length=20 ):
+
+    if filename and filename != '':
+        return (HiddenMarkov(filename,length),)
+
+#//////////////////////////////////////////////////////////////////////////////
+
+def py_hiddensemimarkov( filename, length=20, counting=True ):
+
+    if filename and filename != '':
+        return (HiddenSemiMarkov(filename,length,counting),)
+
+#//////////////////////////////////////////////////////////////////////////////
+
+def py_markov( filename, length=20 ):
+
+    if filename and filename != '':
+        return (Markov(filename,length),)
+
+#//////////////////////////////////////////////////////////////////////////////
+
+def py_mixture( filename ):
+
+    if filename and filename != '':
+        return (Mxture(filename),)
+
+#//////////////////////////////////////////////////////////////////////////////
+
+class PyRenewal(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.Types=["Equilibriun","Ordinary"]
+        self.add_input(name="inter_event")
+        self.add_input(name="Type", interface = IEnumStr(self.Types), value = self.Types[0]) 
+        self.add_input(name="ObservationTime", interface=IInt, value=20)
+
+    def __call__(self, inputs):
+        inter_event= self.get_input_by_key("inter_event")
+        Type=self.get_input_by_key("Type")
+        obs_time=self.get_input_by_key("ObservationTime")
+        return (Renewal(inter_event,Type,obs_time),)
+
+class PyRenewalAscii(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.Types=["Equilibriun","Ordinary"]
+        self.add_input(name="filename", interface=IFileStr)
+        self.add_input(name="Type", interface = IEnumStr(self.Types), value = self.Types[0]) 
+        self.add_input(name="ObservationTime", interface=IInt, value=20)
+
+    def __call__(self, inputs):
+        filename= self.get_input_by_key("filename")
+        Type=self.get_input_by_key("Type")
+        obs_time=self.get_input_by_key("ObservationTime")
+        if filename:
+            return (Renewal(filename,Type,obs_time),)
+
+#//////////////////////////////////////////////////////////////////////////////
+
+def py_semimarkov( filename, length=20, counting=True ):
+
+    if filename and filename != '':
+        return (SemiMarkov(filename,length,counting),)
+
+#//////////////////////////////////////////////////////////////////////////////
+
 def py_histogram( seq = [] ):
     """\
     Histogram([int]) -> Histogram
@@ -90,9 +156,13 @@ def py_histogram( seq = [] ):
         Histogram model
     """
     
-    seq= self.get_input_by_key("sequence")
-    if seq:
+    if hasattr(seq,'__iter__'):
         return (Histogram(seq),)
+
+def py_histogram_ascii(filename):
+    
+    if filename and filename != '':
+        return (Histogram(filename),)
 
 #//////////////////////////////////////////////////////////////////////////////
 
