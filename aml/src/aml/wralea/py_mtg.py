@@ -99,8 +99,8 @@ Output:
     def __call__(self, inputs):
         """ inputs is the list of input values """
 
-        from amlPy import VtxList as vertices
-        from amlPy import Active, Activate
+        from openalea.aml import VtxList as vertices
+        from openalea.aml import Active, Activate
 
         # We prefer here to get the value by key
         g= self.get_input("MTG")
@@ -256,6 +256,43 @@ Input:
         obj= self.get_input("obj")
         if obj:
           amlPy.Plot(obj)
+
+#//////////////////////////////////////////////////////////////////////////////
+
+class PlantFrame( Node ):
+    """\
+Plot(aml object) -> Plot the object
+Input:
+  aml object
+  
+    """
+    
+    def __init__(self):
+    
+        Node.__init__(self)
+
+        self.add_input( name = "MTG", interface = None) 
+        self.add_input( name = "Vertex", interface = IInt, value= 0)
+        self.add_input( name = "Scale", interface = IInt, value= 0)
+        self.add_output(name = "plantframe")
+
+    def __call__(self, inputs):
+        g= self.get_input("MTG")
+        vtx= self.get_input("Vertex")
+        scale= self.get_input("Scale")
+        if not g:
+            g= amlPy.Active()
+        else:
+            amlPy.Activate(g)
+
+        if not g:
+            return (None,)
+        
+        max_scale= max_mtg_scale(g)
+        if scale > max_scale:
+            scale = max_scale
+
+        return amlPy.PlantFrame(vtx,Scale=scale)
 
 
 

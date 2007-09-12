@@ -78,5 +78,13 @@ def define_factory(package):
                   nodemodule = "py_mtg",
                   nodeclass = "Plot",
                   )
-
     package.add_factory( nf )
+
+    nf = Factory( name= "PlantFrame", 
+                  description= "Constructs a geometric interpretation of a MTG.", 
+                  category = "MTG", 
+                  nodemodule = "py_mtg",
+                  nodeclass = "PlantFrame",
+                  )
+    package.add_factory( nf )
+
