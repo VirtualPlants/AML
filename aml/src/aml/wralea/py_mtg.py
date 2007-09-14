@@ -119,7 +119,7 @@ Output:
         vtxs= []
         if scale == 0:
             vtxs= vertices()
-        elif scale < max_scale:
+        elif scale <= max_scale:
             vtxs= vertices(Scale=scale)
         
         return (vtxs,)
@@ -215,12 +215,17 @@ class Complex(UnaryVtxFunc):
 
     def __init__(self):
         UnaryVtxFunc.__init__(self,amlPy.Complex)
-        self.add_input(name= "Scale", interface= IInt, value= 1 )
+        self.add_input(name= "Vtx", interface= IInt )
+        self.add_input(name= "Scale", interface= IInt, value= 0 )
 
     def __call__(self, inputs):
+        vtx = self.get_input("Vtx")
         scale= self.get_input("Scale")
-        g= lambda x: self.f(x,Scale= scale)
-        return (g,)
+        if vtx:
+            return (self.f(vtx,Scale=scale),)
+        else:
+            g= lambda x: self.f(x,Scale= scale)
+            return (g,)
 
 
 
@@ -228,12 +233,17 @@ class Components(UnaryVtxFunc):
 
     def __init__(self):
         UnaryVtxFunc.__init__(self,amlPy.Components)
-        self.add_input(name= "Scale", interface= IInt, value= 1 )
+        self.add_input(name= "Vtx", interface= IInt )
+        self.add_input(name= "Scale", interface= IInt, value= 0 )
 
     def __call__(self, inputs):
+        vtx = self.get_input("Vtx")
         scale= self.get_input("Scale")
-        g= lambda x: self.f(x,Scale= scale)
-        return (g,)
+        if vtx:
+            return (self.f(vtx,Scale=scale),)
+        else:
+            g= lambda x: self.f(x,Scale= scale)
+            return (g,)
 
 
 #//////////////////////////////////////////////////////////////////////////////

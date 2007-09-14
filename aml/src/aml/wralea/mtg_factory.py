@@ -54,6 +54,15 @@ def define_factory(package):
 
     package.add_factory( nf )
 
+    nf = Factory( name= "TopoFunction", 
+                  description= "Common function on  MTG", 
+                  category = "MTG", 
+                  nodemodule = "py_mtg",
+                  nodeclass = "TopoFunction",
+                  )
+
+    package.add_factory( nf )
+
     nf = Factory( name= "Complex", 
                   description= "Complex of a vertex.", 
                   category = "MTG", 
