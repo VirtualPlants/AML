@@ -36,12 +36,11 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
-    nf = Factory( name= "Compound_from_file", 
-                  description= "Construction of an object of type compound from an ASCII file.", 
+    nf = Factory( name= "Load_from_file", 
+                  description= "Construction of a statistical object from an ASCII file.", 
                   category = "STAT", 
                   nodemodule = "py_stat",
-                  nodeclass = "py_compound_ascii",
-                  inputs=(dict(name='filename',interface=IFileStr),),
+                  nodeclass = "PyObjectFromFile",
                   )
     package.add_factory( nf )
 
@@ -53,25 +52,8 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
-    nf = Factory( name= "Convolution_from_file", 
-                  description= "Construction of an object of type convolution from an ASCII file.", 
-                  category = "STAT", 
-                  nodemodule = "py_stat",
-                  nodeclass = "py_convolution_ascii",
-                  inputs=(dict(name='filename',interface=IFileStr),),
-                  )
-    package.add_factory( nf )
 
-    nf = Factory( name= "Distribution", 
-                  description= "Construction of a parametric discrete distribution (either binomial, Poisson, negative binomial or uniform) from a file.", 
-                  category = "STAT", 
-                  nodemodule = "py_stat",
-                  nodeclass = "py_distribution_ascii",
-                  inputs=(dict(name='filename',interface=IFileStr),),
-                  )
-    package.add_factory( nf )
-
-    nf = Factory( name= "Distribution_Binomial", 
+    nf = Factory( name= "Binomial", 
                   description= "Construction of a binomial distribution.", 
                   category = "STAT", 
                   nodemodule = "py_stat",
@@ -79,7 +61,7 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
-    nf = Factory( name= "Distribution_Poisson", 
+    nf = Factory( name= "Poisson", 
                   description= "Construction of a poisson distribution.", 
                   category = "STAT", 
                   nodemodule = "py_stat",
@@ -87,7 +69,7 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
-    nf = Factory( name= "Distribution_NegativeBinomial", 
+    nf = Factory( name= "NegativeBinomial", 
                   description= "Construction of a negative binomial distribution.", 
                   category = "STAT", 
                   nodemodule = "py_stat",
@@ -95,7 +77,7 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
-    nf = Factory( name= "Distribution_Uniform", 
+    nf = Factory( name= "Uniform", 
                   description= "Construction of a uniform distribution.", 
                   category = "STAT", 
                   nodemodule = "py_stat",
@@ -103,11 +85,11 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
-    nf = Factory( name= "HiddenMarkov_from_file", 
+    nf = Factory( name= "HiddenMarkov", 
                   description= "Construction of an object of type hidden_markov from an ASCII file.", 
                   category = "STAT", 
                   nodemodule = "py_stat",
-                  nodeclass = "py_hidenmarkov",
+                  nodeclass = "py_hiddenmarkov",
                   inputs=(dict(name='filename', interface=IFileStr),
                           dict(name='length', interface=IInt, value=20) ),
                   )
@@ -117,7 +99,7 @@ def define_factory(package):
                   description= "Construction of an object of type hidden_semi-markov from an ASCII file.", 
                   category = "STAT", 
                   nodemodule = "py_stat",
-                  nodeclass = "py_hidensemimarkov",
+                  nodeclass = "py_hiddensemimarkov",
                   inputs=(dict(name='filename', interface=IFileStr),
                           dict(name='length', interface=IInt, value=20),
                           dict(name='counting', interface=IBool, value=True)),
@@ -134,14 +116,6 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
-    nf = Factory( name= "Mixture", 
-                  description= "Construction of a mixture of distributions from a file.", 
-                  category = "STAT", 
-                  nodemodule = "py_stat",
-                  nodeclass = "py_mixture",
-                  inputs=(dict(name='filename', interface=IFileStr),),
-                  )
-    package.add_factory( nf )
     # TODO Mixture with a set of dist and proba
 
     '''
@@ -173,15 +147,21 @@ def define_factory(package):
                           dict(name='counting', interface=IBool, value=True)),
                   )
     package.add_factory( nf )
-    '''
     nf = Factory( name= "Sequences", 
                   description= "", 
                   category = "STAT", 
                   nodemodule = "py_stat",
                   nodeclass = "py_sequences",
+                  inputs=(dict(name='seq', interface=ISequence, value=[]),
+                          dict(name="identifiers", interface=ISequence),
+                          dict(name="indexParameter", 
+                               interface=IEnumStr(["Position","Time"]), 
+                               value = "Position")),
+                  outputs=(dict(name="sequences", interface=ISequence),)
                   )
     package.add_factory( nf )
 
+    '''
     nf = Factory( name= "TimeEvents", 
                   description= "", 
                   category = "STAT", 
@@ -237,14 +217,6 @@ def define_factory(package):
                   nodemodule = "py_stat",
                   nodeclass = "py_histogram",
                   inputs=(dict(name='sequence',interface=ISequence,value=[]),),
-                  )
-    package.add_factory( nf )
-    nf = Factory( name= "Histogram_from_file", 
-                  description= "Histogram from a file.", 
-                  category = "STAT", 
-                  nodemodule = "py_stat",
-                  nodeclass = "py_histogram_ascii",
-                  inputs=(dict(name='filename',interface=IFileStr),),
                   )
     package.add_factory( nf )
 

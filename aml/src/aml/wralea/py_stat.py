@@ -26,6 +26,7 @@ __revision__=" $Id$ "
 
 from openalea.core import *
 from openalea.aml import *
+import types
 
 #//////////////////////////////////////////////////////////////////////////////
 # Input/output functions
@@ -34,6 +35,16 @@ from openalea.aml import *
 def py_compound_ascii( filename ):
     if filename and filename != '':
         return (Compound(filename),)
+def py_convolution_ascii( filename ):
+    if filename and filename != '':
+        return (Convolution(filename),)
+def py_distribution_ascii( filename ):
+    if filename and filename != '':
+        return (Distribution(filename),)
+def py_histogram_ascii(filename):
+    if filename and filename != '':
+        return (Histogram(filename),)
+
 
 #//////////////////////////////////////////////////////////////////////////////
 
@@ -43,21 +54,9 @@ def py_compound( sum_dist, dist ):
 
 #//////////////////////////////////////////////////////////////////////////////
 
-def py_convolution_ascii( filename ):
-    if filename and filename != '':
-        return (Convolution(filename),)
-
-#//////////////////////////////////////////////////////////////////////////////
-
 def py_convolution( list_of_dist ):
     if hasattr(list_of_dist,'__iter__'):
         return (Convolution(list_of_dist),)
-
-#//////////////////////////////////////////////////////////////////////////////
-
-def py_distribution_ascii( filename ):
-    if filename and filename != '':
-        return (Distribution(filename),)
 
 #//////////////////////////////////////////////////////////////////////////////
 
@@ -105,7 +104,7 @@ def py_markov( filename, length=20 ):
 def py_mixture( filename ):
 
     if filename and filename != '':
-        return (Mxture(filename),)
+        return (Mixture(filename),)
 
 #//////////////////////////////////////////////////////////////////////////////
 
@@ -113,9 +112,9 @@ class PyRenewal(Node):
     def __init__(self):
         Node.__init__(self)
         self.Types=["Equilibriun","Ordinary"]
-        self.add_input(dict(name="inter_event"))
-        self.add_input(dict(name="Type", interface = IEnumStr(self.Types), value = self.Types[0]))
-        self.add_input(dict(name="ObservationTime", interface=IInt, value=20))
+        self.add_input(name="inter_event")
+        self.add_input(name="Type", interface = IEnumStr(self.Types), value = self.Types[0])
+        self.add_input(name="ObservationTime", interface=IInt, value=20)
 
     def __call__(self, inputs):
         inter_event= self.get_input("inter_event")
@@ -127,9 +126,9 @@ class PyRenewalAscii(Node):
     def __init__(self):
         Node.__init__(self)
         self.Types=["Equilibriun","Ordinary"]
-        self.add_input(dict(name="filename", interface=IFileStr))
-        self.add_input(dict(name="Type", interface = IEnumStr(self.Types), value = self.Types[0]))
-        self.add_input(dict(name="ObservationTime", interface=IInt, value=20))
+        self.add_input(name="filename", interface=IFileStr)
+        self.add_input(name="Type", interface = IEnumStr(self.Types), value = self.Types[0])
+        self.add_input(name="ObservationTime", interface=IInt, value=20)
 
     def __call__(self, inputs):
         filename= self.get_input("filename")
@@ -159,11 +158,6 @@ def py_histogram( seq = [] ):
     if hasattr(seq,'__iter__') and (len(seq)>0):
         return (Histogram(seq),)
 
-def py_histogram_ascii(filename):
-    
-    if filename and filename != '':
-        return (Histogram(filename),)
-
 #//////////////////////////////////////////////////////////////////////////////
 
 def py_plot( obj ):
@@ -175,6 +169,55 @@ def py_plot( obj ):
     
     if obj:
         Plot(obj)
+
+#//////////////////////////////////////////////////////////////////////////////
+
+class PyObjectFromFile(Node):
+    """ 
+    Construct a model (Distribution, vectors, ...) from a file.
+    """
+
+    Types= {"BINOMIAL" : Distribution,
+            "POISSON" : Distribution,
+            "NEGATIVE_BINOMIAL" : Distribution,
+            "UNIFORM" : Distribution,
+            "COMPOUND" : Compound,
+            "CONVOLUTION" : Convolution,
+            "MIXTURE" : Mixture,
+            "HISTOGRAM" : Histogram,
+            "SEQUENCES" : Sequences,
+            "TIME_EVENTS" : TimeEvents,
+            "TOPS" : Tops,
+            "VECTOR_DISTANCE" : VectorDistance,
+            "VECTORS" : Vectors,
+            
+            }
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input(name="filename", interface=IFileStr)
+        self.add_input(name="Type", 
+                       interface = IEnumStr(self.Types.keys()), 
+                       value = "BINOMIAL")
+        self.add_output(name='Model')
+        self.set_caption("import model")
+
+    def __call__(self, inputs):
+        filename= self.get_input("filename")
+        name=self.get_input("Type")
+        self.set_caption(name)
+
+        klass = self.Types.get(name)
+        if filename:
+            return (klass(filename),)
+
+#//////////////////////////////////////////////////////////////////////////////
+
+def py_sequences(seq=[], identifiers=[], indexParameter='Position'):
+    if seq:
+        if identifiers:
+            return (Sequences(seq,identifier,indexParameter),)
+        else:
+            return(Sequences(seq),)
 
 
 
