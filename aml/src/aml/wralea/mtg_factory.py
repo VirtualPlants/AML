@@ -31,7 +31,7 @@ def define_factory(package):
                   description= "MTG file creation", 
                   category = "MTG", 
                   nodemodule = "py_mtg",
-                  nodeclass = "MTG",
+                  nodeclass = "py_MTG",
                   )
 
     package.add_factory( nf )
@@ -40,7 +40,7 @@ def define_factory(package):
                   description= "Array of vertices contained in a MTG", 
                   category = "MTG", 
                   nodemodule = "py_mtg",
-                  nodeclass = "VtxList",
+                  nodeclass = "py_VtxList",
                   )
 
     package.add_factory( nf )
@@ -67,7 +67,7 @@ def define_factory(package):
                   description= "Complex of a vertex.", 
                   category = "MTG", 
                   nodemodule = "py_mtg",
-                  nodeclass = "Complex",
+                  nodeclass = "py_Complex",
                   )
 
     package.add_factory( nf )
@@ -76,7 +76,7 @@ def define_factory(package):
                   description= "Set of components of a vertex.", 
                   category = "MTG", 
                   nodemodule = "py_mtg",
-                  nodeclass = "Components",
+                  nodeclass = "py_Components",
                   )
 
     package.add_factory( nf )
@@ -85,7 +85,7 @@ def define_factory(package):
                   description= "Plot aml objects.", 
                   category = "MTG", 
                   nodemodule = "py_mtg",
-                  nodeclass = "Plot",
+                  nodeclass = "py_Plot",
                   )
     package.add_factory( nf )
 
@@ -93,7 +93,17 @@ def define_factory(package):
                   description= "Constructs a geometric interpretation of a MTG.", 
                   category = "MTG", 
                   nodemodule = "py_mtg",
-                  nodeclass = "PlantFrame",
+                  nodeclass = "py_PlantFrame",
+                  )
+    package.add_factory( nf )
+
+    nf = Factory( name= "DressingData", 
+                  description= "Data and default geometric parameters used to compute the geometric interpretation of a MTG.", 
+                  category = "MTG", 
+                  nodemodule = "py_mtg",
+                  nodeclass = "py_dressingdata",
+                  inputs=(dict(name="MTG"),dict(name="filename", interface=IFileStr)),
+                  outputs=(dict(name="DressingData"),),
                   )
     package.add_factory( nf )
 

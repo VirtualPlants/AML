@@ -25,9 +25,7 @@ __revision__=" $Id$ "
 #//////////////////////////////////////////////////////////////////////////////
 
 from openalea.core import *
-import openalea.aml as amlPy
-#import amlPy
-from amlPy import Class,Index,Scale,Order,Rank,Height
+from openalea.aml import *
 
 
 def max_mtg_scale(g):
@@ -39,9 +37,18 @@ def max_mtg_scale(g):
     max_scale= int(scale.strip("levelnb="))
     return max_scale
 
+def set_mtg(g):
+    old_g = Active()
+    if not g:
+        g= old_g
+    elif g != old_g:
+        Activate(g)
+
+    return g
+
 #//////////////////////////////////////////////////////////////////////////////
 
-class MTG(Node):
+class py_MTG(Node):
     """
 MTG( filename, ErrorNb= 10, VtxNumber= 10000 ) -> MTG
 
@@ -62,18 +69,21 @@ Ouput : MTG object if the parsing process succeeds.
     def __call__(self, inputs):
         """ inputs is the list of input values """
 
-        from amlPy import MTG as mtg
-
         # We prefer here to get the value by key
         fn = self.get_input("filename")
+        g = None
         if fn:
-            return (mtg(fn),)
-        else:
-            return (None,)
+            try:
+                g = MTG(fn)
+            except Exception, e:
+                print e
+                g = None
+
+        return (g,)
 
 #//////////////////////////////////////////////////////////////////////////////
 
-class VtxList(Node):
+class py_VtxList(Node):
     """\
 VtxList( mtg, Scale= 2 ) -> [vtx]
 
@@ -99,16 +109,12 @@ Output:
     def __call__(self, inputs):
         """ inputs is the list of input values """
 
-        from openalea.aml import VtxList as vertices
-        from openalea.aml import Active, Activate
+        #from openalea.aml import VtxList as vertices
+        #from openalea.aml import Active, Activate
 
         # We prefer here to get the value by key
         g= self.get_input("MTG")
-        if not g:
-            g= Active()
-        else:
-            Activate(g)
-
+        g = set_mtg(g)
         if not g:
             return ([],)
         
@@ -118,9 +124,9 @@ Output:
 
         vtxs= []
         if scale == 0:
-            vtxs= vertices()
+            vtxs= VtxList()
         elif scale <= max_scale:
-            vtxs= vertices(Scale=scale)
+            vtxs= VtxList(Scale=scale)
         
         return (vtxs,)
 
@@ -150,11 +156,21 @@ Output:
         funs= self.vtx_func.keys()
         funs.sort()
         self.add_input( name = "Name", interface = IEnumStr(funs), value = funs[0]) 
+        self.add_input( name = "Vtx" ) 
         self.add_output( name = "VtxFunction", interface = None)
 
     def __call__(self, inputs):
         func_name= self.get_input("Name")
-        return (self.vtx_func.get(func_name,None),)
+        vtx = self.get_input("Vtx")
+        f = self.vtx_func.get(func_name,None)
+        self.set_caption(func_name)
+
+        if not vtx:
+            return f
+        elif callable(vtx):
+            return lambda x: f(vtx(x))
+        else:
+            return f(vtx)
 
 #//////////////////////////////////////////////////////////////////////////////
 
@@ -167,20 +183,20 @@ Output:
   function that can be applied on a vertex.
     """
     
-    vtx_func= { "Father" : amlPy.Father,
-                "Successor" : amlPy.Successor,
-                "Predecessor" : amlPy.Predecessor,
-                "Root" : amlPy.Root,
-                "Complex" : amlPy.Complex,
-                "Location" : amlPy.Location,
-                "Sons" : amlPy.Sons,
-                "Ancestors" : amlPy.Ancestors, 
-                "Descendants" : amlPy.Descendants,
-                "Extremities" : amlPy.Extremities,
-                "Components" : amlPy.Components,
-                "ComponentRoots" : amlPy.ComponentRoots,
-                "Axis" : amlPy.Axis,
-                "Trunk" : amlPy.Trunk}
+    vtx_func= { "Father" : Father,
+                "Successor" : Successor,
+                "Predecessor" : Predecessor,
+                "Root" : Root,
+                "Complex" : Complex,
+                "Location" : Location,
+                "Sons" : Sons,
+                "Ancestors" : Ancestors, 
+                "Descendants" : Descendants,
+                "Extremities" : Extremities,
+                "Components" : Components,
+                "ComponentRoots" : ComponentRoots,
+                "Axis" : Axis,
+                "Trunk" :Trunk}
     
     
     def __init__(self):
@@ -190,11 +206,20 @@ Output:
         funs= self.vtx_func.keys()
         funs.sort()
         self.add_input( name = "name", interface = IEnumStr(funs), value = funs[0]) 
+        self.add_input( name = "Vtx" ) 
         self.add_output( name = "f", interface = None)
 
     def __call__(self, inputs):
         func_name= self.get_input("name")
-        return (self.vtx_func.get(func_name,None),)
+        vtx = self.get_input("Vtx")
+        f = self.vtx_func.get(func_name,None)
+        self.set_caption(func_name)
+        if not vtx:
+            return f
+        elif callable(vtx):
+            return lambda x: f(vtx(x))
+        else:
+            return f(vtx)
 
 #//////////////////////////////////////////////////////////////////////////////
 
@@ -211,10 +236,10 @@ class UnaryVtxFunc( Node ):
         g= lambda x: self.f(x,*inputs)
         return (g,)
 
-class Complex(UnaryVtxFunc):
+class py_Complex(UnaryVtxFunc):
 
     def __init__(self):
-        UnaryVtxFunc.__init__(self,amlPy.Complex)
+        UnaryVtxFunc.__init__(self,Complex)
         self.add_input(name= "Vtx", interface= IInt )
         self.add_input(name= "Scale", interface= IInt, value= 0 )
 
@@ -229,10 +254,10 @@ class Complex(UnaryVtxFunc):
 
 
 
-class Components(UnaryVtxFunc):
+class py_Components(UnaryVtxFunc):
 
     def __init__(self):
-        UnaryVtxFunc.__init__(self,amlPy.Components)
+        UnaryVtxFunc.__init__(self,Components)
         self.add_input(name= "Vtx", interface= IInt )
         self.add_input(name= "Scale", interface= IInt, value= 0 )
 
@@ -248,7 +273,7 @@ class Components(UnaryVtxFunc):
 
 #//////////////////////////////////////////////////////////////////////////////
 
-class Plot( Node ):
+class py_Plot( Node ):
     """\
 Plot(aml object) -> Plot the object
 Input:
@@ -265,11 +290,11 @@ Input:
     def __call__(self, inputs):
         obj= self.get_input("obj")
         if obj:
-          amlPy.Plot(obj)
+          Plot(obj)
 
 #//////////////////////////////////////////////////////////////////////////////
 
-class PlantFrame( Node ):
+class py_PlantFrame( Node ):
     """\
 Plot(aml object) -> Plot the object
 Input:
@@ -284,25 +309,50 @@ Input:
         self.add_input( name = "MTG", interface = None) 
         self.add_input( name = "Vertex", interface = IInt, value= 0)
         self.add_input( name = "Scale", interface = IInt, value= 0)
+        self.add_input( name = "DressingData")
         self.add_output(name = "plantframe")
 
     def __call__(self, inputs):
         g= self.get_input("MTG")
         vtx= self.get_input("Vertex")
         scale= self.get_input("Scale")
-        if not g:
-            g= amlPy.Active()
-        else:
-            amlPy.Activate(g)
+        d=self.get_input("DressingData")
 
+        g = set_mtg(g)
         if not g:
             return (None,)
         
         max_scale= max_mtg_scale(g)
         if scale > max_scale:
             scale = max_scale
+        
+        kwds={}
+        if scale:
+            kwds["Scale"] = scale
+        if d:
+            kwds["DressingData"] = d
 
-        return amlPy.PlantFrame(vtx,Scale=scale)
+        try:
+            pf = PlantFrame(vtx, **kwds)
+        except Exception, e:
+            print e
+            pf=None
 
+        return (pf,)
+
+#//////////////////////////////////////////////////////////////////////////////
+
+def py_dressingdata(g,filename):
+    g =set_mtg(g)
+    if not g:
+        return
+
+    if filename:
+        try:
+            d = DressingData(filename)
+        except Exception, e:
+            print e
+            d = None
+        return (d,)
 
 
