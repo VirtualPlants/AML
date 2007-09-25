@@ -29,6 +29,16 @@ from openalea.aml import *
 import types
 
 #//////////////////////////////////////////////////////////////////////////////
+# Adapters
+def adapt2list(arg):
+    if arg is None:
+        return []
+    elif type(arg) == types.ListType:
+        return arg
+    else:
+        return [arg]
+
+#//////////////////////////////////////////////////////////////////////////////
 # Input/output functions
 #//////////////////////////////////////////////////////////////////////////////
 
@@ -60,22 +70,22 @@ def py_convolution( list_of_dist ):
 
 #//////////////////////////////////////////////////////////////////////////////
 
-def py_dist_binomial( inf_bound= 2, sup_bound = 5, proba = 0.8 ):
+def py_dist_binomial( inf_bound= 0, sup_bound = 10, proba = 0.5 ):
     return (Distribution("BINOMIAL",inf_bound, sup_bound, proba),)
 
 #//////////////////////////////////////////////////////////////////////////////
 
-def py_dist_poisson( inf_bound= 0, param = 12.2 ):
+def py_dist_poisson( inf_bound= 0, param = 10 ):
     return (Distribution("P",inf_bound, param),)
 
 #//////////////////////////////////////////////////////////////////////////////
 
-def py_dist_negativebinomial( inf_bound= 5, param = 3.2, proba = 0.4 ):
+def py_dist_negativebinomial( inf_bound= 0, param = 10., proba = 0.5 ):
     return (Distribution("NB",inf_bound, param, proba),)
 
 #//////////////////////////////////////////////////////////////////////////////
 
-def py_dist_uniform( inf_bound= 2, sup_bound = 5 ):
+def py_dist_uniform( inf_bound= 0, sup_bound = 10 ):
     return (Distribution("U",inf_bound, sup_bound),)
 
 #//////////////////////////////////////////////////////////////////////////////
@@ -168,7 +178,10 @@ def py_plot( obj ):
     """
     
     if obj:
-        Plot(obj)
+        if type(obj) == types.ListType:
+            Plot(*obj)
+        else:
+            Plot(obj)
 
 #//////////////////////////////////////////////////////////////////////////////
 
@@ -219,5 +232,110 @@ def py_sequences(seq=[], identifiers=[], indexParameter='Position'):
         else:
             return(Sequences(seq),)
 
+#//////////////////////////////////////////////////////////////////////////////
+# Compare family : TODO
+
+def py_compare_frequency( histos, Type ):
+    _types = {"Numeric" : "N","Ordinal" : "O", "Symbolic" : "S"}
+    _type=_types[Type]
+    if histos is None:
+        return None,
+    args = list(adapt2list(histos))
+    args.append(_type)
+    
+    return Compare(*args),
+        
+
+def py_compare_vectors( vectors, vector_distance ):
+    if vectors is None or vector_distance is None:
+        return None,
+    return Compare(vectors, vector_distance),
+
+#//////////////////////////////////////////////////////////////////////////////
+
+def py_comparisontest(Type, histo1, histo2):
+    if Type in ['F', 'T', 'W'] and histo1 and histo2:
+        return ComparisonTest(Type, histo1, histo2)
+
+#//////////////////////////////////////////////////////////////////////////////
+
+def py_estimate_dist( histo,
+                      distribution,
+                      mixtures,
+                      unknow,
+                      MinInfBound,
+                      InfBoundStatus,
+                      DistInfBoundStatus,
+                      NbComponents,
+                      Penalty,
+                      Parametric,
+                      InitialDistribution ):
+    if not histo: return
+    args = [histo]
+    args.append(distribution)
+
+    if distribution == 'MIXTURE':
+        mix = mixtures.split(',')
+        mix = map(lambda x:x.strip(),mix)
+        args.extend(mix)
+
+    if distribution in ['CONVOLUTION','COMPOUND'] and unknow != '': 
+        args.append(unknow)
+
+    kwds = {}
+    if MinInfBound != 0:
+        kwds['MinInfBound'] = MinInfBound
+
+    if distribution != 'NON-PARAMETRIC':
+        if InfBoundStatus != 'Free':
+            kwds['InfBoundStatus'] = InfBoundStatus
+
+    if distribution == 'MIXTURE':
+        if DistInfBoundStatus != 'Fixed':
+            kwds['DistInfBoundStatus'] = DistInfBoundStatus
+        if NbComponents == "Estimated":
+            kwds['NbComponent'] = NbComponents
+            kwds['Penalty'] = Penalty
+
+    if distribution in ['CONVOLUTION','COMPOUND']:
+        kwds['Parametric'] = Parametric
+        if InitialDistribution:
+            kwds['InitialDistribution'] = InitialDistribution
+            if 'MinInfBound' in kwds:
+                del kwds['MinInfBound']
+
+    return Estimate(*args, **kwds)
 
 
+def py_merge( data ):
+    
+    if data:
+        if type(data) == types.ListType:
+            return Merge(*data)
+        else:
+            return Merge(data)
+
+def py_extractdata( model ):
+    if model is not None:
+        return ExtractData(model)
+
+def py_shift(obj, param=0):
+    if obj: return Shift(obj,param)
+
+def py_shiftn(obj, variable=0, param=0):
+    if obj: return Shift(obj,variable, param)
+
+def py_cluster(obj, mode, step, information_ratio, limits, AddVariable):
+    if obj is None: return
+    if mode == "Step":
+        return Cluster(obj, mode, step)
+    elif mode == 'Information':
+        return Cluster(obj, mode, information_ratio)
+    elif mode == "Limit":
+        _limits = adapt2list(limits)
+        return Cluster(obj, mode, _limits)
+
+def py_simulate_dist(obj, size=100):
+    if obj is None:
+        return
+    return Simulate(obj,size)

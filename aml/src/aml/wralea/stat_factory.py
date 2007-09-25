@@ -229,3 +229,136 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
+    #//////////////////////////////////////////////////////////////////////////////
+    # Compare algorithms
+    nf = Factory( name= "Compare(frequency)", 
+                  description= "Comparison of frequency distributions.", 
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_compare_frequency",
+                  inputs=(dict(name='histos',interface=ISequence),
+                          dict(name="Type", 
+                               interface= IEnumStr(["Numeric","Ordinal","Symbolic"]),
+                               value="Numeric"),
+                         ),
+                  )
+    package.add_factory( nf )
+
+    nf = Factory( name= "Compare(Vectors)", 
+                  description= "Comparison of vectors.", 
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_compare_vectors",
+                  )
+    package.add_factory( nf )
+
+    #//////////////////////////////////////////////////////////////////////////////
+
+    nf = Factory( name= "ComparisonTest", 
+                  description= "Test of comparison of frequency distributions.", 
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_comparisontest",
+                  inputs=(dict(name="Type", 
+                               interface= IEnumStr(["F","T","W"]),
+                               value="F"),
+                          dict(name='histo1'), 
+                          dict(name='histo2')),
+                  )
+    package.add_factory( nf )
+    
+#//////////////////////////////////////////////////////////////////////////////
+
+    nf = Factory( name= "Estimate(distribution)", 
+                  description= "Estimation of distributions.", 
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_estimate_dist",
+                  inputs=(
+                          dict(name='histo'), 
+                          dict(name="distribution", 
+                               interface= IEnumStr(["NON-PARAMETRIC",
+                                                    "BINOMIAL",
+                                                    "POISSON",
+                                                    "NEGATIVE_BINOMIAL",
+                                                    "UNIFORM",
+                                                    "MIXTURE",
+                                                    "CONVOLUTION",
+                                                    "COMPOUND"]),
+                               value="NON-PARAMETRIC"),
+                          dict(name='mixtures',interface=IStr),
+                          dict(name='unknow',interface=IEnumStr(["","Sum","Elementary"]),value=''),
+                          dict(name='MinInfBound',interface=IInt(0,1), value = 0),
+                          dict(name='InfBoundStatus',interface=IEnumStr(['Free','Fixed']), value="Free"),
+                          dict(name='DistInfBoundStatus',interface=IEnumStr(['Fixed','Estimated']), value="Fixed"),
+                          dict(name='NbComponents',interface=IEnumStr(['Fixed','Estimated']), value="Fixed"),
+                          dict(name='Penalty',interface=IEnumStr(['AIC','AICc','BIC']), value='AICc'),
+                          dict(name='Parametric',interface=IBool, value=True),
+                          dict(name='InitialDistribution'),
+                         )
+                  )
+    package.add_factory( nf )
+    
+#//////////////////////////////////////////////////////////////////////////////
+
+    nf = Factory( name= "Merge", 
+                  description= "Merge of objects of the same data type or merging of sample correlation functions.",
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_merge",
+                  inputs= (dict(name='data',interface=ISequence),),
+                  )
+    package.add_factory( nf )
+    
+    nf = Factory( name= "ExtractData", 
+                  description= "Extraction of the data part of an object of type model.",
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_extractdata",
+                  )
+    package.add_factory( nf )
+
+    nf = Factory( name= "Shift", 
+                  description= "Shifting of values.",
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_shift",
+                  )
+    package.add_factory( nf )
+
+    nf = Factory( name= "Shift multivariate", 
+                  description= "Shifting of values.",
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_shiftn",
+                  )
+    package.add_factory( nf )
+
+    nf = Factory( name= "Cluster", 
+                  description= "Extraction of the data part of an object of type model.",
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_cluster",
+                  inputs= (dict(name='obj'),
+                           dict(name='mode',
+                                interface=IEnumStr(["Step","Information","Limit"]),
+                                value="Step"),
+                           dict(name='step', interface=IInt), 
+                           dict(name='information_ratio', interface=IFloat),
+                           dict(name='limits',interface=ISequence),
+                           dict(name='AddVariable', interface=IBool, value= False),
+                          ),
+                  )
+    package.add_factory( nf )
+    
+
+    nf = Factory( name= "Simulate(distribution)", 
+                  description= "Generation of a random sample from a distribution.",
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_simulate_dist",
+                  )
+    package.add_factory( nf )
+
+
+
