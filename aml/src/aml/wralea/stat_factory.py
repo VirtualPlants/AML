@@ -269,13 +269,71 @@ def define_factory(package):
     
 #//////////////////////////////////////////////////////////////////////////////
 
-    nf = Factory( name= "Estimate(distribution)", 
-                  description= "Estimation of distributions.", 
+    nf = Factory( name= "EstimateDistribution", 
+                  description= "Estimation of a discrete distribution.", 
                   category = "STAT", 
                   nodemodule = "py_stat",
                   nodeclass = "py_estimate_dist",
                   inputs=(
                           dict(name='histo'), 
+                          dict(name="distribution", 
+                               interface= IEnumStr(["NONPARAMETRIC",
+                                                    "BINOMIAL",
+                                                    "POISSON",
+                                                    "NEGATIVE_BINOMIAL"]),
+                               value="NONPARAMETRIC"),
+                          dict(name='MinInfBound',interface=IInt(0,1), value = 0),
+                          dict(name='InfBoundStatus',interface=IEnumStr(['Free','Fixed']), value="Free"),
+                         )
+                  )
+    package.add_factory( nf )
+
+    nf = Factory( name= "EstimateMixture", 
+                  description= "Estimation of a finite mixture.", 
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_estimate_mixture",
+                  inputs=(
+                          dict(name='histo'), 
+                          dict(name='components',interface=IStr),
+                          dict(name='MinInfBound',interface=IInt(0,1), value = 0),
+                          dict(name='InfBoundStatus',interface=IEnumStr(['Free','Fixed']), value="Free"),
+                          dict(name='DistInfBoundStatus',interface=IEnumStr(['Free','Fixed']), value="Free"),
+                          dict(name='NbComponents',interface=IEnumStr(['Fixed','Estimated']), value="Fixed"),
+                          dict(name='Penalty',interface=IEnumStr(['AIC','AICc','BIC','BICc']), value='BICc'),
+                         )
+                  )
+    package.add_factory( nf )
+
+    nf = Factory( name= "EstimateConvolution", 
+                  description= "Estimation of a convolution of discrete distributions.", 
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_estimate_conv",
+                  inputs=(
+                          dict(name='histo'), 
+                          dict(name='dist'),
+                          dict(name='Estimator',
+                               interface=IEnumStr(["Likelihood",
+                                                  "PenalizedLikelihood",
+                                                  "Parametric"]),
+                               value="Likelihood"),
+                          dict(name='InitialDistribution'),
+                          dict(name='MinInfBound',interface=IInt(0,1), value = 0),
+                          dict(name='NbIteration',interface=IInt, value=-1),
+                          dict(name='Penalty',interface=IEnumStr(['FirstDifference','SecondDifference','Entropy']), value='SecondDifference'),
+                          dict(name='Weight',interface=IFloat, value=-1.),
+                          dict(name='Outside',interface=IEnumStr(['Zero','Continuation']), value='Zero'),
+                         )
+                  )
+    package.add_factory( nf )
+'''    
+    nf = Factory( name= "Estimate(distribution)", 
+                  description= "Estimation of distributions.", 
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_estimate_distrib",
+                  inputs=(dict(name="histo"), 
                           dict(name="distribution", 
                                interface= IEnumStr(["NON-PARAMETRIC",
                                                     "BINOMIAL",
@@ -286,19 +344,19 @@ def define_factory(package):
                                                     "CONVOLUTION",
                                                     "COMPOUND"]),
                                value="NON-PARAMETRIC"),
-                          dict(name='mixtures',interface=IStr),
-                          dict(name='unknow',interface=IEnumStr(["","Sum","Elementary"]),value=''),
-                          dict(name='MinInfBound',interface=IInt(0,1), value = 0),
-                          dict(name='InfBoundStatus',interface=IEnumStr(['Free','Fixed']), value="Free"),
-                          dict(name='DistInfBoundStatus',interface=IEnumStr(['Fixed','Estimated']), value="Fixed"),
-                          dict(name='NbComponents',interface=IEnumStr(['Fixed','Estimated']), value="Fixed"),
-                          dict(name='Penalty',interface=IEnumStr(['AIC','AICc','BIC']), value='AICc'),
-                          dict(name='Parametric',interface=IBool, value=True),
-                          dict(name='InitialDistribution'),
+                          dict(name="mixtures",interface=IStr),
+                          dict(name="unknow",interface=IEnumStr(["","Sum","Elementary"]),value=""),
+                          dict(name="MinInfBound",interface=IInt(0,1), value = 0),
+                          dict(name="InfBoundStatus",interface=IEnumStr(["Free","Fixed"]), value="Free"),
+                          dict(name="DistInfBoundStatus",interface=IEnumStr(["Fixed","Estimated"]), value="Fixed"),
+                          dict(name="NbComponents",interface=IEnumStr(["Fixed","Estimated"]), value="Fixed"),
+                         dict(name="Penalty",interface=IEnumStr(["AIC","AICc","BIC"]), value="AICc"),
+                          dict(name="Parametric",interface=IBool, value=True),
+                          dict(name="InitialDistribution"),
                          )
-                  )
+                )
     package.add_factory( nf )
-    
+'''    
 #//////////////////////////////////////////////////////////////////////////////
 
     nf = Factory( name= "Merge", 

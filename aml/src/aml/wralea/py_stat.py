@@ -261,6 +261,75 @@ def py_comparisontest(Type, histo1, histo2):
 
 def py_estimate_dist( histo,
                       distribution,
+                      MinInfBound,
+                      InfBoundStatus,
+                      ):
+    if not histo: return
+    if distribution == 'NON-PARAMETRIC':
+        return Estimate(histo, distribution)
+    else:
+        return Estimate(histo, 
+                        distribution, 
+                        MinInfBound=MinInfBound, 
+                        InfBoundStatus=InfBoundStatus)
+
+
+def py_estimate_mixture( histo,
+                         components,
+                         MinInfBound,
+                         InfBoundStatus,
+                         DistInfBoundStatus,
+                         NbComponents,
+                         Penalty,):
+
+    if not histo: return
+    args = [histo]
+    args.append("MIXTURE")
+
+    mix = components.split(',')
+    mix = map(lambda x:x.strip(),mix)
+    args.extend(mix)
+
+    kwds = {}
+    kwds['MinInfBound'] = MinInfBound
+    kwds['InfBoundStatus'] = InfBoundStatus
+    kwds['DistInfBoundStatus'] = DistInfBoundStatus
+    kwds['NbComponent'] = NbComponents
+
+    if NbComponents == "Estimated":
+        kwds['Penalty'] = Penalty
+
+    return Estimate(*args, **kwds)
+
+def py_estimate_conv( histo,
+                      dist,
+                      Estimator,
+                      InitialDistribution,
+                      MinInfBound,
+                      NbIteration,
+                      Penalty,
+                      Weight,
+                      Outside,
+                    ):
+
+    if not histo or not dist: return
+    
+    kwds = {}
+    kwds['Estimator']=Estimator
+    kwds['MinInfBound']=MinInfBound
+    kwds['NbIteration']=NbIteration
+    if InitialDistribution:
+        kwds['InitialDistribution'] = InitialDistribution
+
+    if Estimator == "PenalizedLikelihood":
+        kwds['Penalty'] = Penalty
+        kwds['Weight'] = Weight
+        kwds['Outside'] = Outside
+    
+    return Estimate(histo,dist,*kwds)
+
+def py_estimate_distrib( histo,
+                      distribution,
                       mixtures,
                       unknow,
                       MinInfBound,
@@ -305,7 +374,6 @@ def py_estimate_dist( histo,
                 del kwds['MinInfBound']
 
     return Estimate(*args, **kwds)
-
 
 def py_merge( data ):
     
