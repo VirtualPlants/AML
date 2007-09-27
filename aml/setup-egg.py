@@ -11,17 +11,17 @@ scons_parameters=["build_prefix="+build_prefix]
 
 
 # platform dependencies
-if("win" in sys.platform):
-    install_requires = ["boostpython","gnuplot"]
-    setup_requires = install_requires 
-else:
-    install_requires = []
-    setup_requires = []
+install_requires = ['vplants.amlobj', 
+                    'vplants.sequence_analysis',
+                    'vplants.tree_matching', 
+                    'vplants.flux', 
+                    'vplants.msvoxel',
+                    ]
 
-# common deps
-common_deps = ['vplants.amlobj', 'vplants.sequence_analysis',
-         'vplants.tree_matching', 'vplants.flux', 'vplants.msvoxel',
-         ]
+if("win" in sys.platform):
+    install_requires += ["boostpython","gnuplot"]
+
+setup_requires = install_requires + ['openalea.deploy']
 
 if __name__ == '__main__':
     
@@ -46,7 +46,9 @@ if __name__ == '__main__':
           package_dir={namespace+".aml" : "src/aml",
                        namespace+".aml.amldoc" : "src/aml/amldoc",
                        namespace+".aml.wralea" : "src/aml/wralea",
-                       "amlPy" : "src/amlPy"},
+                       "amlPy" : "src/amlPy",
+                       #"" : 'build/lib', # hack to use develop command
+                       },
       
           # Add package platform libraries if any
           package_data = {namespace+".aml" : ['*.pyd', '*.so'],},

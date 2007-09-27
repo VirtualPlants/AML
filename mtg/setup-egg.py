@@ -11,23 +11,16 @@ scons_parameters=["build_prefix="+build_prefix]
 
 
 # dependencies
-if("win" in sys.platform):
-    install_requires = []
-    setup_requires = install_requires + []
-else:
-    install_requires = []
-    setup_requires = []
-
-
+install_requires = ['vplants.amlobj', 'PlantGL']
+setup_requires = ['openalea.deploy'] + install_requires
 
 if __name__ == '__main__':
     
     setup(name='VPlants.Mtg',
           version='0.1',
-          author='',
-          author_email='',
+          author='Christophe Godin',
           description='mtg structure',
-          url='',
+          url='http://www-sop.inria.fr/virtualplants/',
           license='GPL',
  
           # Define where to execute scons
@@ -49,8 +42,7 @@ if __name__ == '__main__':
           
 
           # Dependencies
-          setup_requires = setup_requires + \
-                           ['openalea.deploy', 'vplants.amlobj', 'PlantGL'],
-          install_requires = install_requires + ['vplants.amlobj', 'PlantGL'],
+          setup_requires = setup_requires,
+          install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
           )
