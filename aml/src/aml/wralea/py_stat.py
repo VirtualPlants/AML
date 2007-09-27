@@ -65,8 +65,19 @@ def py_compound( sum_dist, dist ):
 #//////////////////////////////////////////////////////////////////////////////
 
 def py_convolution( list_of_dist ):
-    if hasattr(list_of_dist,'__iter__'):
-        return (Convolution(list_of_dist),)
+    l=adapt2list(list_of_dist)
+    if l:
+        return Convolution(*l)
+
+def py_mixture( list_of_dist ):
+    l=adapt2list(list_of_dist)
+    if l:
+        arg=[]
+        for w,d in l:
+            arg.append(w)
+            arg.append(d)
+
+    return Mixture(*arg)
 
 #//////////////////////////////////////////////////////////////////////////////
 
@@ -327,7 +338,7 @@ def py_estimate_conv( histo,
         kwds['Outside'] = Outside
     
     return Estimate(histo,dist,*kwds)
-
+"""
 def py_estimate_distrib( histo,
                       distribution,
                       mixtures,
@@ -374,6 +385,7 @@ def py_estimate_distrib( histo,
                 del kwds['MinInfBound']
 
     return Estimate(*args, **kwds)
+"""
 
 def py_merge( data ):
     
