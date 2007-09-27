@@ -14,7 +14,7 @@ install_requires = ['vplants.tool']
 setup_requires = install_requires + ['openalea.deploy']
 
 if("win" in sys.platform):
-    setup_require += ['bisonflex']
+    setup_requires += ['bisonflex']
 
 if __name__ == '__main__':
     

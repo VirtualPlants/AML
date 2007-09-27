@@ -62,8 +62,8 @@ if __name__ == '__main__':
           
 
           # Dependencies
-          setup_requires = setup_requires + common_deps + ['openalea.deploy'],
-          install_requires = install_requires + common_deps,
+          setup_requires = setup_requires ,
+          install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
           )
 
