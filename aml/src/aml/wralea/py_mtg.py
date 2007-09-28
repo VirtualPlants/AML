@@ -79,7 +79,7 @@ Ouput : MTG object if the parsing process succeeds.
                 print e
                 g = None
 
-        return (g,)
+        return g
 
 #//////////////////////////////////////////////////////////////////////////////
 
@@ -286,11 +286,16 @@ Input:
         Node.__init__(self)
 
         self.add_input( name = "obj", interface = None, value = []) 
+        self.add_input( name = "color", interface = IFunction) 
+        self.add_output( name = "linetree") 
 
     def __call__(self, inputs):
-        obj= self.get_input("obj")
+        obj, color= inputs
         if obj:
-          Plot(obj)
+	    if color is None:
+		return Plot(obj)
+	    else:
+		return Plot(obj, color)
 
 #//////////////////////////////////////////////////////////////////////////////
 
