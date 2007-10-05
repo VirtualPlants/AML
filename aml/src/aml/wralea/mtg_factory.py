@@ -45,6 +45,15 @@ def define_factory(package):
 
     package.add_factory( nf )
 
+    nf = Factory( name= "Feature", 
+                  description= "Feature data stored on MTG vertices", 
+                  category = "MTG", 
+                  nodemodule = "py_mtg",
+                  nodeclass = "py_Feature",
+                  )
+
+    package.add_factory( nf )
+
     nf = Factory( name= "VtxFunction", 
                   description= "Common function on  MTG", 
                   category = "MTG", 
@@ -81,11 +90,39 @@ def define_factory(package):
 
     package.add_factory( nf )
 
-    nf = Factory( name= "Plot", 
-                  description= "Plot aml objects.", 
+    nf = Factory( name= "MTGRoot", 
+                  description= "Returns the global root of a MTG.", 
                   category = "MTG", 
                   nodemodule = "py_mtg",
-                  nodeclass = "py_Plot",
+                  nodeclass = "py_MTGRoot",
+                  inputs=(dict(name='graph'),),
+                  outputs=(dict(name='Vtx',interface=IInt),),
+                  )
+
+    package.add_factory( nf )
+
+    nf = Factory( name= "Axis", 
+                  description= "Returns the sequence of vertices defining the axis of a given vertex.", 
+                  category = "MTG", 
+                  nodemodule = "py_mtg",
+                  nodeclass = "py_Axis",
+                  )
+
+    package.add_factory( nf )
+
+    nf = Factory( name= "PlotPlantFrame", 
+                  description= "Plot PlantFrame objects.", 
+                  category = "MTG", 
+                  nodemodule = "py_mtg",
+                  nodeclass = "py_PlotPlantFrame",
+                  )
+    package.add_factory( nf )
+
+    nf = Factory( name= "PlotLineTree", 
+                  description= "Plot Linetree objects.", 
+                  category = "MTG", 
+                  nodemodule = "py_mtg",
+                  nodeclass = "py_PlotLineTree",
                   )
     package.add_factory( nf )
 

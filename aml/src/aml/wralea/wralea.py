@@ -24,6 +24,8 @@ __revision__=" $Id$"
 
 from openalea.core import *
 
+
+
 import mtg_factory
 import stat_factory
 
@@ -43,7 +45,10 @@ def register_packages(pkgmanager):
     mtg_factory.define_factory(package)
     pkgmanager.add_package(package)
 
+    
+
     package = Package("vplants.stat", metainfo)
     stat_factory.define_factory(package)
     pkgmanager.add_package(package)
+
 
