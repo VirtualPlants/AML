@@ -194,15 +194,6 @@ RWCString AMObjType::string() const {
     stg = "TIME_EVENTS";
     break;
 
-  case AMObjType::MARKOV:
-    stg = "MARKOV";
-    break;
-  case AMObjType::HIDDEN_MARKOV:
-    stg = "HIDDEN_MARKOV";
-    break;
-  case AMObjType::MARKOV_DATA:
-    stg = "MARKOV_DATA";
-    break;
   case AMObjType::VARIABLE_ORDER_MARKOV:
     stg = "VARIABLE_ORDER_MARKOV";
     break;
@@ -220,6 +211,12 @@ RWCString AMObjType::string() const {
     break;
   case AMObjType::SEMI_MARKOV_DATA:
     stg = "SEMI-MARKOV_DATA";
+    break;
+  case AMObjType::NONHOMOGENEOUS_MARKOV:
+    stg = "NONHOMOGENEOUS_MARKOV";
+    break;
+  case AMObjType::NONHOMOGENEOUS_MARKOV_DATA:
+    stg = "NONHOMOGENEOUS_MARKOV_DATA";
     break;
   case AMObjType::SEQUENCES:
     stg = "SEQUENCES";
@@ -364,15 +361,14 @@ AMObj::AMObj(AMObjType t, AMModel* p) {
          t==AMObjType::RENEWAL_DATA ||
          t==AMObjType::TIME_EVENTS ||
 
-         t==AMObjType::MARKOV ||
-         t==AMObjType::HIDDEN_MARKOV ||
-         t==AMObjType::MARKOV_DATA ||
          t==AMObjType::VARIABLE_ORDER_MARKOV ||
          t==AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV ||
          t==AMObjType::VARIABLE_ORDER_MARKOV_DATA ||
          t==AMObjType::SEMI_MARKOV ||
          t==AMObjType::HIDDEN_SEMI_MARKOV ||
          t==AMObjType::SEMI_MARKOV_DATA ||
+         t==AMObjType::NONHOMOGENEOUS_MARKOV ||
+         t==AMObjType::NONHOMOGENEOUS_MARKOV_DATA ||
          t==AMObjType::SEQUENCES ||
          t==AMObjType::MARKOVIAN_SEQUENCES ||
          t==AMObjType::CORRELATION ||
@@ -497,15 +493,14 @@ Boolean AMObj::operator==(const AMObj& rec) const {
       case AMObjType::RENEWAL_DATA:
       case AMObjType::TIME_EVENTS:
 
-      case AMObjType::MARKOV:
-      case AMObjType::HIDDEN_MARKOV:
-      case AMObjType::MARKOV_DATA:
       case AMObjType::VARIABLE_ORDER_MARKOV:
       case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV:
       case AMObjType::VARIABLE_ORDER_MARKOV_DATA:
       case AMObjType::SEMI_MARKOV:
       case AMObjType::HIDDEN_SEMI_MARKOV:
       case AMObjType::SEMI_MARKOV_DATA:
+      case AMObjType::NONHOMOGENEOUS_MARKOV:
+      case AMObjType::NONHOMOGENEOUS_MARKOV_DATA:
       case AMObjType::SEQUENCES:
       case AMObjType::MARKOVIAN_SEQUENCES:
       case AMObjType::CORRELATION:
@@ -839,15 +834,14 @@ ostream& AMObj::printValue(ostream& o, int line_size) const {
   case AMObjType::RENEWAL_DATA:
   case AMObjType::TIME_EVENTS:
 
-  case AMObjType::MARKOV:
-  case AMObjType::HIDDEN_MARKOV:
-  case AMObjType::MARKOV_DATA:
   case AMObjType::VARIABLE_ORDER_MARKOV:
   case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV:
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA:
   case AMObjType::SEMI_MARKOV:
   case AMObjType::HIDDEN_SEMI_MARKOV:
   case AMObjType::SEMI_MARKOV_DATA:
+  case AMObjType::NONHOMOGENEOUS_MARKOV:
+  case AMObjType::NONHOMOGENEOUS_MARKOV_DATA:
   case AMObjType::SEQUENCES:
   case AMObjType::MARKOVIAN_SEQUENCES:
   case AMObjType::CORRELATION:
@@ -1014,15 +1008,14 @@ size_t hashAMObj(const AMObj& v) {
   case AMObjType::RENEWAL_DATA:
   case AMObjType::TIME_EVENTS:
 
-  case AMObjType::MARKOV:
-  case AMObjType::HIDDEN_MARKOV:
-  case AMObjType::MARKOV_DATA:
   case AMObjType::VARIABLE_ORDER_MARKOV:
   case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV:
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA:
   case AMObjType::SEMI_MARKOV:
   case AMObjType::HIDDEN_SEMI_MARKOV:
   case AMObjType::SEMI_MARKOV_DATA:
+  case AMObjType::NONHOMOGENEOUS_MARKOV:
+  case AMObjType::NONHOMOGENEOUS_MARKOV_DATA:
   case AMObjType::SEQUENCES:
   case AMObjType::MARKOVIAN_SEQUENCES:
   case AMObjType::CORRELATION:
