@@ -51,12 +51,11 @@
 
 #include "sequence_analysis/renewal.h"
 #include "sequence_analysis/sequences.h"
-#include "sequence_analysis/markov.h"
-#include "sequence_analysis/hidden_markov.h"
 #include "sequence_analysis/variable_order_markov.h"
 #include "sequence_analysis/hidden_variable_order_markov.h"
 #include "sequence_analysis/semi_markov.h"
 #include "sequence_analysis/hidden_semi_markov.h"
+#include "sequence_analysis/nonhomogeneous_markov.h"
 #include "sequence_analysis/tops.h"
 #include "sequence_analysis/sequence_label.h"
 
@@ -77,8 +76,6 @@ extern const char *STAT_err_msgs_aml[];
 
 
 extern int nb_required_computation(const AMObjVector &args);
-extern double* buildRealFilterArray(const AMObjVector &args , int arg_index , const char *function ,
-                                    int output_index , int &nb_element);
 extern RWCollectable* STAT_binary_read(Format_error &error , const char *path);
 
 
@@ -736,8 +733,71 @@ int* buildIntArray(const AMObjVector &args , int arg_index , const char *functio
 
 /*--------------------------------------------------------------*
  *
+ *  Construction d'un tableau de reels a partir d'une objet de type ARRAY(REAL).
+ *
+ *--------------------------------------------------------------*/
+
+double* buildRealArray(const AMObjVector &args , int arg_index , const char *function ,
+                       int output_index , int &nb_element , bool filter)
+
+{
+  register int i;
+  bool status = true;
+  double *element = 0;
+
+
+  Array* parray = (Array*)args[arg_index].val.p;
+
+  switch (filter) {
+
+  case false : {
+    nb_element = parray->entries();
+    element = new double[nb_element];
+    break;
+  }
+
+  // allocation du filtre complet alors que seules les valeurs correspondant
+  // a la demi-largeur + valeur centrale sont lues
+
+  case true : {
+    nb_element = parray->entries() - 1;
+    element = new double[2 * nb_element + 1];
+    break;
+  }
+  }
+
+  ArrayIter* pnext = parray->iterator();
+  ArrayIter& next = *pnext;
+
+  i = 0;
+  while (next()) {
+    if ((next.key()).tag() != AMObjType::REAL) {
+      status = false;
+      genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_sddss) , function , output_index ,
+                  i + 1 , (next.key()).tag.string().data() , "REAL");
+    }
+    else {
+      element[i] = (next.key()).val.r;
+    }
+
+    i++;
+  }
+
+  delete pnext;
+
+  if (!status) {
+    delete [] element;
+    element = 0;
+  }
+
+  return element;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Construction d'un ensemble de vecteurs a partir d'un objet
- *  de type ARRAY(ARRAY(INT)), a partir d'un ensemble de sequences ou
+ *  de type ARRAY(ARRAY(INT/REAL)), a partir d'un ensemble de sequences ou
  *  a partir d'un fichier.
  *
  *--------------------------------------------------------------*/
@@ -754,7 +814,9 @@ AMObj STAT_Vectors(const AMObjVector &args)
   if (args[0].tag() == AMObjType::ARRAY) {
     bool status = true;
     register int i , j;
-    int nb_required , nb_variable = 0 , dim , nb_vector , *identifier = 0 , **vector = 0;
+    int nb_required , nb_variable = 0 , dim , nb_vector , type , *identifier = 0 ,
+        **int_vector = 0;
+    double **real_vector = 0;
     const Array* parray = (Array*)args[0].val.p , *pvector;
     Format_error error;
 
@@ -786,50 +848,98 @@ AMObj STAT_Vectors(const AMObjVector &args)
 
       else {
         pvector = (Array*)(next.key()).val.p;
+        dim = pvector->entries();
 
-        if (pvector->surfaceType() != AMObjType::INTEGER) {
+        if ((nb_variable > 0) && (dim != nb_variable)) {
           status = false;
-          genAMLError(ERRORMSG(VECTOR_ARRAY_ELEMENT_TYPE_sdss) , "Vectors" , i + 1 ,
-                      (pvector->surfaceType()).string().data() , "INT");
+          genAMLError(ERRORMSG(VECTOR_ARRAY_SIZE_sdd) , "Vectors" , i + 1 ,
+                      nb_variable);
+        }
+
+        if (pvector->surfaceType() == AMObjType::INTEGER) {
+          if (nb_variable == 0) {
+            type = INT_VALUE;
+
+            nb_variable = dim;
+            int_vector = new int*[nb_vector];
+            for (j = 0;j < nb_vector;j++) {
+              int_vector[j] = new int[nb_variable];
+            }
+          }
+
+          if ((type == INT_VALUE) && (dim == nb_variable)) {
+            ArrayIter* pvector_next = pvector->iterator();
+            ArrayIter& vector_next = *pvector_next;
+
+            j = 0;
+
+            while (vector_next()) {
+              if ((vector_next.key()).tag() != AMObjType::INTEGER) {
+                status = false;
+                genAMLError(ERRORMSG(VECTOR_ARRAY_ELEMENT_TYPE_sddss) , "Vectors" , i + 1 ,
+                            j + 1 , (vector_next.key()).tag.string().data() , "INT");
+              }
+              else {
+                int_vector[i][j] = (vector_next.key()).val.i;
+              }
+
+              j++;
+            }
+
+            delete pvector_next;
+          }
+
+          if (type != INT_VALUE) {
+            status = false;
+            genAMLError(ERRORMSG(VECTOR_ARRAY_ELEMENT_TYPE_sdss) , "Vectors" , i + 1 ,
+                        (pvector->surfaceType()).string().data() , "INT");
+          }
+        }
+
+        else if (pvector->surfaceType() == AMObjType::REAL) {
+          if (nb_variable == 0) {
+            type = REAL_VALUE;
+
+            nb_variable = dim;
+            real_vector = new double*[nb_vector];
+            for (j = 0;j < nb_vector;j++) {
+              real_vector[j] = new double[nb_variable];
+            }
+          }
+
+          if ((type == REAL_VALUE) && (dim == nb_variable)) {
+            ArrayIter* pvector_next = pvector->iterator();
+            ArrayIter& vector_next = *pvector_next;
+
+            j = 0;
+
+            while (vector_next()) {
+              if ((vector_next.key()).tag() != AMObjType::REAL) {
+                status = false;
+                genAMLError(ERRORMSG(VECTOR_ARRAY_ELEMENT_TYPE_sddss) , "Vectors" , i + 1 ,
+                            j + 1 , (vector_next.key()).tag.string().data() , "REAL");
+              }
+              else {
+                real_vector[i][j] = (vector_next.key()).val.r;
+              }
+
+              j++;
+            }
+
+            delete pvector_next;
+          }
+
+          if (type != REAL_VALUE) {
+            status = false;
+            genAMLError(ERRORMSG(VECTOR_ARRAY_ELEMENT_TYPE_sdss) , "Vectors" , i + 1 ,
+                        (pvector->surfaceType()).string().data() , "REAL");
+          }
         }
 
         else {
-          dim = pvector->entries();
-
-          if (nb_variable == 0) {
-            nb_variable = dim;
-            vector = new int*[nb_vector];
-            for (j = 0;j < nb_vector;j++) {
-              vector[j] = new int[nb_variable];
-            }
-          }
-
-          else if (dim != nb_variable) {
-            status = false;
-            genAMLError(ERRORMSG(VECTOR_ARRAY_SIZE_sdd) , "Vectors" , i + 1 ,
-                        nb_variable);
-            break;
-          }
-
-          ArrayIter* pvector_next = pvector->iterator();
-          ArrayIter& vector_next = *pvector_next;
-
-          j = 0;
-
-          while (vector_next()) {
-            if ((vector_next.key()).tag() != AMObjType::INTEGER) {
-              status = false;
-              genAMLError(ERRORMSG(VECTOR_ARRAY_ELEMENT_TYPE_sddss) , "Vectors" , i + 1 ,
-                          j + 1 , (vector_next.key()).tag.string().data() , "INT");
-            }
-            else {
-              vector[i][j] = (vector_next.key()).val.i;
-            }
-
-            j++;
-          }
-
-          delete pvector_next;
+          status = false;
+          genAMLError(ERRORMSG(VECTOR_ARRAY_ELEMENT_TYPE_sdss) , "Vectors" , i + 1 ,
+                      (pvector->surfaceType()).string().data() , "INT or REAL");
         }
       }
 
@@ -878,7 +988,12 @@ AMObj STAT_Vectors(const AMObjVector &args)
     }
 
     if (status) {
-      vec = new Vectors(nb_variable , nb_vector , vector , identifier);
+      if (type == INT_VALUE) {
+        vec = new Vectors(nb_vector , identifier , nb_variable , int_vector);
+      }
+      else {
+        vec = new Vectors(nb_vector , identifier , nb_variable , real_vector);
+      }
 
       status = vec->check(error);
 
@@ -891,11 +1006,18 @@ AMObj STAT_Vectors(const AMObjVector &args)
 
     delete [] identifier;
 
-    if (vector) {
+    if (int_vector) {
       for (i = 0;i < nb_vector;i++) {
-        delete [] vector[i];
+        delete [] int_vector[i];
       }
-      delete [] vector;
+      delete [] int_vector;
+    }
+
+    if (real_vector) {
+      for (i = 0;i < nb_vector;i++) {
+        delete [] real_vector[i];
+      }
+      delete [] real_vector;
     }
 
     if (!status) {
@@ -907,8 +1029,9 @@ AMObj STAT_Vectors(const AMObjVector &args)
   }
 
   if ((args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
-      (args[0].tag() == AMObjType::MARKOV_DATA) || (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
-      (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) || (args[0].tag() == AMObjType::TOPS)) {
+      (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
+      (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
+      (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA) || (args[0].tag() == AMObjType::TOPS)) {
     bool status = true , index_variable = false;
     int nb_required;
     Sequences *seq;
@@ -928,14 +1051,14 @@ AMObj STAT_Vectors(const AMObjVector &args)
     case AMObjType::MARKOVIAN_SEQUENCES :
       seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
       break;
-    case AMObjType::MARKOV_DATA :
-      seq = (Markov_data*)((STAT_model*)args[0].val.p)->pt;
-      break;
     case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
       seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
       break;
     case AMObjType::SEMI_MARKOV_DATA :
       seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+      seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
       break;
     case AMObjType::TOPS :
       seq = (Tops*)((STAT_model*)args[0].val.p)->pt;
@@ -999,7 +1122,7 @@ AMObj STAT_Vectors(const AMObjVector &args)
   }
 
   genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Vectors" , args[0].tag.string().data() ,
-              "ARRAY or SEQUENCES or MARKOVIAN_SEQUENCES or MARKOV_DATA or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or TOPS or STRING");
+              "ARRAY or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or TOPS or STRING");
   return AMObj(AMObjType::ERROR);
 }
 
@@ -1034,7 +1157,7 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
   if (args[0].tag() == AMObjType::STRING) {
     pstr = (AMString*)args[0].val.p;
     for (i = SYMBOLIC;i <= NUMERIC;i++) {
-      if ((*pstr == STAT_variable_word[i]) || (*pstr == STAT_variable_letter[i])) {
+      if ((*pstr == STAT_variable_type_word[i]) || (*pstr == STAT_variable_type_letter[i])) {
         break;
       }
     }
@@ -1111,7 +1234,7 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
     else {
       pstr = (AMString*)args[(i + 1) * scale - 1].val.p;
       for (j = SYMBOLIC;j <= NUMERIC;j++) {
-        if ((*pstr == STAT_variable_word[j]) || (*pstr == STAT_variable_letter[j])) {
+        if ((*pstr == STAT_variable_type_word[j]) || (*pstr == STAT_variable_type_letter[j])) {
           variable_type[i] = j;
           break;
         }
@@ -1655,18 +1778,18 @@ AMObj STAT_RenewalData(const AMObjVector &args)
   case AMObjType::MARKOVIAN_SEQUENCES :
     seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
     break;
-  case AMObjType::MARKOV_DATA :
-    seq = (Markov_data*)((STAT_model*)args[0].val.p)->pt;
-    break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
     seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::SEMI_MARKOV_DATA :
     seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
     break;
+  case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+    seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    break;
   default :
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "RenewalData" , 1 , args[0].tag.string().data() ,
-                "SEQUENCES or MARKOVIAN_SEQUENCES or MARKOV_DATA or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA");
+                "SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
     return AMObj(AMObjType::ERROR);
   }
 
@@ -1722,304 +1845,6 @@ AMObj STAT_RenewalData(const AMObjVector &args)
   else {
     AMLOUTPUT << "\n" << error;
     genAMLError(ERRORMSG(STAT_MODULE_s) , "TimeEvents");
-    return AMObj(AMObjType::ERROR);
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction d'une chaine de Markov a partir d'un fichier.
- *
- *--------------------------------------------------------------*/
-
-AMObj STAT_Markov(const AMObjVector &args)
-
-{
-  bool status = true;
-  int nb_required , length = DEFAULT_LENGTH;
-  Markov *markov;
-  Format_error error;
-
-
-  nb_required = 1;
-
-  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Markov"));
-
-  // argument obligatoire
-
-  if (args[0].tag() != AMObjType::STRING) {
-    status = false;
-    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Markov" , 1 ,
-                args[0].tag.string().data() , "STRING");
-  }
-
-  // argument optionnel
-
-  if (args.length() == nb_required + 2) {
-    if (args[nb_required].tag() != AMObjType::OPTION) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Markov" , nb_required + 1 ,
-                  args[nb_required].tag.string().data() , "OPTION");
-    }
-    else {
-      if (*((AMString*)args[nb_required].val.p) != "Length") {
-        status = false;
-        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Markov" , nb_required + 1 ,
-                    "Length");
-      }
-    }
-
-    if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Markov" , nb_required + 1 ,
-                  args[nb_required + 1].tag.string().data() , "INT");
-    }
-    else {
-      length = args[nb_required + 1].val.i;
-    }
-  }
-
-  if (!status) {
-    return AMObj(AMObjType::ERROR);
-  }
-
-  markov = markov_ascii_read(error , ((AMString*)args[0].val.p)->data() , length);
-
-  if (markov) {
-    STAT_model* model = new STAT_model(markov);
-    return AMObj(AMObjType::MARKOV , model);
-  }
-  else {
-    AMLOUTPUT << "\n" << error;
-    genAMLError(ERRORMSG(STAT_MODULE_s) , "Markov");
-    return AMObj(AMObjType::ERROR);
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction d'un "Mixture Transition Distribution" modele a partir
- *  d'une chaine de Markov d'ordre 1 et de poids..
- *
- *--------------------------------------------------------------*/
-
-AMObj STAT_MTDModel(const AMObjVector &args)
-
-{
-  bool status = true;
-  int nb_required , order , length = DEFAULT_LENGTH;
-  double *weight;
-  Markov *markov;
-  Format_error error;
-
-
-  nb_required = 2;
-
-  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "MTDModel"));
-
-  // arguments obligatoires
-
-  if (args[0].tag() != AMObjType::MARKOV) {
-    status = false;
-    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "MTDModel" , 1 ,
-                args[0].tag.string().data() , "STRING");
-  }
-
-  weight = 0;
-
-  if (args[1].tag() == AMObjType::ARRAY) {
-    Array* parray = (Array*)args[1].val.p;
-
-    if (parray->surfaceType() == AMObjType::REAL) {
-      weight = buildRealFilterArray(args , 1 , "MTDModel" , 2 , order);
-      if (!weight) {
-        status = false;
-      }
-    }
-
-    else {
-      status = false;
-      genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_1_sdss) , "MTDModel" , 2 ,
-                  (parray->surfaceType()).string().data() , "REAL");
-    }
-  }
-
-  // argument optionnel
-
-  if (args.length() == nb_required + 2) {
-    if (args[nb_required].tag() != AMObjType::OPTION) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "MTDModel" , nb_required + 1 ,
-                  args[nb_required].tag.string().data() , "OPTION");
-    }
-    else {
-      if (*((AMString*)args[nb_required].val.p) != "Length") {
-        status = false;
-        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "MTDModel" , nb_required + 1 ,
-                    "Length");
-      }
-    }
-
-    if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "MTDModel" , nb_required + 1 ,
-                  args[nb_required + 1].tag.string().data() , "INT");
-    }
-    else {
-      length = args[nb_required + 1].val.i;
-    }
-  }
-
-  if (!status) {
-    delete [] weight;
-    return AMObj(AMObjType::ERROR);
-  }
-
-  markov = ((Markov*)((STAT_model*)args[0].val.p)->pt)->MTD_model_building(error , AMLOUTPUT , order + 1 , weight , length);
-  delete [] weight;
-
-  if (markov) {
-    STAT_model* model = new STAT_model(markov);
-    return AMObj(AMObjType::MARKOV , model);
-  }
-  else {
-    AMLOUTPUT << "\n" << error;
-    genAMLError(ERRORMSG(STAT_MODULE_s) , "MTDModel");
-    return AMObj(AMObjType::ERROR);
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction d'une chaine de Markov cachee a partir d'un fichier.
- *
- *--------------------------------------------------------------*/
-
-AMObj STAT_HiddenMarkov(const AMObjVector &args)
-
-{
-  RWCString *pstr;
-  bool status = true , length_option = false , format_option = false , old_format = false;
-  register int i;
-  int nb_required , length = DEFAULT_LENGTH;
-  Hidden_markov *hmarkov;
-  Format_error error;
-
-
-  nb_required = 1;
-
-  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
-              (args.length() == nb_required + 4) ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "HiddenMarkov"));
-
-  // argument obligatoire
-
-  if (args[0].tag() != AMObjType::STRING) {
-    status = false;
-    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenMarkov" , 1 ,
-                args[0].tag.string().data() , "STRING");
-  }
-
-  // arguments optionnels
-
-  for (i = 0;i < (args.length() - nb_required) / 2;i++) {
-    if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenMarkov" , nb_required + i + 1 ,
-                  args[nb_required + i * 2].tag.string().data() , "OPTION");
-    }
-
-    else {
-      pstr = (AMString*)args[nb_required + i * 2].val.p;
-
-      if (*pstr == "Length") {
-        switch (length_option) {
-
-        case false : {
-          length_option = true;
-
-          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
-            status = false;
-            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenMarkov" , nb_required + i + 1 ,
-                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
-          }
-          else {
-            length = args[nb_required + i * 2 + 1].val.i;
-          }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenMarkov" , nb_required + i + 1);
-          break;
-        }
-        }
-      }
-
-      else if (*pstr == "Format") {
-        switch (format_option) {
-
-        case false : {
-          format_option = true;
-
-          if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
-            status = false;
-            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "HiddenMarkov" , nb_required + i + 1 ,
-                        args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
-          }
-          else {
-            pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
-
-            if (*pstr == "Current") {
-              old_format = false;
-            }
-            else if (*pstr == "Old") {
-              old_format = true;
-            }
-            else {
-              status = false;
-              genAMLError(ERRORMSG(K_FILE_FORMAT_ERR_sds) , "HiddenMarkov" ,
-                          nb_required + i + 1 , "Current or Old");
-            }
-          }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenMarkov" , nb_required + i + 1);
-          break;
-        }
-        }
-      }
-
-      else {
-        status = false;
-        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "HiddenMarkov" ,
-                    nb_required + i + 1 , "Length or Format");
-      }
-    }
-  }
-
-  if (!status) {
-    return AMObj(AMObjType::ERROR);
-  }
-
-  hmarkov = hidden_markov_ascii_read(error , ((AMString*)args[0].val.p)->data() , length , old_format);
-
-  if (hmarkov) {
-    STAT_model* model = new STAT_model(hmarkov);
-    return AMObj(AMObjType::HIDDEN_MARKOV , model);
-  }
-  else {
-    AMLOUTPUT << "\n" << error;
-    genAMLError(ERRORMSG(STAT_MODULE_s) , "HiddenMarkov");
     return AMObj(AMObjType::ERROR);
   }
 }
@@ -2451,17 +2276,89 @@ AMObj STAT_HiddenSemiMarkov(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'une sequence a partir d'un objet de type ARRAY(INT).
+ *  Construction d'une chaine de Markov non-homogene a partir d'un fichier.
  *
  *--------------------------------------------------------------*/
 
-static int** buildIntSequence(const Array *parray , int seq_index ,
-                              int &nb_variable , int &length)
+AMObj STAT_NonhomogeneousMarkov(const AMObjVector &args)
+
+{
+  bool status = true;
+  int nb_required , length = DEFAULT_LENGTH;
+  Nonhomogeneous_markov *markov;
+  Format_error error;
+
+
+  nb_required = 1;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "NonhomogeneousMarkov"));
+
+  // argument obligatoire
+
+  if (args[0].tag() != AMObjType::STRING) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "NonhomogeneousMarkov" , 1 ,
+                args[0].tag.string().data() , "STRING");
+  }
+
+  // argument optionnel
+
+  if (args.length() == nb_required + 2) {
+    if (args[nb_required].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "NonhomogeneousMarkov" , nb_required + 1 ,
+                  args[nb_required].tag.string().data() , "OPTION");
+    }
+    else {
+      if (*((AMString*)args[nb_required].val.p) != "Length") {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "NonhomogeneousMarkov" , nb_required + 1 ,
+                    "Length");
+      }
+    }
+
+    if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "NonhomogeneousMarkov" , nb_required + 1 ,
+                  args[nb_required + 1].tag.string().data() , "INT");
+    }
+    else {
+      length = args[nb_required + 1].val.i;
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  markov = nonhomogeneous_markov_ascii_read(error , ((AMString*)args[0].val.p)->data() , length);
+
+  if (markov) {
+    STAT_model* model = new STAT_model(markov);
+    return AMObj(AMObjType::NONHOMOGENEOUS_MARKOV , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "NonhomogeneousMarkov");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une sequence entiere a partir d'un objet de type ARRAY(INT).
+ *
+ *--------------------------------------------------------------*/
+
+static int** buildIntSequence(const Array *parray , int &length ,
+                              int &nb_variable , int seq_index)
 
 {
   bool status;
   register int i;
-  int **sequence = 0;
+  int **int_sequence = 0;
 
 
   if (nb_variable == 0) {
@@ -2470,8 +2367,8 @@ static int** buildIntSequence(const Array *parray , int seq_index ,
 
   length = parray->entries();
 
-  sequence = new int*[nb_variable];
-  sequence[0] = new int[length];
+  int_sequence = new int*[nb_variable];
+  int_sequence[0] = new int[length];
 
   ArrayIter* pnext = parray->iterator();
   ArrayIter& next = *pnext;
@@ -2486,7 +2383,7 @@ static int** buildIntSequence(const Array *parray , int seq_index ,
                   seq_index + 1 , i + 1 , (next.key()).tag.string().data() , "INT");
     }
     else {
-      sequence[0][i] = (next.key()).val.i;
+      int_sequence[0][i] = (next.key()).val.i;
     }
 
     i++;
@@ -2495,42 +2392,135 @@ static int** buildIntSequence(const Array *parray , int seq_index ,
   delete pnext;
 
   if (!status) {
-    delete [] sequence[0];
-    delete [] sequence;
+    delete [] int_sequence[0];
+    delete [] int_sequence;
 
-    sequence = 0;
+    int_sequence = 0;
   }
 
-  return sequence;
+  return int_sequence;
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'une sequence a partir d'un objet de type ARRAY(ARRAY(INT)).
+ *  Construction d'une sequence reelle a partir d'un objet de type ARRAY(REAL).
  *
  *--------------------------------------------------------------*/
 
-static int** buildArraySequence(const Array *parray , int seq_index , int &nb_variable ,
-                                int &length , const char *function , int type)
+static double** buildRealSequence(const Array *parray , int &length ,
+                                  int &nb_variable , int seq_index)
+
+{
+  bool status;
+  register int i;
+  double **real_sequence = 0;
+
+
+  if (nb_variable == 0) {
+    nb_variable = 1;
+  }
+
+  length = parray->entries();
+
+  real_sequence = new double*[nb_variable];
+  real_sequence[0] = new double[length];
+
+  ArrayIter* pnext = parray->iterator();
+  ArrayIter& next = *pnext;
+
+  status = true;
+  i = 0;
+
+  while (next()) {
+    if ((next.key()).tag() != AMObjType::REAL) {
+      status = false;
+      genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sddss) , "Sequences" ,
+                  seq_index + 1 , i + 1 , (next.key()).tag.string().data() , "REAL");
+    }
+    else {
+      real_sequence[0][i] = (next.key()).val.r;
+    }
+
+    i++;
+  }
+
+  delete pnext;
+
+  if (!status) {
+    delete [] real_sequence[0];
+    delete [] real_sequence;
+
+    real_sequence = 0;
+  }
+
+  return real_sequence;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Determination du type d'une sequence multivariee.
+ *
+ *--------------------------------------------------------------*/
+
+static int type_determination(const Array *parray , const char *pattern_label)
+
+{
+  int type = IMPLICIT_TYPE;
+  const Array *pvector;
+
+
+  ArrayIter* pnext = parray->iterator();
+  ArrayIter& next = *pnext;
+
+  next();
+ 
+  if ((next.key()).tag() == AMObjType::ARRAY) {
+    pvector = (Array*)(next.key()).val.p;
+
+    if (pvector->surfaceType() == AMObjType::INTEGER) {
+      type = INT_VALUE;
+    }
+    else if (pvector->surfaceType() == AMObjType::REAL) {
+      type = REAL_VALUE;
+    }
+    else {
+      genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sddss) , pattern_label , 1 ,
+                  1 , (pvector->surfaceType()).string().data() , "INT or REAL");
+    }
+  }
+
+  return type;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une sequence multivariee entiere a partir d'un objet de type ARRAY(ARRAY(INT)).
+ *
+ *--------------------------------------------------------------*/
+
+static int** buildIntArraySequence(const Array *parray , int &length , int index_parameter_type ,
+                                   int &nb_variable , int seq_index , const char *pattern_label)
 
 {
   bool status = true;
   register int i , j;
-  int dim , **sequence = 0;
+  int dim , **int_sequence = 0;
   const Array *pvector;
 
 
   length = parray->entries();
-  if (type == POSITION) {
+  if (index_parameter_type == POSITION) {
     length--;
   }
 
   if (nb_variable > 0) {
-    sequence = new int*[nb_variable];
-    sequence[0] = new int[type == POSITION ? length + 1 : length];
+    int_sequence = new int*[nb_variable];
+    int_sequence[0] = new int[index_parameter_type == POSITION ? length + 1 : length];
     for (i = 1;i < nb_variable;i++) {
-      sequence[i] = new int[length];
+      int_sequence[i] = new int[length];
     }
   }
 
@@ -2542,7 +2532,7 @@ static int** buildArraySequence(const Array *parray , int seq_index , int &nb_va
   while (next()) {
     if ((next.key()).tag() != AMObjType::ARRAY) {
       status = false;
-      genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sddss) , function , seq_index + 1 ,
+      genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sddss) , pattern_label , seq_index + 1 ,
                   i + 1 , (next.key()).tag.string().data() , "ARRAY");
     }
 
@@ -2551,7 +2541,7 @@ static int** buildArraySequence(const Array *parray , int seq_index , int &nb_va
 
       if (pvector->surfaceType() != AMObjType::INTEGER) {
         status = false;
-        genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sddss) , function , seq_index + 1 ,
+        genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sddss) , pattern_label , seq_index + 1 ,
                     i + 1 , (pvector->surfaceType()).string().data() , "INT");
       }
 
@@ -2560,52 +2550,56 @@ static int** buildArraySequence(const Array *parray , int seq_index , int &nb_va
 
         if (nb_variable == 0) {
           nb_variable = dim;
-          sequence = new int*[nb_variable];
-          sequence[0] = new int[type == POSITION ? length + 1 : length];
+
+          int_sequence = new int*[nb_variable];
+          int_sequence[0] = new int[index_parameter_type == POSITION ? length + 1 : length];
           for (j = 1;j < nb_variable;j++) {
-            sequence[j] = new int[length];
+            int_sequence[j] = new int[length];
           }
         }
 
-        else if (dim != nb_variable) {
-          status = false;
-          genAMLError(ERRORMSG(SEQUENCE_ARRAY_SIZE_sddd) , function , seq_index + 1 ,
-                      i + 1 , nb_variable);
-          break;
-        }
+//        if ((dim == nb_variable) || ((index_parameter_type == POSITION) &&
+//             (i == length) && (dim == 1))) {
+	if (dim == nb_variable) {
+          ArrayIter* pvector_next = pvector->iterator();
+          ArrayIter& vector_next = *pvector_next;
 
-        ArrayIter* pvector_next = pvector->iterator();
-        ArrayIter& vector_next = *pvector_next;
+          j = 0;
 
-        j = 0;
-
-        while (vector_next()) {
-          if ((vector_next.key()).tag() != AMObjType::INTEGER) {
-            status = false;
-            genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdddss) , function , seq_index + 1 ,
-                        i + 1 , j + 1 , (vector_next.key()).tag.string().data() , "INT");
-          }
-
-          else {
-            if ((j == 0) && ((type == POSITION) || (type == TIME)) &&
-                (vector_next.key()).val.i < 0) {
+          while (vector_next()) {
+            if ((vector_next.key()).tag() != AMObjType::INTEGER) {
               status = false;
-              genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_VALUE_sddd) , function ,
-                          seq_index + 1 , i + 1 , j + 1);
+              genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdddss) , pattern_label , seq_index + 1 ,
+                          i + 1 , j + 1 , (vector_next.key()).tag.string().data() , "INT");
             }
+
             else {
-              sequence[j][i] = (vector_next.key()).val.i;
+              if ((j == 0) && ((index_parameter_type == POSITION) || (index_parameter_type == TIME)) &&
+                  (vector_next.key()).val.i < 0) {
+                status = false;
+                genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_VALUE_sddd) , pattern_label ,
+                            seq_index + 1 , i + 1 , j + 1);
+              }
+              else {
+                int_sequence[j][i] = (vector_next.key()).val.i;
+              }
             }
+
+            if ((index_parameter_type == POSITION) && (i == length) && (j == 0)) {
+	      break;
+            }
+
+            j++;
           }
 
-          if ((type == POSITION) && (i == length) && (j == 0)) {
-            break;
-          }
-
-          j++;
+          delete pvector_next;
         }
 
-        delete pvector_next;
+        else {
+          status = false;
+          genAMLError(ERRORMSG(SEQUENCE_ARRAY_SIZE_sddd) , pattern_label , seq_index + 1 ,
+                      i + 1 , nb_variable);
+        }
       }
     }
 
@@ -2614,23 +2608,130 @@ static int** buildArraySequence(const Array *parray , int seq_index , int &nb_va
 
   delete pnext;
 
-  if ((!status) && (sequence)) {
+  if ((!status) && (int_sequence)) {
     for (i = 0;i < nb_variable;i++) {
-      delete [] sequence[i];
+      delete [] int_sequence[i];
     }
-    delete [] sequence;
+    delete [] int_sequence;
 
-    sequence = 0;
+    int_sequence = 0;
   }
 
-  return sequence;
+  return int_sequence;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une sequence multivariee reelle a partir d'un objet de type ARRAY(ARRAY(INT)).
+ *
+ *--------------------------------------------------------------*/
+
+static double** buildRealArraySequence(const Array *parray , int &length , int &nb_variable ,
+                                       int seq_index , const char *pattern_label)
+
+{
+  bool status = true;
+  register int i , j;
+  int dim;
+  double **real_sequence = 0;
+  const Array *pvector;
+
+
+  length = parray->entries();
+
+  if (nb_variable > 0) {
+    real_sequence = new double*[nb_variable];
+    for (i = 0;i < nb_variable;i++) {
+      real_sequence[i] = new double[length];
+    }
+  }
+
+  ArrayIter* pnext = parray->iterator();
+  ArrayIter& next = *pnext;
+
+  i = 0;
+
+  while (next()) {
+    if ((next.key()).tag() != AMObjType::ARRAY) {
+      status = false;
+      genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sddss) , pattern_label , seq_index + 1 ,
+                  i + 1 , (next.key()).tag.string().data() , "ARRAY");
+    }
+
+    else {
+      pvector = (Array*)(next.key()).val.p;
+
+      if (pvector->surfaceType() != AMObjType::REAL) {
+        status = false;
+        genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sddss) , pattern_label , seq_index + 1 ,
+                    i + 1 , (pvector->surfaceType()).string().data() , "REAL");
+      }
+
+      else {
+        dim = pvector->entries();
+
+        if (nb_variable == 0) {
+          nb_variable = dim;
+
+          real_sequence = new double*[nb_variable];
+          for (j = 0;j < nb_variable;j++) {
+            real_sequence[j] = new double[length];
+          }
+        }
+
+        if (dim == nb_variable) {
+          ArrayIter* pvector_next = pvector->iterator();
+          ArrayIter& vector_next = *pvector_next;
+
+          j = 0;
+
+          while (vector_next()) {
+            if ((vector_next.key()).tag() != AMObjType::REAL) {
+              status = false;
+              genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdddss) , pattern_label , seq_index + 1 ,
+                          i + 1 , j + 1 , (vector_next.key()).tag.string().data() , "REAL");
+            }
+            else {
+              real_sequence[j][i] = (vector_next.key()).val.r;
+            }
+
+            j++;
+          }
+
+          delete pvector_next;
+        }
+
+        else {
+          status = false;
+          genAMLError(ERRORMSG(SEQUENCE_ARRAY_SIZE_sddd) , pattern_label , seq_index + 1 ,
+                      i + 1 , nb_variable);
+        }
+      }
+    }
+
+    i++;
+  }
+
+  delete pnext;
+
+  if ((!status) && (real_sequence)) {
+    for (i = 0;i < nb_variable;i++) {
+      delete [] real_sequence[i];
+    }
+    delete [] real_sequence;
+
+    real_sequence = 0;
+  }
+
+  return real_sequence;
 }
 
 
 /*--------------------------------------------------------------*
  *
  *  Construction d'un ensemble de sequences a partir d'un objet
- *  de type ARRAY(ARRAY(INT)), ARRAY(ARRAY(ARRAY(INT))) ou RENEWAL_DATA ou
+ *  de type ARRAY(ARRAY(INT/REAL)), ARRAY(ARRAY(ARRAY(INT/REAL))) ou RENEWAL_DATA ou
  *  a partir d'un fichier.
  *
  *--------------------------------------------------------------*/
@@ -2649,7 +2750,7 @@ AMObj STAT_Sequences(const AMObjVector &args)
     RWCString *pstr;
     bool status = true , index_parameter_option = false , identifier_option = false;
     register int i , j;
-    int nb_required , nb_sequence , itype = INT_VALUE , *identifier = 0;
+    int nb_required , nb_sequence , index_parameter_type = IMPLICIT_TYPE , *identifier = 0;
 
 
     nb_required = 1;
@@ -2725,10 +2826,10 @@ AMObj STAT_Sequences(const AMObjVector &args)
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
 
               if (*pstr == "Position") {
-                itype = POSITION;
+                index_parameter_type = POSITION;
               }
               else if (*pstr == "Time") {
-                itype = TIME;
+                index_parameter_type = TIME;
               }
               else {
                 status = false;
@@ -2767,7 +2868,8 @@ AMObj STAT_Sequences(const AMObjVector &args)
 
     else {
       register int j;
-      int nb_variable = 0 , *type , *length , ***sequence;
+      int nb_variable = 0 , type , *length , ***int_sequence;
+      double ***real_sequence;
       const Array *seq_array;
       Sequences *seq;
       Markovian_sequences *markovian_seq;
@@ -2775,9 +2877,15 @@ AMObj STAT_Sequences(const AMObjVector &args)
 
 
       length = new int[nb_sequence];
-      sequence = new int**[nb_sequence];
+
+      int_sequence = new int**[nb_sequence];
       for (i = 0;i < nb_sequence;i++) {
-        sequence[i] = 0;
+        int_sequence[i] = 0;
+      }
+
+      real_sequence = new double**[nb_sequence];
+      for (i = 0;i < nb_sequence;i++) {
+        real_sequence[i] = 0;
       }
 
       ArrayIter* pnext = parray->iterator();
@@ -2788,20 +2896,66 @@ AMObj STAT_Sequences(const AMObjVector &args)
         seq_array = (Array*)(next.key()).val.p;
 
         switch ((seq_array->surfaceType())()) {
-        case AMObjType::INTEGER :
-          sequence[i] = buildIntSequence(seq_array , i , nb_variable , length[i]);
-          break;
-        case AMObjType::ARRAY :
-          sequence[i] = buildArraySequence(seq_array , i , nb_variable , length[i] ,
-                                           "Sequences" , itype);
-          break;
-        default :
-          genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdss) , "Sequences" , i + 1 ,
-                      (seq_array->surfaceType()).string().data() , "INT or ARRAY");
+
+        case AMObjType::INTEGER : {
+          if (i == 0) {
+            type = INT_VALUE;
+          }
+          if (type == INT_VALUE) {
+            int_sequence[i] = buildIntSequence(seq_array, length[i] , nb_variable , i);
+          }
+          else {
+            status = false;
+            genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdss) , "Sequences" , i + 1 ,
+                        (seq_array->surfaceType()).string().data() , "INT");
+          }
           break;
         }
 
-        if (!sequence[i]) {
+        case AMObjType::REAL : {
+          if (i == 0) {
+            type = REAL_VALUE;
+          }
+          if (type == REAL_VALUE) {
+            real_sequence[i] = buildRealSequence(seq_array, length[i] , nb_variable , i);
+          }
+          else {
+            status = false;
+            genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdss) , "Sequences" , i + 1 ,
+                        (seq_array->surfaceType()).string().data() , "REAL");
+          }
+          break;
+        }
+
+        case AMObjType::ARRAY : {
+          if (i == 0) {
+            type = type_determination(seq_array , "Sequences");
+          }
+          if (type == INT_VALUE) {
+            int_sequence[i] = buildIntArraySequence(seq_array , length[i] , index_parameter_type ,
+                                                    nb_variable , i , "Sequences");
+          }
+          else if (type == REAL_VALUE) {
+            real_sequence[i] = buildRealArraySequence(seq_array , length[i] , nb_variable ,
+                                                      i , "Sequences");
+          }
+          else {
+           status = false;
+           genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdss) , "Sequences" , i + 1 ,
+                        (seq_array->surfaceType()).string().data() , "INT or REAL");
+          }
+          break;
+        }
+
+        default : {
+          status = false;
+          genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdss) , "Sequences" , i + 1 ,
+                      (seq_array->surfaceType()).string().data() , "INT or REAL or ARRAY");
+          break;
+        }
+        }
+
+        if ((!int_sequence[i]) && (!real_sequence[i])) {
           status = false;
           break;
         }
@@ -2817,14 +2971,18 @@ AMObj STAT_Sequences(const AMObjVector &args)
       }
 
       if (status) {
-        type = new int[nb_variable];
-        type[0] = itype;
-        for (i = 1;i < nb_variable;i++) {
-          type[i] = INT_VALUE;
+        if (index_parameter_type != IMPLICIT_TYPE) {
+          nb_variable--;
         }
 
-        seq = new Sequences(nb_variable , type , nb_sequence , length , sequence , identifier);
-        delete [] type;
+        if (type == INT_VALUE) {
+          seq = new Sequences(nb_sequence , identifier , length , index_parameter_type ,
+                              nb_variable , INT_VALUE , int_sequence);
+        }
+        else {
+          seq = new Sequences(nb_sequence , identifier , length ,
+                              nb_variable , real_sequence);
+        }
 
         status = seq->check(error , SEQ_label[SEQL_SEQUENCE]);
 
@@ -2838,15 +2996,24 @@ AMObj STAT_Sequences(const AMObjVector &args)
       delete [] identifier;
 
       delete [] length;
+
       for (i = 0;i < nb_sequence;i++) {
-        if (sequence[i]) {
+        if (int_sequence[i]) {
           for (j = 0;j < nb_variable;j++) {
-            delete [] sequence[i][j];
+            delete [] int_sequence[i][j];
           }
-          delete [] sequence[i];
+          delete [] int_sequence[i];
+        }
+
+        if (real_sequence[i]) {
+          for (j = 0;j < nb_variable;j++) {
+            delete [] real_sequence[i][j];
+          }
+          delete [] real_sequence[i];
         }
       }
-      delete [] sequence;
+      delete [] int_sequence;
+      delete [] real_sequence;
 
       if (!status) {
         return AMObj(AMObjType::ERROR);
@@ -2893,15 +3060,49 @@ AMObj STAT_Sequences(const AMObjVector &args)
   }
 
   case AMObjType::STRING : {
+    bool status = true , old_format = false;
+    int nb_required;
     Sequences *seq;
     Markovian_sequences *markovian_seq;
     Format_error error;
 
 
-    CHECKCONDVA(args.length() == 1 ,
-                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Sequences"));
+    nb_required = 1;
 
-    seq = sequences_ascii_read(error , ((AMString*)args[0].val.p)->data());
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Sequences"));
+
+    // argument optionnel
+
+    if (args.length() == nb_required + 2) {
+      if (args[nb_required].tag() != AMObjType::OPTION) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Sequences" , nb_required + 1 ,
+                    args[nb_required].tag.string().data() , "OPTION");
+      }
+      else {
+        if (*((AMString*)args[nb_required].val.p) != "OldFormat") {
+          status = false;
+          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Sequences" , nb_required + 1 ,
+                      "OldFormat");
+        }
+      }
+
+      if (args[nb_required + 1].tag() != AMObjType::BOOL) {
+       status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Sequences" , nb_required + 1 ,
+                    args[nb_required + 1].tag.string().data() , "BOOL");
+      }
+      else {
+        old_format = args[nb_required + 1].val.b;
+      }
+
+      if (!status) {
+        return AMObj(AMObjType::ERROR);
+      }
+    }
+
+    seq = sequences_ascii_read(error , ((AMString*)args[0].val.p)->data() , old_format);
 
     if (seq) {
       markovian_seq = seq->markovian_sequences(error);
@@ -3103,7 +3304,7 @@ AMObj STAT_Tops(const AMObjVector &args)
     bool status = true;
     register int i , j;
     int nb_required , nb_sequence , nb_variable = 0 , *type , *length ,
-        *identifier = 0 , ***sequence;
+        *identifier = 0 , ***int_sequence;
     const Array *parray = (Array*)args[0].val.p , *seq_array;
     Sequences *seq;
     Tops *tops;
@@ -3124,9 +3325,9 @@ AMObj STAT_Tops(const AMObjVector &args)
     // argument obligatoire
 
     length = new int[nb_sequence];
-    sequence = new int**[nb_sequence];
+    int_sequence = new int**[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      sequence[i] = 0;
+      int_sequence[i] = 0;
     }
 
     ArrayIter* pnext = parray->iterator();
@@ -3141,11 +3342,11 @@ AMObj STAT_Tops(const AMObjVector &args)
                     (seq_array->surfaceType()).string().data() , "ARRAY");
       }
       else {
-        sequence[i] = buildArraySequence(seq_array , i , nb_variable , length[i] ,
-                                         "Tops" , true);
+        int_sequence[i] = buildIntArraySequence(seq_array , length[i] , POSITION ,
+                                                nb_variable , i , "Tops");
       }
 
-      if (!sequence[i]) {
+      if (!int_sequence[i]) {
         status = false;
         break;
       }
@@ -3199,12 +3400,9 @@ AMObj STAT_Tops(const AMObjVector &args)
     }
 
     if (status) {
-      type = new int[nb_variable];
-      type[0] = POSITION;
-      type[1] = NB_INTERNODE;
-
-      seq = new Sequences(nb_variable , type , nb_sequence , length , sequence , identifier);
-      delete [] type;
+      nb_variable--;
+      seq = new Sequences(nb_sequence , identifier , length , POSITION ,
+                          nb_variable , NB_INTERNODE , int_sequence);
 
       status = seq->check(error , SEQ_label[SEQL_TOP]);
 
@@ -3218,15 +3416,16 @@ AMObj STAT_Tops(const AMObjVector &args)
     delete [] identifier;
 
     delete [] length;
+
     for (i = 0;i < nb_sequence;i++) {
-      if (sequence[i]) {
+      if (int_sequence[i]) {
         for (j = 0;j < nb_variable;j++) {
-          delete [] sequence[i][j];
+          delete [] int_sequence[i][j];
         }
-        delete [] sequence[i];
+        delete [] int_sequence[i];
       }
     }
-    delete [] sequence;
+    delete [] int_sequence;
 
     if (!status) {
       return AMObj(AMObjType::ERROR);
@@ -3247,14 +3446,46 @@ AMObj STAT_Tops(const AMObjVector &args)
   }
 
   case AMObjType::STRING : {
+    bool status = true , old_format = false;
+    int nb_required;
     Tops *tops;
     Format_error error;
 
 
-    CHECKCONDVA(args.length() == 1 ,
-                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Tops"));
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Tops"));
 
-    tops = tops_ascii_read(error , ((AMString*)args[0].val.p)->data());
+    // argument optionnel
+
+    if (args.length() == nb_required + 2) {
+      if (args[nb_required].tag() != AMObjType::OPTION) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Tops" , nb_required + 1 ,
+                    args[nb_required].tag.string().data() , "OPTION");
+      }
+      else {
+        if (*((AMString*)args[nb_required].val.p) != "OldFormat") {
+          status = false;
+          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Tops" , nb_required + 1 ,
+                      "OldFormat");
+        }
+      }
+
+      if (args[nb_required + 1].tag() != AMObjType::BOOL) {
+       status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Tops" , nb_required + 1 ,
+                    args[nb_required + 1].tag.string().data() , "BOOL");
+      }
+      else {
+        old_format = args[nb_required + 1].val.b;
+      }
+
+      if (!status) {
+        return AMObj(AMObjType::ERROR);
+      }
+    }
+
+    tops = tops_ascii_read(error , ((AMString*)args[0].val.p)->data() , old_format);
 
     if (tops) {
       STAT_model* model = new STAT_model(tops);
@@ -3354,21 +3585,17 @@ AMObj STAT_Tops(const AMObjVector &args)
       return AMObj(AMObjType::RENEWAL_DATA , model);
     }
 
-    if (obj->isA() == STATI_MARKOV) {
-      model = new STAT_model((Markov*)obj);
-      return AMObj(AMObjType::MARKOV , model);
-    }
     if (obj->isA() == STATI_SEMI_MARKOV) {
       model = new STAT_model((Semi_markov*)obj);
       return AMObj(AMObjType::SEMI_MARKOV , model);
     }
-    if (obj->isA() == STATI_HIDDEN_MARKOV) {
-      model = new STAT_model((Hidden_markov*)obj);
-      return AMObj(AMObjType::HIDDEN_MARKOV , model);
-    }
     if (obj->isA() == STATI_HIDDEN_SEMI_MARKOV) {
       model = new STAT_model((Hidden_semi_markov*)obj);
       return AMObj(AMObjType::HIDDEN_SEMI_MARKOV , model);
+    }
+    if (obj->isA() == STATI_NONHOMOGENEOUS_MARKOV) {
+      model = new STAT_model((Nonhomogeneous_markov*)obj);
+      return AMObj(AMObjType::NONHOMOGENEOUS_MARKOV , model);
     }
 
     if (obj->isA() == STATI_SEQUENCES) {
@@ -3397,13 +3624,13 @@ AMObj STAT_Tops(const AMObjVector &args)
       model = new STAT_model((Markovian_sequences*)obj);
       return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
     }
-    if (obj->isA() == STATI_MARKOV_DATA) {
-      model = new STAT_model((Markov_data*)obj);
-      return AMObj(AMObjType::MARKOV_DATA , model);
-    }
     if (obj->isA() == STATI_SEMI_MARKOV_DATA) {
       model = new STAT_model((Semi_markov_data*)obj);
       return AMObj(AMObjType::SEMI_MARKOV_DATA , model);
+    }
+    if (obj->isA() == STATI_NONHOMOGENEOUS_MARKOV_DATA) {
+      model = new STAT_model((Nonhomogeneous_markov_data*)obj);
+      return AMObj(AMObjType::NONHOMOGENEOUS_MARKOV_DATA , model);
     }
     if (obj->isA() == STATI_CORRELATION) {
       model = new STAT_model((Correlation*)obj);

@@ -2842,9 +2842,10 @@ static AMObj K_ToArray(const AMObjVector& args) {
               args[0].tag() ==AMObjType::SET ||
               args[0].tag() ==AMObjType::SEQUENCES ||
               args[0].tag() ==AMObjType::MARKOVIAN_SEQUENCES ||
-              args[0].tag() ==AMObjType::MARKOV_DATA ||
-              args[0].tag() ==AMObjType::SEMI_MARKOV_DATA,
-              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss), "ToArray", args[0].tag.string().data(), "ARRAY or LIST or SET or a SEQUENCES"));
+              args[0].tag() ==AMObjType::VARIABLE_ORDER_MARKOV_DATA ||
+              args[0].tag() ==AMObjType::SEMI_MARKOV_DATA ||
+              args[0].tag() ==AMObjType::NONHOMOGENEOUS_MARKOV_DATA,
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss), "ToArray", args[0].tag.string().data(), "ARRAY or LIST or SET or SEQUENCES"));
 
   Array* array = 0;
 
@@ -2901,9 +2902,10 @@ static AMObj K_ToArray(const AMObjVector& args) {
     }
     break;
   case AMObjType::SEQUENCES:
-  case AMObjType::MARKOVIAN_SEQUENCES :
-  case AMObjType::MARKOV_DATA :
-  case AMObjType::SEMI_MARKOV_DATA :
+  case AMObjType::MARKOVIAN_SEQUENCES:
+  case AMObjType::VARIABLE_ORDER_MARKOV_DATA:
+  case AMObjType::SEMI_MARKOV_DATA:
+  case AMObjType::NONHOMOGENEOUS_MARKOV_DATA:
     {
 
       Sequences* seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
@@ -2920,7 +2922,7 @@ static AMObj K_ToArray(const AMObjVector& args) {
 
           for(int k=0;k<seq->get_nb_variable();k++) {
 
-            *vect_array += AMObj(AMObjType::INTEGER,seq->get_sequence(i,k,j));
+            *vect_array += AMObj(AMObjType::INTEGER,seq->get_int_sequence(i,k,j));
 
           }
 
