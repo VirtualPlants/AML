@@ -220,7 +220,9 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
-    nf = Factory( name= "Plot", 
+	#//////////////////////////////////////////////////////////////////////////////
+
+    nf = Factory( name= "Plot (gnuplot)", 
                   description= "Graphical output of an object of the STAT module using the GNUPLOT software.", 
                   category = "STAT", 
                   nodemodule = "py_stat",
@@ -229,11 +231,34 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
+    nf = Factory( name= "PlotSegmentProfile (gnuplot)", 
+                  description= "Graphical output of segment profiles.", 
+                  category = "STAT.Sequence", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_plot_segprofile",
+                  inputs=(dict(name='sequence'), 
+                             dict(name='individual',interface = IInt),
+                             dict(name='nb_segment', interface = IInt),
+                             dict(name='model', interface=IStr),
+                             dict(name='output', interface=IEnumStr(['Segment', 'ChangePoint']), value='Segment'),
+                         ),
+                  outputs=(), )
+    package.add_factory( nf )
+
+    nf = Factory( name= "PlotData (gnuplot)", 
+                  description= "Graphical output of sequences.", 
+                  category = "STAT.Sequence", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_plot_data",
+                  inputs=(dict(name='sequence'), ),
+                  outputs=(), )
+    package.add_factory( nf )
+    
     #//////////////////////////////////////////////////////////////////////////////
     # Compare algorithms
     nf = Factory( name= "Compare(frequency)", 
                   description= "Comparison of frequency distributions.", 
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_compare_frequency",
                   inputs=(dict(name='histos',interface=ISequence),
@@ -393,7 +418,7 @@ def define_factory(package):
     package.add_factory( nf )
 
     nf = Factory( name= "Cluster", 
-                  description= "Extraction of the data part of an object of type model.",
+                  description= "Clustering of values",
                   category = "STAT", 
                   nodemodule = "py_stat",
                   nodeclass = "py_cluster",
@@ -401,10 +426,10 @@ def define_factory(package):
                            dict(name='mode',
                                 interface=IEnumStr(["Step","Information","Limit"]),
                                 value="Step"),
-                           dict(name='step', interface=IInt), 
+                           dict(name='variable_rank', interface=IInt(min=1),value=None),
+                           dict(name='step', interface=IInt),
                            dict(name='information_ratio', interface=IFloat),
                            dict(name='limits',interface=ISequence),
-                           dict(name='AddVariable', interface=IBool, value= False),
                           ),
                   )
     package.add_factory( nf )
@@ -418,5 +443,81 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
+    nf = Factory( name= "SelectVariable", 
+                  description= "Selection of variables.",
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_select_variable",
+                  inputs = [dict(name='multivariate'),
+                            dict(name='variables', interface=ISequence), 
+                            dict(name='mode', interface=IEnumStr(['Keep','Reject']), value='Keep')],
+                )
+    package.add_factory( nf )
 
+    nf = Factory( name= "SelectIndividual", 
+                  description= "Selection of individuals.",
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_select_individual",
+                  inputs = [dict(name='data'),
+                            dict(name='individuals', interface=ISequence), 
+                            dict(name='mode', interface=IEnumStr(['Keep','Reject']), value='Keep')],
+                )
+    package.add_factory( nf )
+
+    nf = Factory( name= "Segmentation", 
+                  description= "Segmentation of a sequence.",
+                  category = "STAT.Sequence", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_segmentation",
+                  inputs = [dict(name='seq'),
+                            dict(name='individual',  interface=IInt), 
+                            dict(name='nb_segment', interface=IInt), 
+                            dict(name='change points', interface=ISequence), 
+                            dict( name='available models', interface=IEnumStr(['Symbolic', 'Ordinal', 'Poisson', 'Numeric', 'Mean', 'Variance']), ),
+                            dict(name='model', interface=IStr),
+                            dict(name='NbSegment',  interface=IEnumStr(['Fixed', 'Estimated']),  value='Estimated'), 
+                            dict(name='Output', interface=IEnumStr(['Sequence','Residual']), value='Sequence')],
+                )
+    package.add_factory( nf )
+
+    nf = Factory( name= "SegmentationSample", 
+                  description= "Segmentation of a sample of sequences.",
+                  category = "STAT.Sequence", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_segmentation_sample",
+                  inputs = [dict(name='seq'),
+                            dict(name='nb_segment', interface=ISequence), 
+                            dict( name='available models', interface=IEnumStr(['Symbolic', 'Ordinal', 'Poisson', 'Numeric', 'Mean', 'Variance']), ),
+                            dict(name='model', interface=IStr),
+                            dict(name='Output', interface=IEnumStr(['Sequence','Residual']), value='Sequence')],
+                )
+    package.add_factory( nf )
+    
+    nf = Factory( name= "ComputeCorrelation", 
+                  description= "Computation of sample autocorrelation function.",
+                  category = "STAT.Sequence", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_compute_correlation",
+                  inputs = [dict(name='seq'),
+                            dict(name='MaxLag', interface=IInt(),  value=-1), 
+                            dict( name='Type', interface=IEnumStr(['Pearson', 'Spearman', 'Kendall']), value='Pearson' ),
+                            dict( name='Normalization', interface=IEnumStr(['Approximated', 'Exact']), value='Exact' )],
+                )
+    package.add_factory( nf )
+    
+    nf = Factory( name= "ComputeCorrelation multivariate", 
+                  description= "Computation of sample autocorrelation  or cross-correlation functions.",
+                  category = "STAT.Sequence", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_compute_correlation_mult",
+                  inputs = [dict(name='seq'),
+                            dict(name='autocorrelation',  interface=IBool,  value=True), 
+                            dict(name='variable1', interface=IInt(min=1)), 
+                            dict(name='variable2', interface=IInt(min=1)), 
+                            dict(name='MaxLag', interface=IInt(),  value=-1), 
+                            dict( name='Type', interface=IEnumStr(['Pearson', 'Spearman', 'Kendall']), value='Pearson' ),
+                            dict( name='Normalization', interface=IEnumStr(['Approximated', 'Exact']), value='Exact' )],
+                )
+    package.add_factory( nf )
 

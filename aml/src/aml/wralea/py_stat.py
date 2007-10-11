@@ -194,6 +194,19 @@ def py_plot( obj ):
         else:
             Plot(obj)
 
+def py_plot_segprofile(seq, ind, nb_seg, model, output):
+    if seq:
+        args= [seq, ind, nb_seg]
+        model = model.split(',')
+        model = map(lambda x:x.strip(),model)
+        args.extend(model)
+        kwds={'ViewPoint':'SegmentProfile', 'Output':output}
+        Plot(*args, **kwds)
+
+def py_plot_data(seq):
+    if seq:
+        Plot(seq,  ViewPoint="Data")
+
 #//////////////////////////////////////////////////////////////////////////////
 
 class PyObjectFromFile(Node):
@@ -405,17 +418,86 @@ def py_shift(obj, param=0):
 def py_shiftn(obj, variable=0, param=0):
     if obj: return Shift(obj,variable, param)
 
-def py_cluster(obj, mode, step, information_ratio, limits, AddVariable):
+def py_cluster(obj, mode, variable_rank, step, information_ratio, limits):
     if obj is None: return
+
     if mode == "Step":
-        return Cluster(obj, mode, step)
+        if variable_rank:
+            return Cluster(obj, mode, variable_rank, step)
+        else:
+            return Cluster(obj, mode, step)
     elif mode == 'Information':
         return Cluster(obj, mode, information_ratio)
     elif mode == "Limit":
         _limits = adapt2list(limits)
-        return Cluster(obj, mode, _limits)
+        if variable_rank:
+            return Cluster(obj, mode, variable_rank, _limits)
+        else:
+            return Cluster(obj, mode, _limits)
 
 def py_simulate_dist(obj, size=100):
     if obj is None:
         return
     return Simulate(obj,size)
+
+def py_select_variable(obj, variables, mode):
+    if not obj:
+        return
+    vars = adapt2list(variables)
+    return SelectVariable(obj, vars, Mode=mode),
+
+def py_select_individual(obj, individuals, mode):
+    if not obj:
+        return
+    vars = adapt2list(individuals)
+    return SelectIndividual(obj, vars, Mode=mode),
+
+def py_segmentation(seq, ind, nb_segment, change_points,  model_list, model, NbSegment, Output):
+    if not seq:
+        return
+    
+    kwds={}
+    args= [seq, ind]
+    if change_points:
+        args.append(change_points)
+    else:
+        args.append(nb_segment)
+    model = model.split(',')
+    model = map(lambda x:x.strip(),model)
+    args.extend(model)
+
+    if change_points:
+        kwds['Output']=Output
+        return Segmentation(*args, **kwds)
+    else:
+        kwds['NbSegment']=NbSegment
+        if NbSegment != 'Estimated':
+            kwds['Output']=Output
+        return Segmentation(*args, **kwds)
+
+def py_segmentation_sample(seq, nb_segment, model_list, model, Output):
+    if not seq:
+        return
+    kwds={}
+    args= [seq, nb_segment]
+
+    model = model.split(',')
+    model = map(lambda x:x.strip(),model)
+    args.extend(model)
+
+    kwds['Output']=Output
+    return Segmentation(*args, **kwds)
+
+def py_compute_correlation(seq,  MaxLag,  Type,  Normalization):
+    if not seq:
+        return 
+
+    return ComputeCorrelation(seq,  MaxLag=MaxLag,  Type=Type,  Normalization=Normalization)
+    
+def py_compute_correlation_mult(seq,  auto,  var1,  var2,  MaxLag,  Type,  Normalization):
+    if not seq:
+        return 
+    if auto:
+        return ComputeCorrelation(seq,  var1,  MaxLag=MaxLag,  Type=Type,  Normalization=Normalization)
+    else:
+        return ComputeCorrelation(seq,  var1, var2,  MaxLag=MaxLag,  Type=Type,  Normalization=Normalization)

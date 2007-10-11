@@ -48,9 +48,6 @@
 
 using namespace std;
 
-#ifndef PyBool_Check
-#define PyBool_Check PyObject_IsTrue
-#endif
 
 /*********************************************************************************/
 /************************************** GLOBAL ***********************************/
@@ -96,7 +93,7 @@ PyObject* AMLtoPy(AMObj amobj)
     case AMObjType::STRING:
       return PyString_FromString(((AMString*)amobj.val.p)->c_str());
     case AMObjType::BOOL:
-      return PyInt_FromLong((long)amobj.val.i);
+      return PyBool_FromLong((long)amobj.val.i);
     case AMObjType::INTEGER:
       return PyInt_FromLong((long)amobj.val.i);
     case AMObjType::REAL:
@@ -145,7 +142,7 @@ PyObject* convert(AMObj o)
     case AMObjType::STRING:
       return PyString_FromString(((AMString*)amobj.val.p)->c_str());
     case AMObjType::BOOL:
-      return PyInt_FromLong((long)amobj.val.i);
+      return PyBool_FromLong((long)amobj.val.i);
     case AMObjType::INTEGER:
       return PyInt_FromLong((long)amobj.val.i);
     case AMObjType::REAL:
@@ -186,7 +183,7 @@ AMObject PytoAMObject(PyObject* argobj)
     {
       amlarg = AMObj(AMObjType::BOOL, (int)PyInt_AsLong(argobj));
     }
-
+  else
   if( argobj == Py_None )
     amlarg = AMObj(AMObjType::UNDEF);
   else
