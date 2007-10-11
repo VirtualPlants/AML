@@ -355,6 +355,7 @@ PointwiseAverage
 RecurrenceTimeSequences
 Regression
 RemoveApicalInternodes
+RemoveIndexParameter
 RemoveRun
 Renewal
 RenewalData
