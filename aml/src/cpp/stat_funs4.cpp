@@ -3055,7 +3055,7 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const Markovian_sequences *s
               (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
               (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
               (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ||
-              (args.length() == nb_required + 16),
+              (args.length() == nb_required + 16) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
   // argument obligatoire  

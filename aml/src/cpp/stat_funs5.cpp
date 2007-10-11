@@ -2841,7 +2841,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
 
     CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
                 (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
-                (args.length() == nb_required + 8),
+                (args.length() == nb_required + 8) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Clustering"));
 
     // arguments optionnels
@@ -4835,7 +4835,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
 
       CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
-	          (args.length() == nb_required + 4),
+                  (args.length() == nb_required + 4) ,
                   genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Segmentation" , nb_required));
 
       output = SEQUENCE;
@@ -4948,16 +4948,23 @@ AMObj STAT_Segmentation(const AMObjVector &args)
       switch (nb_segment_estimation) {
 
       case false : {
-        nb_sequence = iseq->get_nb_sequence();
-        nb_segment = new int[nb_sequence];
-
-        for (i = 0;i < nb_sequence;i++) {
-          nb_segment[i] = args[2].val.i;
+        if (args[2].val.i == 1) {
+          seq = iseq->segmentation(error , AMLOUTPUT , args[1].val.i , args[2].val.i ,
+                                   0 , variable_type , output);
         }
 
-        seq = iseq->segmentation(error , AMLOUTPUT , nb_segment , variable_type ,
-                                 args[1].val.i , output);
-        delete [] nb_segment;
+        else {
+          nb_sequence = iseq->get_nb_sequence();
+          nb_segment = new int[nb_sequence];
+
+          for (i = 0;i < nb_sequence;i++) {
+            nb_segment[i] = args[2].val.i;
+          }
+
+          seq = iseq->segmentation(error , AMLOUTPUT , nb_segment , variable_type ,
+                                   args[1].val.i , output);
+          delete [] nb_segment;
+        }
         break;
       }
 

@@ -2560,7 +2560,7 @@ static int** buildIntArraySequence(const Array *parray , int &length , int index
 
 //        if ((dim == nb_variable) || ((index_parameter_type == POSITION) &&
 //             (i == length) && (dim == 1))) {
-	if (dim == nb_variable) {
+        if (dim == nb_variable) {
           ArrayIter* pvector_next = pvector->iterator();
           ArrayIter& vector_next = *pvector_next;
 
@@ -2586,7 +2586,7 @@ static int** buildIntArraySequence(const Array *parray , int &length , int index
             }
 
             if ((index_parameter_type == POSITION) && (i == length) && (j == 0)) {
-	      break;
+              break;
             }
 
             j++;
