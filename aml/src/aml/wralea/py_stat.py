@@ -501,3 +501,18 @@ def py_compute_correlation_mult(seq,  auto,  var1,  var2,  MaxLag,  Type,  Norma
         return ComputeCorrelation(seq,  var1,  MaxLag=MaxLag,  Type=Type,  Normalization=Normalization)
     else:
         return ComputeCorrelation(seq,  var1, var2,  MaxLag=MaxLag,  Type=Type,  Normalization=Normalization)
+
+def py_pointwise_average(seq,  StandardDeviation,  Output,  dirname,  FileName,  Format):
+    if not seq:
+        return
+    
+    kwds={}
+    kwds['StandardDeviation'] = StandardDeviation
+    kwds['Output'] = Output
+    if dirname and FileName:
+        FileName = os.path.join(dirname, FileName)
+        kwds[FileName] = FileName
+        kwds['Format'] = Format
+        
+    return PointwiseAverage(seq,  **kwds), 
+        

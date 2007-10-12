@@ -521,3 +521,17 @@ def define_factory(package):
                 )
     package.add_factory( nf )
 
+    nf = Factory( name= "PointwiseAverage", 
+                  description= "Pointwise averaging of a sequence.",
+                  category = "STAT.Sequence", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_pointwise_average",
+                  inputs = [dict(name='seq', ),
+                                dict(name='StandardDeviation',  interface=IBool,  value=False), 
+                            dict(name='Output', interface=IEnumStr(['Sequence','Residual', 'StandardizedResidual']), value='Sequence'),
+                            dict(name='DirName',  interface=IDirStr), 
+                            dict(name='FileName',  interface=IStr), 
+                            dict(name='Format',  interface=IEnumStr(['ASCII',  'SpreadSheet']),  value='ASCII'), ], 
+                )
+
+    package.add_factory( nf )
