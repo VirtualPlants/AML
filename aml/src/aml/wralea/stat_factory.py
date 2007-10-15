@@ -194,13 +194,6 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
-    nf = Factory( name= "Vectors", 
-                  description= "", 
-                  category = "STAT", 
-                  nodemodule = "py_stat",
-                  nodeclass = "py_vectors",
-                  )
-    package.add_factory( nf )
 
     nf = Factory( name= "", 
                   description= "", 
@@ -535,3 +528,40 @@ def define_factory(package):
                 )
 
     package.add_factory( nf )
+
+    nf = Factory( name= "Vectors", 
+                  description= "Construction of a set of vectors from a multidimensional array, or from a set of sequences.", 
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_vectors",
+                  )
+    package.add_factory( nf )
+
+    nf = Factory( name= "Regression", 
+                  description= "Simple Regression with a single explanatory variable.", 
+                  category = "STAT", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_regression",
+                  inputs = [ dict(name='vec'),
+                             dict(name='RegressionModel', 
+                                  interface=IEnumStr([ "Linear", "MovingAverage", "NearestNeighbors"]),  value="Linear"), 
+                             dict(name='explanatoryVariable', interface=IInt),
+                             dict(name='responseVariable',interface=IInt),
+                             dict(name='filter', interface = ISequence ), 
+                            dict(name='frequencies',  interface=ISequence), 
+                            dict(name='distribution'), 
+                            dict(name='span',  interface=IFloat),
+                            dict(name='Algorithm', interface=IEnumStr(['Averaging', 'LeastSquares']), value='Averaging'),
+                            dict(name='Weighting',  interface=IBool, value=True),
+     ], 
+                  )
+    package.add_factory( nf )
+
+    nf = Factory( name = "Cumulate",
+                  description = "Sum of successive values along sequences.",
+                  category = "STAT.Sequence", 
+                  nodemodule = "py_stat",
+                  nodeclass = "py_cumulate")
+                    
+    package.add_factory( nf )
+

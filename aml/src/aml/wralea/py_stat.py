@@ -515,4 +515,31 @@ def py_pointwise_average(seq,  StandardDeviation,  Output,  dirname,  FileName, 
         kwds['Format'] = Format
         
     return PointwiseAverage(seq,  **kwds), 
+
+def py_vectors(seq, IndexVariable = False):
+    if not seq:
+        return
+    return Vectors(seq, IndexVariable=IndexVariable),
+
+def py_regression(vec, regressionModel, explanatoryVariable, responseVariable, filter, frequencies, distribution, span, Algorithm, Weighting ):
+    if vec is None or explanatoryVariable is None or responseVariable is None:
+        return
+
+    if regressionModel == 'Linear':
+        reg = Regression(vec, regressionModel, explanatoryVariable, responseVariable)
+    elif regressionModel == 'MovingAverage':
+        if filter:
+            reg = Regression(vec, regressionModel, explanatoryVariable, responseVariable, filter, Algorithm=Algorithm)
+        elif frequencies:
+            reg = Regression(vec, regressionModel, explanatoryVariable, responseVariable, frequencies, Algorithm=Algorithm)
+        elif distribution:
+            reg = Regression(vec, regressionModel, explanatoryVariable, responseVariable, distribution, Algorithm=Algorithm)
+        else:
+            raise "Missing filter parameters: Please, give us filter, frequencies or distribution to estimate a MovingAverage regression."
+    else:
+        reg = Regression(vec, regressionModel, explanatoryVariable, responseVariable, span, Weighting=Weighting)
+    return reg,
         
+def py_cumulate(seq):
+    if seq is not None:
+        return Cumulate(seq),
