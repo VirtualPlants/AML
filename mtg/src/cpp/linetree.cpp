@@ -747,7 +747,7 @@ Boolean LineTree::viewer(const FNode* filter, bool display_on)
 
         /***** STORING THE SHAPE OF THE ELEMENT ********/
         if(pgeom.isValid() && pgeom->isValid())
-          _scene->add(Shape(pgeom,AppearancePtr(pmat),vtx));
+          _scene->add(ShapePtr(new Shape(pgeom,AppearancePtr(pmat),vtx)));
 
 
       }
@@ -1462,6 +1462,26 @@ AMObj LineTree::extract(const AMObjVector& args) const {
 		  }
         else {
           genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "Extract", (argth+1)/2+1,"Macro or Micro");
+          return  AMObj(AMObjType::UNDEF);
+        }
+
+      }
+      else if (*(AMString*)(args[argth].val.p) == "SceneId") { // treatment of different options
+		  CHECKCONDVA(args[argth+1].tag() == AMObjType::STRING,
+			  genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "Extract", (argth+1)/2+1, "Macro or Micro"));
+
+		  if (*(AMString*)(args[argth+1].val.p) == "Micro") {
+			  if(_scene){
+                (*ret) += AMObj(AMObjType::INTEGER,(int)_scene.toUint32());
+			  }
+		  }
+		  else if (*(AMString*)(args[argth+1].val.p) == "Macro"){
+			  if(_qgc->getScene()){
+                (*ret) += AMObj(AMObjType::INTEGER,(int)_qgc->getScene().toUint32());
+			  }
+		  }
+        else {
+          genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "Extract", (argth+1)/2+1, "Macro or Micro");
           return  AMObj(AMObjType::UNDEF);
         }
 

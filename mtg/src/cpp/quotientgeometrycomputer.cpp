@@ -646,7 +646,7 @@ bool QuotientGeometryComputer::computeMacroGeometry(const PlantFrame* _pf) {
             else the_app = _material;
           }
           else the_app = _material;
-          _scene->add(Shape(_geom,the_app, _it->first));
+          _scene->add(ShapePtr(new Shape(_geom,the_app, _it->first)));
         }
         else {
 #ifdef DEBUG

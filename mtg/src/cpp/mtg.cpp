@@ -1579,11 +1579,11 @@ ScenePtr MTG::shape(int scale, VId root) const {
               if (pf2 && mat_ind != UNDEF &&
                   pf2->i != (unsigned long)LUNDEF) {
                   AppearancePtr pmat2 = AppearancePtr::Cast(*(SceneObjectPtr*)pf2->p);
-                  if(pmat2)scene->add(Shape(pgeom,pmat2,vtx));
-                  else scene->add(Shape(pgeom,pmat,vtx));
+                  if(pmat2)scene->add(ShapePtr(new Shape(pgeom,pmat2,vtx)));
+                  else scene->add(ShapePtr(new Shape(pgeom,pmat,vtx)));
               }
               else
-                  scene->add(Shape(pgeom,pmat,vtx));
+                  scene->add(ShapePtr(new Shape(pgeom,pmat,vtx)));
           }
         }
 
@@ -1631,7 +1631,7 @@ ScenePtr MTG::shape(int scale, VId root) const {
                       pgeom->id = vtx;
                       if(!pgeom->appearance)
                           pgeom->appearance = default_mat;
-                      scene->add(*pgeom);
+                      scene->add(ShapePtr(new Shape(*pgeom)));
                   }
               }
 

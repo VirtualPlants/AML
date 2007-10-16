@@ -49,7 +49,7 @@ date.cpp
 bflex = BisonFlex(lib_env, "parseraml.y", "scanneraml.l", prefix="aml")
 sources.extend(bflex)
 
-lib_env.AppendUnique(CPPPATH=[pj(lib_env['openalea_includes'],'plantgl')])
+#lib_env.AppendUnique(CPPPATH=[pj(lib_env['openalea_includes'],'plantgl')])
 lib_env.AppendUnique(LIBS=['vptool'])
 
 inc = lib_env.ALEAIncludes("aml", includes)

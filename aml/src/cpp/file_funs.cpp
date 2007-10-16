@@ -444,7 +444,7 @@ static AMObj F_Rename(const AMObjVector& args) {
 
 /*  ------------------------------------------------------------------------ */
 
-#ifdef __GNUC__
+// #ifdef __GNUC__
 
 static AMObj F_Copy(const AMObjVector& args) {
   CHECKCONDVA(args.length() == 2,
@@ -480,7 +480,7 @@ static AMObj F_Copy(const AMObjVector& args) {
   }
 }
 
-#endif
+// #endif
 
 /*  ------------------------------------------------------------------------ */
 
@@ -606,11 +606,7 @@ void installFILEModule() {
   varname = ":CWD";
   amobjTable()->insert(varname, var);
 
-#ifdef __GNUC__
-  var = AMObj(AMObjType::STRING, new AMString("/"));
-#else
-  var = AMObj(AMObjType::STRING, new AMString((QDir::rootDirPath()).latin1()));
-#endif
+  var = AMObj(AMObjType::STRING, new AMString((QDir::rootPath()).toAscii().data()));
   varname = ":ROOTDIR";
   amobjTable()->insert(varname, var);
 

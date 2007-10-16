@@ -16,8 +16,8 @@ SConsignFile()
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
 
 #wrapper_conf = ALEAConfig(name, ['boost_python', 'alea',])
-cpp_conf = ALEAConfig(name, ['alea', 'qt4', 'bison', 'flex','install', 'vplants.tool'])
-opt_conf = ALEAConfig(name, ['boost_python', 'alea', 'qt4', 'bison', 'flex','install'])
+cpp_conf = ALEAConfig(name, ['qt4', 'bison', 'flex','install', 'vplants.tool','plantgl'])
+opt_conf = ALEAConfig(name, ['qt4', 'bison', 'flex','install', 'vplants.tool','plantgl'])
 
 # Set all the common options for the package
 # TODO: Have a configure stage.

@@ -30,7 +30,7 @@
  *  -------------------------------------------------------------------------
  */
 
-#include <stream.h>
+#include <fstream>
 #include <string.h>
 #include <assert.h>
 
@@ -38,6 +38,7 @@
 
 //static const char rcsid[] = "$Id:";
 
+using namespace std;
 
 static Boolean testLabel(MTG* mtg, VId x, void* c) {
 

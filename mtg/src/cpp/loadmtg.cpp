@@ -130,7 +130,7 @@ static void processItem(char* file, char* options) {
 
 }
 
-main(int argc, char** argv) {
+int main(int argc, char** argv) {
 
   int loop = 1;
   char* options = 0;

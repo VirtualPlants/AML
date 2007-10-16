@@ -11,7 +11,8 @@ scons_parameters=["build_prefix="+build_prefix]
 
 
 # dependencies
-install_requires = ['vplants.amlobj', 'PlantGL']
+#install_requires = ['vplants.amlobj', 'plantgl']
+install_requires = []
 setup_requires = ['openalea.deploy'] + install_requires
 
 if __name__ == '__main__':
@@ -30,8 +31,8 @@ if __name__ == '__main__':
         
           # Packages
           #packages=
-          #package_dir=
-      
+          #package_dir={'':'build/lib'},
+            
           # Add package platform libraries if any
           include_package_data=True,
           zip_safe = False,

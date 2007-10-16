@@ -30,7 +30,7 @@
  *  -------------------------------------------------------------------------
  */
 
-#include <stream.h>
+#include <fstream>
 #include <string.h>
 #include <assert.h>
 
