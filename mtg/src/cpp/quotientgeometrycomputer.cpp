@@ -61,7 +61,8 @@ MacroVtxInfo::MacroVtxInfo() :
     _points(0),
     _radius(0),
     _need(false),
-    _reuseshapes(0){
+    _reuseshapes(0),
+    _father(Shape::NOID){
 }
 
 MacroVtxInfo::MacroVtxInfo(const string& name,
@@ -71,7 +72,8 @@ MacroVtxInfo::MacroVtxInfo(const string& name,
     _points(new Point3Array),
     _radius(0),
     _need(false),
-    _reuseshapes(0){
+    _reuseshapes(0),
+    _father(Shape::NOID){
 }
 
 MacroVtxInfo::MacroVtxInfo(const string& name,
@@ -82,7 +84,8 @@ MacroVtxInfo::MacroVtxInfo(const string& name,
     _points(new Point3Array(1)),
     _radius(0),
     _need(false),
-    _reuseshapes(0){
+    _reuseshapes(0),
+    _father(Shape::NOID){
     _points->setAt(0,point);
 }
 
@@ -94,7 +97,8 @@ MacroVtxInfo::MacroVtxInfo(const string& name,
     _points(new Point3Array(*points)),
     _radius(0),
     _need(false),
-    _reuseshapes(0){
+    _reuseshapes(0),
+    _father(Shape::NOID){
 }
 
 MacroVtxInfo::MacroVtxInfo(const string& name,
@@ -106,7 +110,8 @@ MacroVtxInfo::MacroVtxInfo(const string& name,
     _points(new Point3Array(1)),
     _radius(new Point2Array(1)),
     _need(true),
-    _reuseshapes(0){
+    _reuseshapes(0),
+    _father(Shape::NOID){
     _points->setAt(0,point);
     _radius->setAt(0,Vector2(radius,radius));
 }
@@ -117,7 +122,8 @@ MacroVtxInfo::MacroVtxInfo(const string& name,
     _points(0),
     _radius(0),
     _need(false),
-    _reuseshapes(new Scene()){
+    _reuseshapes(new Scene()),
+    _father(Shape::NOID){
   _reuseshapes->add(Shape3DPtr(sh));
 }
 
@@ -646,7 +652,7 @@ bool QuotientGeometryComputer::computeMacroGeometry(const PlantFrame* _pf) {
             else the_app = _material;
           }
           else the_app = _material;
-          _scene->add(ShapePtr(new Shape(_geom,the_app, _it->first)));
+          _scene->add(ShapePtr(new Shape(_geom,the_app, _it->first,_it->second._father)));
         }
         else {
 #ifdef DEBUG
@@ -819,27 +825,30 @@ QuotientGeometryComputer::computeMacroInfo( const PlantFrame* _pf) {
         for(size_t j=0;j<nbb;j++) {
 
             VId vtx = compo.at(j).getVertex(); // jth vertex of branch b
-            VId father = g->si_complex(vtx,_quotient_scale);
-			if(father == -1){
+            VId complex = g->si_complex(vtx,_quotient_scale);
+			if(complex == -1){
 				VId ftr = _lt->fatherOfVirtualElement(vtx);
 				if(ftr != -1){ // isVirtualElement
-				  father = g->si_complex(ftr,_quotient_scale);
-				  if(father == -1)
+				  complex = g->si_complex(ftr,_quotient_scale);
+				  if(complex == -1)
 					cerr << "Cannot find complex for element " << vtx << '\n';
 				}
 			}
-			if(father!=-1){
+			if(complex!=-1){
 				MacroInfoList::iterator _it;
-				if((_it=macroinfos.find((int)father))==macroinfos.end()){
-					createInfoTo(macroinfos, vtx, father, _pf, discretizer);
+				if((_it=macroinfos.find((int)complex))==macroinfos.end()){
+					createInfoTo(macroinfos, vtx, complex, _pf, discretizer);
+                    /// find father of complex
+                    VId father = g->si_father(complex);
+                    if (father != UNDEF) macroinfos[(int)complex]._father = father;
 				}
 				else {
 					addInfoTo(_it->second, vtx, _pf, discretizer);
 				}
-				if(j==nbb-1 && !macroinfos[(int)father].hasShapeComputed() && macroinfos[(int)father].areRadiusNeeded()){
+				if(j==nbb-1 && !macroinfos[(int)complex].hasShapeComputed() && macroinfos[(int)complex].areRadiusNeeded()){
 					ValType coord[3];
 					_pf->coord3D(vtx,coord);
-					macroinfos[(int)father].addInfo(Vector3((real_t)coord[0],(real_t)coord[1],(real_t)coord[2]),(real_t)(_pf->topDia(vtx)));
+					macroinfos[(int)complex].addInfo(Vector3((real_t)coord[0],(real_t)coord[1],(real_t)coord[2]),(real_t)(_pf->topDia(vtx)));
 				}
 			}
         }
@@ -957,6 +966,13 @@ QuotientGeometryComputer::computeQuotientInfo( const PlantFrame* _pf) {
 				MacroInfoList::iterator _it;
 				if((_it=macroinfos.find((int)father))==macroinfos.end()){
 					createInfoTo(macroinfos, vtx, father, _pf, discretizer);
+                    // compute father of complex
+                    VId grandfather = g->si_father(father);
+                    if ( grandfather != UNDEF){
+                        hash_map<VId,VId>::iterator _itf;
+                        if((_itf=roots.find(grandfather))!=roots.end())
+                            macroinfos[(int)father]._father = _itf->second;
+                    }
 				}
 				else {
 					addInfoTo(_it->second, vtx, _pf, discretizer);

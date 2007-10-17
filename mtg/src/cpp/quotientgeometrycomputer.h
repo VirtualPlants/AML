@@ -88,6 +88,8 @@ public :
   /// Reuse shape.
   ScenePtr _reuseshapes;
 
+  /// father of the vertex if known
+  int _father;
 
   /// Set the geometric class name.
   void setClassName(const std::string& name);

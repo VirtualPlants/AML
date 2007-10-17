@@ -746,9 +746,10 @@ Boolean LineTree::viewer(const FNode* filter, bool display_on)
 
 
         /***** STORING THE SHAPE OF THE ELEMENT ********/
-        if(pgeom.isValid() && pgeom->isValid())
-          _scene->add(ShapePtr(new Shape(pgeom,AppearancePtr(pmat),vtx)));
-
+        if(pgeom.isValid() && pgeom->isValid()){
+          VId father = plant->topoFather(vtx,ANY);
+          _scene->add(ShapePtr(new Shape(pgeom,AppearancePtr(pmat),vtx,father == UNDEF?Shape::NOID:father )));
+        }
 
       }
 
@@ -1472,12 +1473,12 @@ AMObj LineTree::extract(const AMObjVector& args) const {
 
 		  if (*(AMString*)(args[argth+1].val.p) == "Micro") {
 			  if(_scene){
-                (*ret) += AMObj(AMObjType::INTEGER,(int)_scene.toUint32());
+                return AMObj(AMObjType::INTEGER,(int)_scene.toUint32());
 			  }
 		  }
 		  else if (*(AMString*)(args[argth+1].val.p) == "Macro"){
 			  if(_qgc->getScene()){
-                (*ret) += AMObj(AMObjType::INTEGER,(int)_qgc->getScene().toUint32());
+                return  AMObj(AMObjType::INTEGER,(int)_qgc->getScene().toUint32());
 			  }
 		  }
         else {
