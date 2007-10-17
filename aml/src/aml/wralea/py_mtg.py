@@ -70,7 +70,7 @@ Ouput : MTG object if the parsing process succeeds.
         self.add_input( name = "FeatureMap", interface = ISequence, value=[],hide=True)
         self.add_input( name = "OuputFile", interface = IFileStr, value=None,hide=True)
         self.add_input( name = "HeaderFile", interface = IFileStr, value=None,hide=True)
-        self.add_input( name = "DiscardSymbols", interface = ISequence, value=[],hide=True)
+        self.add_input( name = "DiscardSymbols", interface = ISequence, value=None,hide=True)
             
         self.add_output( name = "MTG", interface = None) 
 
@@ -90,12 +90,12 @@ Ouput : MTG object if the parsing process succeeds.
 	obj = kwds.get('filename',None)
 	del kwds['filename']
 
+        g = None
         if obj:
             try:
                 g = MTG(obj, **kwds)
             except Exception, e:
                 print e
-                g = None
 
 	return g
 
