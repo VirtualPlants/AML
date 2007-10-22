@@ -110,6 +110,24 @@ def define_factory(package):
 
     package.add_factory( nf )
 
+    nf = Factory( name= "PlantFrame", 
+                  description= "Constructs a geometric interpretation of a MTG.", 
+                  category = "MTG", 
+                  nodemodule = "py_mtg",
+                  nodeclass = "py_PlantFrame",
+                  )
+    package.add_factory( nf )
+
+    nf = Factory( name= "DressingData", 
+                  description= "Data and default geometric parameters used to compute the geometric interpretation of a MTG.", 
+                  category = "MTG", 
+                  nodemodule = "py_mtg",
+                  nodeclass = "py_dressingdata",
+                  inputs=(dict(name="MTG"),dict(name="filename", interface=IFileStr)),
+                  outputs=(dict(name="DressingData"),),
+                  )
+    package.add_factory( nf )
+
     nf = Factory( name= "PlotPlantFrame", 
                   description= "Plot PlantFrame objects.", 
                   category = "MTG", 
@@ -126,21 +144,32 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
-    nf = Factory( name= "PlantFrame", 
-                  description= "Constructs a geometric interpretation of a MTG.", 
+    nf = Factory( name= "Linetree2Scene", 
+                  description= "Extract scene from Linetree.", 
                   category = "MTG", 
                   nodemodule = "py_mtg",
-                  nodeclass = "py_PlantFrame",
+                  nodeclass = "py_Linetree2Scene",
+                  inputs= ( dict( name = "linetree", interface=None ),
+                            dict( name = "scale", interface=IEnumStr(['Micro', 'Macro']), value = 'Micro'),
+                          ),
+                  outputs=(dict(name="Scene", interface = None),
+                          ),
                   )
     package.add_factory( nf )
 
-    nf = Factory( name= "DressingData", 
-                  description= "Data and default geometric parameters used to compute the geometric interpretation of a MTG.", 
+    nf = Factory( name= "Quotient", 
+                  description= "Quotient Linetree objects.", 
                   category = "MTG", 
                   nodemodule = "py_mtg",
-                  nodeclass = "py_dressingdata",
-                  inputs=(dict(name="MTG"),dict(name="filename", interface=IFileStr)),
-                  outputs=(dict(name="DressingData"),),
+                  nodeclass = "py_Quotient",
+                  )
+    package.add_factory( nf )
+
+    nf = Factory( name= "Compress", 
+                  description= "Create a compressed representation of Linetree objects.", 
+                  category = "MTG", 
+                  nodemodule = "py_mtg",
+                  nodeclass = "py_Compress",
                   )
     package.add_factory( nf )
 

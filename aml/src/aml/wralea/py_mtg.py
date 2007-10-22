@@ -344,108 +344,6 @@ def py_MTGRoot(graph):
 
 #//////////////////////////////////////////////////////////////////////////////
 
-
-class py_PlotPlantFrame( Node ):
-    """\
-Plot(aml object) -> Plot the object
-Input:
-  aml object
-  
-    """
-    
-    def __init__(self):
-    
-        Node.__init__(self)
-
-        self.add_input( name = "obj", interface = None, value = []) 
-        self.add_input( name = "Simplification", interface = IInt,value=None,hide=True) 
-        self.add_input( name = "Show", interface = IFunction,hide=True) 
-        self.add_input( name = "Display", interface = IStr,value=None,hide=True) 
-        self.add_input( name = "Color", interface = IFunction,hide=True) 
-        self.add_input( name = "ColorRGB", interface = IFunction,hide=True) 
-        self.add_input( name = "Appearance", interface = IFunction,hide=True) 
-        self.add_input( name = "Geometry", interface = IFunction,hide=True) 
-        self.add_input( name = "DressindData",hide=True) 
-        self.add_input( name = "Symbols", interface = IFunction,hide=True) 
-        self.add_input( name = "VirtualFruits",hide=True) 
-        self.add_input( name = "VirtualFlowers",hide=True) 
-        self.add_input( name = "VirtualLeaves",hide=True) 
-        self.add_input( name = "Interpol", interface = IFunction,hide=True) 
-        self.add_input( name = "LineFile", interface = IStr,value=None,hide=True) 
-        self.add_input( name = "MaxThreshold", interface = IFloat,value=None,hide=True) 
-        self.add_input( name = "MinThreshold", interface = IFloat,value=None,hide=True) 
-        self.add_input( name = "MediumThreshold", interface = IFloat,value=None,hide=True) 
-
-        self.add_output( name = "Linetree") 
-
-    def __call__(self, inputs):
-
-        kwds={}
-
-	# input_desc contains a list of dictionaries for 
-	# each input port of the node
-	for desc in self.input_desc:
-	    key = desc['name']
-	    x = self.get_input(key)
-	    if x is not None:  # selects the input arguments
-		print key, x
-		kwds[key] = x
-
-	obj = kwds.get('obj',None)
-	del kwds['obj']
-
-        if obj:
-	    return Plot(obj, **kwds)
-
-class py_PlotLineTree( Node ):
-    """\
-Plot(aml object) -> Plot the object
-Input:
-  aml object
-  
-    """
-    
-    def __init__(self):
-    
-        Node.__init__(self)
-
-        self.add_input( name = "obj", interface = None, value = []) 
-        self.add_input( name = "Color", interface = IFunction) 
-        self.add_input( name = "Geometry", interface = IFunction) 
-        self.add_input( name = "Symbol", interface = IFunction) 
-        self.add_input( name = "Appearance", interface = IFunction) 
-        self.add_input( name = "Quotient", interface = IFunction) 
-        self.add_input( name = "QuotientGeometry", interface = IFunction) 
-        self.add_input( name = "QuotientAppearance", interface = IFunction) 
-        self.add_input( name = "QuotientConsider", interface = IFunction) 
-        self.add_input( name = "Compress", interface = IFunction) 
-        self.add_input( name = "Sort", interface = IFunction) 
-        self.add_input( name = "Show", interface = IFunction) 
-        self.add_input( name = "ShowMacro", interface = IFunction) 
-        self.add_input( name = "Display", interface = IFunction) 
-
-        self.add_output( name = "linetree") 
-
-    def __call__(self, inputs):
-
-        kwds={}
-
-	# input_desc contains a list of dictionaries for 
-	# each input port of the node
-	for desc in self.input_desc:
-	    key = desc['name']
-	    x = self.get_input(key)
-	    if x is not None:  # selects the input arguments
-		kwds[key] = x
-
-	obj = kwds.get('obj',None)
-	del kwds['obj']
-
-        if obj:
-	    return Plot(obj, **kwds)
-
-#//////////////////////////////////////////////////////////////////////////////
-
 class py_PlantFrame( Node ):
     """\
 Plot(aml object) -> Plot the object
@@ -537,6 +435,8 @@ def py_dressingdata(g,filename):
             d = None
         return (d,)
 
+#//////////////////////////////////////////////////////////////////////////////
+        
 class py_virtualpatterns( Node ):
     """\
 Plot(aml object) -> Plot the object
@@ -608,3 +508,161 @@ Input:
 
         return (pf,)
 
+
+#//////////////////////////////////////////////////////////////////////////////
+
+class py_PlotPlantFrame( Node ):
+    """\
+Plot(aml object) -> Plot the object
+Input:
+  aml object
+  
+    """
+    
+    def __init__(self):
+    
+        Node.__init__(self)
+
+        self.add_input( name = "obj", interface = None) 
+        self.add_input( name = "Simplification", interface = IInt,value=None,hide=True) 
+        self.add_input( name = "Show", interface = IFunction,hide=True) 
+        self.add_input( name = "Display", interface = IStr,value=None,hide=True) 
+        self.add_input( name = "Color", interface = IFunction,hide=True) 
+        self.add_input( name = "ColorRGB", interface = IFunction,hide=True) 
+        self.add_input( name = "Appearance", interface = IFunction,hide=True) 
+        self.add_input( name = "Geometry", interface = IFunction,hide=True) 
+        self.add_input( name = "DressindData",hide=True) 
+        self.add_input( name = "Symbols", interface = IFunction,hide=True) 
+        self.add_input( name = "VirtualFruits",hide=True) 
+        self.add_input( name = "VirtualFlowers",hide=True) 
+        self.add_input( name = "VirtualLeaves",hide=True) 
+        self.add_input( name = "Interpol", interface = IFunction,hide=True) 
+        self.add_input( name = "LineFile", interface = IStr,value=None,hide=True) 
+        self.add_input( name = "MaxThreshold", interface = IFloat,value=None,hide=True) 
+        self.add_input( name = "MinThreshold", interface = IFloat,value=None,hide=True) 
+        self.add_input( name = "MediumThreshold", interface = IFloat,value=None,hide=True) 
+
+        self.add_output( name = "Linetree") 
+
+    def __call__(self, inputs):
+        kwds={}
+        # input_desc contains a list of dictionaries for 
+        # each input port of the node
+        for desc in self.input_desc:
+            key = desc['name']
+            x = self.get_input(key)
+            if x is not None:  # selects the input arguments
+                print key, x
+                kwds[key] = x
+        obj = kwds.get('obj',None)
+        del kwds['obj']
+        
+        if obj:
+            return Plot(obj, **kwds)
+
+#//////////////////////////////////////////////////////////////////////////////
+        
+class py_PlotLineTree( Node ):
+    """\
+Plot(aml object) -> Plot the object
+Input:
+  aml object
+  
+    """
+    
+    def __init__(self):
+    
+        Node.__init__(self)
+
+        self.add_input( name = "obj", interface = None) 
+        self.add_input( name = "Color", interface = IFunction) 
+        self.add_input( name = "Geometry", interface = IFunction) 
+        self.add_input( name = "Symbol", interface = IFunction) 
+        self.add_input( name = "Appearance", interface = IFunction) 
+        self.add_input( name = "Sort", interface = IFunction) 
+        self.add_input( name = "Show", interface = IFunction) 
+        self.add_input( name = "ShowMacro", interface = IFunction) 
+        self.add_input( name = "Display", interface = IFunction) 
+
+        self.add_output( name = "linetree") 
+
+    def __call__(self, inputs):
+        kwds={}
+        
+        # input_desc contains a list of dictionaries for 
+        # each input port of the node
+        for desc in self.input_desc:
+            key = desc['name']
+            x = self.get_input(key)
+            if x is not None:  # selects the input arguments
+                kwds[key] = x
+        obj = kwds.get('obj',None)
+        del kwds['obj']
+        
+        if obj:
+            return Plot(obj, **kwds)
+
+#//////////////////////////////////////////////////////////////////////////////
+
+from openalea.plantgl.all import Scene
+
+def py_Linetree2Scene(lt,scale = 'Micro'):
+    id = Extract(lt,SceneId=scale)
+    if id == 0:
+        return None
+    return Scene.pool().get(id)
+
+
+#//////////////////////////////////////////////////////////////////////////////
+
+class py_Quotient( Node ):
+    """\
+Quotient(linetree) -> Quotient the linetree
+Input:
+  linetree
+  
+    """
+    
+    def __init__(self):
+    
+        Node.__init__(self)
+
+        self.add_input( name = "obj", interface = None) 
+        self.add_input( name = "Quotient", interface = IFunction) 
+        self.add_input( name = "Geometry", interface = IFunction ,hide = True) 
+        self.add_input( name = "Appearance", interface = IFunction ,hide = True) 
+        self.add_input( name = "Consider", interface = IFunction ,hide = True) 
+
+        self.add_output( name = "Scene") 
+        self.add_output( name = "Graph") 
+
+    def __call__(self, inputs):
+        obj = self.get_input("obj")
+        args = {'Display':'HIDE'}
+        quotient= self.get_input("Quotient")
+        if quotient:
+            args['Quotient'] = quotient
+        geometry= self.get_input("Geometry")
+        if geometry:
+            args['QuotientGeometry'] = geometry
+        app= self.get_input("Appearance")
+        if app:
+            args['QuotientAppearance'] = app
+        consider= self.get_input("Consider")
+        if consider:
+            args['QuotientConsider'] = consider
+        if obj:
+            Plot(obj,**args)
+            ms_scene = Scene(py_Linetree2Scene(obj,'Macro'))
+            ms_graph = Extract(obj,Data='QuotientedGraph')
+            return (ms_scene,ms_graph)
+        return tuple()
+    
+#//////////////////////////////////////////////////////////////////////////////
+
+def py_Compress(lt,rate = 0):
+    Plot(obj,Compress=rate,Display='Hide')
+    return py_Linetree2Scene(obj,'Macro')
+    
+
+#//////////////////////////////////////////////////////////////////////////////
