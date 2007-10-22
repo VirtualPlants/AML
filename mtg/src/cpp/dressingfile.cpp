@@ -37,7 +37,7 @@
 
 
 
-#include "tool/dirnames.h"
+#include "plantgl/tool/dirnames.h"
 TOOLS_USING_NAMESPACE
 
 //#include "GEOM/scne_smbtable.h"
@@ -579,11 +579,11 @@ DRFErrorMsg DressingFile::symbolFun( RWCTokenizer next)
           if (index!=RW_NPOS)
           {
             file_name= RWCString(_varTable->at(index)._fileName);
-      if( !exists(append_suffix(cat_dir_file(_symbol_path,file_name),".smb")))
+      if( !exists(set_suffix(cat_dir_file(_symbol_path,file_name),".smb")))
         {
         is_error=true;
         error_msg=new RWCString(ERRORS_MSG[7]);
-        *error_msg+=RWCString(append_suffix(cat_dir_file(_symbol_path,file_name),".smb"));
+        *error_msg+=RWCString(set_suffix(cat_dir_file(_symbol_path,file_name),".smb"));
         }
           }
           else
@@ -689,7 +689,7 @@ DRFErrorMsg DressingFile::symbolPathFun( RWCTokenizer next)
               {
 
               // computes an expanded path where .././ forms have been interpreted
-              _symbol_path = absolute_dirname(short_dirname(token.data())).c_str();
+              _symbol_path = absolute_filename(short_dirname(token.data())).c_str();
 
 
               if ((_symbol_path.length() == 0) || (!exists(_symbol_path)) )
@@ -747,7 +747,7 @@ DRFErrorMsg DressingFile::geometryFun( RWCTokenizer next)
             {
 
               // computes an expanded path where .././ forms have been interpreted
-              string filename = absolute_dirname(token.data()).c_str();
+              string filename = absolute_filename(token.data()).c_str();
 
               if (filename.length() == 0) {
               }
@@ -774,19 +774,20 @@ DRFErrorMsg DressingFile::geometryFun( RWCTokenizer next)
                 for (SceneObjectSymbolTable::iterator sti = _table->begin();
                      sti != _table->end();
                      sti++) {
-                    Geometry * _geom;
-                    if((_geom = dynamic_cast<Geometry *>(&(*(sti->second))))){
+                    GeometryPtr _geom;
+                    if((_geom = GeometryPtr::Cast(sti->second))){
                         if (!_geom_table) _geom_table = new GeometrySymbolTable;
                         else{
                             GeometrySymbolTable::iterator _it = _geom_table->find( sti->first );
                             if(_it!=_geom_table->end())
                                 cerr << "Warning ! Multiple Definition of '" << sti->first.c_str() << "'. Overloading." << endl;
                         }
-                        (*_geom_table)[sti->first]=GeometryPtr(_geom);
+                        (*_geom_table)[sti->first]=_geom;
+                        cerr << "Adding symbol '" << sti->first.c_str() << "'." << endl;
                     }
                     else{
-                        Appearance * _app;
-                        if((_app = dynamic_cast<Appearance *>(&(*(sti->second))))){
+                        AppearancePtr _app;
+                        if((_app = AppearancePtr::Cast(sti->second))){
                             if (!_mat_table) _mat_table = new AppearanceSymbolTable;
                             else{
                                 AppearanceSymbolTable::iterator _it = _mat_table->find( sti->first );
@@ -864,7 +865,7 @@ DRFErrorMsg DressingFile::appearanceFun( RWCTokenizer next)
             {
 
               // computes an expanded path where .././ forms have been interpreted
-              string filename = absolute_dirname(token.data()).c_str();
+              string filename = absolute_filename(token.data()).c_str();
 
               if (filename.length() == 0) {
               }
@@ -894,15 +895,15 @@ DRFErrorMsg DressingFile::appearanceFun( RWCTokenizer next)
                   for (SceneObjectSymbolTable::iterator sti = _table->begin();
                        sti != _table->end();
                        sti++) {
-                      Appearance * _app;
-                      if((_app = dynamic_cast<Appearance *>(&(*(sti->second))))){
+                      AppearancePtr _app;
+                      if((_app = AppearancePtr::Cast(sti->second))){
                           if (!_mat_table) _mat_table = new AppearanceSymbolTable;
                           else{
                               AppearanceSymbolTable::iterator _it = _mat_table->find( sti->first );
                               if(_it!=_mat_table->end())
                                   cerr << "Warning ! Multiple Definition of '" << sti->first.c_str() << "'. Overloading." << endl;
                           }
-                          (*_mat_table)[sti->first]=AppearancePtr(_app);
+                          (*_mat_table)[sti->first]=_app;
                       }
                       else {
                           cerr << "Found not an Appearance object : '" << sti->first.c_str() << "'. Aborting." << endl;
