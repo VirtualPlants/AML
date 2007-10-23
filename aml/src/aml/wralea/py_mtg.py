@@ -526,7 +526,7 @@ Input:
         self.add_input( name = "obj", interface = None) 
         self.add_input( name = "Simplification", interface = IInt,value=None,hide=True) 
         self.add_input( name = "Show", interface = IFunction,hide=True) 
-        self.add_input( name = "Display", interface = IStr,value=None,hide=True) 
+        self.add_input( name = "Display", interface = IEnumStr(['SHOW','HIDE']), value = 'SHOW',hide=True) 
         self.add_input( name = "Color", interface = IFunction,hide=True) 
         self.add_input( name = "ColorRGB", interface = IFunction,hide=True) 
         self.add_input( name = "Appearance", interface = IFunction,hide=True) 
@@ -537,7 +537,7 @@ Input:
         self.add_input( name = "VirtualFlowers",hide=True) 
         self.add_input( name = "VirtualLeaves",hide=True) 
         self.add_input( name = "Interpol", interface = IFunction,hide=True) 
-        self.add_input( name = "LineFile", interface = IStr,value=None,hide=True) 
+        self.add_input( name = "LineFile", interface = IFileStr,value=None,hide=True) 
         self.add_input( name = "MaxThreshold", interface = IFloat,value=None,hide=True) 
         self.add_input( name = "MinThreshold", interface = IFloat,value=None,hide=True) 
         self.add_input( name = "MediumThreshold", interface = IFloat,value=None,hide=True) 
@@ -575,15 +575,13 @@ Input:
         Node.__init__(self)
 
         self.add_input( name = "obj", interface = None) 
-        self.add_input( name = "Color", interface = IFunction) 
-        self.add_input( name = "Geometry", interface = IFunction) 
-        self.add_input( name = "Symbol", interface = IFunction) 
-        self.add_input( name = "Appearance", interface = IFunction) 
-        self.add_input( name = "Sort", interface = IFunction) 
-        self.add_input( name = "Show", interface = IFunction) 
-        self.add_input( name = "ShowMacro", interface = IFunction) 
-        self.add_input( name = "Display", interface = IFunction) 
-
+        self.add_input( name = "Color", interface = IFunction,hide=True) 
+        self.add_input( name = "Geometry", interface = IFunction,hide=True) 
+        self.add_input( name = "Symbol", interface = IFunction,hide=True) 
+        self.add_input( name = "Appearance", interface = IFunction,hide=True) 
+        self.add_input( name = "Show", interface = IFunction,hide=True) 
+        self.add_input( name = "ShowMacro", interface = IFunction,hide=True) 
+        self.add_input( name = "Display", interface = IEnumStr(['All','MicroOnly', 'MacroOnly','HIDE']), value = 'All') 
         self.add_output( name = "linetree") 
 
     def __call__(self, inputs):
@@ -610,10 +608,16 @@ def py_Linetree2Scene(lt,scale = 'Micro'):
     id = Extract(lt,SceneId=scale)
     if id == 0:
         return None
-    return Scene.pool().get(id)
+    return Scene(Scene.pool().get(id))
 
 
 #//////////////////////////////////////////////////////////////////////////////
+
+def quotient_rep(lt,quotient,args):
+    Plot(lt,Quotient=quotient,**args)
+    ms_scene = py_Linetree2Scene(lt,'Macro')
+    ms_graph = Extract(lt,Data='QuotientedGraph')
+    return (ms_scene,ms_graph)    
 
 class py_Quotient( Node ):
     """\
@@ -628,20 +632,18 @@ Input:
         Node.__init__(self)
 
         self.add_input( name = "obj", interface = None) 
-        self.add_input( name = "Quotient", interface = IFunction) 
-        self.add_input( name = "Geometry", interface = IFunction ,hide = True) 
-        self.add_input( name = "Appearance", interface = IFunction ,hide = True) 
-        self.add_input( name = "Consider", interface = IFunction ,hide = True) 
+        self.add_input( name = "Quotient", interface = IFunction, value = None) 
+        self.add_input( name = "Geometry", interface = IFunction, value = None ,hide = True) 
+        self.add_input( name = "Appearance", interface = IFunction, value = None ,hide = True) 
+        self.add_input( name = "Consider", interface = IFunction, value = None ,hide = True) 
 
         self.add_output( name = "Scene") 
         self.add_output( name = "Graph") 
 
     def __call__(self, inputs):
         obj = self.get_input("obj")
-        args = {'Display':'HIDE'}
         quotient= self.get_input("Quotient")
-        if quotient:
-            args['Quotient'] = quotient
+        args = {'Display':'HIDE'}
         geometry= self.get_input("Geometry")
         if geometry:
             args['QuotientGeometry'] = geometry
@@ -652,17 +654,36 @@ Input:
         if consider:
             args['QuotientConsider'] = consider
         if obj:
-            Plot(obj,**args)
-            ms_scene = Scene(py_Linetree2Scene(obj,'Macro'))
-            ms_graph = Extract(obj,Data='QuotientedGraph')
-            return (ms_scene,ms_graph)
-        return tuple()
+            if quotient:
+                return quotient_rep(obj,quotient,args)
+            else:
+                return (lambda x : quotient_rep(obj,x,args),None)
+        else:
+            return (lambda x : quotient_rep(x,quotient,args),None)
     
 #//////////////////////////////////////////////////////////////////////////////
+class py_Compress( Node ):
+    """\
+Compress(linetree) -> Compress a linetree
+Input:
+  linetree
+  
+    """
+    
+    def __init__(self):
+    
+        Node.__init__(self)
 
-def py_Compress(lt,rate = 0):
-    Plot(obj,Compress=rate,Display='Hide')
-    return py_Linetree2Scene(obj,'Macro')
+        self.add_input( name = "obj", interface = None) 
+        self.add_input( name = "rate", interface = IFloat, value = 0) 
+        self.add_input( name = "sort", interface = IEnumStr(['DECREASINGSIZE','INCREASINGSIZE', 'DECREASINGORDER','INCREASINGORDER','NONE'],value='DECREASINGSIZE')) 
+        self.add_output( name = "scene") 
+    def __call__():
+        obj = self.get_input("obj")
+        rate = self.get_input("rate")
+        sort = self.get_input("sort")
+        Plot(obj,Compress=rate,Display='Hide',Sort=sort)
+        return py_Linetree2Scene(obj,'Macro')
     
 
 #//////////////////////////////////////////////////////////////////////////////
