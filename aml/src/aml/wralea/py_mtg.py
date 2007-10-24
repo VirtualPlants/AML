@@ -676,9 +676,9 @@ Input:
 
         self.add_input( name = "obj", interface = None) 
         self.add_input( name = "rate", interface = IFloat, value = 0) 
-        self.add_input( name = "sort", interface = IEnumStr(['DECREASINGSIZE','INCREASINGSIZE', 'DECREASINGORDER','INCREASINGORDER','NONE'],value='DECREASINGSIZE')) 
+        self.add_input( name = "sort", interface = IEnumStr(['DECREASINGSIZE','INCREASINGSIZE', 'DECREASINGORDER','INCREASINGORDER','NONE']),value='DECREASINGSIZE',hide=True) 
         self.add_output( name = "scene") 
-    def __call__():
+    def __call__(self,inputs):
         obj = self.get_input("obj")
         rate = self.get_input("rate")
         sort = self.get_input("sort")
