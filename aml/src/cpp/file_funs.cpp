@@ -54,6 +54,9 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include <qfile.h>
+#include <qdir.h>
+#include <qstringlist.h>
 #if defined( __GNUC__ ) && ! defined(  __MINGW32__ )
 
 #include <unistd.h>
@@ -61,9 +64,9 @@
 
 #else
 
-#include <qfile.h>
-#include <qdir.h>
-#include <qstringlist.h>
+//#include <qfile.h>
+//#include <qdir.h>
+//#include <qstringlist.h>
 #include "file_funs2.h"
 
 #ifdef _WIN32
