@@ -14,8 +14,6 @@ scons_parameters=["build_prefix="+build_prefix]
 install_requires = ['vplants.amlobj', 
                     'vplants.sequence_analysis',
                     'vplants.tree_matching', 
-                    'vplants.flux', 
-                    'vplants.msvoxel',
                     ]
 
 if("win" in sys.platform):
