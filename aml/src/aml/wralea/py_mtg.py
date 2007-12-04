@@ -376,7 +376,7 @@ Input:
         self.add_input( name = "ZZ", interface = IFunction,hide=True)
         self.add_input( name = "EulerAngles", interface = IFunction,hide=True)
         self.add_input( name = "DigitizedPoints", interface = IFunction,hide=True)
-        self.add_input( name = "Mode", interface = IStr, value=None,hide=True,hide=True)
+        self.add_input( name = "Mode", interface = IStr, value=None,hide=True)
         self.add_input( name = "Translate", interface = ISequence, value=None,hide=True)
         self.add_input( name = "Origin", interface = ISequence, value=None,hide=True)
         self.add_input( name = "DressingData",hide=True)
