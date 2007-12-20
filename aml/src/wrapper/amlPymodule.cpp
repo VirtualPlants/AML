@@ -1111,13 +1111,11 @@ init_amlPymodule(void)
 
   if (PyObject_HasAttrString( sys_stdout, "write")) {
     std::cout.rdbuf( new python::py_ostreambuf(sys_stdout) );
-	std::cout << "STDOUT redirected\n";
-  }
+	}
   
   if (PyObject_HasAttrString( sys_stderr, "write")) {
     std::cerr.rdbuf( new python::py_ostreambuf(sys_stderr) );
-	std::cerr << "STDERR redirected\n";
-  }
+	}
 
   std::cout << "Loading AML...";
 
@@ -1133,7 +1131,7 @@ init_amlPymodule(void)
     PyDict_SetItemString(d, "AMException", amlPyException);
 
   // Load AML
-  initAML();
+  initAML(&std::cout);
   std::cout << "OK\n";
   
   Py_AtExit(&AtExit);

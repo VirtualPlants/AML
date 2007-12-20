@@ -41,6 +41,6 @@
 
 
 std::string printErrorList();
-void initAML();
+void initAML(std::ostream* stream = 0);
 bool getAMObj( const std::string& name, AMObj& amobj);
 

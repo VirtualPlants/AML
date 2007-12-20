@@ -30,7 +30,6 @@
 #include <assert.h>
 #include <sstream>
 #include <string>
-#include <iostream>
 
 #include "aml.h"
 
@@ -71,7 +70,6 @@ std::string printErrorList()
       next.key().print(oss);
     }
   errlist->clear();
- 
   return oss.str();
 }
 
@@ -79,13 +77,13 @@ std::string printErrorList()
 /*********************************************************************************/
 /********************** initialize modules and objects table *********************/
 /*********************************************************************************/
-void initAML()
+void initAML(std::ostream * stream)
 {
   // create table for functions and objects 
   createAMObjTable();
   // fill the table
   installAMLModules(); 
-  initParser();
+  initParser(stream);
 }
 
 

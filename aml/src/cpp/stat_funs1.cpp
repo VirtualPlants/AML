@@ -371,7 +371,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
   int nb_required , segmentation = FORWARD_DYNAMIC_PROGRAMMING , nb_segmentation = NB_SEGMENTATION ,
       state_sequence = GENERALIZED_VITERBI , nb_state_sequence = NB_STATE_SEQUENCE , output;
 
-
+  std::cout << "TOTO"<<endl;
   nb_required = nb_required_computation(args);
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
