@@ -1095,8 +1095,13 @@ init_amlPymodule(void)
   PyObject* sys = PyImport_ImportModule("sys");
   PyObject* dict = PyModule_GetDict( sys );
   PyObject* sys_stdout = PyDict_GetItemString(dict, "stdout");
+  PyObject* sys_stderr = PyDict_GetItemString(dict, "stderr");
 
   if (PyObject_HasAttrString( sys_stdout, "write")) {
+    std::cout.rdbuf( new python::py_ostreambuf(sys_stdout) );
+  }
+  
+  if (PyObject_HasAttrString( sys_stderr, "write")) {
     std::cout.rdbuf( new python::py_ostreambuf(sys_stdout) );
   }
 
