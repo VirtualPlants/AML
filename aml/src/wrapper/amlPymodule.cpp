@@ -1102,7 +1102,7 @@ init_amlPymodule(void)
   }
   
   if (PyObject_HasAttrString( sys_stderr, "write")) {
-    std::cout.rdbuf( new python::py_ostreambuf(sys_stdout) );
+    std::cerr.rdbuf( new python::py_ostreambuf(sys_stderr) );
   }
 
   std::cout << "...AMAPmod loaded\n";
