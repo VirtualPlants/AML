@@ -72,14 +72,16 @@ tm_src= ["aml_treematch.cpp"]
 sources.extend(tm_src)
 
 # MSVOXEL module
-LIBS += ["vpoctree"]
-octree_src = "msvoxel_funs.cpp"
-sources.append(octree_src)
+# LIBS += ["vpoctree"]
+# octree_src = "msvoxel_funs.cpp"
+# sources.append(octree_src)
+env_aml.AppendUnique(CPPDEFINES=['WITHOUT_MSVOXEL'])
 
 #  FLUX module
-LIBS += ["vpflux"]
-flux_src = "flux_funs.cpp"
-sources.append(flux_src)
+# LIBS += ["vpflux"]
+# flux_src = "flux_funs.cpp"
+# sources.append(flux_src)
+env_aml.AppendUnique(CPPDEFINES=['WITHOUT_FLUX'])
 
 # Build the aml library with all the static aml functions
 env_aml.AppendUnique(LIBS=LIBS)

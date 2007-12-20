@@ -425,10 +425,18 @@ def doc_wrapper(func, name):
 
 # Update globals() with aml functions
 for fct in __function:
-    __dictionnary[fct] = doc_wrapper(aml.__getattr__(fct), fct)
+   try:
+      __dictionnary[fct] = doc_wrapper(aml.__getattr__(fct), fct)
+   except Exception:
+      pass
+
 
 for fct in __var:
-    __dictionnary[fct] = aml.__getattr__(fct)
+   try:
+      __dictionnary[fct] = aml.__getattr__(fct)
+   except Exception:
+      pass
+
 
 _DEBUG = False
 if _DEBUG:

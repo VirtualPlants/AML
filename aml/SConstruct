@@ -18,7 +18,7 @@ options = Options(['../options.py', 'options.py'], ARGUMENTS)
 # Dependencies
 common_tools = ['vplants.mtg', 'PlantGL', 'vplants.tool', 'vplants.amlobj',
                 'vplants.stat_tool', 'vplants.sequence_analysis',
-                'vplants.tree_matching', 'vplants.flux', 'vplants.msvoxel']
+                'vplants.tree_matching']
 
 wrapper_tools = ['python', 'alea', 'qt4'] + common_tools
 cpp_tools = ['alea','flex','install', 'qt4'] + common_tools

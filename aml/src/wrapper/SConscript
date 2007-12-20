@@ -31,10 +31,10 @@ pglsg""")
 LIBS += ["vpmtg"]
 # TreeMatching module
 LIBS += ["vptree_matching"]
-# MSVOXEL module
-LIBS += ["vpoctree"]
-#  FLUX module
-LIBS += ["vpflux"]
+# # MSVOXEL module
+# LIBS += ["vpoctree"]
+# #  FLUX module
+# LIBS += ["vpflux"]
 
 
 env.AppendUnique(LIBS=LIBS)

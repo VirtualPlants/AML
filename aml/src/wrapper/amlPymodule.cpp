@@ -39,6 +39,7 @@
 
 #include <sstream>
 
+#include "py_ostreambuf.h"
 #include "amlPymodule.h"
 #include "pyfnode.h"
 #include "aml.h"
@@ -1090,7 +1091,16 @@ extern "C" {
 DL_EXPORT(void)
 init_amlPymodule(void)
 {
-  printf("...AMAPmod loaded\n");
+  // Redirect STDOUT
+  PyObject* sys = PyImport_ImportModule("sys");
+  PyObject* dict = PyModule_GetDict( sys );
+  PyObject* sys_stdout = PyDict_GetItemString(dict, "stdout");
+
+  if (PyObject_HasAttrString( sys_stdout, "write")) {
+    std::cout.rdbuf( new python::py_ostreambuf(sys_stdout) );
+  }
+
+  std::cout << "...AMAPmod loaded\n";
 
   CONVMODE=0;
   AMObj_Type.ob_type = &PyType_Type;
