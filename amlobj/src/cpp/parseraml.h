@@ -64,7 +64,7 @@ extern int readline_file(char* buff);
 extern int readline_interactive(char* buff);
 extern int file_init_read_line(const char* file);
 extern AMLErrorList* getAMLErrorList();
-extern void initParser();
+extern void initParser(std::ostream* stream = 0);
 extern void cleanParser();
 extern const char* amlTokenName(int token);
 

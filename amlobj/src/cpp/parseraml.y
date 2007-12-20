@@ -1622,18 +1622,26 @@ static void initLogFile() {
 
 }
 
-void initParser() {
+void initParser(std::ostream* stream) {
 
   errlist = new AMLErrorList;
 
+  if(!stream)
+    {
 #ifdef QT_AML
-  aml_output_stream =qtOuput();
+    aml_output_stream =qtOuput();
 #else
-  aml_output_stream = &std::cout;
+    aml_output_stream = &std::cout;
 #endif
+    }
+  else
+    {
+    aml_output_stream = stream;
+    }
   initLogFile();
 
 }
+
 
 void cleanParser() {
 
