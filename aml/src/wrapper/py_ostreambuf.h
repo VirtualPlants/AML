@@ -20,6 +20,8 @@ class py_ostreambuf : public std::streambuf
     {
         have_flush = PyObject_HasAttrString( file, "flush");
     }
+	
+	
 
  protected:
     virtual int_type overflow( int_type c)

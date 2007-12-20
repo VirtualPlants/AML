@@ -47,6 +47,7 @@
 #include "compile.h"
 #include "funcobject.h"
 
+
 using namespace std;
 
 
@@ -1083,10 +1084,18 @@ static PyMethodDef amlPy_methods[] =
 /*********************************************************************************/
 /********************** Initialization function for the module *******************/
 /*********************************************************************************/
+std::streambuf* old_cout_buf, *old_cerr_buf;
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void AtExit()
+{
+   std::cout.rdbuf(old_cout_buf);
+   std::cerr.rdbuf(old_cerr_buf);
+}
 
 DL_EXPORT(void)
 init_amlPymodule(void)
@@ -1096,16 +1105,21 @@ init_amlPymodule(void)
   PyObject* dict = PyModule_GetDict( sys );
   PyObject* sys_stdout = PyDict_GetItemString(dict, "stdout");
   PyObject* sys_stderr = PyDict_GetItemString(dict, "stderr");
+  
+  old_cout_buf = std::cout.rdbuf();
+  old_cerr_buf = std::cerr.rdbuf();
 
   if (PyObject_HasAttrString( sys_stdout, "write")) {
     std::cout.rdbuf( new python::py_ostreambuf(sys_stdout) );
+	std::cout << "STDOUT redirected\n";
   }
   
   if (PyObject_HasAttrString( sys_stderr, "write")) {
     std::cerr.rdbuf( new python::py_ostreambuf(sys_stderr) );
+	std::cerr << "STDERR redirected\n";
   }
 
-  std::cout << "...AMAPmod loaded\n";
+  std::cout << "Loading AML...";
 
   CONVMODE=0;
   AMObj_Type.ob_type = &PyType_Type;
@@ -1120,7 +1134,10 @@ init_amlPymodule(void)
 
   // Load AML
   initAML();
-
+  std::cout << "OK\n";
+  
+  Py_AtExit(&AtExit);
+  
 }
 
 #ifdef __cplusplus

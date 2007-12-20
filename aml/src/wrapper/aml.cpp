@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <sstream>
 #include <string>
+#include <iostream>
 
 #include "aml.h"
 
@@ -70,6 +71,7 @@ std::string printErrorList()
       next.key().print(oss);
     }
   errlist->clear();
+ 
   return oss.str();
 }
 
