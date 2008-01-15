@@ -5730,8 +5730,8 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des sequences des temps de retour pour une valeur prise
- *  par une variable donnee.
+ *  Calcul des sequences de temps de retour pour une valeur prise
+ *  par une variable entiere.
  *
  *--------------------------------------------------------------*/
 
@@ -5739,16 +5739,14 @@ AMObj STAT_RecurrenceTimeSequences(const AMObjVector &args)
 
 {
   bool status = true;
-  int nb_required , nb_variable , variable , offset , value;
+  int nb_variable , variable , offset;
   const Sequences *iseq;
   Sequences *seq;
   Markovian_sequences *markovian_seq;
   Format_error error;
 
 
-  nb_required = nb_required_computation(args);
-
-  CHECKCONDVA(nb_required >= 2 ,
+  CHECKCONDVA(args.length() >= 2 ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "RecurrenceTimeSequences"));
 
   // argument obligatoire
@@ -5795,23 +5793,20 @@ AMObj STAT_RecurrenceTimeSequences(const AMObjVector &args)
     }
   }
 
-  CHECKCONDVA(nb_required - offset == 1 ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "RecurrenceTimeSequences"));
+  CHECKCONDVA(args.length() == offset + 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "RecurrenceTimeSequences" , offset + 1));
 
   if (args[offset].tag() != AMObjType::INTEGER) {
     status = false;
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "RecurrenceTimeSequences" , offset + 1 ,
                 args[offset].tag.string().data() , "INT");
   }
-  else {
-    value = args[offset].val.i;
-  }
 
   if (!status) {
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->recurrence_time_sequences(error , variable , value);
+  seq = iseq->recurrence_time_sequences(error , variable , args[offset].val.i);
 
   if (seq) {
     markovian_seq = seq->markovian_sequences(error);
@@ -5831,6 +5826,102 @@ AMObj STAT_RecurrenceTimeSequences(const AMObjVector &args)
   else {
     AMLOUTPUT << "\n" << error;
     genAMLError(ERRORMSG(STAT_MODULE_s) , "RecurrenceTimeSequences");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des sequences de temps de sejour pour une variable entiere.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_SojournTimeSequences(const AMObjVector &args)
+
+{
+  bool status = true;
+  int nb_variable , variable;
+  const Sequences *iseq;
+  Sequences *seq;
+  Markovian_sequences *markovian_seq;
+  Format_error error;
+
+
+  CHECKCONDVA(args.length() >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "SojournTimeSequences"));
+
+  // argument obligatoire
+
+  switch (args[0].tag()) {
+  case AMObjType::SEQUENCES :
+    iseq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::MARKOVIAN_SEQUENCES :
+    iseq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+    iseq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::SEMI_MARKOV_DATA :
+    iseq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+    iseq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  default :
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SojournTimeSequences" , 1 , args[0].tag.string().data() ,
+                "SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+    return AMObj(AMObjType::ERROR);
+  }
+
+  nb_variable = iseq->get_nb_variable();
+
+  if (nb_variable == 1) {
+    CHECKCONDVA(args.length() == 1 ,
+                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "SojournTimeSequences"));
+
+    variable = 1;
+  }
+
+  else {
+    CHECKCONDVA(args.length() == 2 ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "SojournTimeSequences" , 2));
+
+    if (args[1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SojournTimeSequences" , 2 ,
+                  args[1].tag.string().data() , "INT");
+    }
+    else {
+      variable = args[1].val.i;
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  seq = iseq->sojourn_time_sequences(error , variable);
+
+  if (seq) {
+    markovian_seq = seq->markovian_sequences(error);
+    if (markovian_seq) {
+      delete seq;
+      STAT_model* model = new STAT_model(markovian_seq);
+      return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
+    }
+    else {
+      AMLOUTPUT << "\n";
+      error.ascii_write(AMLOUTPUT , WARNING);
+      STAT_model* model = new STAT_model(seq);
+      return AMObj(AMObjType::SEQUENCES , model);
+    }
+  }
+
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "SojournTimeSequences");
     return AMObj(AMObjType::ERROR);
   }
 }
