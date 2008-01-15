@@ -3382,7 +3382,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
   if ((args[2].tag() == AMObjType::STRING) || (args[2].tag() == AMObjType::INTEGER)) {
     char type = 'v';
     bool left_right , initial_occupancy_mean_option = false;
-    int offset , nb_state;
+    int nb_state;
     double occupancy_mean = D_DEFAULT;
 
 
@@ -3425,9 +3425,6 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
               }
               else if (*pstr == "SEM") {
                 algorithm = FORWARD_BACKWARD_SAMPLING;
-              }
-              else if (*pstr == "Viterbi") {
-                algorithm = VITERBI;
               }
               else {
                 status = false;
@@ -3717,10 +3714,6 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
     if ((algorithm != FORWARD_BACKWARD) && (estimator == KAPLAN_MEIER)) {
       estimator = COMPLETE_LIKELIHOOD;
     }
-    if ((algorithm == VITERBI) && (state_sequences_option)) {
-      status = false;
-      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "StateSequences");
-    }
     if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (min_nb_state_sequence_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MinNbStateSequence");
@@ -3734,82 +3727,73 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Parameter");
     }
 
-    CHECKCONDVA(((algorithm != VITERBI) && (nb_required >= 4)) ||
-                ((algorithm == VITERBI) && (nb_required == 3)) ,
+    CHECKCONDVA(nb_required >= 4 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
     // arguments obligatoires
 
-    if (algorithm != VITERBI) {
-      offset = 3;
-
-      if (args[2].tag() != AMObjType::STRING) {
-        status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 3 ,
-                    args[2].tag.string().data() , "STRING");
+    if (args[2].tag() != AMObjType::STRING) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 3 ,
+                  args[2].tag.string().data() , "STRING");
+    }
+    else {
+      pstr = (AMString*)args[2].val.p;
+      if (*pstr == "Ordinary") {
+        type = 'o';
+      }
+      else if (*pstr == "Equilibrium") {
+        type = 'e';
       }
       else {
-        pstr = (AMString*)args[2].val.p;
-        if (*pstr == "Ordinary") {
-          type = 'o';
-        }
-        else if (*pstr == "Equilibrium") {
-          type = 'e';
-        }
-        else {
-          status = false;
-          genAMLError(ERRORMSG(STOCHASTIC_PROCESS_TYPE_sds) , "Estimate" , 3 ,
-                      "Ordinary or Equilibrium");
-        }
-      }
-
-      CHECKCONDVA(((type == 'o') && (nb_required == 5)) ||
-                  ((type == 'e') && (nb_required == 4)) ,
-                  genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
-
-      switch (type) {
-
-      case 'o' : {
-        if (args[4].tag() != AMObjType::STRING) {
-          status = false;
-          genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 5 ,
-                      args[4].tag.string().data() , "STRING");
-        }
-        else {
-          pstr = (AMString*)args[4].val.p;
-          if (*pstr == "Irreducible") {
-            left_right = false;
-          }
-          else if (*pstr == "LeftRight") {
-            left_right = true;
-          }
-          else {
-            status = false;
-            genAMLError(ERRORMSG(MARKOV_CHAIN_TYPE_sds) , "Estimate" , 5 ,
-                        "Irreducible or LeftRight");
-          }
-        }
-        break;
-      }
-
-      case 'e' : {
-        left_right = false;
-        break;
-      }
+        status = false;
+        genAMLError(ERRORMSG(STOCHASTIC_PROCESS_TYPE_sds) , "Estimate" , 3 ,
+                    "Ordinary or Equilibrium");
       }
     }
 
-    else {
-      offset = 2;
-    }
-
-    if (args[offset].tag() != AMObjType::INTEGER) {
+    if (args[3].tag() != AMObjType::INTEGER) {
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , offset + 1 ,
-                  args[offset].tag.string().data() , "INT");
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 4 ,
+                  args[3].tag.string().data() , "INT");
     }
     else {
-      nb_state = args[offset].val.i;
+      nb_state = args[3].val.i;
+    }
+
+    CHECKCONDVA(((type == 'o') && (nb_required == 5)) ||
+                ((type == 'e') && (nb_required == 4)) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
+
+    switch (type) {
+
+    case 'o' : {
+      if (args[4].tag() != AMObjType::STRING) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 5 ,
+                    args[4].tag.string().data() , "STRING");
+      }
+      else {
+        pstr = (AMString*)args[4].val.p;
+        if (*pstr == "Irreducible") {
+          left_right = false;
+        }
+        else if (*pstr == "LeftRight") {
+          left_right = true;
+        }
+        else {
+          status = false;
+          genAMLError(ERRORMSG(MARKOV_CHAIN_TYPE_sds) , "Estimate" , 5 ,
+                      "Irreducible or LeftRight");
+        }
+      }
+      break;
+    }
+
+    case 'e' : {
+      left_right = false;
+      break;
+    }
     }
 
     if (((type != 'e') || (estimator == PARTIAL_LIKELIHOOD) || (algorithm != FORWARD_BACKWARD)) &&
@@ -3835,11 +3819,6 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
                                                                max_nb_state_sequence , parameter ,
                                                                estimator , counting_flag , state_sequence ,
                                                                occupancy_mean , nb_iter);
-      break;
-    case VITERBI :
-      hsmarkov = seq->hidden_semi_markov_viterbi_estimation(error , AMLOUTPUT , nb_state ,
-                                                            estimator , counting_flag ,
-                                                            occupancy_mean , nb_iter);
       break;
     }
   }
@@ -3889,9 +3868,6 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
               }
               else if (*pstr == "SEM") {
                 algorithm = FORWARD_BACKWARD_SAMPLING;
-              }
-              else if (*pstr == "Viterbi") {
-                algorithm = VITERBI;
               }
               else {
                 status = false;
@@ -4151,10 +4127,6 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
     if ((algorithm != FORWARD_BACKWARD) && (estimator == KAPLAN_MEIER)) {
       estimator = COMPLETE_LIKELIHOOD;
     }
-    if ((algorithm == VITERBI) && (state_sequences_option)) {
-      status = false;
-      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "StateSequences");
-    }
     if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (min_nb_state_sequence_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MinNbStateSequence");
@@ -4188,10 +4160,6 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
                                                                min_nb_state_sequence , max_nb_state_sequence ,
                                                                parameter , estimator , counting_flag ,
                                                                state_sequence , nb_iter);
-      break;
-    case VITERBI :
-      hsmarkov = seq->hidden_semi_markov_viterbi_estimation(error , AMLOUTPUT , *ihsmarkov ,
-                                                            estimator , counting_flag , nb_iter);
       break;
     }
   }
