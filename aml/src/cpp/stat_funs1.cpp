@@ -233,6 +233,7 @@ extern AMObj STAT_Difference(const AMObjVector &args);
 extern AMObj STAT_MovingAverage(const AMObjVector &args);
 extern AMObj STAT_PointwiseAverage(const AMObjVector &args);
 extern AMObj STAT_RecurrenceTimeSequences(const AMObjVector &args);
+extern AMObj STAT_SojournTimeSequences(const AMObjVector &args);
 extern AMObj STAT_TransformPosition(const AMObjVector &args);
 
 extern AMObj STAT_Cross(const AMObjVector &args);
@@ -699,7 +700,11 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
   }
   if (((state_sequences_option) || (nb_state_sequence_option)) && ((view_point != 'p') ||
        ((args[0].tag() != AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) &&
-        (args[0].tag() != AMObjType::HIDDEN_SEMI_MARKOV)))) {
+        (args[0].tag() != AMObjType::HIDDEN_SEMI_MARKOV) &&
+        (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
+        (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA)))) {
     status = false;
     genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Display");
   }
@@ -707,8 +712,12 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
        ((args[0].tag() != AMObjType::SEQUENCES) && (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
         (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
         (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
-        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA))) && ((view_point != 'p') ||
-       (args[0].tag() != AMObjType::HIDDEN_SEMI_MARKOV))) {
+        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA))) &&
+      ((view_point != 'p') || ((args[0].tag() != AMObjType::HIDDEN_SEMI_MARKOV) &&
+        (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
+        (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA)))) {
     status = false;
     genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Display");
   }
@@ -999,7 +1008,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
     Format_error error;
 
 
-    CHECKCONDVA(nb_required == 2 ,
+    CHECKCONDVA(nb_required >= 2 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
     if (args[1].tag() != AMObjType::INTEGER) {
@@ -1013,28 +1022,63 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
     }
 
     if (args[0].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
-      status = ((Hidden_variable_order_markov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , AMLOUTPUT , args[1].val.i , state_sequence , nb_state_sequence);
+      CHECKCONDVA(nb_required == 2 ,
+                  genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
-      if (!status) {
-        AMLOUTPUT << "\n" << error;
-        genAMLError(ERRORMSG(STAT_MODULE_s) , "Display");
-        return AMObj(AMObjType::ERROR);
-      }
+      status = ((Hidden_variable_order_markov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , AMLOUTPUT , args[1].val.i , state_sequence , nb_state_sequence);
     }
 
     else if (args[0].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
-      status = ((Hidden_semi_markov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , AMLOUTPUT , args[1].val.i , output , state_sequence , nb_state_sequence);
+      CHECKCONDVA(nb_required == 2 ,
+                  genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
-      if (!status) {
-        AMLOUTPUT << "\n" << error;
-        genAMLError(ERRORMSG(STAT_MODULE_s) , "Display");
+      status = ((Hidden_semi_markov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , AMLOUTPUT , args[1].val.i , output , state_sequence , nb_state_sequence);
+    }
+
+    else {
+      const Markovian_sequences *seq;
+
+
+      CHECKCONDVA(nb_required == 3 ,
+                  genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
+
+      switch (args[0].tag()) {
+      case AMObjType::MARKOVIAN_SEQUENCES :
+        seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+        break;
+      case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+        seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+        break;
+      case AMObjType::SEMI_MARKOV_DATA :
+        seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+        break;
+      case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+        seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+        break;
+      default :
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , 1 , args[0].tag.string().data() ,
+                    "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI_MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+        return AMObj(AMObjType::ERROR);
+      }
+
+      if (args[2].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
+        status = ((Hidden_variable_order_markov*)((STAT_model*)args[2].val.p)->pt)->state_profile_write(error , AMLOUTPUT , *seq , args[1].val.i , 'a' , state_sequence , nb_state_sequence);
+      }
+
+      else if (args[2].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
+        status = ((Hidden_semi_markov*)((STAT_model*)args[2].val.p)->pt)->state_profile_write(error , AMLOUTPUT , *seq , args[1].val.i , output , 'a' , state_sequence , nb_state_sequence);
+      }
+
+      else {
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , 3 , args[2].tag.string().data() ,
+                    "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV");
         return AMObj(AMObjType::ERROR);
       }
     }
 
-    else {
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , 1 , args[0].tag.string().data() ,
-                  "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV");
+    if (!status) {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "Display");
       return AMObj(AMObjType::ERROR);
     }
     break;
@@ -1380,7 +1424,11 @@ AMObj STAT_model::save(const AMObjVector &args) const
   }
   if (((state_sequences_option) || (nb_state_sequence_option)) && ((view_point != 'p') ||
        ((args[0].tag() != AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) &&
-        (args[0].tag() != AMObjType::HIDDEN_SEMI_MARKOV)))) {
+        (args[0].tag() != AMObjType::HIDDEN_SEMI_MARKOV) &&
+        (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
+        (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA)))) {
     status = false;
     genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Save");
   }
@@ -1388,8 +1436,12 @@ AMObj STAT_model::save(const AMObjVector &args) const
        ((args[0].tag() != AMObjType::SEQUENCES) && (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
         (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
         (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
-        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA))) && ((view_point != 'p') ||
-       (args[0].tag() != AMObjType::HIDDEN_SEMI_MARKOV))) {
+        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA))) &&
+      ((view_point != 'p') || ((args[0].tag() != AMObjType::HIDDEN_SEMI_MARKOV) &&
+        (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
+        (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA)))) {
     status = false;
     genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Save");
   }
@@ -1842,8 +1894,8 @@ AMObj STAT_model::save(const AMObjVector &args) const
     }
 
     status = seq->segment_profile_write(error , ((AMString*)args[1].val.p)->data() ,
-                                        args[2].val.i , args[3].val.i , variable_type , output ,
-                                        format , segmentation , nb_segmentation);
+                                        args[2].val.i , args[3].val.i , variable_type ,
+                                        output , format , segmentation , nb_segmentation);
     delete [] variable_type;
 
     if (!status) {
@@ -1855,7 +1907,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
   }
 
   case 'p' : {
-    CHECKCONDVA(nb_required == 3 ,
+    CHECKCONDVA(nb_required >= 3 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
 
     if (args[2].tag() != AMObjType::INTEGER) {
@@ -1885,15 +1937,58 @@ AMObj STAT_model::save(const AMObjVector &args) const
     }
 
     if (args[0].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
+      CHECKCONDVA(nb_required == 3 ,
+                  genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
+
       status = ((Hidden_variable_order_markov*)((STAT_model*)args[0].val.p)->pt)->state_profile_write(error , ((AMString*)args[1].val.p)->data() , args[2].val.i , format , state_sequence , nb_state_sequence);
     }
+
     else if (args[0].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
+      CHECKCONDVA(nb_required == 3 ,
+                  genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
+
       status = ((Hidden_semi_markov*)((STAT_model*)args[0].val.p)->pt)->state_profile_write(error , ((AMString*)args[1].val.p)->data() , args[2].val.i , output , format , state_sequence , nb_state_sequence);
     }
+
     else {
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , 1 , args[0].tag.string().data() ,
-                  "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV");
-      return AMObj(AMObjType::ERROR);
+      const Markovian_sequences *seq;
+
+
+      CHECKCONDVA(nb_required == 4 ,
+                  genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
+
+      switch (args[0].tag()) {
+      case AMObjType::MARKOVIAN_SEQUENCES :
+        seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+        break;
+      case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+        seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+        break;
+      case AMObjType::SEMI_MARKOV_DATA :
+        seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+        break;
+      case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+        seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+        break;
+      default :
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , 1 , args[0].tag.string().data() ,
+                    "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI_MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+        return AMObj(AMObjType::ERROR);
+      }
+
+      if (args[3].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
+        status = ((Hidden_variable_order_markov*)((STAT_model*)args[3].val.p)->pt)->state_profile_write(error , ((AMString*)args[1].val.p)->data() , *seq , args[2].val.i , format , state_sequence , nb_state_sequence);
+      }
+
+      else if (args[3].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
+        status = ((Hidden_semi_markov*)((STAT_model*)args[3].val.p)->pt)->state_profile_write(error , ((AMString*)args[1].val.p)->data() , *seq , args[2].val.i , output , format , state_sequence , nb_state_sequence);
+      }
+
+      else {
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , 4 , args[3].tag.string().data() ,
+                    "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV");
+        return AMObj(AMObjType::ERROR);
+      }
     }
     break;
   }
@@ -2423,8 +2518,12 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
        ((args[0].tag() != AMObjType::SEQUENCES) && (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
         (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
         (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
-        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA))) && ((view_point != 'p') ||
-       (args[0].tag() != AMObjType::HIDDEN_SEMI_MARKOV))) {
+        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA))) &&
+      ((view_point != 'p') || ((args[0].tag() != AMObjType::HIDDEN_SEMI_MARKOV) &&
+        (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
+        (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA)))) {
     status = false;
     genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Plot");
   }
@@ -2732,10 +2831,58 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
 
       case 'p' : {
         if (args[0].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
+          CHECKCONDVA(nb_required == 2 ,
+                      genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot"));
+
           status = ((Hidden_variable_order_markov*)((STAT_model*)args[0].val.p)->pt)->state_profile_plot_write(error , Plot_prefix , args[1].val.i , title);
         }
+
         else if (args[0].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
+          CHECKCONDVA(nb_required == 2 ,
+                      genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot"));
+
           status = ((Hidden_semi_markov*)((STAT_model*)args[0].val.p)->pt)->state_profile_plot_write(error , Plot_prefix , args[1].val.i , output , title);
+        }
+
+        else {
+          const Markovian_sequences *seq;
+
+
+          CHECKCONDVA(nb_required == 3 ,
+                      genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot"));
+
+          switch (args[0].tag()) {
+          case AMObjType::MARKOVIAN_SEQUENCES :
+            seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+            break;
+          case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+            seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+            break;
+          case AMObjType::SEMI_MARKOV_DATA :
+            seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+            break;
+          case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+            seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+            break;
+          default :
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , 1 , args[0].tag.string().data() ,
+                        "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI_MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+            return AMObj(AMObjType::ERROR);
+          }
+
+          if (args[2].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
+            status = ((Hidden_variable_order_markov*)((STAT_model*)args[2].val.p)->pt)->state_profile_plot_write(error , Plot_prefix , *seq , args[1].val.i , title);
+          }
+
+          else if (args[2].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
+            status = ((Hidden_semi_markov*)((STAT_model*)args[2].val.p)->pt)->state_profile_plot_write(error , Plot_prefix , *seq , args[1].val.i , output , title);
+          }
+
+          else {
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , 3 , args[2].tag.string().data() ,
+                        "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV");
+            return AMObj(AMObjType::ERROR);
+          }
         }
 
         if (status) {
@@ -3124,6 +3271,9 @@ void installSTATModule()
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::INTEGER;
   installFNode("RecurrenceTimeSequences" , STAT_RecurrenceTimeSequences , 2 , type , AMObjType::SEQUENCES);
+
+  type[0] = AMObjType::ANY;
+  installFNode("SojournTimeSequences" , STAT_SojournTimeSequences , 1 , type , AMObjType::SEQUENCES);
 
   type[0] = AMObjType::SEQUENCES;
   type[1] = AMObjType::INTEGER;
