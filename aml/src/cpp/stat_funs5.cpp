@@ -4683,7 +4683,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                              *((Vector_distance*)((STAT_model*)args[3].val.p)->pt) , AMLOUTPUT , output);
   }
 
-  if (args[1].tag() == AMObjType::ARRAY) {
+  else if (args[1].tag() == AMObjType::ARRAY) {
     CHECKCONDVA(nb_required == nb_variable + 2 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
 
@@ -5973,7 +5973,7 @@ AMObj STAT_ComputeStateSequences(const AMObjVector &args)
     Semi_markov_data *seq;
 
 
-    seq = ((Hidden_semi_markov*)((STAT_model*)args[1].val.p)->pt)->state_sequence_computation(error , *iseq ,
+    seq = ((Hidden_semi_markov*)((STAT_model*)args[1].val.p)->pt)->state_sequence_computation(error , AMLOUTPUT , *iseq ,
                                                                                               characteristic_flag);
 
     if (seq) {
