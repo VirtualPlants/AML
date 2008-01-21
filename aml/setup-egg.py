@@ -24,7 +24,7 @@ setup_requires = install_requires + ['openalea.deploy']
 if __name__ == '__main__':
     
     setup(name='VPlants.Aml',
-          version='2.0.1',
+          version='0.1.2',
           author='C. Godin, Y. Guedon, C.Pradal',
           description='aml and amlPy libraries',
           url='',
