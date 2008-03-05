@@ -741,7 +741,7 @@ bool AMObject_Check(PyObject* pobj)
 bool Char_Check(PyObject* pobj)
 {
     char *buffer;
-    int length;
+    Py_ssize_t length;
     if(!PyString_Check(pobj))
       return FALSE;
     else if(-1==PyString_AsStringAndSize(pobj, &buffer, &length))
@@ -759,15 +759,16 @@ bool Char_Check(PyObject* pobj)
 char PyStringasChar(PyObject* pobj)
 {
     char *buffer;
-    int length;
+    Py_ssize_t length;
     if(!PyString_Check(pobj))
       return EOF;
-    if(-1==PyString_AsStringAndSize(pobj, &buffer, &length))
+    if(-1 == PyString_AsStringAndSize(pobj, &buffer, &length))
       return EOF;
     if(length!=1)
       return EOF;
     return *buffer;
 }
+
 AMModel* PyTupleasSet(PyObject* pobj)
 {
   Set* set = 0;

@@ -34,7 +34,7 @@ class py_ostreambuf : public std::streambuf
 	return c;
     }
 
-    virtual int xsputn(const char_type* s, std::streamsize n)
+    virtual long xsputn(const char_type* s, std::streamsize n)
     {
         const char * str = std::string( s, n).c_str();
         PyObject* pystr = PyString_FromString(str); 
