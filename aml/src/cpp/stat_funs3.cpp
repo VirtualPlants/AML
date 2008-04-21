@@ -1214,8 +1214,8 @@ AMObj STAT_ExtractHistogram(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
- *  Extraction de mesures globales (longueur, nombre de series/d'occurrences d'une valeur)
- *  par sequence,
+ *  Extraction de mesures globales (longueur, temps avant la 1ere occurrence
+ *  d'une valeur, nombre de series/d'occurrences d'une valeur) par sequence,
  *
  *--------------------------------------------------------------*/
 
@@ -1278,7 +1278,16 @@ AMObj STAT_ExtractVectors(const AMObjVector &args)
     }
   }
 
-  if (*pstr == "NbRun") {
+  if (*pstr == "Cumul") {
+    type = SEQUENCE_CUMUL;
+  }
+  else if (*pstr == "Mean") {
+    type = SEQUENCE_MEAN;
+  }
+  else if (*pstr == "FirstOccurrence") {
+    type = FIRST_OCCURRENCE;
+  }
+  else if (*pstr == "NbRun") {
     type = NB_RUN;
   }
   else if (*pstr == "NbOccurrence") {
@@ -1287,7 +1296,7 @@ AMObj STAT_ExtractVectors(const AMObjVector &args)
   else {
     status = false;
     genAMLError(ERRORMSG(HISTOGRAM_NAME_sds) , "ExtractVectors" , 2 ,
-                "Length or NbRun or NbOccurrence");
+                "Length or Cumul or Mean or FirstOccurrence or NbRun or NbOccurrence");
   }
 
   nb_variable = seq->get_nb_variable();
@@ -1307,6 +1316,27 @@ AMObj STAT_ExtractVectors(const AMObjVector &args)
     }
     else {
       variable = args[2].val.i;
+    }
+  }
+
+  if ((*pstr == "Cumul") || (*pstr == "Mean")) {
+    CHECKCONDVA(args.length() == offset ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "ExtractVectors" , offset));
+
+    if (!status) {
+      return AMObj(AMObjType::ERROR);
+    }
+
+    vec = seq->extract_vectors(error , type , variable);
+
+    if (vec) {
+      STAT_model* model = new STAT_model(vec);
+      return AMObj(AMObjType::VECTORS , model);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "ExtractVectors");
+      return AMObj(AMObjType::ERROR);
     }
   }
 
@@ -6115,15 +6145,14 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
 
 {
   bool status = true;
-  int nb_required , length = I_DEFAULT;
+  int nb_required , nb_variable , variable , offset , sequence_length = I_DEFAULT ,
+      run_length = I_DEFAULT;
   const Markovian_sequences *iseq;
   Markovian_sequences *seq;
   Format_error error;
 
 
-  nb_required = 1;
-
-  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+  CHECKCONDVA(args.length() >= 1 ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "AddAbsorbingRun"));
 
   // argument obligatoire
@@ -6142,11 +6171,35 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
     iseq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
     break;
   default :
-    status = false;
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "AddAbsorbingRun" , args[0].tag.string().data() ,
                 "MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
-    break;
+    return AMObj(AMObjType::ERROR);
   }
+
+  nb_variable = iseq->get_nb_variable();
+
+  if (nb_variable == 1) {
+    offset = 1;
+    variable = 1;
+  }
+
+  else {
+    offset = 2;
+
+    if (args[1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "AddAbsorbingRun" , 2 ,
+                  args[1].tag.string().data() , "INT");
+    }
+    else {
+      variable = args[1].val.i;
+    }
+  }
+
+  nb_required = offset;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "AddAbsorbingRun"));
 
   // argument optionnel
 
@@ -6157,9 +6210,16 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
                   args[nb_required].tag.string().data() , "OPTION");
     }
     else {
-      if (*((AMString*)args[nb_required].val.p) != "Length") {
+      if (*((AMString*)args[nb_required].val.p) == "SequenceLength") {
+        sequence_length = 0;
+      }
+      else if (*((AMString*)args[nb_required].val.p) == "RunLength") {
+        run_length = 0;
+      }
+      else {
         status = false;
-        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "AddAbsorbingRun" , nb_required + 1 , "Length");
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "AddAbsorbingRun" , nb_required + 1 ,
+                    "SequenceLength or RunLength");
       }
     }
 
@@ -6169,7 +6229,12 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
                   args[nb_required + 1].tag.string().data() , "INT");
     }
     else {
-      length = args[nb_required + 1].val.i;
+      if (sequence_length == 0) {
+        sequence_length = args[nb_required + 1].val.i;
+      }
+      else if (run_length == 0){
+        run_length = args[nb_required + 1].val.i;
+      }
     }
   }
 
@@ -6177,7 +6242,7 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->add_absorbing_run(error , length);
+  seq = iseq->add_absorbing_run(error , variable , sequence_length , run_length);
 
   if (seq) {
     STAT_model* model = new STAT_model(seq);
