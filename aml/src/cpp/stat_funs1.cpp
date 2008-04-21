@@ -173,6 +173,7 @@ const char *STAT_err_msgs_aml[] = {
   "function %s: argument %d: bad normalization: should be %s" ,
   "function %s: argument %d: bad regression method: should be %s" ,
   "function %s: argument %d: bad span" ,
+  "function %s: argument %d: bad change-point model: should be %s" ,
   "function %s: argument %d: bad segmentation output: should be %s" ,
   "function %s: argument %d: bad number of segments estimation: should be %s"
 };
@@ -368,11 +369,11 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
        format_option = false , segmentations_option = false , nb_segmentation_option = false ,
        state_sequences_option = false , nb_state_sequence_option = false ,
        output_option = false , exhaustive = false;
-  register int i;
+  register int i , j;
   int nb_required , segmentation = FORWARD_DYNAMIC_PROGRAMMING , nb_segmentation = NB_SEGMENTATION ,
       state_sequence = GENERALIZED_VITERBI , nb_state_sequence = NB_STATE_SEQUENCE , output;
 
-  std::cout << "TOTO"<<endl;
+
   nb_required = nb_required_computation(args);
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
@@ -907,7 +908,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
   }
 
   case 'q' : {
-    int nb_variable , *variable_type;
+    int nb_variable , *model_type;
     const Sequences *seq;
     Format_error error;
 
@@ -936,10 +937,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 
     nb_variable = seq->get_nb_variable();
 
-    CHECKCONDVA(nb_required == nb_variable + 3 ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
-
-    variable_type = new int[nb_variable];
+    model_type = new int[nb_variable];
 
     if (args[1].tag() != AMObjType::INTEGER) {
       status = false;
@@ -958,43 +956,88 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , i + 4 ,
                     args[i + 3].tag.string().data() , "STRING");
       }
+
       else {
         pstr = (AMString*)args[i + 3].val.p;
-        if (*pstr == "Symbolic") {
-          variable_type[i] = SYMBOLIC;
+
+        if (i == 0) {
+          if (*pstr == "Multinomial") {
+            model_type[i] = MULTINOMIAL_CHANGE;
+          }
+          else if (*pstr == "Poisson") {
+            model_type[i] = POISSON_CHANGE;
+          }
+          else if (*pstr == "Ordinal") {
+            model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Gaussian") {
+            model_type[i] = GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Mean") {
+            model_type[i] = MEAN_CHANGE;
+          }
+          else if (*pstr == "Variance") {
+            model_type[i] = VARIANCE_CHANGE;
+          }
+          else if (*pstr == "MeanVariance") {
+            model_type[i] = MEAN_VARIANCE_CHANGE;
+          }
+          else {
+            status = false;
+            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 4 ,
+                        "Multinomial or Poisson or Ordinal or Gaussian or Mean or Variance or MeanVariance");
+          }
+
+          if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
+            CHECKCONDVA(nb_required == 4 ,
+                        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
+
+            for (j = 1;j < nb_variable;j++) {
+              model_type[j] = model_type[i];
+            }
+            break;
+          }
+
+          else {
+            CHECKCONDVA(nb_required == nb_variable + 3 ,
+                        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
+          }
         }
-        else if (*pstr == "Ordinal") {
-          variable_type[i] = ORDINAL;
-        }
-        else if (*pstr == "Numeric") {
-          variable_type[i] = NUMERIC;
-        }
-        else if (*pstr == "Poisson") {
-          variable_type[i] = POISSON_CHANGE;
-        }
-        else if (*pstr == "Mean") {
-          variable_type[i] = MEAN_CHANGE;
-        }
-        else if (*pstr == "Variance") {
-          variable_type[i] = VARIANCE_CHANGE;
-        }
+
         else {
-          status = false;
-          genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "Display" , i + 4 ,
-                      "Symbolic or Ordinal or Numeric or Poisson or Mean or Variance");
+          if (*pstr == "Multinomial") {
+            model_type[i] = MULTINOMIAL_CHANGE;
+          }
+          else if (*pstr == "Poisson") {
+            model_type[i] = POISSON_CHANGE;
+          }
+          else if (*pstr == "Ordinal") {
+            model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Gaussian") {
+            model_type[i] = GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Variance") {
+            model_type[i] = VARIANCE_CHANGE;
+          }
+          else {
+            status = false;
+            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 4 ,
+                        "Multinomial or Poisson or Ordinal or Gaussian or Variance");
+          }
         }
       }
     }
 
     if (!status) {
-      delete [] variable_type;
+      delete [] model_type;
       return AMObj(AMObjType::ERROR);
     }
 
     status = seq->segment_profile_write(error , AMLOUTPUT , args[1].val.i , args[2].val.i ,
-                                        variable_type , output , 'a' ,
+                                        model_type , output , 'a' ,
                                         segmentation , nb_segmentation);
-    delete [] variable_type;
+    delete [] model_type;
 
     if (!status) {
       AMLOUTPUT << "\n" << error;
@@ -1104,7 +1147,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
        format_option = false , segmentations_option = false , nb_segmentation_option = false ,
        state_sequences_option = false , nb_state_sequence_option = false ,
        output_option = false , exhaustive = false;
-  register int i;
+  register int i , j;
   int nb_required , format_index , segmentation = FORWARD_DYNAMIC_PROGRAMMING ,
       nb_segmentation = NB_SEGMENTATION , state_sequence = GENERALIZED_VITERBI ,
       nb_state_sequence = NB_STATE_SEQUENCE , output;
@@ -1793,7 +1836,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
   }
 
   case 'q' : {
-    int nb_variable , *variable_type;
+    int nb_variable , *model_type;
     const Sequences *seq;
     Format_error error;
 
@@ -1822,10 +1865,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
 
     nb_variable = seq->get_nb_variable();
 
-    CHECKCONDVA(nb_required == nb_variable + 4 ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
-
-    variable_type = new int[nb_variable];
+    model_type = new int[nb_variable];
 
     if (args[2].tag() != AMObjType::INTEGER) {
       status = false;
@@ -1844,30 +1884,75 @@ AMObj STAT_model::save(const AMObjVector &args) const
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , i + 5 ,
                     args[i + 4].tag.string().data() , "STRING");
       }
+
       else {
         pstr = (AMString*)args[i + 4].val.p;
-        if (*pstr == "Symbolic") {
-          variable_type[i] = SYMBOLIC;
+
+        if (i == 0) {
+          if (*pstr == "Multinomial") {
+            model_type[i] = MULTINOMIAL_CHANGE;
+          }
+          else if (*pstr == "Poisson") {
+            model_type[i] = POISSON_CHANGE;
+          }
+          else if (*pstr == "Ordinal") {
+            model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Gaussian") {
+            model_type[i] = GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Mean") {
+            model_type[i] = MEAN_CHANGE;
+          }
+          else if (*pstr == "Variance") {
+            model_type[i] = VARIANCE_CHANGE;
+          }
+          else if (*pstr == "MeanVariance") {
+            model_type[i] = MEAN_VARIANCE_CHANGE;
+          }
+          else {
+            status = false;
+            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 5 ,
+                        "Multinomial or Poisson or Ordinal or Gaussian or Mean or Variance or MeanVariance");
+          }
+
+          if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
+            CHECKCONDVA(nb_required == 5 ,
+                        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
+
+            for (j = 1;j < nb_variable;j++) {
+              model_type[j] = model_type[i];
+            }
+            break;
+          }
+
+          else {
+            CHECKCONDVA(nb_required == nb_variable + 4 ,
+                        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
+          }
         }
-        else if (*pstr == "Ordinal") {
-          variable_type[i] = ORDINAL;
-        }
-        else if (*pstr == "Numeric") {
-          variable_type[i] = NUMERIC;
-        }
-        else if (*pstr == "Poisson") {
-          variable_type[i] = POISSON_CHANGE;
-        }
-        else if (*pstr == "Mean") {
-          variable_type[i] = MEAN_CHANGE;
-        }
-        else if (*pstr == "Variance") {
-          variable_type[i] = VARIANCE_CHANGE;
-        }
+
         else {
-          status = false;
-          genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "Save" , i + 5 ,
-                      "Symbolic or Ordinal or Numeric or Poisson or Mean or Variance");
+          if (*pstr == "Multinomial") {
+            model_type[i] = MULTINOMIAL_CHANGE;
+          }
+          else if (*pstr == "Poisson") {
+            model_type[i] = POISSON_CHANGE;
+          }
+          else if (*pstr == "Ordinal") {
+            model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Gaussian") {
+            model_type[i] = GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Variance") {
+            model_type[i] = VARIANCE_CHANGE;
+          }
+          else {
+            status = false;
+            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 5 ,
+                        "Multinomial or Poisson or Ordinal or Gaussian or Variance");
+          }
         }
       }
     }
@@ -1889,14 +1974,14 @@ AMObj STAT_model::save(const AMObjVector &args) const
     }
 
     if (!status) {
-      delete [] variable_type;
+      delete [] model_type;
       return AMObj(AMObjType::ERROR);
     }
 
     status = seq->segment_profile_write(error , ((AMString*)args[1].val.p)->data() ,
-                                        args[2].val.i , args[3].val.i , variable_type ,
+                                        args[2].val.i , args[3].val.i , model_type ,
                                         output , format , segmentation , nb_segmentation);
-    delete [] variable_type;
+    delete [] model_type;
 
     if (!status) {
       AMLOUTPUT << "\n" << error;
@@ -2019,7 +2104,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
   bool status = true , data = false , survival = false , config = false , mode = false ,
        window_option = false , mode_option = false , view_point_option = false ,
        title_option = false , output_option = false;
-  register int i;
+  register int i , j;
   int nb_required , nb_object = 0 , variable , type , output;
   const Distribution **pdist;
   const Hidden_variable_order_markov *hmarkov;
@@ -2734,7 +2819,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       }
 
       case 'q' : {
-        int nb_variable , *variable_type;
+        int nb_variable , *model_type;
         const Sequences *seq;
 
 
@@ -2759,10 +2844,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
 
         nb_variable = seq->get_nb_variable();
 
-        CHECKCONDVA(nb_required == nb_variable + 3 ,
-                    genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot"));
-
-        variable_type = new int[nb_variable];
+        model_type = new int[nb_variable];
 
         if (args[1].tag() != AMObjType::INTEGER) {
           status = false;
@@ -2781,42 +2863,87 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
             genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , i + 4 ,
                         args[i + 3].tag.string().data() , "STRING");
           }
+
           else {
             pstr = (AMString*)args[i + 3].val.p;
-            if (*pstr == "Symbolic") {
-              variable_type[i] = SYMBOLIC;
+
+            if (i == 0) {
+              if (*pstr == "Multinomial") {
+                model_type[i] = MULTINOMIAL_CHANGE;
+              }
+              else if (*pstr == "Poisson") {
+                model_type[i] = POISSON_CHANGE;
+              }
+              else if (*pstr == "Ordinal") {
+                model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
+              }
+              else if (*pstr == "Gaussian") {
+                model_type[i] = GAUSSIAN_CHANGE;
+              }
+              else if (*pstr == "Mean") {
+                model_type[i] = MEAN_CHANGE;
+              }
+              else if (*pstr == "Variance") {
+                model_type[i] = VARIANCE_CHANGE;
+              }
+              else if (*pstr == "MeanVariance") {
+                model_type[i] = MEAN_VARIANCE_CHANGE;
+              }
+              else {
+                status = false;
+                genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 4 ,
+                            "Multinomial or Poisson or Ordinal or Gaussian or Mean or Variance or MeanVariance");
+              }
+
+              if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
+                CHECKCONDVA(nb_required == 4 ,
+                            genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot"));
+
+                for (j = 1;j < nb_variable;j++) {
+                  model_type[j] = model_type[i];
+                }
+                break;
+              }
+
+              else {
+                CHECKCONDVA(nb_required == nb_variable + 3 ,
+                            genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot"));
+              }
             }
-            else if (*pstr == "Ordinal") {
-              variable_type[i] = ORDINAL;
-            }
-            else if (*pstr == "Numeric") {
-              variable_type[i] = NUMERIC;
-            }
-            else if (*pstr == "Poisson") {
-              variable_type[i] = POISSON_CHANGE;
-            }
-            else if (*pstr == "Mean") {
-              variable_type[i] = MEAN_CHANGE;
-            }
-            else if (*pstr == "Variance") {
-              variable_type[i] = VARIANCE_CHANGE;
-            }
+
             else {
-              status = false;
-              genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "Plot" , i + 4 ,
-                          "Symbolic or Ordinal or Numeric or Poisson or Mean or Variance");
+              if (*pstr == "Multinomial") {
+                model_type[i] = MULTINOMIAL_CHANGE;
+              }
+              else if (*pstr == "Poisson") {
+                model_type[i] = POISSON_CHANGE;
+              }
+              else if (*pstr == "Ordinal") {
+                model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
+              }
+              else if (*pstr == "Gaussian") {
+                model_type[i] = GAUSSIAN_CHANGE;
+              }
+              else if (*pstr == "Variance") {
+                model_type[i] = VARIANCE_CHANGE;
+              }
+              else {
+                status = false;
+                genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 4 ,
+                            "Multinomial or Poisson or Ordinal or Gaussian or Variance");
+              }
             }
           }
         }
 
         if (!status) {
-          delete [] variable_type;
+          delete [] model_type;
           return AMObj(AMObjType::ERROR);
         }
 
         status = seq->segment_profile_plot_write(error , Plot_prefix , args[1].val.i ,
-                                                 args[2].val.i , variable_type , output , title);
-        delete [] variable_type;
+                                                 args[2].val.i , model_type , output , title);
+        delete [] model_type;
 
         if (status) {
           nb_object = nb_required;
