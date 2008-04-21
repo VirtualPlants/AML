@@ -4583,9 +4583,9 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 {
   RWCString *pstr;
   bool status = true , sequence_option = false , output_option = false;
-  register int i;
+  register int i , j;
   int nb_required , nb_sequence , nb_variable , identifier = I_DEFAULT , output ,
-      *variable_type , *nb_segment;
+      *model_type , *nb_segment;
   const Sequences *iseq;
   Sequences *seq;
   Markovian_sequences *markovian_seq;
@@ -4684,11 +4684,6 @@ AMObj STAT_Segmentation(const AMObjVector &args)
   }
 
   else if (args[1].tag() == AMObjType::ARRAY) {
-    CHECKCONDVA(nb_required == nb_variable + 2 ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
-
-    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
 
     // arguments obligatoires
 
@@ -4698,7 +4693,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
       status = false;
     }
 
-    variable_type = new int[nb_variable];
+    model_type = new int[nb_variable];
 
     for (i = 0;i < nb_variable;i++) {
       if (args[i + 2].tag() != AMObjType::STRING) {
@@ -4706,33 +4701,81 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , i + 3 ,
                     args[i + 2].tag.string().data() , "STRING");
       }
+
       else {
         pstr = (AMString*)args[i + 2].val.p;
-        if (*pstr == "Symbolic") {
-          variable_type[i] = SYMBOLIC;
+
+        if (i == 0) {
+          if (*pstr == "Multinomial") {
+            model_type[i] = MULTINOMIAL_CHANGE;
+          }
+          else if (*pstr == "Poisson") {
+            model_type[i] = POISSON_CHANGE;
+          }
+          else if (*pstr == "Ordinal") {
+            model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Gaussian") {
+            model_type[i] = GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Mean") {
+            model_type[i] = MEAN_CHANGE;
+          }
+          else if (*pstr == "Variance") {
+            model_type[i] = VARIANCE_CHANGE;
+          }
+          else if (*pstr == "MeanVariance") {
+            model_type[i] = MEAN_VARIANCE_CHANGE;
+          }
+          else {
+            status = false;
+            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
+                        "Multinomial or Poisson or Ordinal or Gaussian or Mean or Variance or MeanVariance");
+          }
+
+          if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
+            CHECKCONDVA(nb_required == 3 ,
+                        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
+
+            for (j = 1;j < nb_variable;j++) {
+              model_type[j] = model_type[i];
+            }
+            break;
+          }
+
+          else {
+            CHECKCONDVA(nb_required == nb_variable + 2 ,
+                        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
+          }
         }
-        else if (*pstr == "Ordinal") {
-          variable_type[i] = ORDINAL;
-        }
-        else if (*pstr == "Numeric") {
-          variable_type[i] = NUMERIC;
-        }
-        else if (*pstr == "Poisson") {
-          variable_type[i] = POISSON_CHANGE;
-        }
-        else if (*pstr == "Mean") {
-          variable_type[i] = MEAN_CHANGE;
-        }
-        else if (*pstr == "Variance") {
-          variable_type[i] = VARIANCE_CHANGE;
-        }
+
         else {
-          status = false;
-          genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "Segmentation" , i + 3 ,
-                      "Symbolic or Ordinal or Numeric or Poisson or Mean or Variance");
+          if (*pstr == "Multinomial") {
+            model_type[i] = MULTINOMIAL_CHANGE;
+          }
+          else if (*pstr == "Poisson") {
+            model_type[i] = POISSON_CHANGE;
+          }
+          else if (*pstr == "Ordinal") {
+            model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Gaussian") {
+            model_type[i] = GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Variance") {
+            model_type[i] = VARIANCE_CHANGE;
+          }
+          else {
+            status = false;
+            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
+                        "Multinomial or Poisson or Ordinal or Gaussian or Variance");
+          }
         }
       }
     }
+
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
 
     output = SEQUENCE;
 
@@ -4778,23 +4821,22 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
     if (!status) {
       delete [] nb_segment;
-      delete [] variable_type;
+      delete [] model_type;
       return AMObj(AMObjType::ERROR);
     }
 
-    seq = iseq->segmentation(error , AMLOUTPUT , nb_segment , variable_type ,
+    seq = iseq->segmentation(error , AMLOUTPUT , nb_segment , model_type ,
                              identifier , output);
     delete [] nb_segment;
-    delete [] variable_type;
+    delete [] model_type;
   }
 
   else if (args[1].tag() == AMObjType::INTEGER) {
-    CHECKCONDVA(nb_required == nb_variable + 3 ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
+    CHECKCONDVA(nb_required >= 4 , genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
 
     // argument obligatoire
 
-    variable_type = new int[nb_variable];
+    model_type = new int[nb_variable];
 
     for (i = 0;i < nb_variable;i++) {
       if (args[i + 3].tag() != AMObjType::STRING) {
@@ -4802,30 +4844,75 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , i + 4 ,
                     args[i + 3].tag.string().data() , "STRING");
       }
+
       else {
         pstr = (AMString*)args[i + 3].val.p;
-        if (*pstr == "Symbolic") {
-          variable_type[i] = SYMBOLIC;
+
+        if (i == 0) {
+          if (*pstr == "Multinomial") {
+            model_type[i] = MULTINOMIAL_CHANGE;
+          }
+          else if (*pstr == "Poisson") {
+            model_type[i] = POISSON_CHANGE;
+          }
+          else if (*pstr == "Ordinal") {
+            model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Gaussian") {
+            model_type[i] = GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Mean") {
+             model_type[i] = MEAN_CHANGE;
+          }
+          else if (*pstr == "Variance") {
+            model_type[i] = VARIANCE_CHANGE;
+          }
+          else if (*pstr == "MeanVariance") {
+            model_type[i] = MEAN_VARIANCE_CHANGE;
+          }
+          else {
+            status = false;
+            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 4 ,
+                        "Multinomial or Poisson or Ordinal or Gaussian or Mean or Variance or MeanVariance");
+          }
+
+          if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
+            CHECKCONDVA(nb_required == 4 ,
+                        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
+
+            for (j = 1;j < nb_variable;j++) {
+              model_type[j] = model_type[i];
+            }
+            break;
+          }
+
+          else {
+            CHECKCONDVA(nb_required == nb_variable + 3 ,
+                        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
+          }
         }
-        else if (*pstr == "Ordinal") {
-          variable_type[i] = ORDINAL;
-        }
-        else if (*pstr == "Numeric") {
-          variable_type[i] = NUMERIC;
-        }
-        else if (*pstr == "Poisson") {
-          variable_type[i] = POISSON_CHANGE;
-        }
-        else if (*pstr == "Mean") {
-           variable_type[i] = MEAN_CHANGE;
-        }
-        else if (*pstr == "Variance") {
-          variable_type[i] = VARIANCE_CHANGE;
-        }
+
         else {
-          status = false;
-          genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "Segmentation" , i + 4 ,
-                      "Symbolic or Ordinal or Numeric or Poisson or Mean or Variance");
+          if (*pstr == "Multinomial") {
+            model_type[i] = MULTINOMIAL_CHANGE;
+          }
+          else if (*pstr == "Poisson") {
+            model_type[i] = POISSON_CHANGE;
+          }
+          else if (*pstr == "Ordinal") {
+            model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Gaussian") {
+            model_type[i] = GAUSSIAN_CHANGE;
+          }
+          else if (*pstr == "Variance") {
+            model_type[i] = VARIANCE_CHANGE;
+          }
+          else {
+            status = false;
+            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 4 ,
+                        "Multinomial or Poisson or Ordinal or Gaussian or Variance");
+          }
         }
       }
     }
@@ -4941,7 +5028,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
       }
 
       if (!status) {
-        delete [] variable_type;
+        delete [] model_type;
         return AMObj(AMObjType::ERROR);
       }
 
@@ -4950,7 +5037,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
       case false : {
         if (args[2].val.i == 1) {
           seq = iseq->segmentation(error , AMLOUTPUT , args[1].val.i , args[2].val.i ,
-                                   0 , variable_type , output);
+                                   0 , model_type , output);
         }
 
         else {
@@ -4961,7 +5048,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
             nb_segment[i] = args[2].val.i;
           }
 
-          seq = iseq->segmentation(error , AMLOUTPUT , nb_segment , variable_type ,
+          seq = iseq->segmentation(error , AMLOUTPUT , nb_segment , model_type ,
                                    args[1].val.i , output);
           delete [] nb_segment;
         }
@@ -4969,11 +5056,11 @@ AMObj STAT_Segmentation(const AMObjVector &args)
       }
 
       case true : {
-        seq = iseq->segmentation(error , AMLOUTPUT , args[1].val.i , args[2].val.i , variable_type);
+        seq = iseq->segmentation(error , AMLOUTPUT , args[1].val.i , args[2].val.i , model_type);
         break;
       }
       }
-      delete [] variable_type;
+      delete [] model_type;
     }
 
     else if (args[2].tag() == AMObjType::ARRAY) {
@@ -5037,14 +5124,14 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
       if (!status) {
         delete [] change_point;
-        delete [] variable_type;
+        delete [] model_type;
         return AMObj(AMObjType::ERROR);
       }
 
       seq = iseq->segmentation(error , AMLOUTPUT , args[1].val.i , nb_segment ,
-                               change_point , variable_type , output);
+                               change_point , model_type , output);
       delete [] change_point;
-      delete [] variable_type;
+      delete [] model_type;
     }
 
     else {
@@ -5138,7 +5225,7 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
   bool status = true , begin_option = false , begin = false , estimator_option = false ,
        file_name_option = false , format_option = false;
   register int i;
-  int nb_required , estimator = LAPLACE;
+  int nb_required , estimator = MAXIMUM_LIKELIHOOD;
   const Markovian_sequences *seq;
   Format_error error;
 
