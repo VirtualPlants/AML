@@ -1707,8 +1707,10 @@ static AMObj K_Delete(const AMObjVector& args) {
     if (amobjTable()->findValue(name, obj)) {
 
       if (obj.isaAMModel())
-      CHECKCONDVA(obj.isLocked() == 2,
+        {
+        CHECKCONDVA(obj.isLocked() <= 1,
                   genAMLError(ERRORMSG(K_F_ARG_VALUE_NEG_ERR_sds), "Delete", i+1, "an object in use elsewhere"));
+        }
 
 
       amobjTable()->remove(name);
