@@ -57,7 +57,7 @@ if __name__ == '__main__':
           lib_dirs = {'lib' : pj(build_prefix, 'lib'),},
           inc_dirs = { 'include' : pj(build_prefix, 'include') },
           bin_dirs = { 'bin':  pj(build_prefix, 'bin') },
-          
+          share_dirs = { 'databases' : 'databases' },
 
           # Dependencies
           setup_requires = setup_requires ,
