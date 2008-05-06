@@ -579,11 +579,11 @@ DRFErrorMsg DressingFile::symbolFun( RWCTokenizer next)
           if (index!=RW_NPOS)
           {
             file_name= RWCString(_varTable->at(index)._fileName);
-      if( !exists(set_suffix(cat_dir_file(_symbol_path,file_name),".smb")))
+      if( !exists(set_suffix(cat_dir_file(_symbol_path,file_name),"smb")))
         {
         is_error=true;
         error_msg=new RWCString(ERRORS_MSG[7]);
-        *error_msg+=RWCString(set_suffix(cat_dir_file(_symbol_path,file_name),".smb"));
+        *error_msg+=RWCString(set_suffix(cat_dir_file(_symbol_path,file_name),"smb"));
         }
           }
           else
