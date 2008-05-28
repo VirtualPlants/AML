@@ -45,7 +45,7 @@ if __name__ == '__main__':
                        namespace+".aml.amldoc" : "src/aml/amldoc",
                        namespace+".aml.wralea" : "src/aml/wralea",
                        "amlPy" : "src/amlPy",
-                       #"" : 'build/lib', # hack to use develop command
+                       "" : 'src', # hack to use develop command
                        },
       
           # Add package platform libraries if any
