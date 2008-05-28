@@ -944,13 +944,13 @@ size_t hashAMObj(const AMObj& v) {
   case AMObjType::BOOL:
   case AMObjType::INTEGER:
   case AMObjType::VTX:
-    return v.val.i % HASHAMOBJCONST;
+    return (size_t) v.val.i % HASHAMOBJCONST;
 
   case AMObjType::DATE:
-    return (int) v.val.d % HASHAMOBJCONST;
+    return (size_t) v.val.d % HASHAMOBJCONST;
 
   case AMObjType::CHAR:
-    return (int) v.val.c % HASHAMOBJCONST;
+    return (size_t) v.val.c % HASHAMOBJCONST;
 
   case AMObjType::REAL:
     {
@@ -1028,7 +1028,7 @@ size_t hashAMObj(const AMObj& v) {
   case AMObjType::GEOMSCENE:
   case AMObjType::ELECTRICAL_MODEL:
 
-    if (v.val.p) return v.val.p % HASHAMOBJCONST;
+    if (v.val.p) return (size_t) v.val.p % HASHAMOBJCONST;
     else return 0;
   case AMObjType::VOID:
     return 0;
