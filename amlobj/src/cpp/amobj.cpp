@@ -1028,7 +1028,7 @@ size_t hashAMObj(const AMObj& v) {
   case AMObjType::GEOMSCENE:
   case AMObjType::ELECTRICAL_MODEL:
 
-    if (v.val.p) return (int) v.val.p % HASHAMOBJCONST;
+    if (v.val.p) return v.val.p % HASHAMOBJCONST;
     else return 0;
   case AMObjType::VOID:
     return 0;
