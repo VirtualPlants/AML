@@ -40,11 +40,21 @@ if __name__ == '__main__':
           namespace_packages = [namespace],
           create_namespaces = True,
 
-          packages=[namespace+".aml", namespace+".aml.amldoc",namespace+".aml.wralea", "amlPy"],
+          packages=[namespace+".aml", 
+                    namespace+".aml.amldoc",
+                    namespace+".aml.wralea", 
+                    namespace+".aml.demo", 
+                    namespace+".aml.demo.changepoint", 
+                    namespace+".aml.demo.mtg", 
+                    "amlPy"],
+
           package_dir={namespace+".aml" : "src/aml",
                        namespace+".aml.amldoc" : "src/aml/amldoc",
                        namespace+".aml.wralea" : "src/aml/wralea",
                        namespace+".aml.demo" : "src/aml/demo",
+                       namespace+".aml.demo.changepoint" : "src/aml/demo/changepoint", 
+                       namespace+".aml.demo.mtg": "src/aml/demo/mtg", 
+
                        "amlPy" : "src/amlPy",
                        "" : 'src', # hack to use develop command
                        },
