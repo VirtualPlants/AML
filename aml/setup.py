@@ -44,6 +44,7 @@ if __name__ == '__main__':
           package_dir={namespace+".aml" : "src/aml",
                        namespace+".aml.amldoc" : "src/aml/amldoc",
                        namespace+".aml.wralea" : "src/aml/wralea",
+                       namespace+".aml.demo" : "src/aml/demo",
                        "amlPy" : "src/amlPy",
                        "" : 'src', # hack to use develop command
                        },
@@ -63,6 +64,11 @@ if __name__ == '__main__':
           setup_requires = setup_requires ,
           install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
+
+          entry_points = {
+            "wralea": ['demo = openalea.aml.demo',      ]
+              },
+
 
           # entry_points
           entry_points = {
