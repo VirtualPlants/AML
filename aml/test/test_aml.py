@@ -7,14 +7,14 @@ def test_mtg():
     assert m
 
 
-def test_agraf():
-    g  = MTG("agraf.mtg")
+# def test_agraf():
 
-    dr1 = DressingData("agraf.drf")
-    f1 = PlantFrame(1, Scale=3, DressingData=dr1)
-    #Plot(f1)
+#     g  = MTG("agraf.mtg")
+#     dr1 = DressingData("agraf.drf")
+#     f1 = PlantFrame(1, Scale=3, DressingData=dr1)
+#     #Plot(f1)
 
-    assert g and dr1 and f1
+#     assert g and dr1 and f1
 
 
 

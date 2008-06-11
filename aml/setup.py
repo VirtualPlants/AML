@@ -44,7 +44,7 @@ if __name__ == '__main__':
                     namespace+".aml.amldoc",
                     namespace+".aml.wralea", 
                     namespace+".aml.demo", 
-                    namespace+".aml.demo.changepoint", 
+                    namespace+".aml.demo.change_point", 
                     namespace+".aml.demo.mtg", 
                     "amlPy"],
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
                        namespace+".aml.amldoc" : "src/aml/amldoc",
                        namespace+".aml.wralea" : "src/aml/wralea",
                        namespace+".aml.demo" : "src/aml/demo",
-                       namespace+".aml.demo.changepoint" : "src/aml/demo/changepoint", 
+                       namespace+".aml.demo.change_point" : "src/aml/demo/change_point", 
                        namespace+".aml.demo.mtg": "src/aml/demo/mtg", 
 
                        "amlPy" : "src/amlPy",
@@ -75,14 +75,10 @@ if __name__ == '__main__':
           install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
 
-          entry_points = {
-            "wralea": ['demo = openalea.aml.demo',      ]
-              },
-
-
           # entry_points
           entry_points = {
-            "wralea": ["aml = openalea.aml.wralea",]
+            "wralea": ["aml = openalea.aml.wralea",
+                       "demo = openalea.aml.demo"]
             },
 
 
