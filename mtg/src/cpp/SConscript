@@ -24,7 +24,7 @@ lib_env.EnableQt4Modules(['QtCore','QtOpenGL'])
 
 includes= lib_env.ALEAGlob('*.h')
 sources = lib_env.ALEAGlob('*.cpp')
-pgllibs = ['pglalgo', 'pglgui', 'pglsg', 'pgltool']
+pgllibs = ['pglalgo', 'pglgui', 'pglsg', 'pgltool', 'pglmath']
 
 # Add hpp files
 hpp = Split("""
