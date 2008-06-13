@@ -2708,7 +2708,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
     // destruction des fichiers Gnuplot courants
 
 #   ifdef _WIN32
-    if(TOOLS(exists)(string(Plot_prefix) + string(".plot"))) {
+    if(VPTOOLS(exists)(string(Plot_prefix) + string(".plot"))) {
       string buffer = string("ERASE /F /Q ") + Plot_prefix + "*";
       if (system(buffer.c_str()) == -1) {
         system_error(AMLOUTPUT , "ERASE");

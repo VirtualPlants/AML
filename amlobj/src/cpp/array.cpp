@@ -1900,7 +1900,7 @@ AMObj SLArray::plot(GP_window& window, const AMObjVector& args) const
 
     //for (int h=0;h<DP_PLOT_SIZE;h++) buffer[h]=0;
 #ifdef _WIN32
-          if(TOOLS(exists)(string(Plot_prefix)+".plot")){
+          if(VPTOOLS(exists)(string(Plot_prefix)+".plot")){
 			std::string cmd = string("ERASE /F /Q ") + Plot_prefix + "*";
 			system(cmd.c_str());
           }

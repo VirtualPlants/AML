@@ -51,7 +51,7 @@
 
 #else
 
-#include <Windows.h>
+// #include <windows.h>
 #include <io.h>
 #include <process.h>
 #include<iostream>
@@ -86,7 +86,7 @@
 #include "tool/dirnames.h"
 
 using namespace std;
-TOOLS_USING_NAMESPACE
+VPTOOLS_USING_NAMESPACE
 
 /// Gnuplot port pb
 

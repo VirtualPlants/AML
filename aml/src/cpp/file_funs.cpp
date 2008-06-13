@@ -84,7 +84,7 @@
 #include "tool/util_enviro.h"
 #include "plantgl/gui/viewer/pglapplication.h"
 
-TOOLS_USING_NAMESPACE
+VPTOOLS_USING_NAMESPACE
 using namespace std;
 
 #define  ERR_MSG_ARRAY          kernel_err_msgs_aml
@@ -596,7 +596,7 @@ void installFILEModule() {
   RWCString varname;
 
 
-  var = AMObj(AMObjType::STRING, new AMString(TOOLS(getAMAPmodDir()).c_str()));
+  var = AMObj(AMObjType::STRING, new AMString(getAMAPmodDir().c_str()));
   varname = ":AMAPMOD_DIR";
   amobjTable()->insert(varname, var);
 

@@ -70,10 +70,13 @@
 #include "sam_msg.h"
 
 #include "tool/dirnames.h"
-#include "tool/bfstream.h"
 #include "tool/util_string.h"
+#include "tool/bfstream.h"
 
-TOOLS_USING_NAMESPACE
+VPTOOLS_USING_NAMESPACE
+TOOLS_USING(Vector3)
+TOOLS_USING(cross)
+
 using namespace std;
 
 //#include "aml/kernel_funs.h"

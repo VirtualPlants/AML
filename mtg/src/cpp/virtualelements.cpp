@@ -38,8 +38,8 @@
 
 
 #include <typeinfo>
-#include "tool/util_math.h"
-#include "tool/util_matrix.h"
+#include "plantgl/math/util_math.h"
+#include "plantgl/math/util_matrix.h"
 TOOLS_USING_NAMESPACE
 
 #include "aml/ammodel.h"

@@ -1498,7 +1498,7 @@ static AMObj K_Date(const AMObjVector& args) {
 
 }
 
-static TOOLS(Timer) TIMER;
+static VPTOOLS(Timer) TIMER;
 
 static AMObj K_TimerStart(const AMObjVector& args) {
   TIMER.start();

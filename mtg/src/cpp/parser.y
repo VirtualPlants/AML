@@ -70,7 +70,7 @@
 #include "plantgl/algo/codec/cdc_geom.h"
 
 PGL_USING_NAMESPACE
-TOOLS_USING_NAMESPACE
+VPTOOLS_USING_NAMESPACE
 
 #include "tool/util_hashmap.h"
 

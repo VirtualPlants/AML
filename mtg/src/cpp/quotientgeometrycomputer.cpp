@@ -48,7 +48,7 @@
 #include "plantgl/algo/fitting/branchcompressor.h"
 #include "plantgl/scenegraph/core/smbtable.h"
 
-#include "tool/util_string.h"
+#include "plantgl/tool/util_string.h"
 
 TOOLS_USING_NAMESPACE
 using namespace std;

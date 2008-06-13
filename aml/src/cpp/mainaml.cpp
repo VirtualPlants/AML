@@ -68,7 +68,7 @@
 
 #include "aml/release.h"
 
-TOOLS_USING_NAMESPACE
+VPTOOLS_USING_NAMESPACE
 using namespace std;
 
 static const char* INIT_FILE = ".aml";

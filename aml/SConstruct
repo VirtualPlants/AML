@@ -16,7 +16,7 @@ SConsignFile()
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
 
 # Dependencies
-common_tools = ['vplants.mtg', 'PlantGL', 'vplants.tool', 'vplants.amlobj',
+common_tools = ['vplants.mtg', 'plantgl', 'vplants.tool', 'vplants.amlobj',
                 'vplants.stat_tool', 'vplants.sequence_analysis',
                 'vplants.tree_matching']
 

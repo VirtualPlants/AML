@@ -48,7 +48,7 @@
 // #include <sys/prctl.h>
 #include <time.h>
 #include "tool/timer.h"
-TOOLS_USING(Timer)
+VPTOOLS_USING(Timer)
 
 
 #include "linetree.h"

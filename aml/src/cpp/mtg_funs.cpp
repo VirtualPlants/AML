@@ -77,13 +77,13 @@
 
 #ifndef SYSTEM_IS__IRIX
 #include "plantgl/gui/viewer/pglapplication.h"
-#include "tool/util_matrix.h"
+#include "plantgl/math/util_matrix.h"
+TOOLS_USING(Matrix3)
+TOOLS_USING(Vector3)
 #endif
 
 #include "tool/dirnames.h"
-
-
-TOOLS_USING_NAMESPACE
+VPTOOLS_USING_NAMESPACE
 
 extern const char *Plot_prefix;
 
@@ -4263,7 +4263,7 @@ static AMObj MTG_MatchingExtract(const AMObjVector& args) {
 	  const char* buffer;
 #endif
 #ifdef _WIN32
-          if(TOOLS(exists)( string(Plot_prefix) + string(".plot") ) )
+          if(VPTOOLS(exists)( string(Plot_prefix) + string(".plot") ) )
       {
           string buf= string("ERASE /F /Q ")+string(Plot_prefix)+string("*");
 		  system(buf.c_str()); 
