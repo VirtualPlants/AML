@@ -19,7 +19,7 @@ if("win" in sys.platform):
 if __name__ == '__main__':
     
     setup(name='VPlants.AmlObj',
-          version='0.3.0',
+          version='0.3.1',
           author='Christophe Godin',
           author_email='',
           description='aml objects',

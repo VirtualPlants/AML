@@ -3,7 +3,7 @@ from distutils.core import setup
 
 LONG_DESC = """ aml2py convert AML files to python files."""
 
-version= "0.1.0"
+version= "0.1.2"
 
 setup(name="aml2py",
       version=version,
