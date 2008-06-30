@@ -54,7 +54,6 @@
 // #include <windows.h>
 #include <io.h>
 #include <process.h>
-#include<iostream>
 #define pipe(a) _pipe(a,256,_O_TEXT)
 #define execlp _execlp
 #define sleep Sleep
@@ -69,6 +68,7 @@
 
 #include<iostream>
 #include "tool/config.h"
+
 #ifdef STL_EXTENSION
 #include <sstream>
 #else
@@ -86,6 +86,7 @@
 #include "tool/dirnames.h"
 
 using namespace std;
+
 VPTOOLS_USING_NAMESPACE
 
 /// Gnuplot port pb
