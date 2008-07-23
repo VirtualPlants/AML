@@ -2733,9 +2733,8 @@ AMObj STAT_Clustering(const AMObjVector &args)
       }
 
       if (status) {
-        clusters = ((Distance_matrix*)((STAT_model*)args[0].val.p)->pt)->partitioning(error , AMLOUTPUT ,
-                                                                                      nb_cluster , prototype ,
-                                                                                      initialization , algorithm);
+        clusters = ((Distance_matrix*)((STAT_model*)args[0].val.p)->pt)->
+	  partitioning(error , AMLOUTPUT ,  nb_cluster , prototype,  initialization , algorithm);
       }
 
      delete [] prototype;
