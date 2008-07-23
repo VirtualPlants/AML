@@ -779,18 +779,56 @@ AMObj STAT_CompareHistograms(const AMObjVector &args)
 AMObj STAT_CompareVectors(const AMObjVector &args)
 
 {
+  bool status = true , standardization = true;
+  int nb_required;
   Distance_matrix *dist_matrix;
   Format_error error;
 
 
-  CHECKCONDVA(args.length() == 2 ,
+  nb_required = 2;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Compare" , 2));
 
-  CHECKCONDVA(args[1].tag() == AMObjType::VECTOR_DISTANCE ,
-              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Compare" , 2 ,
-                          args[1].tag.string().data() , "VECTOR_DISTANCE"));
+  // argument obligatoire
 
-  dist_matrix = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->comparison(error , *((Vector_distance*)((STAT_model*)args[1].val.p)->pt));
+  if (args[1].tag() != AMObjType::VECTOR_DISTANCE) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Compare" , 2 ,
+                args[1].tag.string().data() , "VECTOR_DISTANCE");
+  }
+
+  // argument optionnel
+
+  if (args.length() == nb_required + 2) {
+    if (args[nb_required].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Compare" , nb_required + 1 ,
+                  args[nb_required].tag.string().data() , "OPTION");
+    }
+    else {
+      if (*((AMString*)args[nb_required].val.p) != "Standardization") {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Compare" , nb_required + 1 ,
+                    "Standardization");
+      }
+    }
+
+    if (args[nb_required + 1].tag() != AMObjType::BOOL) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Compare" , nb_required + 1 ,
+                  args[nb_required + 1].tag.string().data() , "BOOL");
+    }
+    else {
+      standardization = args[nb_required + 1].val.b;
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  dist_matrix = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->comparison(error , *((Vector_distance*)((STAT_model*)args[1].val.p)->pt) , standardization);
 
   if (dist_matrix) {
     STAT_model* model = new STAT_model(dist_matrix);
