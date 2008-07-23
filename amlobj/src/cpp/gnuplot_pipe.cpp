@@ -37,6 +37,7 @@
 
 
 
+#include<iostream>
 #include <stdlib.h>      // AML2: for compilation on Linux
 
 #include <errno.h>
@@ -66,7 +67,6 @@
 #include <signal.h>
 #include <assert.h>
 
-#include<iostream>
 #include "tool/config.h"
 
 #ifdef STL_EXTENSION
