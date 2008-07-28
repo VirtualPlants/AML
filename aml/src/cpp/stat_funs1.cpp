@@ -3028,13 +3028,13 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
     else {
       if ((args[0].tag() == AMObjType::DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE) ||
           (args[0].tag() == AMObjType::CONVOLUTION) || (args[0].tag() == AMObjType::COMPOUND)) {
-        status = plot_write(error , Plot_prefix , nb_object , pdist , title);
+        status = pdist[0]->plot_write(error , Plot_prefix , nb_object - 1 , pdist + 1 , title);
         delete [] pdist;
       }
 
       else if ((args[0].tag() == AMObjType::HISTOGRAM) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
                (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
-        status = plot_write(error , Plot_prefix , nb_object , phisto , title);
+        status = phisto[0]->plot_write(error , Plot_prefix , nb_object - 1 , phisto + 1 , title);
         delete [] phisto;
       }
 

@@ -3097,13 +3097,13 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const Markovian_sequences *s
             if (*pstr == "EM") {
               algorithm = FORWARD_BACKWARD;
             }
-            else if (*pstr == "SEM") {
+            else if (*pstr == "MCEM") {
               algorithm = FORWARD_BACKWARD_SAMPLING;
             }
             else {
               status = false;
               genAMLError(ERRORMSG(ALGORITHM_NAME_sds) , "Estimate" ,
-                          nb_required + i + 1 , "EM or SEM");
+                          nb_required + i + 1 , "EM or MCEM");
             }
           }
           break;
@@ -3423,13 +3423,13 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
               if (*pstr == "EM") {
                 algorithm = FORWARD_BACKWARD;
               }
-              else if (*pstr == "SEM") {
+              else if (*pstr == "MCEM") {
                 algorithm = FORWARD_BACKWARD_SAMPLING;
               }
               else {
                 status = false;
                 genAMLError(ERRORMSG(ALGORITHM_NAME_sds) , "Estimate" ,
-                            nb_required + i + 1 , "EM or SEM");
+                            nb_required + i + 1 , "EM or MCEM");
               }
             }
             break;
@@ -3866,13 +3866,13 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
               if (*pstr == "EM") {
                 algorithm = FORWARD_BACKWARD;
               }
-              else if (*pstr == "SEM") {
+              else if (*pstr == "MCEM") {
                 algorithm = FORWARD_BACKWARD_SAMPLING;
               }
               else {
                 status = false;
                 genAMLError(ERRORMSG(ALGORITHM_NAME_sds) , "Estimate" ,
-                            nb_required + i + 1 , "EM or SEM");
+                            nb_required + i + 1 , "EM or MCEM");
               }
             }
             break;
