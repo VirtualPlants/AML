@@ -1,13 +1,12 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
-# Class
+# Index
 """
-    Class of a vertex
+    Index of a vertex
 
-    The `Class` of a vertex is a feature always defined and independent of time 
+    The `Index` of a vertex is a feature always defined and independent of time 
     (like the index). 
-    It is represented by an alphabetic character in upper or lower case 
-    (lower cases characters are considered different from upper cases). 
+    It is represented by an by a non negative integer². 
     The label of a vertex is the string defined by the concatenation 
     of its class and its index. 
     The label thus provides general information about a vertex and 
@@ -16,7 +15,7 @@
     Usage
     -----
     .. python ::
-        Class(v)
+        Index(v)
 
     Properties
     ----------
@@ -24,9 +23,9 @@
 
     Returns
     -------
-        str
+        int
 
     See Also
     --------	
-	`MTG`, `Index`.
+	`MTG`, `Class`.
 """
