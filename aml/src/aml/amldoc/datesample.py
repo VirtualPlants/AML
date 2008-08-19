@@ -1,41 +1,34 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
+# DateSample
 """
-DateSample
-        Array of observation dates of a vertex.
+    Array of observation dates of a vertex.
+
+    Returns the set of dates at which a given vertex (passed as an argument) 
+    has been observed as an array of ordered dates. 
+    Options can be specified to define a temporal window and the total 
+    list of observation dates will be truncated according to the corresponding temporal window.
 
     Usage
     -----
-        DateSample(v)
-        DateSample(v, MinDate= d1, MaxDate= d2)
+    .. python ::
+        - DateSample(v)
+        - DateSample(v, MinDate=d1, MaxDate=d2)
 
     Parameters
     ----------
-        v (VTX) : vertex of the active MTG.
+        - v (VTX) : vertex of the active MTG.
 
     Optional Parameters
     -------------------
-    MinDate (DATE) : defines a minimum date of interest.
-    MaxDate (DATE) : defines a maximum date of interest.
+        - MinDate (date) : defines a minimum date of interest.
+        - MaxDate (date) : defines a maximum date of interest.
 
     Returns
     -------
-        ARRAY(DATE)
-
-    Description
-    -----------
-        Returns the set of dates at which a given vertex (passed as an argument) has been observed as an array of ordered dates. Options can be specified to define a temporal window and the total list of observation dates will be truncated according to the corresponding temporal window.
-
-    Background
-    ----------
-        Dynamic MTGs.
+        list of date
 
     See Also
     --------
-        
-        MTG, 
-        FirstDefinedFeature, 
-        LastDefinedFeature, 
-        PreviousDate, 
-        NextDate.
+        `MTG`, `FirstDefinedFeature`, `LastDefinedFeature`, `PreviousDate`, `NextDate`.
 """

@@ -1,44 +1,36 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
+# Components
 """
-Components
-        Set of components of a vertex
+    Set of components of a vertex.
+
+    The set of components of a vertex is returned as a list of vertices. 
+    If `s` defines the scale of `v`, components are defined at scale `s` + 1. 
+    The array is empty if the vertex has no components. 
+    The order of the components in the array is not significant.
+    
+    When a scale is specified using optional argument `Scale`, 
+    it must be necessarily greater than the scale of the argument.
 
     Usage
     -----
+    .. python ::
         Components(v)
-        Components(v, Scale= 2)
+        Components(v, Scale=2)
 
     Parameters
     ----------
-        v (VTX) : vertex of the active MTG
+        - v (vtx_id) : vertex of the active MTG
 
     Optional Parameters
     -------------------
-        Scale (INT) : scale of the components.
+        - Scale (int) : scale of the components.
 
     Returns
     -------
-        ARRAY(VTX)
-
-    Description
-    -----------
-        The set of components of a vertex is returned as an array of vertices. If s defines the scale of v, components are defined at scale s + 1. The array is empty if the vertex has no components. The order of the components in the array is not significant.
-  Details
-        When a scale is specified using optional argument Scale, it must be necessarily greater than the scale of the argument.
-
-    Background
-    ----------
-        MTGs
+        list of vtx_id
 
     See Also
     --------
-        MTG, 
-        Complex.
-
-
-
-White vertices with double circle are argument(s) of the function
-
-Black vertices are vertices returned by the function
+        `MTG`, `Complex`.
 """

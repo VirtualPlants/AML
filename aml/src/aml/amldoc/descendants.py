@@ -13,6 +13,7 @@
 
     Usage
     -----
+    .. python ::
         Descendants(v)
 
     Parameters

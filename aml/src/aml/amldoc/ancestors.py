@@ -14,6 +14,7 @@
 
     Usage
     -----
+    .. python ::
         Ancestors(v)
 
     Parameters
@@ -36,6 +37,7 @@
 
     Examples
     --------
+    .. python ::
         >>> v # prints vertex v
         78
         >>> Ancestors(v) # set of ancestors of v at the same scale

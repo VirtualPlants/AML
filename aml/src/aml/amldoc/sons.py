@@ -47,6 +47,7 @@
 
     Examples
     --------
+    .. python ::
         >>> Sons(v) # 
         [3,45,47,78,102]
         >>>  Sons(v, EdgeType= '+') # set of vertices borne by v 

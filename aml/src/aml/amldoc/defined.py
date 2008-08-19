@@ -6,15 +6,16 @@
 
     Usage
     -----
+    .. python ::
         Defined(v)
 
     Parameters
     ----------
-        v (VTX) : vertex of the active MTG
+        - v (VTX) : vertex of the active MTG
 
     Returns
     -------
-    BOOL
+        bool
 
     See Also
     --------

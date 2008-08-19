@@ -1,37 +1,28 @@
 # This file has been extracted from AMAPmod documentation (refermanual 18)
 
+# NextDate
 """
-NextDate
-        Next date at which a vertex has been observed after a specified date
+    Next date at which a vertex has been observed after a specified date
+
+    Returns the first observation date at which the vertex has been observed 
+    starting at date d and proceeding forward in time. 
+    None is returned if it does not exists.
 
     Usage
     -----
+    .. python ::
         NextDate(v, d)
 
     Parameters
     ----------
-        v (VTX) : vertex of the active MTG.
-
-    d (DATE) : departure date.
+        - v (vtx_id) : vertex of the active MTG.
+        - d (date) : departure date.
 
     Returns
     -------
-        DATE
-
-    Description
-    -----------
-        Returns the first observation date at which the vertex has been observed starting at date d and proceeding forward in time. None is returned if it does not exists.
-
-    Background
-    ----------
-        Dynamic MTGs.
+       date 
 
     See Also
     --------
-        
-        MTG, 
-        DateSample, 
-        FirstDefinedFeature, 
-        LastDefinedFeature, 
-        PreviousDate.
+        `MTG`, `DateSample`, `FirstDefinedFeature`, `LastDefinedFeature`, `PreviousDate`.
 """
