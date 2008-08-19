@@ -2,21 +2,33 @@
 
 """
 TopCoord
-	Top coordinates of the geometric model of a component
-  Usage
-	TopCoord(p, v)
-  Arguments
-	p (PLANTFRAME) : plantframe containing the geometric representation of v.
-	v (VTX) : vertex of the active MTG
-  Returned Object
-	ARRAY(REAL)
-  Description
-	This function returns the 3D-coordinates of the top of the box containing the geometric model of a plant component. The result is an array of 3 reals. 
-  Background
-	MTGs
-  See Also
-	
-	MTG, 
-	PlantFrame, 
-	BottomCoord.
+        Top coordinates of the geometric model of a component
+
+    Usage
+    -----
+        TopCoord(p, v)
+
+    Parameters
+    ----------
+        p (PLANTFRAME) : plantframe containing the geometric representation of v.
+        v (VTX) : vertex of the active MTG
+
+    Returns
+    -------
+        ARRAY(REAL)
+
+    Description
+    -----------
+        This function returns the 3D-coordinates of the top of the box containing the geometric model of a plant component. The result is an array of 3 reals. 
+
+    Background
+    ----------
+        MTGs
+
+    See Also
+    --------
+        
+        MTG, 
+        PlantFrame, 
+        BottomCoord.
 """

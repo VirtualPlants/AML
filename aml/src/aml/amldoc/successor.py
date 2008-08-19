@@ -10,7 +10,9 @@
     If many such vertices exist, an arbitrary one is returned by the function. 
     If no such vertex exists, None is returned.
 
+  
     Usage
+    -----
     -----
     .. python ::
         Successor(v)
@@ -27,7 +29,9 @@
     -------
         vtx_id
 
+  
     See Also
+    --------
     --------
         `MTG`, `Sons`, `Predecessor`.
 
@@ -37,7 +41,7 @@
         [3,45,47,78,102]
         >>> Sons(v, EdgeType='+') # set of vertices borne by v
         [3,45,47,102]
-        >>> Sons(v, EdgeType-> '<') # set of successors of v
+        >>> Sons(v, EdgeType= '<') # set of successors of v
         [78]
         >>> Successor(v)
         78

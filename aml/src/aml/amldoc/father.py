@@ -7,7 +7,9 @@
     Returns the topological father of a given vertex. And `None` if the father does not exist.
     If the argument is not a valid vertex, `None` is returned.
 
+  
     Usage
+    -----
     -----
     .. python ::
         Father(v)
@@ -51,7 +53,9 @@
     -------
         vtx_id
 
+  
     See Also
+    --------
     --------
         `MTG`, `Defined`, `Sons`, `EdgeType`, `Complex`, `Components`.
 
