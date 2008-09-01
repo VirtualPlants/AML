@@ -46,6 +46,7 @@ if __name__ == '__main__':
                     namespace+".aml.demo", 
                     namespace+".aml.demo.change_point", 
                     namespace+".aml.demo.mtg", 
+                    "vplants.aml",
                     "amlPy"],
 
           package_dir={namespace+".aml" : "src/aml",
@@ -56,7 +57,8 @@ if __name__ == '__main__':
                        namespace+".aml.demo.mtg": "src/aml/demo/mtg", 
 
                        "amlPy" : "src/amlPy",
-                       "" : 'src', # hack to use develop command
+                       "vplants.aml": "src/vplants/aml",
+                       "" : 'src',
                        },
       
           # Add package platform libraries if any
