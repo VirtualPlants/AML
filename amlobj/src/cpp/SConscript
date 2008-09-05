@@ -8,7 +8,7 @@ pj = os.path.join
 
 Import( "env" )
 
-lib_env = env.Copy()
+lib_env = env.Clone()
 
 
 # Export/Import symbol for windows platform

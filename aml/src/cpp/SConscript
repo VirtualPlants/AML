@@ -8,7 +8,7 @@ pj = os.path.join
 
 Import( "env" )
 
-env_aml = env.Copy()
+env_aml = env.Clone()
 
 includes = env_aml.ALEAGlob('*.h')
 env_aml.ALEAIncludes("aml",includes)
