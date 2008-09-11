@@ -456,3 +456,11 @@ if _DEBUG:
     del cpt
    
 del _DEBUG
+
+import datetime
+def ToPyDate(d):
+  s = str(d)
+  sv = s.split(':')[1]
+  d,m,y = sv.split('/')
+  return datetime.date(int(y),int(m),int(d))
+
