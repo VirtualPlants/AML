@@ -78,20 +78,8 @@ typedef RWTStack< RWCString, RWTValOrderedVector<RWCString> > StringStack;
 typedef std::vector<VId> VtxList; // STL equivalent for VIdList
 
 #ifndef SYSTEM_IS__IRIX
-
-// OLD INCLUDES
-//#include "GEOM/scne_scene.h"
-//#include "GEOM/appe_material.h"
-
 #include "plantgl/pgl_scene.h"
-#include "plantgl/pgl_appearance.h"
-
-PGL_USING_NAMESPACE
-
-//typedef pair<GeometryPtr,MaterialPtr> Shape;
-//typedef list<Shape> ShapeList;
 #else
-//typedef IntList ShapeList;
 typedef IntList ScenePtr; // Shapelist is not used on IRIX. This dummy type is only used for compiling
 #endif
 
@@ -595,7 +583,7 @@ public:
   ///@name Geometry
   //@{
 
-  ScenePtr shape(int scale, VId root = -1) const;
+  PGL::ScenePtr shape(int scale, VId root = -1) const;
   //  ShapeList shape(int scale, VId root = -1) const;
 
   //@}

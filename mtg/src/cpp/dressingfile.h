@@ -56,6 +56,14 @@
 #include "vector.h"
 #include "dressingdata.h"
 
+#ifndef SYSTEM_IS__IRIX
+
+#include "plantgl/pgl_geometry.h"
+#include "plantgl/pgl_appearance.h"
+PGL_USING_NAMESPACE
+
+#endif
+
 // Variables associees a un fichier
 
 class FSymb

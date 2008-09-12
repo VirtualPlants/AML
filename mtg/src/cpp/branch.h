@@ -52,7 +52,7 @@
 // OLD INCLUDES
 //#include "GEOM/geom_geometry.h"
 #include "plantgl/pgl_geometry.h"
-
+PGL_USING_NAMESPACE
 
 class BranchElement
 {

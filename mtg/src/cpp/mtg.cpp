@@ -56,8 +56,7 @@
 //#include "GEOM/geom_geometry.h"
 //#include "GEOM/scne_shape.h"
 #include "plantgl/pgl_geometry.h"
-#include "plantgl/pgl_scene.h"
-
+PGL_USING_NAMESPACE
 
 
 #if 0
