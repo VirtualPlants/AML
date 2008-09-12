@@ -7,7 +7,7 @@ pj = os.path.join
 ALEASolution = config.ALEASolution
 
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
-tools = ['flex', 'bison','qt4', 'opengl', 'plantgl', 'vplants.amlobj', 'vplants.tool']
+tools = ['flex', 'bison','qt4', 'opengl', 'vplants.plantgl', 'vplants.amlobj', 'vplants.tool']
 
 env = ALEASolution(options, tools)
 
