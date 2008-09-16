@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from openalea.deploy.binary_deps import binary_deps
 import os, sys
 from os.path import join as pj
  
@@ -11,13 +12,13 @@ scons_parameters=["build_prefix="+build_prefix]
 
 
 # platform dependencies
-install_requires = ['vplants.amlobj', 
-                    'vplants.sequence_analysis',
-                    'vplants.tree_matching', 
+install_requires = [binary_deps('vplants.amlobj'), 
+                    binary_deps('vplants.sequence_analysis'),
+                    binary_deps('vplants.tree_matching'), 
                     ]
 
 if("win" in sys.platform):
-    install_requires += ["boostpython","gnuplot"]
+    install_requires += [binary_deps("boostpython"),"gnuplot"]
 
 setup_requires = install_requires + ['openalea.deploy']
 

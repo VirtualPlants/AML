@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from openalea.deploy.binary_deps import binary_deps
 import os, sys
 from os.path import join as pj
  
@@ -11,9 +12,9 @@ scons_parameters=["build_prefix="+build_prefix]
 
 
 # dependencies
-#install_requires = ['vplants.amlobj', 'vplants.plantgl']
-install_requires = []
-setup_requires = ['openalea.deploy'] + install_requires
+install_requires = [binary_deps('vplants.amlobj'), binary_deps('vplants.plantgl')]
+#install_requires = []
+setup_requires = ['openalea.deploy'] 
 
 if __name__ == '__main__':
     

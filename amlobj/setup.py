@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from openalea.deploy.binary_deps import binary_deps
 import os, sys
 from os.path import join as pj
  
@@ -10,7 +11,7 @@ build_prefix = "build-scons"
 scons_parameters=["build_prefix="+build_prefix]
 
 # dependencies
-install_requires = ['vplants.tool']
+install_requires = [binary_deps('vplants.tool')]
 setup_requires = install_requires + ['openalea.deploy']
 
 if("win" in sys.platform):
