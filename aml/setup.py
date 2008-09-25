@@ -47,7 +47,7 @@ if __name__ == '__main__':
                     namespace+".aml.demo", 
                     namespace+".aml.demo.change_point", 
                     namespace+".aml.demo.mtg", 
-                    "vplants.aml",
+                    "vplants", "vplants.aml",
                     "amlPy"],
 
           package_dir={namespace+".aml" : "src/aml",
@@ -58,7 +58,7 @@ if __name__ == '__main__':
                        namespace+".aml.demo.mtg": "src/aml/demo/mtg", 
 
                        "amlPy" : "src/amlPy",
-                       "vplants.aml": "src/vplants/aml",
+                       "vplants": "src/vplants",
                        "" : 'src',
                        },
       
