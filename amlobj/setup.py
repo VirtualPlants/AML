@@ -14,7 +14,7 @@ scons_parameters=["build_prefix="+build_prefix]
 install_requires = [binary_deps('vplants.tool')]
 setup_requires = install_requires + ['openalea.deploy']
 
-if("win" in sys.platform):
+if sys.platform.startswith('win'):
     setup_requires += ['bisonflex']
 
 if __name__ == '__main__':

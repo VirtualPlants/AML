@@ -17,7 +17,7 @@ install_requires = [binary_deps('vplants.amlobj'),
                     binary_deps('vplants.tree_matching'), 
                     ]
 
-if("win" in sys.platform):
+if sys.platform.startswith('win'):
     install_requires += [binary_deps("boostpython"),"gnuplot"]
 
 setup_requires = install_requires + ['openalea.deploy']
