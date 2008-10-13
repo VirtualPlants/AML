@@ -369,6 +369,7 @@ SemiMarkov
 Sequences
 Shift
 Simulate
+SojournTimeSequences
 Symmetrize
 Thresholding
 TimeEvents
