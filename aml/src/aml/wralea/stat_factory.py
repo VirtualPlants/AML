@@ -467,7 +467,7 @@ def define_factory(package):
                             dict(name='individual',  interface=IInt), 
                             dict(name='nb_segment', interface=IInt), 
                             dict(name='change points', interface=ISequence), 
-                            dict( name='available models', interface=IEnumStr(['Symbolic', 'Ordinal', 'Poisson', 'Numeric', 'Mean', 'Variance']), ),
+                            dict( name='available models', interface=IEnumStr(['Multinomial', 'Ordinal', 'Poisson', 'Gaussian', 'Mean', 'Variance', 'MeanVariance']), ),
                             dict(name='model', interface=IStr),
                             dict(name='NbSegment',  interface=IEnumStr(['Fixed', 'Estimated']),  value='Estimated'), 
                             dict(name='Output', interface=IEnumStr(['Sequence','Residual']), value='Sequence')],
@@ -481,7 +481,7 @@ def define_factory(package):
                   nodeclass = "py_segmentation_sample",
                   inputs = [dict(name='seq'),
                             dict(name='nb_segment', interface=ISequence), 
-                            dict( name='available models', interface=IEnumStr(['Symbolic', 'Ordinal', 'Poisson', 'Numeric', 'Mean', 'Variance']), ),
+                            dict( name='available models', interface=IEnumStr(['Multinomial', 'Ordinal', 'Poisson', 'Gaussian', 'Mean', 'Variance', 'MeanVariance']), ),
                             dict(name='model', interface=IStr),
                             dict(name='Output', interface=IEnumStr(['Sequence','Residual']), value='Sequence')],
                 )
