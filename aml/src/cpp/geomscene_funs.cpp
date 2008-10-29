@@ -95,7 +95,7 @@ AMObj AML_GeomScene::extract(const AMObjVector& args) const
 				  Discretizer dis;
 				  BBoxComputer bbxcmp(dis);
 				  bbxcmp.process(*this);
-				  if(bbxcmp.getBoundingBox().isNull())return AMObj(AMObjType::VOID);
+				  if(!bbxcmp.getBoundingBox())return AMObj(AMObjType::VOID);
 				  Array* ret = new SLArray;
 				  *ret += AMObj(AMObjType::REAL,bbxcmp.getBoundingBox()->getLowerLeftCorner().x());
 				  *ret += AMObj(AMObjType::REAL,bbxcmp.getBoundingBox()->getLowerLeftCorner().y());
@@ -110,7 +110,7 @@ AMObj AML_GeomScene::extract(const AMObjVector& args) const
 				  Discretizer dis;
 				  BBoxComputer bbxcmp(dis);
 				  bbxcmp.process(*this);
-				  if(bbxcmp.getBoundingBox().isNull())return AMObj(AMObjType::VOID);
+				  if(!bbxcmp.getBoundingBox())return AMObj(AMObjType::VOID);
 				  Array* ret = new SLArray;
 				  *ret += AMObj(AMObjType::REAL,bbxcmp.getBoundingBox()->getCenter().x());
 				  *ret += AMObj(AMObjType::REAL,bbxcmp.getBoundingBox()->getCenter().y());
@@ -122,7 +122,7 @@ AMObj AML_GeomScene::extract(const AMObjVector& args) const
 				  Discretizer dis;
 				  BBoxComputer bbxcmp(dis);
 				  bbxcmp.process(*this);
-				  if(bbxcmp.getBoundingBox().isNull())return AMObj(AMObjType::VOID);
+				  if(!bbxcmp.getBoundingBox())return AMObj(AMObjType::VOID);
 				  Array* ret = new SLArray;
 				  *ret += AMObj(AMObjType::REAL,bbxcmp.getBoundingBox()->getSize().x());
 				  *ret += AMObj(AMObjType::REAL,bbxcmp.getBoundingBox()->getSize().y());

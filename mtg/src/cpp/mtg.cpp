@@ -1570,14 +1570,14 @@ ScenePtr MTG::shape(int scale, VId root) const {
 
         if (pf && pf->i == (unsigned long)LUNDEF) continue;
         else if (pf) {
-          pgeom = GeometryPtr::Cast(*(SceneObjectPtr*)pf->p); // replace void* by the correct type
+          pgeom = dynamic_pointer_cast<Geometry>(*(SceneObjectPtr*)pf->p); // replace void* by the correct type
 
           if(pgeom){
               const Feature* pf2 = feature(vtx, mat_ind, LUNDEF);
 
               if (pf2 && mat_ind != UNDEF &&
                   pf2->i != (unsigned long)LUNDEF) {
-                  AppearancePtr pmat2 = AppearancePtr::Cast(*(SceneObjectPtr*)pf2->p);
+                  AppearancePtr pmat2 = dynamic_pointer_cast<Appearance>(*(SceneObjectPtr*)pf2->p);
                   if(pmat2)scene->add(ShapePtr(new Shape(pgeom,pmat2,vtx)));
                   else scene->add(ShapePtr(new Shape(pgeom,pmat,vtx)));
               }
@@ -1624,7 +1624,7 @@ ScenePtr MTG::shape(int scale, VId root) const {
 
               if (pf && pf->i == (unsigned long)LUNDEF) continue;
               else if (pf) {
-                  pgeom = ShapePtr::Cast(*(SceneObjectPtr*)pf->p); // replace void* by the correct type
+                  pgeom = dynamic_pointer_cast<Shape>(*(SceneObjectPtr*)pf->p); // replace void* by the correct type
 
                   if(pgeom){
                       pgeom->id = vtx;

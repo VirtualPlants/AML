@@ -487,7 +487,7 @@ bool LineTree::geomptr(const BranchElement& branch_element,
      _primitive = _base_symbol_list[symbol].geometry;
     }
   }
-  PrimitivePtr primitive;
+  PrimitivePtr primitive = dynamic_pointer_cast<Primitive>(_primitive);
   // PrimitivePtr primitive(_base_symbol_list[symbol].geometry);
 
   // cerr << "POINTEUR = " << primitive.operator->() << endl;
@@ -498,7 +498,7 @@ bool LineTree::geomptr(const BranchElement& branch_element,
           there is no guaranty to find an unique discretized geometry of the group.
   */
 
-  if(!primitive.cast(_primitive)){
+  if(!primitive){
       if(_primitive) {
           if(radius_bot == radius_top){
               if (length == 1.0 && radius_bot == 1.0) {
@@ -611,7 +611,7 @@ bool LineTree::matptr(VId vtx, SymbType symbol, MaterialPtr& pmat) const {
 
   // First check whether the material has been defined by a material function
   // passed as an argument to Plot(f, Material->matfun)
-  pmat.cast(_dr->computeMaterial(vtx));
+  pmat = dynamic_pointer_cast<Material>(_dr->computeMaterial(vtx));
 
   if (!(pmat)) { // No function was defined for defining Material
 
@@ -621,12 +621,12 @@ bool LineTree::matptr(VId vtx, SymbType symbol, MaterialPtr& pmat) const {
     // i.e. pairs of (GeometryPtr,MaterialPtr).
 
     if (symbol >=0 && symbol < _base_symbol_list.size())
-      pmat.cast( _base_symbol_list[symbol].appearance);
+      pmat = dynamic_pointer_cast<Material>( _base_symbol_list[symbol].appearance);
     else {
-      pmat.cast(_default_mat);
+      pmat = dynamic_pointer_cast<Material>(_default_mat);
     }
   }
-  return ((pmat.isValid())&&(pmat->isValid()));
+  return ((pmat)&&(pmat->isValid()));
 }
 
 Boolean LineTree::viewer(const FNode* filter, bool display_on)
@@ -749,7 +749,7 @@ Boolean LineTree::viewer(const FNode* filter, bool display_on)
 
 
         /***** STORING THE SHAPE OF THE ELEMENT ********/
-        if(pgeom.isValid() && pgeom->isValid()){
+        if(pgeom && pgeom->isValid()){
           VId father = plant->topoFather(vtx,ANY);
           _scene->add(ShapePtr(new Shape(pgeom,AppearancePtr(pmat),vtx,father == UNDEF?Shape::NOID:father )));
         }
@@ -1076,8 +1076,8 @@ AMObj LineTree::plot(GP_window&, const AMObjVector& args) const {
   if (geometry || material) {
 
     for (Scene::iterator psti = _scene->getBegin(); psti != _scene->getEnd(); psti++) {
-      ShapePtr _shape;
-      if(_shape.cast(*psti)){
+      ShapePtr _shape = dynamic_pointer_cast<Shape>(*psti);
+      if(_shape){
         VId vtx = _shape->id;
         // cerr << "vtx = " << vtx << '\n';
 
@@ -1103,8 +1103,8 @@ AMObj LineTree::plot(GP_window&, const AMObjVector& args) const {
         }
         if (material) {
 
-          MaterialPtr pmat ;
-          if (pmat.cast(_dr->computeMaterial(vtx))) {
+          MaterialPtr pmat = dynamic_pointer_cast<Material>(_dr->computeMaterial(vtx))  ;
+          if (pmat) {
             _shape->appearance = pmat;
 
           }
@@ -1167,7 +1167,7 @@ AMObj LineTree::_plot(FNode* showMicro,FNode* showMacro) const {
 		  AMObjVector argobjs(1);
 		  for(Scene::const_iterator _it = _scene->getBegin();
 		  _it != _scene->getEnd(); _it++){
-			shape.cast(*_it);
+			shape = dynamic_pointer_cast<Shape>(*_it);
 			if(shape){
 			  argobjs[0] = AMObj(AMObjType::VTX,(VId)shape->getId());
 			  AMObj res = (*showMicro)(argobjs);
@@ -1188,7 +1188,7 @@ AMObj LineTree::_plot(FNode* showMicro,FNode* showMacro) const {
 		  AMObjVector argobjs(1);
 		  for(Scene::const_iterator _it = _qgc->getScene()->getBegin();
 		  _it != _qgc->getScene()->getEnd(); _it++){
-			shape.cast(*_it);
+			shape = dynamic_pointer_cast<Shape>(*_it);
 			if(shape){
 			  argobjs[0] = AMObj(AMObjType::VTX, (VId)shape->getId());
 			  AMObj res = (*showMacro)(argobjs);
@@ -1214,7 +1214,7 @@ AMObj LineTree::_plot(FNode* showMicro,FNode* showMacro) const {
 		  AMObjVector argobjs(1);
 		  for(Scene::const_iterator _it = _scene->getBegin();
 		  _it != _scene->getEnd(); _it++){
-			shape.cast(*_it);
+			shape = dynamic_pointer_cast<Shape>(*_it);
 			if(shape){
 			  argobjs[0] = AMObj(AMObjType::VTX, (VId)shape->getId());
 			  AMObj res = (*showMicro)(argobjs);
@@ -1240,7 +1240,7 @@ AMObj LineTree::_plot(FNode* showMicro,FNode* showMacro) const {
 		  AMObjVector argobjs(1);
 		  for(Scene::const_iterator _it = _qgc->getScene()->getBegin();
 		  _it != _qgc->getScene()->getEnd(); _it++){
-			shape.cast(*_it);
+			shape = dynamic_pointer_cast<Shape>(*_it);
 			if(shape){
 			  argobjs[0] = AMObj(AMObjType::VTX, (VId)shape->getId());
 			  AMObj res = (*showMacro)(argobjs);
@@ -1476,12 +1476,12 @@ AMObj LineTree::extract(const AMObjVector& args) const {
 
 		  if (*(AMString*)(args[argth+1].val.p) == "Micro") {
 			  if(_scene){
-                return AMObj(AMObjType::INTEGER,(int)_scene.toUint32());
+                return AMObj(AMObjType::INTEGER,(int)_scene.get());
 			  }
 		  }
 		  else if (*(AMString*)(args[argth+1].val.p) == "Macro"){
 			  if(_qgc->getScene()){
-                return  AMObj(AMObjType::INTEGER,(int)_qgc->getScene().toUint32());
+                return  AMObj(AMObjType::INTEGER,(int)_qgc->getScene().get());
 			  }
 		  }
         else {
@@ -1821,8 +1821,8 @@ Boolean LineTree::makeLigFile(const Plant& plant,
       file->write(protection,80);
 
     for (Scene::iterator it=_scene->getBegin();it!= _scene->getEnd(); it++) {
-      ShapePtr _shape;
-      if(_shape.cast(*it)){
+      ShapePtr _shape = dynamic_pointer_cast<Shape>(*it);;
+      if(_shape){
         VId vtx = _shape->id;
         LineRecord record;
 

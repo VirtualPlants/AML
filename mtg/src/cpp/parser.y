@@ -1287,7 +1287,8 @@ FeatureLine:
         GeometryPtr _geom;
         for(SceneObjectSymbolTable::iterator _it = geom_table->begin();
             _it != geom_table->end(); _it++){
-            if(!(_geom.cast(_it->second))){
+            _geom = dynamic_pointer_cast<Geometry>(_it->second);
+            if(!_geom){
                 // genMessage(WARNINGMSG(INVALID_TYPE_sss),"Geometry",_it->first.c_str(),typeid(*(_i->second)).name());
                 strict_parsing = false;
             }
@@ -1331,7 +1332,8 @@ FeatureLine:
             AppearancePtr _app;
         for(SceneObjectSymbolTable::iterator _it = app_table->begin();
             _it != app_table->end(); _it++){
-            if(!(_app.cast(_it->second))){
+            _app = dynamic_pointer_cast<Appearance>(_it->second);
+            if(!_app){
                 // genMessage(WARNINGMSG(INVALID_TYPE_sss),"Appearance",_it->first.c_str(),typeid(*(_it->second)).name());
                 strict_parsing = false;
             }

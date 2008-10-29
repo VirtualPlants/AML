@@ -457,7 +457,7 @@ QuotientGeometryComputer::compressGeometry(const PlantFrame* _pf,
 	  for(size_t j=0;j<nbb;j++) {
 		VId vtx = compo.at(j).getVertex(); // jth vertex of branch b
 		if(!newbranch){
-		  if(_lt && _lt->getScene().isValid()){
+		  if(_lt && _lt->getScene()){
 			ShapePtr ptr = _lt->getScene()->getShapeId(vtx);
 			if (ptr && ptr->appearance) newbranch = (in.appearance != ptr->appearance);
 			if (newbranch) {
@@ -494,7 +494,7 @@ QuotientGeometryComputer::compressGeometry(const PlantFrame* _pf,
 		  }
 		  if (father!=-1) in.father = father;
 		  else in.father = 0;
-		  if(_lt && _lt->getScene().isValid()){
+		  if(_lt && _lt->getScene()){
 			ShapePtr ptr = _lt->getScene()->getShapeId(vtx);
 			if(ptr) in.appearance = ptr->appearance;
 			else in.appearance = Material::DEFAULT_MATERIAL;
@@ -645,7 +645,7 @@ bool QuotientGeometryComputer::computeMacroGeometry(const PlantFrame* _pf) {
         _action.setPoints(_it->second._points);
         _action.setRadius(_it->second._radius);
         GeometryPtr _geom = _action.use(_it->second._geomclassname);
-        if ((_geom.isValid()) && (_geom->isValid())){
+        if ((_geom) && (_geom->isValid())){
           if(!_it->second._appearance.empty() && (app)){
             _ait=app->find(_it->second._appearance);
             if(_ait!=app->end())the_app = _ait->second;

@@ -121,7 +121,7 @@ public :
 
   // Return whether some shapes are already computed.
   bool hasShapeComputed() const {
-    return (_reuseshapes.isValid());
+    return (_reuseshapes);
   }
 
   /// Return the shapes.

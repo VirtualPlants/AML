@@ -774,8 +774,8 @@ DRFErrorMsg DressingFile::geometryFun( RWCTokenizer next)
                 for (SceneObjectSymbolTable::iterator sti = _table->begin();
                      sti != _table->end();
                      sti++) {
-                    GeometryPtr _geom;
-                    if((_geom = GeometryPtr::Cast(sti->second))){
+                    GeometryPtr _geom = dynamic_pointer_cast<Geometry>(sti->second);
+                    if( _geom ){
                         if (!_geom_table) _geom_table = new GeometrySymbolTable;
                         else{
                             GeometrySymbolTable::iterator _it = _geom_table->find( sti->first );
@@ -786,8 +786,8 @@ DRFErrorMsg DressingFile::geometryFun( RWCTokenizer next)
                         cerr << "Adding symbol '" << sti->first.c_str() << "'." << endl;
                     }
                     else{
-                        AppearancePtr _app;
-                        if((_app = AppearancePtr::Cast(sti->second))){
+                        AppearancePtr _app = dynamic_pointer_cast<Appearance>(sti->second);
+                        if( _app ){
                             if (!_mat_table) _mat_table = new AppearanceSymbolTable;
                             else{
                                 AppearanceSymbolTable::iterator _it = _mat_table->find( sti->first );
@@ -896,7 +896,7 @@ DRFErrorMsg DressingFile::appearanceFun( RWCTokenizer next)
                        sti != _table->end();
                        sti++) {
                       AppearancePtr _app;
-                      if((_app = AppearancePtr::Cast(sti->second))){
+                      if((_app = dynamic_pointer_cast<Appearance>(sti->second))){
                           if (!_mat_table) _mat_table = new AppearanceSymbolTable;
                           else{
                               AppearanceSymbolTable::iterator _it = _mat_table->find( sti->first );
