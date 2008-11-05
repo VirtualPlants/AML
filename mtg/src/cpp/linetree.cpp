@@ -1476,12 +1476,12 @@ AMObj LineTree::extract(const AMObjVector& args) const {
 
 		  if (*(AMString*)(args[argth+1].val.p) == "Micro") {
 			  if(_scene){
-                return AMObj(AMObjType::INTEGER,(int)_scene.get());
+                return AMObj(AMObjType::INTEGER,(int)ptr_to_uint32(_scene));
 			  }
 		  }
 		  else if (*(AMString*)(args[argth+1].val.p) == "Macro"){
 			  if(_qgc->getScene()){
-                return  AMObj(AMObjType::INTEGER,(int)_qgc->getScene().get());
+                return  AMObj(AMObjType::INTEGER,(int)ptr_to_uint32(_qgc->getScene()));
 			  }
 		  }
         else {
