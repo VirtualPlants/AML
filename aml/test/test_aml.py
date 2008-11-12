@@ -3,7 +3,7 @@ from openalea.aml import *
 
 def test_mtg():
 
-    m = MTG("stand.mtg")
+    m = MTG("data/stand.mtg")
     assert m
 
 
@@ -20,7 +20,7 @@ def test_mtg():
 
 def test_drf():
 
-    mtg = MTG("testdrf.mtg")
-    drf = DressingData("testdrf.drf")
+    mtg = MTG("data/testdrf.mtg")
+    drf = DressingData("data/testdrf.drf")
     pf = PlantFrame (0, DressingData=drf)
     
