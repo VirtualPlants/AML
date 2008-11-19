@@ -6013,7 +6013,7 @@ AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args)
 AMObj STAT_ComputeStateSequences(const AMObjVector &args)
 
 {
-  bool status = true , characteristic_flag = false;
+  bool status = true , characteristic_flag = true;
   int nb_required;
   const Markovian_sequences *iseq;
   Format_error error;
