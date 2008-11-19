@@ -3413,8 +3413,7 @@ void installSTATModule()
   installFNode("ComputeInitialRun" , STAT_ComputeInitialRun , 1 , type , AMObjType::MARKOVIAN_SEQUENCES);
 
   type[0] = AMObjType::ANY;
-  type[1] = AMObjType::INTEGER;
-  installFNode("AddAbsorbingRun" , STAT_AddAbsorbingRun , 2 , type , AMObjType::MARKOVIAN_SEQUENCES);
+  installFNode("AddAbsorbingRun" , STAT_AddAbsorbingRun , 1 , type , AMObjType::MARKOVIAN_SEQUENCES);
 
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::INTEGER;
