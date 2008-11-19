@@ -6145,8 +6145,7 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
 
 {
   bool status = true;
-  int nb_required , nb_variable , variable , offset , sequence_length = I_DEFAULT ,
-      run_length = I_DEFAULT;
+  int nb_required , sequence_length = I_DEFAULT , run_length = I_DEFAULT;
   const Markovian_sequences *iseq;
   Markovian_sequences *seq;
   Format_error error;
@@ -6176,27 +6175,7 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  nb_variable = iseq->get_nb_variable();
-
-  if (nb_variable == 1) {
-    offset = 1;
-    variable = 1;
-  }
-
-  else {
-    offset = 2;
-
-    if (args[1].tag() != AMObjType::INTEGER) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "AddAbsorbingRun" , 2 ,
-                  args[1].tag.string().data() , "INT");
-    }
-    else {
-      variable = args[1].val.i;
-    }
-  }
-
-  nb_required = offset;
+  nb_required = 1;
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "AddAbsorbingRun"));
@@ -6242,7 +6221,7 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->add_absorbing_run(error , variable , sequence_length , run_length);
+  seq = iseq->add_absorbing_run(error , sequence_length , run_length);
 
   if (seq) {
     STAT_model* model = new STAT_model(seq);
