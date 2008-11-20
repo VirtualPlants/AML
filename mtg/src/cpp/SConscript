@@ -20,13 +20,18 @@ if lib_env['compiler'] == 'mingw':
 
 lib_env.EnableQt4Modules(['QtCore','QtOpenGL'])
 
+pgllibs = ['pglalgo', 'pglgui', 'pglsg', 'pgltool', 'pglmath']
+
 # Select files
 
-BUILD_BISON = False
+BUILD_BISON = (lib_env['compiler'] == 'gcc')
 
 includes= lib_env.ALEAGlob('*.h')
 sources = lib_env.ALEAGlob('*.cpp')
-pgllibs = ['pglalgo', 'pglgui', 'pglsg', 'pgltool', 'pglmath']
+
+if BUILD_BISON:
+    exclude = ['lsystemToMTG_parser.cpp', 'parser.cpp']
+    sources = [f for f in sources  if bn(f) not in exclude]
 
 # Add hpp files
 hpp = Split("""
