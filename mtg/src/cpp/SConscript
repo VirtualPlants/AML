@@ -22,7 +22,7 @@ lib_env.EnableQt4Modules(['QtCore','QtOpenGL'])
 
 # Select files
 
-WITH_BISON = False
+BUILD_BISON = False
 
 includes= lib_env.ALEAGlob('*.h')
 sources = lib_env.ALEAGlob('*.cpp')
