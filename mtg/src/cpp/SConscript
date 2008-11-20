@@ -22,6 +22,8 @@ lib_env.EnableQt4Modules(['QtCore','QtOpenGL'])
 
 # Select files
 
+WITH_BISON = False
+
 includes= lib_env.ALEAGlob('*.h')
 sources = lib_env.ALEAGlob('*.cpp')
 pgllibs = ['pglalgo', 'pglgui', 'pglsg', 'pgltool', 'pglmath']
@@ -35,16 +37,18 @@ includes += hpp
 sources = [ x for x in sources if bn(x) not in hpp]
 
 # Bison
-
-bflex = BisonFlex(env,
+if WITH_BISON:
+    bflex = BisonFlex(env,
                   "lsystemToMTG_parser.y",
                   "lsystemToMTG_scanner.l",
                   "lsystemToMTG_yy" )
 
-sources.extend(bflex)
+    sources.extend(bflex)
 
-bflex = BisonFlex(env, "parser.y", "scanner.l", "" )
-sources.extend(bflex)
+    bflex = BisonFlex(env, "parser.y", "scanner.l", "" )
+    sources.extend(bflex)
+else:
+    sources.extend(['lsystemToMTG_scanner.cc', 'scanner.cc'])
 
 # Add header in include
 if env.get('BISON_HPP'):
