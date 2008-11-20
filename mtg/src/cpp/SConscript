@@ -37,7 +37,7 @@ includes += hpp
 sources = [ x for x in sources if bn(x) not in hpp]
 
 # Bison
-if WITH_BISON:
+if BUILD_BISON:
     bflex = BisonFlex(env,
                   "lsystemToMTG_parser.y",
                   "lsystemToMTG_scanner.l",
