@@ -240,6 +240,7 @@ extern AMObj STAT_TransformPosition(const AMObjVector &args);
 extern AMObj STAT_Cross(const AMObjVector &args);
 extern AMObj STAT_ComputeInitialRun(const AMObjVector &args);
 extern AMObj STAT_AddAbsorbingRun(const AMObjVector &args);
+extern AMObj STAT_ConsecutiveValues(const AMObjVector &args);
 extern AMObj STAT_Split(const AMObjVector &args);
 
 extern AMObj STAT_ToDistanceMatrix(const AMObjVector &args);
@@ -3414,6 +3415,9 @@ void installSTATModule()
 
   type[0] = AMObjType::ANY;
   installFNode("AddAbsorbingRun" , STAT_AddAbsorbingRun , 1 , type , AMObjType::MARKOVIAN_SEQUENCES);
+
+  type[0] = AMObjType::ANY;
+  installFNode("ConsecutiveValues" , STAT_ConsecutiveValues , 1 , type , AMObjType::MARKOVIAN_SEQUENCES);
 
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::INTEGER;
