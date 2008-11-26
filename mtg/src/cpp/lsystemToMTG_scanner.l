@@ -107,14 +107,17 @@
   // function is used when EOF is encountered to check whether the
   // scanner should resume scanning on a new stream. If true the
   // scanner stops.
-extern "C" {
-  int lsystemToMTG_yywrap() {return 1;} // if 0 then it is assumed that the scanning continues
+
+// remove the following block, which is not needed anymore (although we must add the code
+// "%option noyywrap;" later on (see below).
+
+//extern "C" {
+//  int lsystemToMTG_yywrap() {return 1;} // if 0 then it is assumed that the scanning continues
 
 // redefined since lex uses the option -P and the default
 // yywrap is nolonger provided by the lex library -lfl
-int yywrap();
-
-}
+//int yywrap();
+//}
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
 %}
@@ -144,7 +147,7 @@ int yywrap();
 %option prefix="lsystemToMTG_yy"
 /*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 %pointer  
-
+%option noyywrap
 /* lex states */
 
 %x include	 
