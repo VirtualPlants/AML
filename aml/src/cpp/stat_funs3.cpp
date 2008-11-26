@@ -6237,6 +6237,114 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
+ *  Suppression des valeurs non-representees d'une variable entiere.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_ConsecutiveValues(const AMObjVector &args)
+
+{
+  bool status = true , add_flag = false;
+  int nb_required , nb_variable , variable , offset;
+  const Markovian_sequences *iseq;
+  Markovian_sequences *seq;
+  Format_error error;
+
+
+  CHECKCONDVA(args.length() >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ConsecutiveValues"));
+
+  // arguments obligatoires
+
+  switch (args[0].tag()) {
+  case AMObjType::MARKOVIAN_SEQUENCES :
+    iseq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+    iseq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::SEMI_MARKOV_DATA :
+    iseq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+    iseq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  default :
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "ConsecutiveValues" , args[0].tag.string().data() ,
+                "MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+    return AMObj(AMObjType::ERROR);
+  }
+
+  nb_variable = iseq->get_nb_variable();
+
+  if (nb_variable == 1) {
+    offset = 1;
+    variable = 1;
+  }
+
+  else {
+    offset = 2;
+
+    if (args[1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ConsecutiveValues" , 2 ,
+                  args[1].tag.string().data() , "INT");
+    }
+    else {
+      variable = args[1].val.i;
+    }
+  }
+
+  nb_required = offset;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ConsecutiveValues"));
+
+  // argument optionnel
+
+  if (args.length() == nb_required + 2) {
+    if (args[nb_required].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ConsecutiveValues" , nb_required + 1 ,
+                  args[nb_required].tag.string().data() , "OPTION");
+    }
+    else {
+      if (*((AMString*)args[nb_required].val.p) != "AddVariable") {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "ConsecutiveValues" , nb_required + 1 , "AddVariable");
+      }
+    }
+
+    if (args[nb_required + 1].tag() != AMObjType::BOOL) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ConsecutiveValues" , nb_required + 1 ,
+                  args[nb_required + 1].tag.string().data() , "BOOL");
+    }
+    else {
+      add_flag = args[nb_required + 1].val.b;
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  seq = iseq->consecutive_values(error , AMLOUTPUT , variable , add_flag);
+
+  if (seq) {
+    STAT_model* model = new STAT_model(seq);
+    return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "ConsecutiveValues");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Segmentation de sequences.
  *
  *--------------------------------------------------------------*/
