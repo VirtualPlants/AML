@@ -37,9 +37,10 @@
 
 
 
-#include <assert.h>
-#include <stdlib.h>
-#include <ctype.h>
+#include <cassert>
+#include <cstdlib>
+#include <cctype>
+#include <cstring>
 
 #include "tool/rw_locale.h"
 #include "tool/rw_zone.h"
