@@ -327,6 +327,7 @@ ComputeSelfTransition
 ComputeStateSequences
 ComputeWhiteNoiseCorrelation
 ContingencyTable
+ConsecutiveValues
 Convolution
 Cross
 Cumulate
