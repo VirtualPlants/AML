@@ -7,6 +7,23 @@
 
 namespace python {
 
+struct PythonInterpreterAcquirer {
+public:
+    PythonInterpreterAcquirer() 
+    { 
+        /** It seems mandatory to acquire the GIL to call python 
+            from C++ internal (during GUI process for instance) */
+        gstate = PyGILState_Ensure(); 
+    }
+    ~PythonInterpreterAcquirer()
+    { 
+        PyGILState_Release(gstate); 
+    }
+
+protected:
+    PyGILState_STATE gstate;
+};
+
 
 class py_ostreambuf : public std::streambuf
 {
@@ -26,6 +43,7 @@ class py_ostreambuf : public std::streambuf
  protected:
     virtual int_type overflow( int_type c)
     {
+		PythonInterpreterAcquirer a;
 	PyObject* write_method = PyString_FromString( "write" );
 	char cc = static_cast<char>(c);
 	const char * str = std::string(&cc,1).c_str();
@@ -36,6 +54,7 @@ class py_ostreambuf : public std::streambuf
 
     virtual std::streamsize xsputn(const char_type* s, std::streamsize n)
     {
+		PythonInterpreterAcquirer a;
         const char * str = std::string( s, n).c_str();
         PyObject* pystr = PyString_FromString(str); 
  	PyObject* write_method = PyString_FromString( "write" ); 
@@ -47,8 +66,9 @@ class py_ostreambuf : public std::streambuf
     {
         if (have_flush) {
 	  
-	  PyObject* write_method = PyString_FromString( "flush" );
-	  PyObject_CallMethodObjArgs(file, write_method, NULL);
+		PythonInterpreterAcquirer a;
+		PyObject* write_method = PyString_FromString( "flush" );
+		PyObject_CallMethodObjArgs(file, write_method, NULL);
         }
         return 0;
     }
