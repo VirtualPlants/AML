@@ -21,7 +21,7 @@ __all__ = ['_90958896', '_90958992', '_93510480', '_96716784']
 
 _90958896 = CompositeNodeFactory(name='Corsican pine change point', 
                              description='', 
-                             category='Stat',
+                             category='Stat,composite,demo',
                              doc='',
                              inputs=[],
                              outputs=[],
@@ -498,8 +498,8 @@ _90958896 = CompositeNodeFactory(name='Corsican pine change point',
 
 
 _90958992 = CompositeNodeFactory(name='Dycorinia change point', 
-                             description='Analysis of the successive internode lengthes of Dycorinia guinensis.', 
-                             category='STAT',
+                             description='Analysis of the successive internode lengths of Dycorinia guinensis.', 
+                             category='STAT,composite,demo',
                              doc='',
                              inputs=[],
                              outputs=[],
