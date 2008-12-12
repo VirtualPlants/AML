@@ -30,7 +30,7 @@ def define_factory(package):
     # Input/output functions
     nf = Factory( name= "Compound", 
                   description= "Construction of an object of type compound from a sum distribution and an elementary distribution.", 
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_compound",
                   )
@@ -46,7 +46,7 @@ def define_factory(package):
 
     nf = Factory( name= "Convolution", 
                   description= "Construction of an object of type convolution from an elementary distribution.", 
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_convolution",
                   )
@@ -55,7 +55,7 @@ def define_factory(package):
 
     nf = Factory( name= "Binomial", 
                   description= "Construction of a binomial distribution.", 
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_dist_binomial",
                   )
@@ -63,7 +63,7 @@ def define_factory(package):
 
     nf = Factory( name= "Poisson", 
                   description= "Construction of a poisson distribution.", 
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_dist_poisson",
                   )
@@ -71,7 +71,7 @@ def define_factory(package):
 
     nf = Factory( name= "NegativeBinomial", 
                   description= "Construction of a negative binomial distribution.", 
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_dist_negativebinomial",
                   )
@@ -79,7 +79,7 @@ def define_factory(package):
 
     nf = Factory( name= "Uniform", 
                   description= "Construction of a uniform distribution.", 
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_dist_uniform",
                   )
@@ -206,7 +206,7 @@ def define_factory(package):
     '''
     nf = Factory( name= "Histogram", 
                   description= "Histogram from a sequence of int.", 
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_histogram",
                   inputs=(dict(name='sequence',interface=ISequence,value=[]),),
@@ -274,7 +274,7 @@ def define_factory(package):
 
     nf = Factory( name= "ComparisonTest", 
                   description= "Test of comparison of frequency distributions.", 
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_comparisontest",
                   inputs=(dict(name="Type", 
@@ -289,7 +289,7 @@ def define_factory(package):
 
     nf = Factory( name= "EstimateDistribution", 
                   description= "Estimation of a discrete distribution.", 
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_estimate_dist",
                   inputs=(
@@ -308,7 +308,7 @@ def define_factory(package):
 
     nf = Factory( name= "EstimateMixture", 
                   description= "Estimation of a finite mixture.", 
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_estimate_mixture",
                   inputs=(
@@ -325,7 +325,7 @@ def define_factory(package):
 
     nf = Factory( name= "EstimateConvolution", 
                   description= "Estimation of a convolution of discrete distributions.", 
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_estimate_conv",
                   inputs=(
@@ -430,7 +430,7 @@ def define_factory(package):
 
     nf = Factory( name= "Simulate(distribution)", 
                   description= "Generation of a random sample from a distribution.",
-                  category = "STAT.FrequencyDistriibution", 
+                  category = "STAT.FrequencyDistribution", 
                   nodemodule = "py_stat",
                   nodeclass = "py_simulate_dist",
                   )

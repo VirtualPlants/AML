@@ -29,7 +29,7 @@ def define_factory(package):
 
     nf = Factory( name= "MTG", 
                   description= "MTG file creation", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_MTG",
                   )
@@ -38,7 +38,7 @@ def define_factory(package):
 
     nf = Factory( name= "VtxList", 
                   description= "Array of vertices contained in a MTG", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_VtxList",
                   )
@@ -47,7 +47,7 @@ def define_factory(package):
 
     nf = Factory( name= "Feature", 
                   description= "Feature data stored on MTG vertices", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_Feature",
                   )
@@ -56,7 +56,7 @@ def define_factory(package):
 
     nf = Factory( name= "VtxFunction", 
                   description= "Common function on  MTG", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "VtxFunction",
                   )
@@ -65,7 +65,7 @@ def define_factory(package):
 
     nf = Factory( name= "TopoFunction", 
                   description= "Common function on  MTG", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "TopoFunction",
                   )
@@ -74,7 +74,7 @@ def define_factory(package):
 
     nf = Factory( name= "Complex", 
                   description= "Complex of a vertex.", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_Complex",
                   )
@@ -83,7 +83,7 @@ def define_factory(package):
 
     nf = Factory( name= "Components", 
                   description= "Set of components of a vertex.", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_Components",
                   )
@@ -92,7 +92,7 @@ def define_factory(package):
 
     nf = Factory( name= "MTGRoot", 
                   description= "Returns the global root of a MTG.", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_MTGRoot",
                   inputs=(dict(name='graph'),),
@@ -103,7 +103,7 @@ def define_factory(package):
 
     nf = Factory( name= "Axis", 
                   description= "Returns the sequence of vertices defining the axis of a given vertex.", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_Axis",
                   )
@@ -112,7 +112,7 @@ def define_factory(package):
 
     nf = Factory( name= "PlantFrame", 
                   description= "Constructs a geometric interpretation of a MTG.", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_PlantFrame",
                   )
@@ -120,7 +120,7 @@ def define_factory(package):
 
     nf = Factory( name= "DressingData", 
                   description= "Data and default geometric parameters used to compute the geometric interpretation of a MTG.", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_dressingdata",
                   inputs=(dict(name="MTG"),dict(name="filename", interface=IFileStr)),
@@ -130,7 +130,7 @@ def define_factory(package):
 
     nf = Factory( name= "PlotPlantFrame", 
                   description= "Plot PlantFrame objects.", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_PlotPlantFrame",
                   )
@@ -138,7 +138,7 @@ def define_factory(package):
 
     nf = Factory( name= "PlotLineTree", 
                   description= "Plot Linetree objects.", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_PlotLineTree",
                   )
@@ -146,7 +146,7 @@ def define_factory(package):
 
     nf = Factory( name= "Linetree2Scene", 
                   description= "Extract scene from Linetree.", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_Linetree2Scene",
                   inputs= ( dict( name = "linetree", interface=None ),
@@ -159,7 +159,7 @@ def define_factory(package):
 
     nf = Factory( name= "Quotient", 
                   description= "Quotient Linetree objects.", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_Quotient",
                   )
@@ -167,7 +167,7 @@ def define_factory(package):
 
     nf = Factory( name= "Compress", 
                   description= "Create a compressed representation of Linetree objects.", 
-                  category = "MTG", 
+                  category = "scene.MTG", 
                   nodemodule = "py_mtg",
                   nodeclass = "py_Compress",
                   )
