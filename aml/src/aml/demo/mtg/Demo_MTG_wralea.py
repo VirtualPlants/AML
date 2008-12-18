@@ -1,5 +1,5 @@
 
-# This file has been generated at Wed Oct 15 07:57:46 2008
+# This file has been generated at Wed Dec 17 20:20:32 2008
 
 from openalea.core import *
 
@@ -17,13 +17,13 @@ __institutes__ = 'INRIA'
 __icon__ = 'icon.png'
  
 
-__all__ = ['MTGActionOnMultipleMTGs', '_105502768', 'MTGExtraction', '_105268688', 'PlantFrame1', 'MTGComponentSelection', 'PlantFrame2']
+__all__ = ['MTGActionOnMultipleMTGs', '_179047628', '_179046796', 'MTGExtraction', '_468437100', 'PlantFrame1', '_470024140', 'MTGComponentSelection', 'PlantFrame2']
 
 
 
 MTGActionOnMultipleMTGs = CompositeNodeFactory(name='MTGActionOnMultipleMTGs', 
                              description='', 
-                             category='distribution,composite,demo',
+                             category='distribution,composite.MTG,demo.MTG',
                              doc='',
                              inputs=[],
                              outputs=[],
@@ -379,7 +379,14 @@ MTGActionOnMultipleMTGs = CompositeNodeFactory(name='MTGActionOnMultipleMTGs',
 
 
 
-_105502768 = DataFactory(name='agraf.drf', 
+_179047628 = DataFactory(name='agraf.mtg', 
+                    description='The famous apple tree - Credits E. Costes, H. Sinoquet', 
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_179046796 = DataFactory(name='agraf.drf', 
                     description='', 
                     editors=None,
                     includes=None,
@@ -389,7 +396,7 @@ _105502768 = DataFactory(name='agraf.drf',
 
 MTGExtraction = CompositeNodeFactory(name='MTGExtraction', 
                              description='', 
-                             category='scene.MTG,composite,demo',
+                             category='scene.MTG,composite.MTG,demo.MTG',
                              doc='',
                              inputs=[],
                              outputs=[],
@@ -646,8 +653,8 @@ MTGExtraction = CompositeNodeFactory(name='MTGExtraction',
 
 
 
-_105268688 = DataFactory(name='agraf.mtg', 
-                    description='The famous apple tree - Credits E. Costes, H. Sinoquet', 
+_468437100 = DataFactory(name='wij10.drf', 
+                    description='drf file', 
                     editors=None,
                     includes=None,
                     )
@@ -656,7 +663,7 @@ _105268688 = DataFactory(name='agraf.mtg',
 
 PlantFrame1 = CompositeNodeFactory(name='PlantFrame1', 
                              description='', 
-                             category='scene.MTG,composite,demo',
+                             category='scene.MTG,composite.MTG,demo.MTG',
                              doc='',
                              inputs=[],
                              outputs=[],
@@ -851,10 +858,17 @@ PlantFrame1 = CompositeNodeFactory(name='PlantFrame1',
 
 
 
+_470024140 = DataFactory(name='wij10.mtg', 
+                    description='wij MTG file', 
+                    editors=None,
+                    includes=None,
+                    )
+
+
 
 MTGComponentSelection = CompositeNodeFactory(name='MTGComponentSelection', 
                              description='', 
-                             category='composite,distribution,demo',
+                             category='composite.MTG,distribution,demo.MTG',
                              doc='',
                              inputs=[],
                              outputs=[],
@@ -1046,7 +1060,7 @@ MTGComponentSelection = CompositeNodeFactory(name='MTGComponentSelection',
 
 PlantFrame2 = CompositeNodeFactory(name='PlantFrame2', 
                              description='Illustrates a typical processing chain for plant analysis in OpenAlea', 
-                             category='scene.MTG,composite,demo',
+                             category='scene.MTG,composite.MTG,demo.MTG',
                              doc='',
                              inputs=[],
                              outputs=[],
