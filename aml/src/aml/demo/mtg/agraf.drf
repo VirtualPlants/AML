@@ -2,7 +2,7 @@
 
 SMBPath = ../../SMBFiles
 
-SMBModel entrenoeud = nentn105
+SMBModel entrenoeud = nentn103
 SMBModel entrenoeud2 = nentn104
 SMBModel Feuille = feui113
 SMBModel Fruit = pommecyl
