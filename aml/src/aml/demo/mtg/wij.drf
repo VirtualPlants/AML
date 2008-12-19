@@ -1,5 +1,5 @@
 # Dressing file for apple trees
-SMBPath = D:\Documents\pradal\venv\release2008\lib\site-packages\vplants.aml-0.6.0.dev_r5864-py2.5-win32.egg\openalea\aml\demo\mtg
+SMBPath = .
 
 SMBModel entrenoeud = nentn105
 SMBModel pomme = pommecyl
