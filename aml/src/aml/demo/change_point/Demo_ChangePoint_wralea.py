@@ -1,5 +1,5 @@
 
-# This file has been generated at Thu Dec 18 12:08:20 2008
+# This file has been generated at Fri Dec 19 10:27:44 2008
 
 from openalea.core import *
 
@@ -14,28 +14,14 @@ __alias__ = []
 __version__ = '0.1'
 __authors__ = 'Y. Guedon'
 __institutes__ = 'CIRAD'
-__icon__ = ''
+__icon__ = 'icon.png'
  
 
-__all__ = ['_48848016', '_48847984', '_48847952', '_48847888']
-
-
-_48848016 = DataFactory(name='angelique_internode_length.seq', 
-                    description='Credits Y. Caraglio', 
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_48847984 = DataFactory(name='pin_laricio_7x.seq', 
-                    description='Credits: C. Meredieu, Y. Caraglio', 
-                    editors=None,
-                    includes=None,
-                    )
+__all__ = ['_41439344', '_41439280', '_41439376', '_41439312']
 
 
 
-_48847952 = CompositeNodeFactory(name='Dycorinia change point', 
+_41439344 = CompositeNodeFactory(name='Dycorinia change point', 
                              description='Analysis of the successive internode lengths of Dycorinia guinensis.', 
                              category='STAT,composite,demo',
                              doc='',
@@ -439,8 +425,15 @@ _48847952 = CompositeNodeFactory(name='Dycorinia change point',
 
 
 
+_41439280 = DataFactory(name='angelique_internode_length.seq', 
+                    description='Credits Y. Caraglio', 
+                    editors=None,
+                    includes=None,
+                    )
 
-_48847888 = CompositeNodeFactory(name='Corsican pine change point', 
+
+
+_41439376 = CompositeNodeFactory(name='Corsican pine change point', 
                              description='', 
                              category='Stat,composite,demo',
                              doc='',
@@ -915,6 +908,13 @@ _48847888 = CompositeNodeFactory(name='Corsican pine change point',
                              lazy=True,
                              )
 
+
+
+_41439312 = DataFactory(name='pin_laricio_7x.seq', 
+                    description='Credits: C. Meredieu, Y. Caraglio', 
+                    editors=None,
+                    includes=None,
+                    )
 
 
 
