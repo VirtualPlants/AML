@@ -2,7 +2,7 @@
 
 """
 Alpha
-        Angle defining the angle between the principal direction of the geometric model of vertex and the z axis of the global coordinate system.
+    Angle defining the angle between the principal direction of the geometric model of vertex and the z axis of the global coordinate system.
 
     Usage
     -----
