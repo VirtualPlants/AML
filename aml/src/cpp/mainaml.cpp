@@ -137,17 +137,17 @@ static int loadInitFile(const char* init_file) {
 
 	if(name == INIT_FILE){
 	  string home = getHome();
-	  
+
 	  name.prepend("/");
 	  name.prepend((char*)(!home.empty()?home.c_str():""));
-	  
+
 	  if (!file_init_read_line(name.data())) return UNDEF;
 	}
-	else { 
+	else {
 	  cerr << " ... Cannot load initialization file : \"" << name.data() << "\"" << endl;
 	  return UNDEF;
 	}
-    
+
   }
 
   cerr << " ... Loading initialization file : \"" << name.data() << "\"" << endl;
@@ -219,7 +219,8 @@ static int aml(const char* file, const StringList& init_files) {
   amlEchoOn();
 
   if (file == NULL) { 	// Interactive mode
-#ifndef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
+#else
     gnu_init_readline();
 #endif
     initGetNextLineFunc(readline_interactive);
@@ -344,21 +345,21 @@ int main(int argc, char** argv) {
 		if (!--argc) return main_usage(exec_name);
 		cerr << "Aml - Batch Mode on File : " << *(++argv) << endl;
 		batch_file = *argv;
-		break;			
+		break;
       }
       else if (strcmp(*argv, "-freestorelooptest") == 0 || strcmp(*argv, "-l") == 0) {
-		if (!--argc) { 
+		if (!--argc) {
 		  cerr << "Aml - Memory Allocation test on initialization file(s): " << endl;
-		  testMemAllocAml(init_files); 
+		  testMemAllocAml(init_files);
 		}
 		else return main_usage(exec_name);
       }
       else return main_usage(exec_name);
-	  
+
       break;
-	  
+
     case '+':
-	  
+
       if (strcmp(*argv , "+init") == 0 || strcmp(*argv, "+i") == 0) {
 		++argv;
 		--argc;
@@ -367,23 +368,23 @@ int main(int argc, char** argv) {
 		  else break;
 		  ++argv;
 		  --argc;
-		} 
+		}
 		--argv;
 		++argc;
       }
       else return main_usage(exec_name);
-	  
+
       break;
     default:
       return main_usage(exec_name);
     }
-	
+
     ++argv;
     --argc;
-	
+
   }
-  
-  
+
+
   cerr << endl;
   cerr << endl;
   cerr << "\tAMAPmod : Exploring and Modeling Plant Architecture" << endl;
@@ -393,7 +394,7 @@ int main(int argc, char** argv) {
   cerr << "\tChristophe Godin,  Yann Guedon" << endl << endl;
   cerr << "\tCIRAD/INRA - UMR Modelisation des Plantes" << endl;
   cerr << endl;
-  
+
   cerr << "\twith contribution of: " << endl;
   cerr << "\tSamir Bellouti,        Frederic Boudon," << endl;
   cerr << "\tPascal Ferraro,        Nicolas Dones," << endl;
