@@ -1,5 +1,5 @@
 
-# This file has been generated at Tue Dec 23 17:48:07 2008
+# This file has been generated at Thu Jan  8 11:10:13 2009
 
 from openalea.core import *
 
@@ -17,17 +17,17 @@ __institutes__ = 'INRIA'
 __icon__ = 'icon.png'
  
 
-__all__ = ['_171290860', '_171290764', 'MTGActionOnMultipleMTGs', '_171291852', '_171290892', '_171291884', '_171291948', 'MTGExtraction', '_171291916', '_171290828', 'MTGComponentSelection', 'PlantFrame2']
+__all__ = ['_163021804', '_163021868', 'MTGActionOnMultipleMTGs', '_163021772', '_163022700', '_163020876', 'MTGExtraction', '_163020844', '_163022668', '_163021836', 'MTGComponentSelection', 'PlantFrame2']
 
 
-_171290860 = DataFactory(name='agraf.mtg',
-                    description='The famous apple tree - Credits E. Costes, H. Sinoquet',
+_163021804 = DataFactory(name='nentn105.smb',
+                    description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_171290764 = DataFactory(name='pommecyl.smb',
+_163021868 = DataFactory(name='pombadia.mtg',
                     description='',
                     editors=None,
                     includes=None,
@@ -69,41 +69,41 @@ MTGActionOnMultipleMTGs = CompositeNodeFactory(name='MTGActionOnMultipleMTGs',
    41: ('vplants.mtg', 'MTG'),
    42: ('vplants.mtg', 'MTG'),
    43: ('openalea.flow control', 'annotation')},
-                             elt_connections={  137678436: (31, 0, 32, 0),
-   137678448: (25, 0, 26, 1),
-   137678460: (21, 0, 41, 0),
-   137678472: (13, 0, 26, 9),
-   137678484: (41, 0, 27, 0),
-   137678496: (30, 0, 31, 1),
-   137678508: (21, 0, 28, 0),
-   137678520: (26, 0, 22, 0),
-   137678532: (34, 0, 33, 0),
-   137678544: (38, 0, 33, 0),
-   137678556: (21, 0, 42, 0),
-   137678568: (28, 0, 27, 0),
-   137678580: (31, 0, 23, 0),
-   137678592: (24, 0, 26, 2),
-   137678604: (32, 0, 38, 0),
-   137678616: (14, 0, 23, 1),
-   137678628: (42, 0, 27, 0),
-   137678640: (31, 0, 26, 0),
-   137678652: (17, 0, 26, 6),
-   137678664: (15, 0, 26, 8),
-   137678676: (31, 0, 25, 0),
-   137678688: (27, 0, 31, 0),
-   137678700: (23, 0, 26, 23),
-   137678712: (30, 0, 33, 0),
-   137678724: (29, 0, 27, 0),
-   137678736: (34, 0, 32, 1),
-   137678748: (21, 0, 29, 0)},
+                             elt_connections={  149028452: (21, 0, 41, 0),
+   149028464: (30, 0, 33, 0),
+   149028476: (31, 0, 23, 0),
+   149028488: (25, 0, 26, 1),
+   149028500: (23, 0, 26, 23),
+   149028512: (28, 0, 27, 0),
+   149028524: (31, 0, 32, 0),
+   149028536: (27, 0, 31, 0),
+   149028548: (21, 0, 42, 0),
+   149028560: (31, 0, 25, 0),
+   149028572: (38, 0, 33, 0),
+   149028584: (15, 0, 26, 9),
+   149028596: (34, 0, 33, 0),
+   149028608: (17, 0, 26, 6),
+   149028620: (26, 0, 22, 0),
+   149028632: (31, 0, 26, 0),
+   149028644: (21, 0, 28, 0),
+   149028656: (42, 0, 27, 0),
+   149028668: (30, 0, 31, 1),
+   149028680: (21, 0, 29, 0),
+   149028692: (14, 0, 23, 1),
+   149028704: (41, 0, 27, 0),
+   149028716: (34, 0, 32, 1),
+   149028728: (32, 0, 38, 0),
+   149028740: (13, 0, 26, 8),
+   149028752: (29, 0, 27, 0),
+   149028764: (24, 0, 26, 2)},
                              elt_data={  13: {  'block': False,
           'caption': 'function',
           'hide': False,
           'lazy': True,
           'minimal': False,
           'port_hide_changed': set([]),
-          'posx': 652.5,
-          'posy': 108.75,
+          'posx': 531.25,
+          'posy': 107.5,
           'priority': 0,
           'user_application': None},
    14: {  'block': False,
@@ -121,8 +121,8 @@ MTGActionOnMultipleMTGs = CompositeNodeFactory(name='MTGActionOnMultipleMTGs',
           'lazy': True,
           'minimal': False,
           'port_hide_changed': set([]),
-          'posx': 530.0,
-          'posy': 111.25,
+          'posx': 635.841368227732,
+          'posy': 105.10215794306704,
           'priority': 0,
           'user_application': None},
    17: {  'block': False,
@@ -341,7 +341,7 @@ MTGActionOnMultipleMTGs = CompositeNodeFactory(name='MTGActionOnMultipleMTGs',
    15: [  (  0,
              '"from vplants.aml import *\\ndef bottom_diameter(v):\\n    return Feature(Components(v)[0],\'diabase\')"')],
    17: [  (  0,
-             '"from vplants.aml import *\\ndef length(v):\\n    return Feature(Components(v)[0],\'length\')"')],
+             '"from vplants.aml import *\\ndef length(v):\\n    return Feature(Components(v)[0],\'longueur\')"')],
    18: [],
    21: [(0, 'PackageData(Demo.MTG, wij10.mtg)'), (1, 'None'), (2, 'None')],
    22: [  (1, 'None'),
@@ -362,7 +362,7 @@ MTGActionOnMultipleMTGs = CompositeNodeFactory(name='MTGActionOnMultipleMTGs',
           (16, 'None'),
           (17, 'None')],
    23: [],
-   24: [(0, '2')],
+   24: [(0, '3')],
    25: [],
    26: [  (3, 'None'),
           (4, 'None'),
@@ -433,28 +433,21 @@ MTGActionOnMultipleMTGs = CompositeNodeFactory(name='MTGActionOnMultipleMTGs',
 
 
 
-_171291852 = DataFactory(name='wij.drf',
+_163021772 = DataFactory(name='wij.drf',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_171290892 = DataFactory(name='nentn105.smb',
+_163022700 = DataFactory(name='agraf.drf',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_171291884 = DataFactory(name='wij10.mtg',
-                    description='MTG of a wijii apple tree provided by E. Costes ',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_171291948 = DataFactory(name='pombadia.mtg',
+_163020876 = DataFactory(name='pommecyl.smb',
                     description='',
                     editors=None,
                     includes=None,
@@ -736,15 +729,22 @@ MTGExtraction = CompositeNodeFactory(name='MTGExtraction',
 
 
 
-_171291916 = DataFactory(name='wij.crv',
+_163020844 = DataFactory(name='agraf.mtg',
+                    description='The famous apple tree - Credits E. Costes, H. Sinoquet',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_163022668 = DataFactory(name='wij.crv',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_171290828 = DataFactory(name='agraf.drf',
-                    description='',
+_163021836 = DataFactory(name='wij10.mtg',
+                    description='MTG of a wijii apple tree provided by E. Costes ',
                     editors=None,
                     includes=None,
                     )
