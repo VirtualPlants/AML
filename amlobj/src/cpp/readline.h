@@ -1,21 +1,21 @@
-/* -*-c++-*- 
+/* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture 
+ *       AMAPmod: Exploring and Modeling Plant Architecture
  *
  *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
  *
- *       File author(s): Ch. Godin (christophe.godin@cirad.fr) 
+ *       File author(s): Ch. Godin (christophe.godin@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
- *               
+ *
  *  ----------------------------------------------------------------------------
- * 
+ *
  *                      GNU General Public Licence
- *           
+ *
  *       This program is free software; you can redistribute it and/or
  *       modify it under the terms of the GNU General Public License as
  *       published by the Free Software Foundation; either version 2 of
@@ -32,7 +32,7 @@
  *       Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  ----------------------------------------------------------------------------
- */				
+ */
 
 
 
@@ -42,8 +42,11 @@
 #ifndef READLINE_HEADER
 #define READLINE_HEADER
 
-#if defined( __GNUC__ ) && ! defined(  __MINGW32__ )
+#if defined( __GNUC__ )
+#if defined(  __MINGW32__ ) || defined(__APPLE__)
+#else
 #define USE_READLINE
+#endif
 #endif
 
 #ifdef USE_READLINE

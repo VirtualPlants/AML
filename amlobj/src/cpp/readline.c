@@ -36,10 +36,7 @@
  *  -------------------------------------------------------------------------
  */
 
-#if defined( __GNUC__ ) && ! defined(  __MINGW32__ )
-#define USE_READLINE
-#endif
-
+#include "readline.h"
 
 #ifdef USE_READLINE
 
