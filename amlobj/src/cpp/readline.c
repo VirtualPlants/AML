@@ -36,7 +36,12 @@
  *  -------------------------------------------------------------------------
  */
 
-#include "readline.h"
+#if defined( __GNUC__ )
+#if defined(  __MINGW32__ ) || defined(__APPLE__)
+#else
+#define USE_READLINE
+#endif
+#endif
 
 #ifdef USE_READLINE
 
