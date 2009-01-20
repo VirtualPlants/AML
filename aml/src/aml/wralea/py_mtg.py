@@ -84,7 +84,6 @@ Ouput : MTG object if the parsing process succeeds.
 	    key = desc['name']
 	    x = self.get_input(key)
 	    if x is not None:  # selects the input arguments
-		print key, x
 		kwds[key] = x
 
 	obj = kwds.get('filename',None)
@@ -552,7 +551,6 @@ Input:
             key = desc['name']
             x = self.get_input(key)
             if x is not None:  # selects the input arguments
-                print key, x
                 kwds[key] = x
         obj = kwds.get('obj',None)
         del kwds['obj']
