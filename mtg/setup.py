@@ -19,7 +19,7 @@ setup_requires = ['openalea.deploy']
 if __name__ == '__main__':
     
     setup(name='VPlants.Mtg',
-          version='0.6.0',
+          version='0.6.2',
           author='Christophe Godin',
           description='mtg structure',
           url='http://www-sop.inria.fr/virtualplants/',
