@@ -28,6 +28,13 @@ from openalea.core import *
 from openalea.aml import *
 import types
 
+# !!! Do not plot in nosetests !!!
+import sys
+
+DISABLE_PLOT = False
+if("nosetests" in sys.argv[0]):
+    DISABLE_PLOT = True
+
 #//////////////////////////////////////////////////////////////////////////////
 # Adapters
 def adapt2list(arg):
@@ -187,7 +194,8 @@ def py_plot( obj ):
     Input:
         aml object
     """
-    
+    if DISABLE_PLOT:
+        return
     if obj:
         if type(obj) == types.ListType:
             Plot(*obj)
@@ -195,6 +203,8 @@ def py_plot( obj ):
             Plot(obj)
 
 def py_plot_segprofile(seq, ind, nb_seg, model, output):
+    if DISABLE_PLOT:
+        return
     if seq:
         args= [seq, ind, nb_seg]
         model = model.split(',')
@@ -204,6 +214,8 @@ def py_plot_segprofile(seq, ind, nb_seg, model, output):
         Plot(*args, **kwds)
 
 def py_plot_data(seq):
+    if DISABLE_PLOT:
+        return
     if seq:
         Plot(seq,  ViewPoint="Data")
 
