@@ -3822,7 +3822,6 @@ static AMObj MTG_EulerAngles(const AMObjVector& args) {
 }
 
 static AMObj MTG_TreeMatching(const AMObjVector& args) {
-
   MTG* active_mtg = (AML_MTG*)activeMTG().val.p;
 
   int len = args.length();
@@ -4000,6 +3999,18 @@ static AMObj MTG_TreeMatching(const AMObjVector& args) {
   
 
   AML_TreeMatch* treematch;
+
+  if (self_similarity == 1){
+
+
+    AML_TreeMatch* treematch;
+
+
+       treematch = new AML_TreeMatch(*active_mtg,array, fnode_array,matching_type.data(),ordered_type.data(),self_similarity,vect_dist,coeff);
+  
+    return AMObj(AMObjType::TREEMATCHING, treematch);
+  }
+  
 
   if (!strcmp(ordered_type.data(),"Unordered")){
 
@@ -4190,7 +4201,8 @@ static AMObj MTG_MatchingExtract(const AMObjVector& args) {
 			if (treematch->getNbTree()!=1)
 				distancebetweentree=treematch->viewDistanceMatching(AMLOUTPUT,input_tree-1,reference_tree-1);
 			else
-				distancebetweentree=treematch->getSelfSimilarDistance(input_tree,reference_tree);
+			  //distancebetweentree=treematch->getSelfSimilarDistance(input_tree,reference_tree);
+			  distancebetweentree=treematch->getDistance(input_tree,reference_tree);
             return AMObj(AMObjType::REAL,distancebetweentree);
           }
         else if (viewpoint == "NormalizedDistance")
