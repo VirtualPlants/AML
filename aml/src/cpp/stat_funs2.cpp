@@ -1312,11 +1312,11 @@ AMObj STAT_Renewal(const AMObjVector &args)
 {
   RWCString *pstr;
   char type = 'e';
-  bool status = true , type_option = false , time_option = false;
+  bool status = true , type_option = false , time_option = false , scale_option = false;
   register int i;
   int nb_required , time = DEFAULT_TIME , ident , inf_bound , sup_bound;
-  double parameter , probability;
-  Parametric *inter_event;
+  double parameter , probability , scaling_coeff;
+  const Parametric *inter_event , *scaled_inter_event;
   Renewal *renew;
   Format_error error;
 
@@ -1401,7 +1401,7 @@ AMObj STAT_Renewal(const AMObjVector &args)
   }
 
   if ((args.length() != nb_required) && (args.length() != nb_required + 2) &&
-      (args.length() != nb_required + 4)) {
+      (args.length() != nb_required + 4) && (args.length() != nb_required + 6)) {
     delete inter_event;
     genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Renewal");
     return AMObj(AMObjType::ERROR);
@@ -1482,10 +1482,40 @@ AMObj STAT_Renewal(const AMObjVector &args)
         }
       }
 
+      else if (*pstr == "Scale") {
+        switch (scale_option) {
+
+        case false : {
+          scale_option = true;
+
+          switch (args[nb_required + i * 2 + 1].tag()) {
+          case AMObjType::INTEGER :
+            scaling_coeff = args[nb_required + i * 2 + 1].val.i;
+            break;
+          case AMObjType::REAL :
+            scaling_coeff = args[nb_required + i * 2 + 1].val.r;
+            break;
+          default :
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Renewal" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
+            break;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Renewal" , nb_required + i + 1);
+          break;
+         }
+        }
+      }
+
       else {
         status = false;
         genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Renewal" ,
-                    nb_required + i + 1 , "Type or ObservationTime");
+                    nb_required + i + 1 , "Type or ObservationTime or Scale");
       }
     }
   }
@@ -1504,7 +1534,16 @@ AMObj STAT_Renewal(const AMObjVector &args)
       inter_event = new Parametric(ident , inf_bound , sup_bound , parameter ,
                                    probability , RENEWAL_THRESHOLD);
 
-      renew = renewal_building(error , *inter_event , type , time);
+      if (scale_option) {
+        // scaled_inter_event = new Parametric(*inter_event , scaling_coeff);
+        scaled_inter_event = new Parametric((Distribution&)*inter_event , scaling_coeff);
+        renew = renewal_building(error , *scaled_inter_event , type , time);
+        delete scaled_inter_event;
+      }
+
+      else {
+        renew = renewal_building(error , *inter_event , type , time);
+      }
       delete inter_event;
     }
   }
