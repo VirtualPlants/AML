@@ -2065,13 +2065,11 @@ AMObj STAT_Cluster(const AMObjVector &args)
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
     RWCString *pstr;
     bool status = true;
+    int nb_required = 3;
     const Histogram *ihisto;
     Distribution_data *histo;
     Format_error error;
 
-
-    CHECKCONDVA(args.length() == 3 ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Cluster" , 3));
 
     switch (args[0].tag()) {
     case AMObjType::HISTOGRAM :
@@ -2091,16 +2089,72 @@ AMObj STAT_Cluster(const AMObjVector &args)
     pstr = (AMString*)args[1].val.p;
 
     if (*pstr == "Step") {
-      CHECKCONDVA(args[2].tag() == AMObjType::INTEGER ,
-                  genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Cluster" , 3 ,
-                            args[2].tag.string().data() , "INT"));
+      int mode = FLOOR;
 
-      histo = ihisto->cluster(error , args[2].val.i);
+
+      CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+                  genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Cluster"));
+
+      // argument obligatoire
+
+      if (args[2].tag() != AMObjType::INTEGER) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Cluster" , 3 ,
+                    args[2].tag.string().data() , "INT");
+      }
+
+      // argument optionnel
+
+      if (args.length() == nb_required + 2) {
+        if (args[nb_required].tag() != AMObjType::OPTION) {
+          status = false;
+          genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Cluster" , nb_required + 1 ,
+                      args[nb_required].tag.string().data() , "OPTION");
+        }
+        else {
+          if (*((AMString*)args[nb_required].val.p) != "Mode") {
+            status = false;
+            genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Cluster" , nb_required + 1 , "Mode");
+          }
+        }
+
+        if (args[nb_required + 1].tag() != AMObjType::STRING) {
+          status = false;
+          genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Cluster" , nb_required + 1 ,
+                      args[nb_required + 1].tag.string().data() , "STRING");
+        }
+        else {
+          pstr = (AMString*)args[nb_required + 1].val.p;
+          if (*pstr == "Floor") {
+            mode = FLOOR;
+          }
+          else if (*pstr == "Round") {
+            mode = ROUND;
+          }
+          else if (*pstr == "Ceil") {
+            mode = CEIL;
+          }
+          else {
+            status = false;
+            genAMLError(ERRORMSG(ROUND_MODE_sds) , "Cluster" , nb_required + 1 ,
+                        "Floor or Round or Ceil");
+          }
+        }
+      }
+
+      if (!status) {
+        return AMObj(AMObjType::ERROR);
+      }
+
+      histo = ihisto->cluster(error , args[2].val.i , mode);
     }
 
     else if (*pstr == "Information") {
       double ratio;
 
+
+      CHECKCONDVA(args.length() == nb_required ,
+                  genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Cluster" , 3));
 
       switch (args[2].tag()) {
       case AMObjType::INTEGER :
@@ -2121,6 +2175,9 @@ AMObj STAT_Cluster(const AMObjVector &args)
     else if (*pstr == "Limit") {
       int nb_class = I_DEFAULT , *limit = 0;
 
+
+      CHECKCONDVA(args.length() == nb_required ,
+                  genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Cluster" , 3));
 
       if (args[2].tag() != AMObjType::ARRAY) {
         status = false;
@@ -2169,7 +2226,8 @@ AMObj STAT_Cluster(const AMObjVector &args)
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     RWCString *pstr;
     bool status = true;
-    int nb_required , nb_variable , variable , offset , nb_class = I_DEFAULT , *int_limit = 0;
+    int nb_required , nb_variable , variable , offset , mode = FLOOR ,
+        nb_class = I_DEFAULT , *int_limit = 0;
     double *real_limit = 0;
     const Vectors *ivec;
     const Sequences *iseq;
@@ -2279,17 +2337,63 @@ AMObj STAT_Cluster(const AMObjVector &args)
       Vectors *vec;
 
 
-      if (args.length() != nb_required) {
-        status = false;
-        genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Cluster" , nb_required);
-      }
-
-      if (status) {
-        if (*pstr == "Step") {
-          vec = ivec->cluster(error , variable , args[offset].val.i);
+      if (*pstr == "Step") {
+        if ((args.length() != nb_required) && (args.length() != nb_required + 2)) {
+          status = false;
+          genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Cluster" , nb_required);
         }
 
-        else if (*pstr == "Limit") {
+        // argument optionnel
+
+        if (args.length() == nb_required + 2) {
+          if (args[nb_required].tag() != AMObjType::OPTION) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Cluster" , nb_required + 1 ,
+                        args[nb_required].tag.string().data() , "OPTION");
+          }
+          else {
+            if (*((AMString*)args[nb_required].val.p) != "Mode") {
+              status = false;
+              genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Cluster" , nb_required + 1 , "Mode");
+            }
+          }
+
+          if (args[nb_required + 1].tag() != AMObjType::STRING) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Cluster" , nb_required + 1 ,
+                        args[nb_required + 1].tag.string().data() , "STRING");
+          }
+          else {
+            pstr = (AMString*)args[nb_required + 1].val.p;
+            if (*pstr == "Floor") {
+              mode = FLOOR;
+            }
+            else if (*pstr == "Round") {
+              mode = ROUND;
+            }
+            else if (*pstr == "Ceil") {
+              mode = CEIL;
+            }
+            else {
+              status = false;
+              genAMLError(ERRORMSG(ROUND_MODE_sds) , "Cluster" , nb_required + 1 ,
+                          "Floor or Round or Ceil");
+            }
+          }
+        }
+
+        if (status) {
+          vec = ivec->cluster(error , variable , args[offset].val.i , mode);
+        }
+      }
+
+      else if (*pstr == "Limit") {
+        if (args.length() != nb_required) {
+          status = false;
+          genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Cluster" , nb_required);
+        }
+        
+        if (status) {
           if (int_limit) {
             vec = ivec->cluster(error , variable , nb_class + 1 , int_limit);
           }
@@ -2322,17 +2426,63 @@ AMObj STAT_Cluster(const AMObjVector &args)
       Markovian_sequences *markovian_seq;
 
 
-      if (args.length() != nb_required) {
-        status = false;
-        genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Cluster" , nb_required);
-      }
-
-      if (status) {
-        if (*pstr == "Step") {
-          seq = iseq->cluster(error , variable , args[offset].val.i);
+      if (*pstr == "Step") {
+        if ((args.length() != nb_required) && (args.length() != nb_required + 2)) {
+          status = false;
+          genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Cluster" , nb_required);
         }
 
-        else if (*pstr == "Limit") {
+        // argument optionnel
+
+        if (args.length() == nb_required + 2) {
+          if (args[nb_required].tag() != AMObjType::OPTION) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Cluster" , nb_required + 1 ,
+                        args[nb_required].tag.string().data() , "OPTION");
+          }
+          else {
+            if (*((AMString*)args[nb_required].val.p) != "Mode") {
+              status = false;
+              genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Cluster" , nb_required + 1 , "Mode");
+            }
+          }
+
+          if (args[nb_required + 1].tag() != AMObjType::STRING) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Cluster" , nb_required + 1 ,
+                        args[nb_required + 1].tag.string().data() , "STRING");
+          }
+          else {
+            pstr = (AMString*)args[nb_required + 1].val.p;
+            if (*pstr == "Floor") {
+              mode = FLOOR;
+            }
+            else if (*pstr == "Round") {
+              mode = ROUND;
+            }
+            else if (*pstr == "Ceil") {
+              mode = CEIL;
+            }
+            else {
+              status = false;
+              genAMLError(ERRORMSG(ROUND_MODE_sds) , "Cluster" , nb_required + 1 ,
+                          "Floor or Round or Ceil");
+            }
+          }
+        }
+
+        if (status) {
+          seq = iseq->cluster(error , variable , args[offset].val.i , mode);
+        }
+      }
+
+      else if (*pstr == "Limit") {
+        if (args.length() != nb_required) {
+          status = false;
+          genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Cluster" , nb_required);
+        }
+
+        if (status) {
           if (int_limit) {
             seq = iseq->cluster(error , variable , nb_class + 1 , int_limit);
           }
@@ -2382,13 +2532,52 @@ AMObj STAT_Cluster(const AMObjVector &args)
       pstr = (AMString*)args[1].val.p;
 
       if (*pstr == "Step") {
-        if (args.length() != nb_required) {
+        if ((args.length() != nb_required) && (args.length() != nb_required + 2)) {
           status = false;
           genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Cluster" , nb_required);
         }
 
+        // argument optionnel
+
+        if (args.length() == nb_required + 2) {
+          if (args[nb_required].tag() != AMObjType::OPTION) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Cluster" , nb_required + 1 ,
+                        args[nb_required].tag.string().data() , "OPTION");
+          }
+          else {
+            if (*((AMString*)args[nb_required].val.p) != "Mode") {
+              status = false;
+              genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Cluster" , nb_required + 1 , "Mode");
+            }
+          }
+
+          if (args[nb_required + 1].tag() != AMObjType::STRING) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Cluster" , nb_required + 1 ,
+                        args[nb_required + 1].tag.string().data() , "STRING");
+          }
+          else {
+            pstr = (AMString*)args[nb_required + 1].val.p;
+            if (*pstr == "Floor") {
+              mode = FLOOR;
+            }
+            else if (*pstr == "Round") {
+              mode = ROUND;
+            }
+            else if (*pstr == "Ceil") {
+              mode = CEIL;
+            }
+            else {
+              status = false;
+              genAMLError(ERRORMSG(ROUND_MODE_sds) , "Cluster" , nb_required + 1 ,
+                          "Floor or Round or Ceil");
+            }
+          }
+        }
+
         if (status) {
-          markovian_seq = imarkovian_seq->cluster(error , variable , args[offset].val.i);
+          markovian_seq = imarkovian_seq->cluster(error , variable , args[offset].val.i , mode);
         }
       }
 
@@ -3215,38 +3404,100 @@ AMObj STAT_VariableScaling(const AMObjVector &args)
 AMObj STAT_Round(const AMObjVector &args)
 
 {
-  bool status = true;
-  int nb_required , variable = I_DEFAULT;
+  RWCString *pstr;
+  bool status = true , variable_option = false , mode_option = false;
+  register int i;
+  int nb_required , variable = I_DEFAULT , mode = ROUND;
   Format_error error;
 
 
   nb_required = 1;
 
-  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+              (args.length() == nb_required + 4) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Round"));
 
-  // argument optionnel
+  // arguments optionnels
 
-  if (args.length() == nb_required + 2) {
-    if (args[nb_required].tag() != AMObjType::OPTION) {
+  for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+    if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Round" , nb_required + 1 ,
-                  args[nb_required].tag.string().data() , "OPTION");
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Round" , nb_required + i + 1 ,
+                  args[nb_required + i * 2].tag.string().data() , "OPTION");
     }
+
     else {
-      if (*((AMString*)args[nb_required].val.p) != "Variable") {
-        status = false;
-        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Round" , nb_required + 1 , "Variable");
+      pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+      if (*pstr == "Variable") {
+        switch (variable_option) {
+
+        case false : {
+          variable_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Round" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+          }
+          else {
+            variable = args[nb_required + i * 2 + 1].val.i;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Round" , nb_required + i + 1);
+          break;
+        }
+        }
       }
-    }
 
-    if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Round" , nb_required + 1 ,
-                  args[nb_required + 1].tag.string().data() , "INT");
-    }
-    else {
-      variable = args[nb_required + 1].val.i;
+      else if (*pstr == "Mode") {
+        switch (mode_option) {
+
+        case false : {
+          mode_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Round" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+          }
+          else {
+            pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+            if (*pstr == "Floor") {
+              mode = FLOOR;
+            }
+            else if (*pstr == "Round") {
+              mode = ROUND;
+            }
+            else if (*pstr == "Ceil") {
+              mode = CEIL;
+            }
+            else {
+              status = false;
+              genAMLError(ERRORMSG(ROUND_MODE_sds) , "Round" , nb_required + i + 1 ,
+                          "Floor or Round or Ceil");
+            }
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Round" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Round" , nb_required + i + 1 ,
+                    "Variable or Mode");
+      }
     }
   }
 
@@ -3258,7 +3509,7 @@ AMObj STAT_Round(const AMObjVector &args)
     Vectors *vec;
 
 
-    vec = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->round(error , variable);
+    vec = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->round(error , variable , mode);
 
     if (vec) {
       STAT_model* model = new STAT_model(vec);
@@ -3298,7 +3549,7 @@ AMObj STAT_Round(const AMObjVector &args)
       break;
     }
 
-    seq = iseq->round(error , variable);
+    seq = iseq->round(error , variable , mode);
 
     if (seq) {
       markovian_seq = seq->markovian_sequences(error);
