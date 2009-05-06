@@ -4136,9 +4136,9 @@ static AMObj MTG_MatchingExtract(const AMObjVector& args) {
                 CHECKCONDVA( viewpoint == "Text" || viewpoint == "Mapping" || viewpoint == "Statistics" ||
                              viewpoint == "List" || viewpoint == "DistanceMatrix" || viewpoint== "Distance"||
 			     viewpoint=="NormalizedDistance"||viewpoint=="ViewVertex"||viewpoint == "ParacladialCoefficient"||
-			     viewpoint == "Paracladia"||viewpoint == "Coefficient"||viewpoint=="Paracladium"||viewpoint=="Time"||viewpoint=="SaveMTG",
+			     viewpoint == "Paracladia"||viewpoint == "Coefficient"||viewpoint=="Paracladium"||viewpoint=="Time"||viewpoint=="SaveMTG"||viewpoint=="saveDistanceMatrix",
                              genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds),
-                                         "MatchingExtract", (argth+1)/2+1, "one of Text,Mapping,Statistics,List,DistanceMatrix,Distance,NormalizedDistance,ViewVertex,ParacladialCoefficient,Paracladia,Coefficient,Paracladium,Time,SaveMTG"));
+                                         "MatchingExtract", (argth+1)/2+1, "one of Text,Mapping,Statistics,List,DistanceMatrix,Distance,NormalizedDistance,ViewVertex,ParacladialCoefficient,Paracladia,Coefficient,Paracladium,Time,SaveMTG,saveDistanceMatrix"));
         }
         else if (*(AMString*)(args[argth].val.p) == "FileName")
         {
@@ -4261,6 +4261,21 @@ static AMObj MTG_MatchingExtract(const AMObjVector& args) {
 	    out_file.close();
 
 	  }
+	else if (viewpoint == "saveDistanceMatrix")
+	  {
+	    ofstream out_file;
+	    string name=file_name.data();
+	    cout<<"Saving Matrix in "<<name<<endl;
+	    out_file.open(name.c_str());
+	    if (out_file.fail() != 0)
+	      {
+		return AMObj(AMObjType::ERROR);
+	      }
+	    treematch->saveDistanceMatrix(out_file);
+	    out_file.close();
+
+	  }
+
         else if (viewpoint == "Statistics")
         {
           file_name.prepend(Plot_prefix);
