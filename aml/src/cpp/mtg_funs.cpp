@@ -1260,10 +1260,19 @@ static AMObj topoOptions(const char* fname, const AMObjVector& args, int argth, 
     }
     else if (edgeType != NONE && option == "EdgeType") {
 
-      CHECKCONDVA(args[argth+1].tag() ==AMObjType::CHAR,
+      CHECKCONDVA(args[argth+1].tag() ==AMObjType::CHAR || args[argth+1].tag() ==AMObjType::STRING,
                   genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss), fname, (argth+1)/2+1, args[argth+1].tag.string().data(), "CHAR"));
 
-      switch (args[argth+1].val.c) {
+	  char edgetype;
+	  if(args[argth+1].tag() ==AMObjType::CHAR) edgetype = args[argth+1].val.c;
+	  else {
+		RWCString optionval(*(AMString*)args[argth+1].val.p);
+		if (optionval.size() != 1)
+			genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss), fname, (argth+1)/2+1, args[argth+1].tag.string().data(), "CHAR");
+		else edgetype = optionval(0);
+	  }
+
+      switch (edgetype) {
 
       case '+':
         edgeType = PLUS;
