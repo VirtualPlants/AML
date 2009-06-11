@@ -203,11 +203,6 @@ AMObject PytoAMObject(PyObject* argobj)
     {
       amlarg = AMObj(AMObjType::REAL, PyFloat_AsDouble(argobj));
     }
-  else if (PyString_Check(argobj))
-    {
-      string s = PyString_AsString(argobj);
-      amlarg =  AMObj(AMObjType::STRING, new AMString(s.c_str()));
-    }
   else if (PyLong_Check(argobj))
     {
       amlarg = AMObj(AMObjType::INTEGER, PyLong_AsLong(argobj));
@@ -215,6 +210,11 @@ AMObject PytoAMObject(PyObject* argobj)
   else if (Char_Check(argobj))
     {
       amlarg = AMObj(AMObjType::CHAR, PyStringasChar(argobj));
+    }
+  else if (PyString_Check(argobj))
+    {
+      string s = PyString_AsString(argobj);
+      amlarg =  AMObj(AMObjType::STRING, new AMString(s.c_str()));
     }
   else if (PyTuple_Check(argobj))
     {
