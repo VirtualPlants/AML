@@ -3202,10 +3202,12 @@ AMObj STAT_ValueSelect(const AMObjVector &args)
 
 
       if (args[offset].tag() == AMObjType::INTEGER) {
-        vec = ivec->value_select(error , variable , int_min_value , int_max_value , keep);
+        vec = ivec->value_select(error , AMLOUTPUT , variable ,
+                                 int_min_value , int_max_value , keep);
       }
       else if (args[offset].tag() == AMObjType::REAL) {
-        vec = ivec->value_select(error , variable , real_min_value , real_max_value , keep);
+        vec = ivec->value_select(error , AMLOUTPUT , variable ,
+                                 real_min_value , real_max_value , keep);
       }
 
       if (vec) {
@@ -3228,10 +3230,12 @@ AMObj STAT_ValueSelect(const AMObjVector &args)
 
 
       if (args[offset].tag() == AMObjType::INTEGER) {
-        seq = iseq->value_select(error , variable , int_min_value , int_max_value , keep);
+        seq = iseq->value_select(error , AMLOUTPUT , variable ,
+                                 int_min_value , int_max_value , keep);
       }
       else if (args[offset].tag() == AMObjType::REAL) {
-        seq = iseq->value_select(error , variable , real_min_value , real_max_value , keep);
+        seq = iseq->value_select(error , AMLOUTPUT , variable ,
+                                 real_min_value , real_max_value , keep);
       }
 
       if (seq) {
@@ -4458,7 +4462,7 @@ AMObj STAT_LengthSelect(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->length_select(error , min_length , max_length , keep);
+  seq = iseq->length_select(error , AMLOUTPUT , min_length , max_length , keep);
 
   if (seq) {
     markovian_seq = seq->markovian_sequences(error);
@@ -4962,7 +4966,8 @@ AMObj STAT_IndexParameterSelect(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->index_parameter_select(error , min_index_parameter , max_index_parameter , keep);
+  seq = iseq->index_parameter_select(error , AMLOUTPUT , min_index_parameter ,
+                                     max_index_parameter , keep);
 
   if (seq) {
     markovian_seq = seq->markovian_sequences(error);
