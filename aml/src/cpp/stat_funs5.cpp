@@ -4043,10 +4043,11 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  bool status = true , max_lag_option = false , type_option = false , normalization_option = false;
+  bool status = true , max_lag_option = false , type_option = false , normalization_option = false ,
+       individual_mean_option = false , individual_mean = false;
   register int i;
-  int nb_required , nb_variable , variable1 = 0 , variable2 , max_lag = I_DEFAULT , type = PEARSON ,
-      normalization = EXACT;
+  int nb_required , nb_variable , variable1 = 0 , variable2 , max_lag = I_DEFAULT ,
+      type = PEARSON , normalization = EXACT;
   const Sequences *seq;
   Correlation *correl;
   Format_error error;
@@ -4058,7 +4059,8 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputeCorrelation"));
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
-              (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ,
+              (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
+              (args.length() == nb_required + 8) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputeCorrelation"));
 
   // arguments obligatoires
@@ -4254,15 +4256,44 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
         }
       }
 
+      else if (*pstr == "IndividualMean") {
+        switch (individual_mean_option) {
+
+        case false : {
+          individual_mean_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeCorrelation" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            individual_mean = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeCorrelation" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
       else {
         status = false;
         genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "ComputeCorrelation" ,
-                    nb_required + i + 1 , "MaxLag or Type");
+                    nb_required + i + 1 , "MaxLag or Type or Normalization or IndividualMean");
       }
     }
   }
 
   if ((normalization_option) && ((type == SPEARMAN2) || (type == KENDALL))) {
+    status = false;
+    genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "ComputeCorrelation");
+  }
+  if ((individual_mean_option) && (type != PEARSON)) {
     status = false;
     genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "ComputeCorrelation");
   }
@@ -4272,7 +4303,7 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
   }
 
   correl = seq->correlation_computation(error , variable1 , variable2 , type ,
-                                        max_lag , normalization);
+                                        max_lag , normalization , individual_mean);
 
   if (correl) {
     STAT_model* model = new STAT_model(correl);
