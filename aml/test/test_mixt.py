@@ -43,7 +43,7 @@ def test_mixt():
     
 # Plot(meri1, meri2, meri3, meri4, meri5)
 
-    Compare(meri1, meri2, meri3, meri4, meri5, "N")
+    Compare(meri1, meri2, meri3, meri4, meri5, "NUMERIC")
     
     ComparisonTest("F", meri1, meri2)
     ComparisonTest("T", meri1, meri2)

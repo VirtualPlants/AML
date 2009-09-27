@@ -7,13 +7,13 @@ pm.init(verbose=False)
 
 app = QApplication([])
 
-def tst_demo_mtg_PlantFrame2():
+def test_demo_mtg_PlantFrame2():
     """ Test dataflow demo PlantFrame2 """
     res = run(('demo.mtg', 'PlantFrame2'), {}, pm=pm)
     assert res == []
 
 
-def tst_demo_mtg_multiplemtg():
+def test_demo_mtg_multiplemtg():
     """ Test dataflow demo multiple MTG"""
     res = run(('demo.mtg', 'MTGActionOnMultipleMTGs'), {}, pm=pm)
     assert res == []
