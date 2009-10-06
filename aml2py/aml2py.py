@@ -24,6 +24,9 @@
 import os
 import re
 
+from optparse import OptionParser
+
+
 class Aml2Py:
     """
     Convert an aml file to a python file
@@ -48,7 +51,7 @@ class Aml2Py:
         self.filename= file
         self.py= ["# Convert %s to python with aml2py\n" % file,
                   "try: ",
-                  self.indent+"from openalea.amlPy import * ",
+                  self.indent+"from openalea.aml import * ",
                   "except: ",
                   self.indent+"from amlPy import * " ]
 
@@ -67,7 +70,7 @@ class Aml2Py:
 
         self.read()
         self.parse()
-        self.write()
+        return self.write()
 
     def read(self):
         """ read() -> Open and read an aml file. """
@@ -104,7 +107,7 @@ class Aml2Py:
         f.writelines([ c+'\n' for c in self.py ])
 
         f.close()
-
+        return os.path.abspath(pyfile)
       
     def parse(self):
         """ parse() -> None
@@ -133,7 +136,7 @@ class Aml2Py:
             self.Exp(l)
 
         # end of file
-        self.py.append('raw_input("Type enter to quit: ")')
+        #self.py.append('raw_input("Type enter to quit: ")')
 
     def If(self, s):
         """ If(string) -> bool
@@ -392,7 +395,38 @@ def aml2py(amlfile):
     """
 
     engine= Aml2Py(amlfile)
-    engine.run()
+    pyfile = engine.run()
+    return pyfile
+
+def main():
+    """ Main function to get user arguments. """
+
+    usage = """
+    %prog convert an aml script into a python script.
+
+    %prog aml_file
+
+    example: %prog tree.aml
+    """
+
+    parser = OptionParser(usage=usage)
+    try:
+        (opts, args)= parser.parse_args()
+    except Exception,e:
+        parser.print_usage()
+        print "Error while parsing :", e
+        raise e
+
+    if (len(args) < 1 ):
+        print "Provide an input aml file"
+        parser.print_usage()
+        return
+
+    amlfile = args[0]
+
+    pyfile = aml2py(amlfile)
+
+    print '%s have been generated.'%pyfile
 
 
 if __name__=="__main__":
