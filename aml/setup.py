@@ -6,6 +6,7 @@ from os.path import join as pj
 packagename = 'aml'
 namespace = 'openalea'
 build_prefix = "build-scons"
+version = '0.7.0'
 
 # Scons build directory
 scons_parameters=["build_prefix="+build_prefix]
@@ -15,6 +16,7 @@ scons_parameters=["build_prefix="+build_prefix]
 install_requires = [binary_deps('vplants.amlobj'), 
                     binary_deps('vplants.sequence_analysis'),
                     binary_deps('vplants.tree_matching'), 
+                    binary_deps('vplants.mtg'), 
                     ]
 
 if sys.platform.startswith('win'):
@@ -25,7 +27,7 @@ setup_requires = install_requires + ['openalea.deploy']
 if __name__ == '__main__':
     
     setup(name='VPlants.Aml',
-          version='0.6.2',
+          version=version,
           author='C. Godin, Y. Guedon, C.Pradal',
           description='aml and amlPy libraries',
           url='',
@@ -41,21 +43,22 @@ if __name__ == '__main__':
           namespace_packages = [namespace],
           create_namespaces = True,
 
-          packages=[namespace+".aml", 
+          packages=[namespace+".aml", namespace+".aml_wralea", 
                     namespace+".aml.amldoc",
-                    namespace+".aml.wralea", 
-                    namespace+".aml.demo", 
-                    namespace+".aml.demo.change_point", 
-                    namespace+".aml.demo.mtg", 
+                    namespace+".aml_wralea.wralea", 
+                    namespace+".aml_wralea.demo", 
+                    namespace+".aml_wralea.demo.change_point", 
+                    namespace+".aml_wralea.demo.mtg", 
                     "vplants", "vplants.aml",
                     "amlPy"],
 
           package_dir={namespace+".aml" : "src/aml",
+                       namespace+".aml_wralea" : "src/aml_wralea",
                        namespace+".aml.amldoc" : "src/aml/amldoc",
-                       namespace+".aml.wralea" : "src/aml/wralea",
-                       namespace+".aml.demo" : "src/aml/demo",
-                       namespace+".aml.demo.change_point" : "src/aml/demo/change_point", 
-                       namespace+".aml.demo.mtg": "src/aml/demo/mtg", 
+                       namespace+".aml_wralea.wralea" : "src/aml_wralea",
+                       namespace+".aml_wralea.demo" : "src/aml_wralea/demo",
+                       namespace+".aml_wralea.demo.change_point" : "src/aml_wralea/demo/change_point", 
+                       namespace+".aml_wralea.demo.mtg": "src/aml_wralea/demo/mtg", 
 
                        "amlPy" : "src/amlPy",
                        "vplants": "src/vplants",
@@ -80,8 +83,8 @@ if __name__ == '__main__':
 
           # entry_points
           entry_points = {
-            "wralea": ["aml = openalea.aml.wralea",
-                       "demo = openalea.aml.demo"]
+            "wralea": ["aml = openalea.aml_wralea.wralea",
+                       "demo = openalea.aml_wralea.demo"]
             },
 
 

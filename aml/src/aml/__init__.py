@@ -36,13 +36,6 @@ from amlPy_version import amlPy_version
 
 __version__= amlPy_version
 
-#from __future__ import nested_scopes
-
-try:
-   import PlantGL 
-except ImportError:
-   pass
-
 import _amlPymodule
 
 _amlPy = _amlPymodule
@@ -50,11 +43,6 @@ _amlPy = _amlPymodule
 # If we cannot import Numeric, it should have been detected at
 # installation time and amlPy should have been compiled properly. So,
 # don't complain.
-try:
-    import Numeric
-except ImportError:
-    pass
-
 
 try:
     import openalea.plantgl.all
