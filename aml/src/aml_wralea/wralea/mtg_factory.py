@@ -173,3 +173,11 @@ def define_factory(package):
                   )
     package.add_factory( nf )
 
+    nf = Factory( name= "VirtualPattern", 
+                  description= "Object containing the specification to add (virtual) components to an existing PlantFrame.", 
+                  category = "scene.MTG", 
+                  nodemodule = "py_mtg",
+                  nodeclass = "py_VirtualPattern",
+                  )
+    package.add_factory( nf )
+    

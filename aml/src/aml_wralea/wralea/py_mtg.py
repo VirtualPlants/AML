@@ -436,7 +436,7 @@ def py_dressingdata(g,filename):
 
 #//////////////////////////////////////////////////////////////////////////////
         
-class py_virtualpatterns( Node ):
+class py_VirtualPattern( Node ):
     """\
 Plot(aml object) -> Plot the object
 Input:
@@ -448,65 +448,45 @@ Input:
     
         Node.__init__(self)
 
-        self.add_input( name = "patterntype", interface = IStr) 
+        self.add_input( name = "patterntype", interface = IEnumStr(['Leaf', 'DigitizedLeaf', 'Fruit', 'Flower']), value = 'Leaf') 
 
-        self.add_input( name = "Class", interface = IInt, value= 0,hide=True)
-        self.add_input( name = "WhorlSize", interface = IInt, value= 0,hide=True)
-        self.add_input( name = "PatternNumber", interface = IFloat, value=None)
-        self.add_input( name = "Color", interface = IFloat, value=None,hide=True)
-        self.add_input( name = "TopDiameter", interface = IFunction,hide=True)
-        self.add_input( name = "Length", interface = IFunction,hide=True)
-        self.add_input( name = "BottomDiameter", interface = IStr,hide=True)
-        self.add_input( name = "Alpha", interface = IFunction,hide=True)
-        self.add_input( name = "beta", interface = IFunction,hide=True)
-        self.add_input( name = "gamma", interface = IFunction,hide=True)
-        self.add_input( name = "Phyllotaxy", interface = IFunction,hide=True)
-        self.add_input( name = "Azimuth", interface = IFunction,hide=True)
-        self.add_input( name = "AA", interface = IFunction,hide=True)
-        self.add_input( name = "BB", interface = IFunction,hide=True)
-        self.add_input( name = "CC", interface = IFunction,hide=True)
-        self.add_input( name = "XX", interface = IFunction,hide=True)
-        self.add_input( name = "YY", interface = IFunction,hide=True)
-        self.add_input( name = "ZZ", interface = IFunction,hide=True)
+        self.add_input( name = "Class", interface = IFunction, value=None, hide=True)
+        self.add_input( name = "WhorlSize", interface = IFunction, value=None, hide=True)
+        self.add_input( name = "PatternNumber", interface = IFunction, value=None, hide=True)
+        self.add_input( name = "Color", interface = IFunction, value=None, hide=True)
+        self.add_input( name = "TopDiameter", interface = IFunction,value=None, hide=True)
+        self.add_input( name = "Length", interface = IFunction,value=None, hide=True)
+        self.add_input( name = "BottomDiameter", interface = IStr,value=None, hide=True)
+        self.add_input( name = "Alpha", interface = IFunction,value=None, hide=True)
+        self.add_input( name = "beta", interface = IFunction,value=None, hide=True)
+        self.add_input( name = "gamma", interface = IFunction,value=None, hide=True)
+        self.add_input( name = "Phyllotaxy", interface = IFunction,value=None, hide=True)
+        self.add_input( name = "Azimuth", interface = IFunction,value=None, hide=True)
+        self.add_input( name = "AA", interface = IFunction,value=None, hide=True)
+        self.add_input( name = "BB", interface = IFunction,value=None, hide=True)
+        self.add_input( name = "CC", interface = IFunction,value=None, hide=True)
+        self.add_input( name = "XX", interface = IFunction,value=None, hide=True)
+        self.add_input( name = "YY", interface = IFunction,value=None, hide=True)
+        self.add_input( name = "ZZ", interface = IFunction,value=None, hide=True)
+
+        self.add_output(name = "pattern")
 
     def __call__(self, inputs):
         
         kwds={}
 
-	# input_desc contains a list of dictionaries for 
-	# each input port of the node
-	for desc in self.input_desc:
-	    key = desc['name']
-	    x = self.get_input(key)
-	    if x is not None:
-		kwds[key] = x
+        # input_desc contains a list of dictionaries for 
+        # each input port of the node
+        for desc in self.input_desc:
+            key = desc['name']
+            x = self.get_input(key)
+            if x is not None:
+                kwds[key] = x
 
-	g = kwds.get('patterntype',None)
-
-        g = set_mtg(g)
-        if not g:
-            return (None,)
-
-	scale = kwds.get('Scale',None)
-
-	vtx = kwds.get('Vertex',None)
-	del kwds['Vertex']
-	if 'MTG' in kwds: del kwds['MTG']
-
-	"""
-        max_scale= max_mtg_scale(g)
-        if scale > max_scale:
-            scale = max_scale
-        """
-
-        try:
-            pf = PlantFrame(vtx, **kwds)
-        except Exception, e:
-            print e
-            pf=None
-
-        return (pf,)
-
+        ptype = kwds['patterntype']
+        del kwds['patterntype']
+        return (VirtualPattern(ptype, **kwds), )
+        
 
 #//////////////////////////////////////////////////////////////////////////////
 
