@@ -1,6 +1,9 @@
-from setuptools import setup, find_packages
+"""setup for mtg package"""
+
+from setuptools import setup
+#, find_packages
 from openalea.deploy.binary_deps import binary_deps
-import os, sys
+#import os, sys
 from os.path import join as pj
  
 packagename = 'mtg'
@@ -8,11 +11,12 @@ namespace = 'openalea'
 build_prefix = "build-scons"
 
 # Scons build directory
-scons_parameters=["build_prefix="+build_prefix]
+scons_parameters = ["build_prefix="+build_prefix]
 
 
 # dependencies
-install_requires = [binary_deps('vplants.amlobj'), binary_deps('vplants.plantgl')]
+install_requires = [binary_deps('vplants.amlobj'), 
+                    binary_deps('vplants.plantgl')]
 #install_requires = []
 setup_requires = ['openalea.deploy'] 
 
@@ -47,4 +51,5 @@ if __name__ == '__main__':
           setup_requires = setup_requires,
           install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
-          )
+          pylint_packages  = ['.']
+        )

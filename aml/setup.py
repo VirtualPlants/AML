@@ -87,7 +87,7 @@ if __name__ == '__main__':
                        "demo = openalea.aml_wralea.demo"]
             },
 
-
+          pylint_packages = ['.']
           )
 
 
