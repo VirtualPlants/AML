@@ -55,7 +55,7 @@ if __name__ == '__main__':
           package_dir={namespace+".aml" : "src/aml",
                        namespace+".aml_wralea" : "src/aml_wralea",
                        namespace+".aml.amldoc" : "src/aml/amldoc",
-                       namespace+".aml_wralea.wralea" : "src/aml_wralea",
+                       namespace+".aml_wralea.wralea" : "src/aml_wralea/wralea",
                        namespace+".aml_wralea.demo" : "src/aml_wralea/demo",
                        namespace+".aml_wralea.demo.change_point" : "src/aml_wralea/demo/change_point", 
                        namespace+".aml_wralea.demo.mtg": "src/aml_wralea/demo/mtg", 
@@ -66,7 +66,7 @@ if __name__ == '__main__':
                        },
       
           # Add package platform libraries if any
-          package_data = {namespace+".aml" : ['*.pyd', '*.so', '*.dylib'],},
+          package_data = {namespace+".aml" : ['*.*'],},
           include_package_data=True,
           zip_safe = False,
 
