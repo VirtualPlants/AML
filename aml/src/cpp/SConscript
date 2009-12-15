@@ -30,7 +30,7 @@ file_funs.cpp
 LIBS = ['vpamlobj', 'vptool']
 
 #if env_aml['compiler'] in ['mingw','msvc']:
-env_aml.EnableQt4Modules( [ 'QtCore', 'QtGui', 'QtOpenGL', 'Qt3Support' , 'QtNetwork' ])
+env_aml.EnableQt4Modules( [ 'QtCore', 'QtGui', 'QtOpenGL', 'Qt3Support' , 'QtNetwork', 'QtSql', 'QtXml' ])
 #env_aml.EnableQt4Modules(['QtCore','QtGui'])
 
 

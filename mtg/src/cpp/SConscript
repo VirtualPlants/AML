@@ -18,7 +18,7 @@ if lib_env['compiler'] == 'mingw':
     lib_env.AppendUnique(LINKFLAGS=LINKFLAGS)
 
 
-lib_env.EnableQt4Modules(['QtCore','QtOpenGL'])
+lib_env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
 
 pgllibs = ['pglalgo', 'pglgui', 'pglsg', 'pgltool', 'pglmath']
 

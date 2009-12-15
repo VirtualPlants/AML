@@ -54,9 +54,9 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include <qfile.h>
-#include <qdir.h>
-#include <qstringlist.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qstringlist.h>
 #if defined( __GNUC__ ) && ! defined(  __MINGW32__ )
 
 #include <unistd.h>
