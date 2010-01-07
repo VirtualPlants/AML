@@ -2,9 +2,14 @@ from setuptools import setup, find_packages
 from openalea.deploy.binary_deps import binary_deps
 import os, sys
 from os.path import join as pj
- 
-packagename = 'amlobj'
-namespace = 'openalea'
+from openalea.deploy.metainfo import read_metainfo
+metadata = read_metainfo('metainfo.ini', verbose=True)
+for key,value in zip(metadata.keys(), metadata.values()):
+    exec("%s = '%s'" % (key, value))
+
+
+
+
 build_prefix = "build-scons"
 
 # Scons build directory
@@ -18,20 +23,20 @@ if sys.platform.startswith('win'):
     setup_requires += ['bisonflex']
 
 if __name__ == '__main__':
-    
-    setup(name='VPlants.AmlObj',
-          version='0.6.2',
-          author='Christophe Godin',
-          author_email='',
+
+    setup(name=name,
+          version=version,
+          authors=authors,
+          authors_email=authors_email,
           description='aml objects',
           url='http://www-sop.inria.fr/virtualplants/',
           license='GPL',
- 
+
           # Define where to execute scons
           scons_scripts=['SConstruct'],
           # Scons parameters  
           scons_parameters=scons_parameters,
-        
+
           # Add package platform libraries if any
           include_package_data=True,
           zip_safe = False,
