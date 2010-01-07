@@ -2,11 +2,14 @@ from setuptools import setup, find_packages
 from openalea.deploy.binary_deps import binary_deps
 import os, sys
 from os.path import join as pj
+
+from openalea.deploy.metainfo import read_metainfo
+metadata = read_metainfo('metainfo.ini', verbose=True)
+for key,value in zip(metadata.keys(), metadata.values()):
+    exec("%s = '%s'" % (key, value))
+
  
-packagename = 'aml'
-namespace = 'openalea'
 build_prefix = "build-scons"
-version = '0.7.0'
 
 # Scons build directory
 scons_parameters=["build_prefix="+build_prefix]
@@ -26,12 +29,12 @@ setup_requires = install_requires + ['openalea.deploy']
 
 if __name__ == '__main__':
     
-    setup(name='VPlants.Aml',
+    setup(name=name,
           version=version,
-          author='C. Godin, Y. Guedon, C.Pradal',
-          description='aml and amlPy libraries',
-          url='',
-          license='GPL',
+          author=authors,
+          description=description,
+          url=url,
+          license=license,
           
           # Define where to execute scons
           scons_scripts=['SConstruct'],
