@@ -5,9 +5,12 @@ from setuptools import setup
 from openalea.deploy.binary_deps import binary_deps
 #import os, sys
 from os.path import join as pj
+from openalea.deploy.metainfo import read_metainfo
+metadata = read_metainfo('metainfo.ini', verbose=True)
+for key,value in zip(metadata.keys(), metadata.values()):
+    exec("%s = '%s'" % (key, value))
+
  
-packagename = 'mtg'
-namespace = 'openalea'
 build_prefix = "build-scons"
 
 # Scons build directory
@@ -21,23 +24,23 @@ install_requires = [binary_deps('vplants.amlobj'),
 setup_requires = ['openalea.deploy'] 
 
 if __name__ == '__main__':
-    
-    setup(name='VPlants.Mtg',
-          version='0.7.0',
-          author='Christophe Godin',
-          description='mtg structure',
-          url='http://www-sop.inria.fr/virtualplants/',
-          license='GPL',
- 
+
+    setup(name=name,
+          version=version,
+          author=authors,
+          description=description,
+          url=url,
+          license=license,
+
           # Define where to execute scons
           scons_scripts=['SConstruct'],
           # Scons parameters  
           scons_parameters=scons_parameters,
-        
+
           # Packages
           #packages=
           #package_dir={'':'build/lib'},
-            
+
           # Add package platform libraries if any
           include_package_data=True,
           zip_safe = False,
