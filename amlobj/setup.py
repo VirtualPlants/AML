@@ -26,8 +26,8 @@ if __name__ == '__main__':
 
     setup(name=name,
           version=version,
-          authors=authors,
-          authors_email=authors_email,
+          author=authors,
+          author_email=authors_email,
           description='aml objects',
           url='http://www-sop.inria.fr/virtualplants/',
           license='GPL',
