@@ -11,7 +11,7 @@ AMLObj User Guide
 :Date: |today|
 
 This manual details functions, modules, and objects included in 
-VPlants.Stat_tool, describing what they are and what they do. For learning
+VPlants.AmlObj, describing what they are and what they do. For learning
 how to use VPlants.Amlobj see :ref:`amlobj_reference`.
 
 .. warning::
