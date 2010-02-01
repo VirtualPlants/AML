@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -1677,7 +1677,7 @@ AMObj STAT_Merge(const AMObjVector &args)
 
     pmarkovian_seq = new const Markovian_sequences*[nb_sample];
     for (i = 0;i < nb_sample;i++) {
-      pmarkovian_seq[i] = 0;
+      pmarkovian_seq[i] = NULL;
     }
 
     for (i = 0;i < nb_sample;i++) {
@@ -2173,7 +2173,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
     }
 
     else if (*pstr == "Limit") {
-      int nb_class = I_DEFAULT , *limit = 0;
+      int nb_class = I_DEFAULT , *limit = NULL;
 
 
       CHECKCONDVA(args.length() == nb_required ,
@@ -2227,8 +2227,8 @@ AMObj STAT_Cluster(const AMObjVector &args)
     RWCString *pstr;
     bool status = true;
     int nb_required , nb_variable , variable , offset , mode = FLOOR ,
-        nb_class = I_DEFAULT , *int_limit = 0;
-    double *real_limit = 0;
+        nb_class = I_DEFAULT , *int_limit = NULL;
+    double *real_limit = NULL;
     const Vectors *ivec;
     const Sequences *iseq;
     const Markovian_sequences *imarkovian_seq;
@@ -2671,7 +2671,7 @@ AMObj STAT_Transcode(const AMObjVector &args)
   if ((args[0].tag() == AMObjType::HISTOGRAM) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
     bool status = true;
-    int nb_symbol , *symbol = 0;
+    int nb_symbol , *symbol = NULL;
     const Histogram *ihisto;
     Distribution_data *histo;
     Format_error error;
@@ -2737,7 +2737,7 @@ AMObj STAT_Transcode(const AMObjVector &args)
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     bool status = true;
     int nb_required , nb_variable , variable = I_DEFAULT , offset ,
-        nb_symbol = I_DEFAULT , *symbol = 0;
+        nb_symbol = I_DEFAULT , *symbol = NULL;
     const Vectors *ivec;
     const Sequences *iseq;
     const Markovian_sequences *imarkovian_seq;
@@ -3594,7 +3594,7 @@ AMObj STAT_SelectIndividual(const AMObjVector &args)
 {
   RWCString *pstr;
   bool status = true , keep = true;
-  int nb_required , nb_pattern = I_DEFAULT , *identifier = 0;
+  int nb_required , nb_pattern = I_DEFAULT , *identifier = NULL;
   Format_error error;
 
 
@@ -3785,7 +3785,7 @@ AMObj STAT_SelectVariable(const AMObjVector &args)
 {
   RWCString *pstr;
   bool status = true , keep = true;
-  int nb_required , nb_variable = I_DEFAULT , *variable = 0;
+  int nb_required , nb_variable = I_DEFAULT , *variable = NULL;
   Format_error error;
 
 
@@ -4059,7 +4059,7 @@ AMObj STAT_MergeVariable(const AMObjVector &args)
 
     pmarkovian_seq = new const Markovian_sequences*[nb_required];
     for (i = 0;i < nb_required;i++) {
-      pmarkovian_seq[i] = 0;
+      pmarkovian_seq[i] = NULL;
     }
 
     for (i = 0;i < nb_required;i++) {
@@ -5111,7 +5111,7 @@ AMObj STAT_SegmentationExtract(const AMObjVector &args)
 {
   RWCString *pstr;
   bool status = true , keep = true;
-  int nb_required , nb_value = I_DEFAULT , *value = 0;
+  int nb_required , nb_value = I_DEFAULT , *value = NULL;
   const Sequences *iseq;
   Sequences *seq;
   Markovian_sequences *markovian_seq;
@@ -5358,7 +5358,7 @@ AMObj STAT_Difference(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = 0;
+  char *file_name = NULL;
   bool status = true , variable_option = false , first_element_option = false ,
        first_element = false , file_name_option = false;
   register int i;
@@ -5553,8 +5553,8 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
     break;
   }
 
-  filter = 0;
-  dist = 0;
+  filter = NULL;
+  dist = NULL;
 
   if (args[1].tag() == AMObjType::ARRAY) {
     Array* parray = (Array*)args[1].val.p;
@@ -5803,7 +5803,7 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char format = 'a' , *file_name = 0;
+  char format = 'a' , *file_name = NULL;
   bool status = true , standard_deviation_option = false , standard_deviation = false ,
        output_option = false , file_name_option = false , format_option = false;
   register int i;
