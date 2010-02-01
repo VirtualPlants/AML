@@ -1535,9 +1535,6 @@ AMObj STAT_model::save(const AMObjVector &args) const
       if (*format_pstr == "ASCII") {
         format = 'a';
       }
-/*      else if (*format_pstr == "Binary") {
-        format = 'b';
-      } */
       else if (*format_pstr == "SpreadSheet") {
         format = 's';
       }
@@ -1548,7 +1545,6 @@ AMObj STAT_model::save(const AMObjVector &args) const
         status = false;
         genAMLError(ERRORMSG(K_FILE_FORMAT_ERR_sds) , "Save" ,
                     format_index , "ASCII or SpreadSheet");
-//                    format_index , "ASCII or Binary or SpreadSheet");
       }
     }
 
@@ -1586,9 +1582,6 @@ AMObj STAT_model::save(const AMObjVector &args) const
     case 'a' :
       status = ((STAT_model*)args[0].val.p)->pt->ascii_write(error , ((AMString*)args[1].val.p)->data() , exhaustive);
       break;
-/*    case 'b' :
-      status = ((STAT_model*)args[0].val.p)->pt->binary_write(error , ((AMString*)args[1].val.p)->data());
-      break; */
     case 's' :
       status = ((STAT_model*)args[0].val.p)->pt->spreadsheet_write(error , ((AMString*)args[1].val.p)->data());
       break;
