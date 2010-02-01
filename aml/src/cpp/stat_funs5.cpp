@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -302,9 +302,9 @@ AMObj STAT_Simulate(const AMObjVector &args)
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV)) {
     bool status , counting_flag = true;
     int nb_required;
-    Variable_order_markov_data *variable_order_markov_seq = 0;
-    Semi_markov_data *semi_markov_seq = 0;
-    Nonhomogeneous_markov_data *nonhomogeneous_markov_seq = 0;
+    Variable_order_markov_data *variable_order_markov_seq = NULL;
+    Semi_markov_data *semi_markov_seq = NULL;
+    Nonhomogeneous_markov_data *nonhomogeneous_markov_seq = NULL;
 
 
     if ((args[1].tag() == AMObjType::HISTOGRAM) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
@@ -585,7 +585,7 @@ AMObj STAT_CompareHistograms(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = 0 , format = 'a';
+  char *file_name = NULL , format = 'a';
   bool status = true , file_name_option = false , format_option = false;
   register int i;
   int nb_required , type;
@@ -852,7 +852,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = 0 , format = 'a' , *alignment_file_name = 0 , alignment_format = 'a';
+  char *file_name = NULL , format = 'a' , *alignment_file_name = NULL , alignment_format = 'a';
   bool status = true , ref_sequence_option = false , test_sequence_option = false , begin_option = false ,
        begin_free = false , end_option = false , end_free = false , file_name_option = false ,
        format_option = false , alignment_file_name_option = false , alignment_format_option = false;
@@ -1830,7 +1830,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
 AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
 
 {
-  char *file_name = 0;
+  char *file_name = NULL;
   bool status = true;
   register int i;
   int nb_required , nb_model;
@@ -2150,12 +2150,12 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
 AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
 
 {
-  char *file_name = 0;
+  char *file_name = NULL;
   bool status = true;
   register int i;
   int nb_required , nb_model , step , nb_sequence , length;
-  Histogram **hlength = 0;
-  const Markovian_sequences **seq = 0;
+  Histogram **hlength = NULL;
+  const Markovian_sequences **seq = NULL;
   Distance_matrix *dist_matrix;
   Format_error error;
 
@@ -2619,7 +2619,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
       RWCString *pstr;
       bool prototypes_option = false , initialization_option = false , algorithm_option = false;
       register int i;
-      int nb_cluster , *prototype = 0 , initialization = 1 , algorithm = 1;
+      int nb_cluster , *prototype = NULL , initialization = 1 , algorithm = 1;
 
 
       CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
@@ -2734,7 +2734,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
 
       if (status) {
         clusters = ((Distance_matrix*)((STAT_model*)args[0].val.p)->pt)->
-	  partitioning(error , AMLOUTPUT ,  nb_cluster , prototype,  initialization , algorithm);
+        partitioning(error , AMLOUTPUT ,  nb_cluster , prototype,  initialization , algorithm);
       }
 
      delete [] prototype;
@@ -2747,7 +2747,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
 
     case AMObjType::ARRAY : {
       register int i , j;
-      int nb_cluster , *cluster_nb_pattern = 0 , **cluster_pattern = 0;
+      int nb_cluster , *cluster_nb_pattern = NULL , **cluster_pattern = NULL;
       const Array *parray , *pcluster;
 
 
@@ -2770,7 +2770,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
         cluster_nb_pattern = new int[nb_cluster];
         cluster_pattern = new int*[nb_cluster];
         for (i = 0;i < nb_cluster;i++) {
-          cluster_pattern[i] = 0;
+          cluster_pattern[i] = NULL;
         }
 
         ArrayIter* pnext = parray->iterator();
@@ -2867,7 +2867,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
   }
 
   else if (*pstr == "Hierarchy") {
-    char *file_name = 0 , format = 'a';
+    char *file_name = NULL , format = 'a';
     bool algorithm_option = false , criterion_option = false , file_name_option = false ,
          format_option = false;
     register int i;
@@ -3305,7 +3305,7 @@ AMObj STAT_ComputeRankCorrelation(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = 0;
+  char *file_name = NULL;
   bool status = true , type_option = false , file_name_option = false;
   register int i;
   int nb_required , type = SPEARMAN;
@@ -3436,7 +3436,7 @@ AMObj STAT_ContingencyTable(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = 0 , format = 'a';
+  char *file_name = NULL , format = 'a';
   bool status = true , file_name_option = false , format_option = false;
   register int i;
   int nb_required;
@@ -3583,7 +3583,7 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = 0 , format = 'a';
+  char *file_name = NULL , format = 'a';
   bool status = true , file_name_option = false , format_option = false;
   register int i;
   int nb_required , type;
@@ -3812,8 +3812,8 @@ AMObj STAT_Regression(const AMObjVector &args)
 
     // arguments obligatoires
 
-    filter = 0;
-    dist = 0;
+    filter = NULL;
+    dist = NULL;
 
     if (args[4].tag() == AMObjType::ARRAY) {
       Array* parray = (Array*)args[4].val.p;
@@ -4344,8 +4344,8 @@ AMObj STAT_ComputeWhiteNoiseCorrelation(const AMObjVector &args)
                 args[0].tag.string().data() , "CORRELATION");
   }
 
-  filter = 0;
-  dist = 0;
+  filter = NULL;
+  dist = NULL;
 
   if (args[1].tag() == AMObjType::ARRAY) {
     Array* parray = (Array*)args[1].val.p;
@@ -5289,7 +5289,7 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = 0 , format = 'a';
+  char *file_name = NULL , format = 'a';
   bool status = true , begin_option = false , begin = false , estimator_option = false ,
        file_name_option = false , format_option = false;
   register int i;
@@ -5706,7 +5706,7 @@ AMObj STAT_LumpabilityTest(const AMObjVector &args)
 
 {
   bool status = true;
-  int nb_required , order = 1 , nb_symbol , *symbol = 0;
+  int nb_required , order = 1 , nb_symbol , *symbol = NULL;
   const Markovian_sequences *seq;
   Format_error error;
 
