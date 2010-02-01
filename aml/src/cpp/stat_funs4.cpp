@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -275,7 +275,7 @@ static AMObj STAT_EstimateMixture(const Histogram *histo , const AMObjVector &ar
 
   for (i = 0;i < nb_component;i++) {
     estimate[i] = false;
-    pcomponent[i] = 0;
+    pcomponent[i] = NULL;
 
     switch (args[2 + i].tag()) {
 
@@ -583,7 +583,7 @@ static AMObj STAT_EstimateConvolution(const Histogram *histo , const AMObjVector
   int nb_required , estimator = LIKELIHOOD , min_inf_bound = 0 , nb_iter = I_DEFAULT ,
       penalty = SECOND_DIFFERENCE , outside = ZERO;
   double weight = D_DEFAULT;
-  const Parametric* known_dist = 0 , *unknown_dist = 0;
+  const Parametric *known_dist = NULL , *unknown_dist = NULL;
   Convolution *convol;
   Format_error error;
 
@@ -940,7 +940,7 @@ static AMObj STAT_EstimateCompound(const Histogram *histo , const AMObjVector &a
   int nb_required , estimator = LIKELIHOOD , min_inf_bound = 0 , nb_iter = I_DEFAULT ,
       penalty = SECOND_DIFFERENCE , outside = ZERO;
   double weight = D_DEFAULT;
-  const Parametric *known_dist = 0 , *unknown_dist = 0;
+  const Parametric *known_dist = NULL , *unknown_dist = NULL;
   Compound *cdist;
   Format_error error;
 
@@ -1325,10 +1325,10 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
   int nb_required , estimator = LIKELIHOOD , nb_iter = I_DEFAULT , mean_computation = COMPUTED ,
       penalty = SECOND_DIFFERENCE , outside = ZERO;
   double weight = D_DEFAULT;
-  const Parametric *iinter_event = 0;
-  Parametric_model *inter_event = 0;
-  Renewal *renew = 0;
-  const Histogram *histo = 0;
+  const Parametric *iinter_event = NULL;
+  Parametric_model *inter_event = NULL;
+  Renewal *renew = NULL;
+  const Histogram *histo = NULL;
   Format_error error;
 
 
@@ -1748,7 +1748,7 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
   int nb_required , estimator = LIKELIHOOD , nb_iter = I_DEFAULT , equilibrium_estimator = COMPLETE_LIKELIHOOD ,
       mean_computation = COMPUTED , penalty = SECOND_DIFFERENCE , outside = ZERO;
   double weight = D_DEFAULT;
-  const Parametric *inter_event = 0;
+  const Parametric *inter_event = NULL;
   Renewal *renew;
   const Time_events *timev;
   Format_error error;
@@ -2652,7 +2652,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const Markovian_sequences *seq , c
   case AMObjType::ARRAY : {
     register int j;
     bool order_option = false , penalty_option = false;
-    int nb_symbol = seq->get_marginal(0)->nb_value , order = 1 , penalty = BIC , *symbol = 0;
+    int nb_symbol = seq->get_marginal(0)->nb_value , order = 1 , penalty = BIC , *symbol = NULL;
 
 
     CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
@@ -3045,7 +3045,7 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const Markovian_sequences *s
   int nb_required , algorithm = FORWARD_BACKWARD , nb_iter = I_DEFAULT ,
       min_nb_state_sequence = MIN_NB_STATE_SEQUENCE , max_nb_state_sequence = MAX_NB_STATE_SEQUENCE;
   double parameter = NB_STATE_SEQUENCE_PARAMETER;
-  Hidden_variable_order_markov *ihmarkov = 0 , *hmarkov;
+  Hidden_variable_order_markov *ihmarkov = NULL , *hmarkov;
   Format_error error;
 
 
@@ -3824,7 +3824,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
   }
 
   else if (args[2].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
-    Hidden_semi_markov *ihsmarkov = 0;
+    Hidden_semi_markov *ihsmarkov = NULL;
 
 
     nb_required = 3;
