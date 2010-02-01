@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -1143,7 +1143,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 AMObj STAT_model::save(const AMObjVector &args) const
 
 {
-  RWCString *pstr , *format_pstr = 0;
+  RWCString *pstr , *format_pstr = NULL;
   char view_point = 'v' , format;
   bool status = true , view_point_option = false , detail_option = false ,
        format_option = false , segmentations_option = false , nb_segmentation_option = false ,
@@ -2102,7 +2102,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
 
 {
   RWCString *pstr;
-  char view_point = 'v' , *title = 0;
+  char view_point = 'v' , *title = NULL;
   bool status = true , data = false , survival = false , config = false , mode = false ,
        window_option = false , mode_option = false , view_point_option = false ,
        title_option = false , output_option = false;
@@ -2121,8 +2121,8 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               genAMLError(ERRORMSG(STAT_TYPE_VECTOR_DISTANCE_sds) , "Plot" , 1 ,
                           args[0].tag.string().data()));
 
-  pdist = 0;
-  phisto = 0;
+  pdist = NULL;
+  phisto = NULL;
 
   nb_required = nb_required_computation(args);
 
