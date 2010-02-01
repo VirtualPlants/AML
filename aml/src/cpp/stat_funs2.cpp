@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -363,7 +363,7 @@ AMObj STAT_Mixture(const AMObjVector &args)
         component[i] = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
         break;
       default :
-        component[i] = 0;
+        component[i] = NULL;
         status = false;
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Mixture" , i * 2 + 2 , args[i * 2 + 1].tag.string().data() ,
                     "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
@@ -448,7 +448,7 @@ AMObj STAT_Convolution(const AMObjVector &args)
         dist[i] = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[i].val.p)->pt)));
         break;
       default :
-        dist[i] = 0;
+        dist[i] = NULL;
         status = false;
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Convolution" , i + 1 , args[i].tag.string().data() ,
                     "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
@@ -532,7 +532,7 @@ AMObj STAT_Compound(const AMObjVector &args)
         dist[i] = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[i].val.p)->pt)));
         break;
       default :
-        dist[i] = 0;
+        dist[i] = NULL;
         status = false;
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Compound" , i + 1 , args[i].tag.string().data() ,
                     "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
@@ -678,7 +678,7 @@ int* buildIntArray(const AMObjVector &args , int arg_index , const char *functio
 {
   bool status = true;
   register int i;
-  int *element = 0;
+  int *element = NULL;
 
 
   Array* parray = (Array*)args[arg_index].val.p;
@@ -722,7 +722,7 @@ int* buildIntArray(const AMObjVector &args , int arg_index , const char *functio
 
       if (!status) {
         delete [] element;
-        element = 0;
+        element = NULL;
       }
     }
   }
@@ -743,7 +743,7 @@ double* buildRealArray(const AMObjVector &args , int arg_index , const char *fun
 {
   register int i;
   bool status = true;
-  double *element = 0;
+  double *element = NULL;
 
 
   Array* parray = (Array*)args[arg_index].val.p;
@@ -787,7 +787,7 @@ double* buildRealArray(const AMObjVector &args , int arg_index , const char *fun
 
   if (!status) {
     delete [] element;
-    element = 0;
+    element = NULL;
   }
 
   return element;
@@ -814,9 +814,9 @@ AMObj STAT_Vectors(const AMObjVector &args)
   if (args[0].tag() == AMObjType::ARRAY) {
     bool status = true;
     register int i , j;
-    int nb_required , nb_variable = 0 , dim , nb_vector , type , *identifier = 0 ,
-        **int_vector = 0;
-    double **real_vector = 0;
+    int nb_required , nb_variable = 0 , dim , nb_vector , type , *identifier = NULL ,
+        **int_vector = NULL;
+    double **real_vector = NULL;
     const Array* parray = (Array*)args[0].val.p , *pvector;
     Format_error error;
 
@@ -1204,7 +1204,7 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
 
   switch (scale) {
   case 1 :
-    weight = 0;
+    weight = NULL;
     break;
   case 2 :
     weight = new double[nb_variable];
@@ -1326,7 +1326,7 @@ AMObj STAT_Renewal(const AMObjVector &args)
   CHECKCONDVA(nb_required >= 1 ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Renewal"));
 
-  inter_event = 0;
+  inter_event = NULL;
 
   // arguments obligatoires
 
@@ -1593,7 +1593,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
 
     seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
     nb_variable = seq->get_nb_variable();
-    offset = (nb_variable == 2 ? 1 : 2);
+    offset = (nb_variable == 1 ? 1 : 2);
 
     nb_required = nb_required_computation(args);
 
@@ -1606,8 +1606,8 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
 
     // arguments obligatoires
 
-    if (nb_variable == 2) {
-      variable = 2;
+    if (nb_variable == 1) {
+      variable = 1;
     }
 
     else {
@@ -2397,7 +2397,7 @@ static int** buildIntSequence(const Array *parray , int &length ,
 {
   bool status;
   register int i;
-  int **int_sequence = 0;
+  int **int_sequence = NULL;
 
 
   if (nb_variable == 0) {
@@ -2434,7 +2434,7 @@ static int** buildIntSequence(const Array *parray , int &length ,
     delete [] int_sequence[0];
     delete [] int_sequence;
 
-    int_sequence = 0;
+    int_sequence = NULL;
   }
 
   return int_sequence;
@@ -2453,7 +2453,7 @@ static double** buildRealSequence(const Array *parray , int &length ,
 {
   bool status;
   register int i;
-  double **real_sequence = 0;
+  double **real_sequence = NULL;
 
 
   if (nb_variable == 0) {
@@ -2490,7 +2490,7 @@ static double** buildRealSequence(const Array *parray , int &length ,
     delete [] real_sequence[0];
     delete [] real_sequence;
 
-    real_sequence = 0;
+    real_sequence = NULL;
   }
 
   return real_sequence;
@@ -2546,7 +2546,7 @@ static int** buildIntArraySequence(const Array *parray , int &length , int index
 {
   bool status = true;
   register int i , j;
-  int dim , **int_sequence = 0;
+  int dim , **int_sequence = NULL;
   const Array *pvector;
 
 
@@ -2653,7 +2653,7 @@ static int** buildIntArraySequence(const Array *parray , int &length , int index
     }
     delete [] int_sequence;
 
-    int_sequence = 0;
+    int_sequence = NULL;
   }
 
   return int_sequence;
@@ -2673,7 +2673,7 @@ static double** buildRealArraySequence(const Array *parray , int &length , int &
   bool status = true;
   register int i , j;
   int dim;
-  double **real_sequence = 0;
+  double **real_sequence = NULL;
   const Array *pvector;
 
 
@@ -2760,7 +2760,7 @@ static double** buildRealArraySequence(const Array *parray , int &length , int &
     }
     delete [] real_sequence;
 
-    real_sequence = 0;
+    real_sequence = NULL;
   }
 
   return real_sequence;
@@ -2789,7 +2789,7 @@ AMObj STAT_Sequences(const AMObjVector &args)
     RWCString *pstr;
     bool status = true , index_parameter_option = false , identifier_option = false;
     register int i , j;
-    int nb_required , nb_sequence , index_parameter_type = IMPLICIT_TYPE , *identifier = 0;
+    int nb_required , nb_sequence , index_parameter_type = IMPLICIT_TYPE , *identifier = NULL;
 
 
     nb_required = 1;
@@ -2919,12 +2919,12 @@ AMObj STAT_Sequences(const AMObjVector &args)
 
       int_sequence = new int**[nb_sequence];
       for (i = 0;i < nb_sequence;i++) {
-        int_sequence[i] = 0;
+        int_sequence[i] = NULL;
       }
 
       real_sequence = new double**[nb_sequence];
       for (i = 0;i < nb_sequence;i++) {
-        real_sequence[i] = 0;
+        real_sequence[i] = NULL;
       }
 
       ArrayIter* pnext = parray->iterator();
@@ -3343,7 +3343,7 @@ AMObj STAT_Tops(const AMObjVector &args)
     bool status = true;
     register int i , j;
     int nb_required , nb_sequence , nb_variable = 0 , *type , *length ,
-        *identifier = 0 , ***int_sequence;
+        *identifier = NULL , ***int_sequence;
     const Array *parray = (Array*)args[0].val.p , *seq_array;
     Sequences *seq;
     Tops *tops;
@@ -3366,7 +3366,7 @@ AMObj STAT_Tops(const AMObjVector &args)
     length = new int[nb_sequence];
     int_sequence = new int**[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      int_sequence[i] = 0;
+      int_sequence[i] = NULL;
     }
 
     ArrayIter* pnext = parray->iterator();
