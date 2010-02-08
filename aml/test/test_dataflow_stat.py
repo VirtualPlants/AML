@@ -1,16 +1,19 @@
 from openalea.core.alea import *
+# !!important!! import dataflowview, which defines the fields of each nodes
+from openalea.grapheditor import dataflowview
+
 
 pm = PackageManager()
 pm.init(verbose=False)
 
 def test_demo_corsican():
     """ Test changepoint demo corsican  """
-    res = run(('demo.changepoint','Corsican pine change point'),{},pm=pm)
+    res = run(('Demo.ChangePoint (gnuplot and aml)','Corsican pine change point'),{},pm=pm)
     assert res == []
 
 def test_demo_dycorinia():
     """ Test dataflow demo dycorinia """
-    res = run(('demo.changepoint','Dycorinia change point'),{},pm=pm)
+    res = run(('Demo.ChangePoint (gnuplot and aml)','Dycorinia change point'),{},pm=pm)
     assert res == []
 
 

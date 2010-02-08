@@ -664,10 +664,21 @@ static AMObj MTG_ClassScale(const AMObjVector& args) {
 
   if (args[0].tag == AMObjType::UNDEF) return AMObj(AMObjType::UNDEF);
 
-  CHECKCONDVA(args[0].tag() ==AMObjType::CHAR ,
+  CHECKCONDVA(args[0].tag() ==AMObjType::CHAR|| args[0].tag() ==AMObjType::STRING,
               genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss), "ClassScale", 1, args[0].tag.string().data(), "CHAR"));
 
-  VClass classid = active_mtg->classId(args[0].val.c);
+  char classname;
+  if (args[0].tag() ==AMObjType::CHAR)
+    classname = args[0].val.c;
+  else 
+    {
+    RWCString optionval(*(AMString*)args[0].val.p);
+    if (optionval.size() != 1)
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss), "ClassScale", 1, args[0].tag.string().data(), "CHAR");
+    else 
+      classname= optionval(0);
+    }
+  VClass classid = active_mtg->classId(classname);
 
   CHECKDEFINECOND(active_mtg->isValidClass(classid),
                   "Class undefined");

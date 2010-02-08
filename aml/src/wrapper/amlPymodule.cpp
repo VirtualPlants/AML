@@ -207,14 +207,14 @@ AMObject PytoAMObject(PyObject* argobj)
     {
       amlarg = AMObj(AMObjType::INTEGER, PyLong_AsLong(argobj));
     }
-  else if (Char_Check(argobj))
-    {
-      amlarg = AMObj(AMObjType::CHAR, PyStringasChar(argobj));
-    }
   else if (PyString_Check(argobj))
     {
       string s = PyString_AsString(argobj);
       amlarg =  AMObj(AMObjType::STRING, new AMString(s.c_str()));
+    }
+  else if (Char_Check(argobj))
+    {
+      amlarg = AMObj(AMObjType::CHAR, PyStringasChar(argobj));
     }
   else if (PyTuple_Check(argobj))
     {
