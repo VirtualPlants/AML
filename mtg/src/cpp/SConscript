@@ -24,7 +24,8 @@ pgllibs = ['pglalgo', 'pglgui', 'pglsg', 'pgltool', 'pglmath']
 
 # Select files
 
-BUILD_BISON = (lib_env['compiler'] == 'gcc')
+#BUILD_BISON = (lib_env['compiler'] == 'gcc')
+BUILD_BISON = True #let's force it on all platforms
 
 includes= lib_env.ALEAGlob('*.h')
 sources = lib_env.ALEAGlob('*.cpp')
