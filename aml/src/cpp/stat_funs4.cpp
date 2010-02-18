@@ -108,17 +108,18 @@ enum {
  *
  *--------------------------------------------------------------*/
 
-static AMObj STAT_EstimateDistribution(const Histogram *histo , int ident , const AMObjVector &args)
+static AMObj STAT_EstimateDistribution(const FrequencyDistribution *histo ,
+                                       int ident , const AMObjVector &args)
 
 {
   if (ident == NONPARAMETRIC) {
-    Parametric_model *dist;
+    DiscreteParametricModel *dist;
 
 
     CHECKCONDVA(args.length() == 2 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Estimate" , 2));
 
-    dist = new Parametric_model(*histo);
+    dist = new DiscreteParametricModel(*histo);
 
     STAT_model* model = new STAT_model(dist);
     return AMObj(AMObjType::DISTRIBUTION , model);
@@ -129,8 +130,8 @@ static AMObj STAT_EstimateDistribution(const Histogram *histo , int ident , cons
     bool status = true , min_inf_bound_option = false , inf_bound_status_option = false , flag = true;
     register int i;
     int nb_required , min_inf_bound = 0;
-    Parametric_model *dist;
-    Format_error error;
+    DiscreteParametricModel *dist;
+    StatError error;
 
 
     nb_required = 2;
@@ -245,7 +246,7 @@ static AMObj STAT_EstimateDistribution(const Histogram *histo , int ident , cons
  *
  *--------------------------------------------------------------*/
 
-static AMObj STAT_EstimateMixture(const Histogram *histo , const AMObjVector &args)
+static AMObj STAT_EstimateMixture(const FrequencyDistribution *histo , const AMObjVector &args)
 
 {
   RWCString *pstr;
@@ -255,16 +256,16 @@ static AMObj STAT_EstimateMixture(const Histogram *histo , const AMObjVector &ar
        estimate[MIXTURE_NB_COMPONENT];
   register int i , j;
   int nb_component , nb_required , min_inf_bound = 0 , penalty = BICc , ident[MIXTURE_NB_COMPONENT];
-  const Parametric *pcomponent[MIXTURE_NB_COMPONENT];
+  const DiscreteParametric *pcomponent[MIXTURE_NB_COMPONENT];
   Mixture *imixt , *mixt;
-  Format_error error;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
   nb_component = nb_required - 2;
 
   CHECKCONDVA((nb_component >= 2) && (nb_component <= MIXTURE_NB_COMPONENT) ,
-              genAMLError(ERRORMSG(NB_DIST_sd) , "Estimate" , MIXTURE_NB_COMPONENT));
+              genAMLError(ERRORMSG(NB_COMPONENT_sd) , "Estimate" , MIXTURE_NB_COMPONENT));
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
               (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
@@ -285,7 +286,7 @@ static AMObj STAT_EstimateMixture(const Histogram *histo , const AMObjVector &ar
         if ((*pstr == STAT_distribution_word[j]) || (*pstr == STAT_distribution_letter[j])) {
           estimate[i] = true;
           ident[i] = j;
-          pcomponent[i] = new Parametric(0 , j);
+          pcomponent[i] = new DiscreteParametric(0 , j);
           break;
         }
       }
@@ -299,22 +300,22 @@ static AMObj STAT_EstimateMixture(const Histogram *histo , const AMObjVector &ar
     }
 
     case AMObjType::DISTRIBUTION : {
-      pcomponent[i] = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[2 + i].val.p)->pt)));
+      pcomponent[i] = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[2 + i].val.p)->pt)));
       break;
     }
 
     case AMObjType::MIXTURE : {
-      pcomponent[i] = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[2 + i].val.p)->pt)));
+      pcomponent[i] = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[2 + i].val.p)->pt)));
       break;
     }
 
     case AMObjType::CONVOLUTION : {
-      pcomponent[i] = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[2 + i].val.p)->pt)));
+      pcomponent[i] = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[2 + i].val.p)->pt)));
       break;
     }
 
     case AMObjType::COMPOUND : {
-      pcomponent[i] = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[2 + i].val.p)->pt)));
+      pcomponent[i] = new DiscreteParametric(*((Distribution*)((Compound*)((STAT_model*)args[2 + i].val.p)->pt)));
       break;
     }
 
@@ -572,7 +573,7 @@ static AMObj STAT_EstimateMixture(const Histogram *histo , const AMObjVector &ar
  *
  *--------------------------------------------------------------*/
 
-static AMObj STAT_EstimateConvolution(const Histogram *histo , const AMObjVector &args)
+static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const AMObjVector &args)
 
 {
   RWCString *pstr;
@@ -583,9 +584,9 @@ static AMObj STAT_EstimateConvolution(const Histogram *histo , const AMObjVector
   int nb_required , estimator = LIKELIHOOD , min_inf_bound = 0 , nb_iter = I_DEFAULT ,
       penalty = SECOND_DIFFERENCE , outside = ZERO;
   double weight = D_DEFAULT;
-  const Parametric *known_dist = NULL , *unknown_dist = NULL;
+  const DiscreteParametric *known_dist = NULL , *unknown_dist = NULL;
   Convolution *convol;
-  Format_error error;
+  StatError error;
 
 
   nb_required = 3;
@@ -600,16 +601,16 @@ static AMObj STAT_EstimateConvolution(const Histogram *histo , const AMObjVector
 
   switch (args[2].tag()) {
   case AMObjType::DISTRIBUTION :
-    known_dist = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[2].val.p)->pt)));
+    known_dist = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[2].val.p)->pt)));
     break;
   case AMObjType::MIXTURE :
-    known_dist = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[2].val.p)->pt)));
+    known_dist = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[2].val.p)->pt)));
     break;
   case AMObjType::CONVOLUTION :
-    known_dist = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[2].val.p)->pt)));
+    known_dist = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[2].val.p)->pt)));
     break;
   case AMObjType::COMPOUND :
-    known_dist = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[2].val.p)->pt)));
+    known_dist = new DiscreteParametric(*((Distribution*)((Compound*)((STAT_model*)args[2].val.p)->pt)));
     break;
   default :
     status = false;
@@ -677,16 +678,16 @@ static AMObj STAT_EstimateConvolution(const Histogram *histo , const AMObjVector
 
           switch (args[nb_required + i * 2 + 1].tag()) {
           case AMObjType::DISTRIBUTION :
-            unknown_dist = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            unknown_dist = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::MIXTURE :
-            unknown_dist = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            unknown_dist = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::CONVOLUTION :
-            unknown_dist = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            unknown_dist = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::COMPOUND :
-            unknown_dist = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            unknown_dist = new DiscreteParametric(*((Distribution*)((Compound*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           default :
             status = false;
@@ -928,7 +929,7 @@ static AMObj STAT_EstimateConvolution(const Histogram *histo , const AMObjVector
  *
  *--------------------------------------------------------------*/
 
-static AMObj STAT_EstimateCompound(const Histogram *histo , const AMObjVector &args)
+static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AMObjVector &args)
 
 {
   RWCString *pstr;
@@ -940,9 +941,9 @@ static AMObj STAT_EstimateCompound(const Histogram *histo , const AMObjVector &a
   int nb_required , estimator = LIKELIHOOD , min_inf_bound = 0 , nb_iter = I_DEFAULT ,
       penalty = SECOND_DIFFERENCE , outside = ZERO;
   double weight = D_DEFAULT;
-  const Parametric *known_dist = NULL , *unknown_dist = NULL;
+  const DiscreteParametric *known_dist = NULL , *unknown_dist = NULL;
   Compound *cdist;
-  Format_error error;
+  StatError error;
 
 
   nb_required = 4;
@@ -957,16 +958,16 @@ static AMObj STAT_EstimateCompound(const Histogram *histo , const AMObjVector &a
 
   switch (args[2].tag()) {
   case AMObjType::DISTRIBUTION :
-    known_dist = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[2].val.p)->pt)));
+    known_dist = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[2].val.p)->pt)));
     break;
   case AMObjType::MIXTURE :
-    known_dist = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[2].val.p)->pt)));
+    known_dist = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[2].val.p)->pt)));
     break;
   case AMObjType::CONVOLUTION :
-    known_dist = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[2].val.p)->pt)));
+    known_dist = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[2].val.p)->pt)));
     break;
   case AMObjType::COMPOUND :
-    known_dist = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[2].val.p)->pt)));
+    known_dist = new DiscreteParametric(*((Distribution*)((Compound*)((STAT_model*)args[2].val.p)->pt)));
     break;
   default :
     status = false;
@@ -1053,16 +1054,16 @@ static AMObj STAT_EstimateCompound(const Histogram *histo , const AMObjVector &a
 
           switch (args[nb_required + i * 2 + 1].tag()) {
           case AMObjType::DISTRIBUTION :
-            unknown_dist = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            unknown_dist = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::MIXTURE :
-            unknown_dist = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            unknown_dist = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::CONVOLUTION :
-            unknown_dist = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            unknown_dist = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::COMPOUND :
-            unknown_dist = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            unknown_dist = new DiscreteParametric(*((Distribution*)((Compound*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           default :
             status = false;
@@ -1325,11 +1326,11 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
   int nb_required , estimator = LIKELIHOOD , nb_iter = I_DEFAULT , mean_computation = COMPUTED ,
       penalty = SECOND_DIFFERENCE , outside = ZERO;
   double weight = D_DEFAULT;
-  const Parametric *iinter_event = NULL;
-  Parametric_model *inter_event = NULL;
+  const DiscreteParametric *iinter_event = NULL;
+  DiscreteParametricModel *inter_event = NULL;
   Renewal *renew = NULL;
-  const Histogram *histo = NULL;
-  Format_error error;
+  const FrequencyDistribution *histo = NULL;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
@@ -1338,18 +1339,18 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
 
   switch (args[0].tag()) {
 
-  case AMObjType::HISTOGRAM : {
+  case AMObjType::FREQUENCY_DISTRIBUTION : {
     CHECKCONDVA((nb_required == 3) || (nb_required == 4) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
     if (nb_required == 4) {
-      if (args[3].tag() != AMObjType::HISTOGRAM) {
+      if (args[3].tag() != AMObjType::FREQUENCY_DISTRIBUTION) {
         status = false;
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 4 ,
-                    args[3].tag.string().data() , "HISTOGRAM");
+                    args[3].tag.string().data() , "FREQUENCY_DISTRIBUTION");
       }
       else {
-        histo = (Histogram*)((Distribution_data*)((STAT_model*)args[3].val.p)->pt);
+        histo = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[3].val.p)->pt);
       }
     }
     break;
@@ -1364,7 +1365,7 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
   default : {
     status = false;
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 1 ,
-                args[0].tag.string().data() , "HISTOGRAM or RENEWAL_DATA");
+                args[0].tag.string().data() , "FREQUENCY_DISTRIBUTION or RENEWAL_DATA");
     break;
   }
   }
@@ -1431,16 +1432,16 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
 
           switch (args[nb_required + i * 2 + 1].tag()) {
           case AMObjType::DISTRIBUTION :
-            iinter_event = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            iinter_event = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::MIXTURE :
-            iinter_event = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            iinter_event = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::CONVOLUTION :
-            iinter_event = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            iinter_event = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::COMPOUND :
-            iinter_event = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            iinter_event = new DiscreteParametric(*((Distribution*)((Compound*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           default :
             status = false;
@@ -1669,37 +1670,37 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
   if (status) {
     switch (args[0].tag()) {
 
-    case AMObjType::HISTOGRAM : {
+    case AMObjType::FREQUENCY_DISTRIBUTION : {
       if (iinter_event) {
-        inter_event = ((Histogram*)((Distribution_data*)((STAT_model*)args[0].val.p)->pt))->estimation(error , AMLOUTPUT ,
-                                                                                                       *((Histogram*)((Distribution_data*)((STAT_model*)args[1].val.p)->pt)) ,
-                                                                                                       *((Histogram*)((Distribution_data*)((STAT_model*)args[2].val.p)->pt)) ,
-                                                                                                       histo , *iinter_event , estimator ,
-                                                                                                       nb_iter , mean_computation ,
-                                                                                                       weight , penalty , outside);
+        inter_event = ((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt))->estimation(error , AMLOUTPUT ,
+                                                                                                              *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[1].val.p)->pt)) ,
+                                                                                                              *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[2].val.p)->pt)) ,
+                                                                                                              histo , *iinter_event , estimator ,
+                                                                                                              nb_iter , mean_computation ,
+                                                                                                              weight , penalty , outside);
       }
       else {
-        inter_event = ((Histogram*)((Distribution_data*)((STAT_model*)args[0].val.p)->pt))->estimation(error , AMLOUTPUT ,
-                                                                                                       *((Histogram*)((Distribution_data*)((STAT_model*)args[1].val.p)->pt)) ,
-                                                                                                       *((Histogram*)((Distribution_data*)((STAT_model*)args[2].val.p)->pt)) ,
-                                                                                                       histo , estimator ,
-                                                                                                       nb_iter , mean_computation ,
-                                                                                                       weight , penalty , outside);
+        inter_event = ((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt))->estimation(error , AMLOUTPUT ,
+                                                                                                              *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[1].val.p)->pt)) ,
+                                                                                                              *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[2].val.p)->pt)) ,
+                                                                                                              histo , estimator ,
+                                                                                                              nb_iter , mean_computation ,
+                                                                                                              weight , penalty , outside);
       }
       break;
     }
 
     case AMObjType::RENEWAL_DATA : {
       if (iinter_event) {
-        renew = ((Renewal_data*)((STAT_model*)args[0].val.p)->pt)->estimation(error , AMLOUTPUT ,
-                                                                              *iinter_event , estimator ,
-                                                                              nb_iter , mean_computation ,
-                                                                              weight , penalty , outside);
+        renew = ((RenewalData*)((STAT_model*)args[0].val.p)->pt)->estimation(error , AMLOUTPUT ,
+                                                                             *iinter_event , estimator ,
+                                                                             nb_iter , mean_computation ,
+                                                                             weight , penalty , outside);
       }
       else {
-        renew = ((Renewal_data*)((STAT_model*)args[0].val.p)->pt)->estimation(error , AMLOUTPUT , estimator ,
-                                                                              nb_iter , mean_computation ,
-                                                                              weight , penalty , outside);
+        renew = ((RenewalData*)((STAT_model*)args[0].val.p)->pt)->estimation(error , AMLOUTPUT , estimator ,
+                                                                             nb_iter , mean_computation ,
+                                                                             weight , penalty , outside);
       }
       break;
     }
@@ -1748,10 +1749,10 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
   int nb_required , estimator = LIKELIHOOD , nb_iter = I_DEFAULT , equilibrium_estimator = COMPLETE_LIKELIHOOD ,
       mean_computation = COMPUTED , penalty = SECOND_DIFFERENCE , outside = ZERO;
   double weight = D_DEFAULT;
-  const Parametric *inter_event = NULL;
+  const DiscreteParametric *inter_event = NULL;
   Renewal *renew;
-  const Time_events *timev;
-  Format_error error;
+  const TimeEvents *timev;
+  StatError error;
 
 
   nb_required = 2;
@@ -1767,10 +1768,10 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
 
   switch (args[0].tag()) {
   case AMObjType::TIME_EVENTS :
-    timev = (Time_events*)((STAT_model*)args[0].val.p)->pt;
+    timev = (TimeEvents*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::RENEWAL_DATA :
-    timev = (Renewal_data*)((STAT_model*)args[0].val.p)->pt;
+    timev = (RenewalData*)((STAT_model*)args[0].val.p)->pt;
     break;
   }
 
@@ -1878,16 +1879,16 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
 
           switch (args[nb_required + i * 2 + 1].tag()) {
           case AMObjType::DISTRIBUTION :
-            inter_event = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            inter_event = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::MIXTURE :
-            inter_event = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            inter_event = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::CONVOLUTION :
-            inter_event = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            inter_event = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::COMPOUND :
-            inter_event = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+            inter_event = new DiscreteParametric(*((Distribution*)((Compound*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           default :
             status = false;
@@ -2173,7 +2174,7 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
  *
  *--------------------------------------------------------------*/
 
-static AMObj STAT_EstimateVariableOrderMarkov(const Markovian_sequences *seq , const AMObjVector &args)
+static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , const AMObjVector &args)
 
 {
   RWCString *pstr;
@@ -2181,8 +2182,8 @@ static AMObj STAT_EstimateVariableOrderMarkov(const Markovian_sequences *seq , c
        global_initial_transition_option = false , global_initial_transition = true;
   register int i;
   int nb_required;
-  Variable_order_markov *markov;
-  Format_error error;
+  VariableOrderMarkov *markov;
+  StatError error;
 
 
   nb_required = 3;
@@ -2556,14 +2557,14 @@ static AMObj STAT_EstimateVariableOrderMarkov(const Markovian_sequences *seq , c
   }
 
   case AMObjType::VARIABLE_ORDER_MARKOV : {
-    Variable_order_markov *imarkov;
+    VariableOrderMarkov *imarkov;
 
 
     CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
                 (args.length() == nb_required + 4) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
-    imarkov = (Variable_order_markov*)((STAT_model*)args[2].val.p)->pt;
+    imarkov = (VariableOrderMarkov*)((STAT_model*)args[2].val.p)->pt;
 
     // arguments optionnels
 
@@ -2808,7 +2809,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const Markovian_sequences *seq , c
  *
  *--------------------------------------------------------------*/
 
-static AMObj STAT_EstimateSemiMarkov(const Markovian_sequences *seq , const AMObjVector &args)
+static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObjVector &args)
 
 {
   RWCString *pstr;
@@ -2817,8 +2818,8 @@ static AMObj STAT_EstimateSemiMarkov(const Markovian_sequences *seq , const AMOb
        nb_iteration_option = false , occupancy_mean_option = false;
   register int i;
   int nb_required , estimator = COMPLETE_LIKELIHOOD , nb_iter = I_DEFAULT , mean_computation = COMPUTED;
-  Semi_markov *smarkov;
-  Format_error error;
+  SemiMarkov *smarkov;
+  StatError error;
 
 
   nb_required = 3;
@@ -3032,7 +3033,7 @@ static AMObj STAT_EstimateSemiMarkov(const Markovian_sequences *seq , const AMOb
  *
  *--------------------------------------------------------------*/
 
-static AMObj STAT_EstimateHiddenVariableOrderMarkov(const Markovian_sequences *seq ,
+static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *seq ,
                                                     const AMObjVector &args)
 
 {
@@ -3045,8 +3046,8 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const Markovian_sequences *s
   int nb_required , algorithm = FORWARD_BACKWARD , nb_iter = I_DEFAULT ,
       min_nb_state_sequence = MIN_NB_STATE_SEQUENCE , max_nb_state_sequence = MAX_NB_STATE_SEQUENCE;
   double parameter = NB_STATE_SEQUENCE_PARAMETER;
-  Hidden_variable_order_markov *ihmarkov = NULL , *hmarkov;
-  Format_error error;
+  HiddenVariableOrderMarkov *ihmarkov = NULL , *hmarkov;
+  StatError error;
 
 
   nb_required = 3;
@@ -3066,7 +3067,7 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const Markovian_sequences *s
                 args[2].tag.string().data() , "HIDDEN_VARIABLE_ORDER_MARKOV");
   }
   else {
-    ihmarkov = (Hidden_variable_order_markov*)((STAT_model*)args[2].val.p)->pt;
+    ihmarkov = (HiddenVariableOrderMarkov*)((STAT_model*)args[2].val.p)->pt;
   }
 
   // arguments optionnels
@@ -3359,7 +3360,7 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const Markovian_sequences *s
  *
  *--------------------------------------------------------------*/
 
-static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , const AMObjVector &args)
+static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const AMObjVector &args)
 
 {
   RWCString *pstr;
@@ -3372,8 +3373,8 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
       min_nb_state_sequence = MIN_NB_STATE_SEQUENCE , max_nb_state_sequence = MAX_NB_STATE_SEQUENCE ,
       mean_computation = COMPUTED;
   double parameter = NB_STATE_SEQUENCE_PARAMETER;
-  Hidden_semi_markov *hsmarkov;
-  Format_error error;
+  HiddenSemiMarkov *hsmarkov;
+  StatError error;
 
 
   CHECKCONDVA(args.length() >= 3 ,
@@ -3824,7 +3825,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
   }
 
   else if (args[2].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
-    Hidden_semi_markov *ihsmarkov = NULL;
+    HiddenSemiMarkov *ihsmarkov = NULL;
 
 
     nb_required = 3;
@@ -3836,7 +3837,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
                 (args.length() == nb_required + 16) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
-    ihsmarkov = (Hidden_semi_markov*)((STAT_model*)args[2].val.p)->pt;
+    ihsmarkov = (HiddenSemiMarkov*)((STAT_model*)args[2].val.p)->pt;
 
     // arguments optionnels
 
@@ -4188,15 +4189,15 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const Markovian_sequences *seq , cons
  *
  *--------------------------------------------------------------*/
 
-static AMObj STAT_EstimateNonhomogeneousMarkov(const Markovian_sequences *seq , const AMObjVector &args)
+static AMObj STAT_EstimateNonhomogeneousMarkov(const MarkovianSequences *seq , const AMObjVector &args)
 
 {
   bool status = true , counting_flag = true;
   register int i , j;
   int nb_required , nb_state = seq->get_marginal(0)->nb_value , *ident;
-  Nonhomogeneous_markov *markov;
+  NonhomogeneousMarkov *markov;
   RWCString *pstr;
-  Format_error error;
+  StatError error;
 
 
   nb_required = 2 + nb_state;
@@ -4298,8 +4299,8 @@ static AMObj STAT_EstimateTopParameters(const AMObjVector &args)
   register int i;
   int nb_required , min_position = 1 , max_position = ((Tops*)((STAT_model*)args[0].val.p)->pt)->get_max_position() ,
       neighborhood = 1;
-  Top_parameters *param;
-  Format_error error;
+  TopParameters *param;
+  StatError error;
 
 
   nb_required = 1;
@@ -4463,9 +4464,9 @@ AMObj STAT_Estimate(const AMObjVector &args)
   // estimation processus de renouvellement
 
   if ((args[0].tag() == AMObjType::TIME_EVENTS) || (args[0].tag() == AMObjType::RENEWAL_DATA) ||
-      ((args.length() >= 3) && (args[0].tag() == AMObjType::HISTOGRAM) &&
-       (args[1].tag() == AMObjType::HISTOGRAM) && (args[2].tag() == AMObjType::HISTOGRAM))) {
-    if ((args.length() >= 2) && (args[0].tag() != AMObjType::HISTOGRAM) && (args[1].tag() == AMObjType::STRING)) {
+      ((args.length() >= 3) && (args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) &&
+       (args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) && (args[2].tag() == AMObjType::FREQUENCY_DISTRIBUTION))) {
+    if ((args.length() >= 2) && (args[0].tag() != AMObjType::FREQUENCY_DISTRIBUTION) && (args[1].tag() == AMObjType::STRING)) {
       return STAT_EstimateRenewalCountData(args);
     }
 
@@ -4474,29 +4475,29 @@ AMObj STAT_Estimate(const AMObjVector &args)
 
   // estimation loi/combinaisons de lois
 
-  if ((args[0].tag() == AMObjType::HISTOGRAM) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+  if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
     RWCString *pstr;
     register int i;
     int model = I_DEFAULT , ident;
-    const Histogram *histo;
+    const FrequencyDistribution *histo;
 
 
     CHECKCONDVA(args.length() >= 2 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
     switch (args[0].tag()) {
-    case AMObjType::HISTOGRAM :
-      histo = (Histogram*)((Distribution_data*)((STAT_model*)args[0].val.p)->pt);
+    case AMObjType::FREQUENCY_DISTRIBUTION :
+      histo = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
       break;
     case AMObjType::MIXTURE_DATA :
-      histo = (Histogram*)((Mixture_data*)((STAT_model*)args[0].val.p)->pt);
+      histo = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[0].val.p)->pt);
       break;
     case AMObjType::CONVOLUTION_DATA :
-      histo = (Histogram*)((Convolution_data*)((STAT_model*)args[0].val.p)->pt);
+      histo = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
       break;
     case AMObjType::COMPOUND_DATA :
-      histo = (Histogram*)((Compound_data*)((STAT_model*)args[0].val.p)->pt);
+      histo = (FrequencyDistribution*)((CompoundData*)((STAT_model*)args[0].val.p)->pt);
       break;
     }
 
@@ -4551,7 +4552,7 @@ AMObj STAT_Estimate(const AMObjVector &args)
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     RWCString *pstr;
     int model = I_DEFAULT;
-    const Markovian_sequences *seq;
+    const MarkovianSequences *seq;
 
 
     CHECKCONDVA(args.length() >= 2 ,
@@ -4559,16 +4560,16 @@ AMObj STAT_Estimate(const AMObjVector &args)
 
     switch (args[0].tag()) {
     case AMObjType::MARKOVIAN_SEQUENCES :
-      seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+      seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
       break;
     case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-      seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+      seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
       break;
     case AMObjType::SEMI_MARKOV_DATA :
-      seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+      seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
       break;
     case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-      seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+      seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
       break;
     }
 
