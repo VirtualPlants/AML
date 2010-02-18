@@ -90,14 +90,14 @@ extern double* buildRealArray(const AMObjVector &args , int arg_index , const ch
 AMObj STAT_Simulate(const AMObjVector &args)
 
 {
-  Format_error error;
+  StatError error;
 
 
   CHECKCONDVA(args.length() >= 2 ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Simulate"));
 
   if (args[0].tag() == AMObjType::DISTRIBUTION) {
-    Distribution_data *histo;
+    DiscreteDistributionData *histo;
 
 
     CHECKCONDVA(args.length() == 2 ,
@@ -106,11 +106,11 @@ AMObj STAT_Simulate(const AMObjVector &args)
                 genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Simulate" , 2 ,
                             args[1].tag.string().data() , "INT"));
 
-    histo = ((Parametric_model*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i);
+    histo = ((DiscreteParametricModel*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i);
 
     if (histo) {
       STAT_model* model = new STAT_model(histo);
-      return AMObj(AMObjType::HISTOGRAM , model);
+      return AMObj(AMObjType::FREQUENCY_DISTRIBUTION , model);
     }
     else {
       AMLOUTPUT << "\n" << error;
@@ -120,7 +120,7 @@ AMObj STAT_Simulate(const AMObjVector &args)
   }
 
   if (args[0].tag() == AMObjType::MIXTURE) {
-    Mixture_data *mixt_histo;
+    MixtureData *mixt_histo;
 
 
     CHECKCONDVA(args.length() == 2 ,
@@ -143,7 +143,7 @@ AMObj STAT_Simulate(const AMObjVector &args)
   }
 
   if (args[0].tag() == AMObjType::CONVOLUTION) {
-    Convolution_data *convol_histo;
+    ConvolutionData *convol_histo;
 
 
     CHECKCONDVA(args.length() == 2 ,
@@ -166,7 +166,7 @@ AMObj STAT_Simulate(const AMObjVector &args)
   }
 
   if (args[0].tag() == AMObjType::COMPOUND) {
-    Compound_data *compound_histo;
+    CompoundData *compound_histo;
 
 
     CHECKCONDVA(args.length() == 2 ,
@@ -192,7 +192,7 @@ AMObj STAT_Simulate(const AMObjVector &args)
     RWCString *pstr;
     char type;
     bool status = true;
-    Renewal_data *timev;
+    RenewalData *timev;
 
 
     CHECKCONDVA(args.length() >= 3 ,
@@ -222,26 +222,26 @@ AMObj STAT_Simulate(const AMObjVector &args)
       return AMObj(AMObjType::ERROR);
     }
 
-    if ((args[2].tag() == AMObjType::HISTOGRAM) || (args[2].tag() == AMObjType::MIXTURE_DATA) ||
+    if ((args[2].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[2].tag() == AMObjType::MIXTURE_DATA) ||
         (args[2].tag() == AMObjType::CONVOLUTION_DATA) || (args[2].tag() == AMObjType::COMPOUND_DATA)) {
-      const Histogram *htime;
+      const FrequencyDistribution *htime;
 
 
       CHECKCONDVA(args.length() == 3 ,
                   genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Simulate" , 3));
 
       switch (args[2].tag()) {
-      case AMObjType::HISTOGRAM :
-        htime = (Histogram*)((Distribution_data*)((STAT_model*)args[2].val.p)->pt);
+      case AMObjType::FREQUENCY_DISTRIBUTION :
+        htime = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[2].val.p)->pt);
         break;
       case AMObjType::MIXTURE_DATA :
-        htime = (Histogram*)((Mixture_data*)((STAT_model*)args[2].val.p)->pt);
+        htime = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[2].val.p)->pt);
         break;
       case AMObjType::CONVOLUTION_DATA :
-        htime = (Histogram*)((Convolution_data*)((STAT_model*)args[2].val.p)->pt);
+        htime = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[2].val.p)->pt);
         break;
       case AMObjType::COMPOUND_DATA :
-        htime = (Histogram*)((Compound_data*)((STAT_model*)args[2].val.p)->pt);
+        htime = (FrequencyDistribution*)((CompoundData*)((STAT_model*)args[2].val.p)->pt);
         break;
       }
 
@@ -257,15 +257,15 @@ AMObj STAT_Simulate(const AMObjVector &args)
       }
 
       else if ((args[3].tag() == AMObjType::TIME_EVENTS) || (args[3].tag() == AMObjType::RENEWAL_DATA)) {
-        const Time_events *itimev;
+        const TimeEvents *itimev;
 
 
         switch (args[3].tag()) {
         case AMObjType::TIME_EVENTS :
-          itimev = (Time_events*)((STAT_model*)args[3].val.p)->pt;
+          itimev = (TimeEvents*)((STAT_model*)args[3].val.p)->pt;
           break;
         case AMObjType::RENEWAL_DATA :
-          itimev = (Renewal_data*)((STAT_model*)args[3].val.p)->pt;
+          itimev = (RenewalData*)((STAT_model*)args[3].val.p)->pt;
           break;
         }
 
@@ -281,7 +281,7 @@ AMObj STAT_Simulate(const AMObjVector &args)
 
     else {
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Simulate" , 3 , args[2].tag.string().data() ,
-                  "HISTOGRAM or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA or INT");
+                  "FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA or INT");
       return AMObj(AMObjType::ERROR);
     }
 
@@ -302,12 +302,12 @@ AMObj STAT_Simulate(const AMObjVector &args)
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV)) {
     bool status , counting_flag = true;
     int nb_required;
-    Variable_order_markov_data *variable_order_markov_seq = NULL;
-    Semi_markov_data *semi_markov_seq = NULL;
-    Nonhomogeneous_markov_data *nonhomogeneous_markov_seq = NULL;
+    VariableOrderMarkovData *variable_order_markov_seq = NULL;
+    SemiMarkovData *semi_markov_seq = NULL;
+    NonhomogeneousMarkovData *nonhomogeneous_markov_seq = NULL;
 
 
-    if ((args[1].tag() == AMObjType::HISTOGRAM) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
+    if ((args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
         (args[1].tag() == AMObjType::CONVOLUTION_DATA) || (args[1].tag() == AMObjType::COMPOUND_DATA)) {
       nb_required = 2;
     }
@@ -357,45 +357,46 @@ AMObj STAT_Simulate(const AMObjVector &args)
       }
     }
 
-    if ((args[1].tag() == AMObjType::HISTOGRAM) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
+    if ((args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
         (args[1].tag() == AMObjType::CONVOLUTION_DATA) || (args[1].tag() == AMObjType::COMPOUND_DATA)) {
-      const Histogram *hlength;
+      const FrequencyDistribution *hlength;
 
 
       switch (args[1].tag()) {
-      case AMObjType::HISTOGRAM :
-        hlength = (Histogram*)((Distribution_data*)((STAT_model*)args[1].val.p)->pt);
+      case AMObjType::FREQUENCY_DISTRIBUTION :
+        hlength = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[1].val.p)->pt);
         break;
       case AMObjType::MIXTURE_DATA :
-        hlength = (Histogram*)((Mixture_data*)((STAT_model*)args[1].val.p)->pt);
+        hlength = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[1].val.p)->pt);
         break;
       case AMObjType::CONVOLUTION_DATA :
-        hlength = (Histogram*)((Convolution_data*)((STAT_model*)args[1].val.p)->pt);
+        hlength = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[1].val.p)->pt);
         break;
       case AMObjType::COMPOUND_DATA :
-        hlength = (Histogram*)((Compound_data*)((STAT_model*)args[1].val.p)->pt);
+        hlength = (FrequencyDistribution*)((CompoundData*)((STAT_model*)args[1].val.p)->pt);
         break;
       }
 
       switch (args[0].tag()) {
       case AMObjType::VARIABLE_ORDER_MARKOV :
-        variable_order_markov_seq = ((Variable_order_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error ,
-                                                                                                           *hlength);
+        variable_order_markov_seq = ((VariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error ,
+                                                                                                         *hlength);
         break;
       case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV :
-        variable_order_markov_seq = ((Hidden_variable_order_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error ,
-                                                                                                                  *hlength);
+        variable_order_markov_seq = ((HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error ,
+                                                                                                               *hlength);
         break;
       case AMObjType::SEMI_MARKOV :
-        semi_markov_seq = ((Semi_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , *hlength ,
-                                                                                       counting_flag);
+        semi_markov_seq = ((SemiMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , *hlength ,
+                                                                                      counting_flag);
         break;
       case AMObjType::HIDDEN_SEMI_MARKOV :
-        semi_markov_seq = ((Hidden_semi_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , *hlength ,
-                                                                                              counting_flag);
+        semi_markov_seq = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , *hlength ,
+                                                                                            counting_flag);
         break;
       case AMObjType::NONHOMOGENEOUS_MARKOV :
-        nonhomogeneous_markov_seq = ((Nonhomogeneous_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , *hlength);
+        nonhomogeneous_markov_seq = ((NonhomogeneousMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error ,
+                                                                                                          *hlength);
         break;
       }
     }
@@ -404,23 +405,24 @@ AMObj STAT_Simulate(const AMObjVector &args)
       if (args[2].tag() == AMObjType::INTEGER) {
         switch (args[0].tag()) {
         case AMObjType::VARIABLE_ORDER_MARKOV :
-          variable_order_markov_seq = ((Variable_order_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
-                                                                                                             args[2].val.i);
+          variable_order_markov_seq = ((VariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
+                                                                                                           args[2].val.i);
           break;
         case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV :
-          variable_order_markov_seq = ((Hidden_variable_order_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
-                                                                                                                    args[2].val.i);
+          variable_order_markov_seq = ((HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
+                                                                                                                 args[2].val.i);
           break;
         case AMObjType::SEMI_MARKOV :
-          semi_markov_seq = ((Semi_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
-                                                                                         args[2].val.i , counting_flag);
+          semi_markov_seq = ((SemiMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
+                                                                                        args[2].val.i , counting_flag);
           break;
         case AMObjType::HIDDEN_SEMI_MARKOV :
-          semi_markov_seq = ((Hidden_semi_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
-                                                                                                args[2].val.i , counting_flag);
+          semi_markov_seq = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
+                                                                                              args[2].val.i , counting_flag);
           break;
         case AMObjType::NONHOMOGENEOUS_MARKOV :
-          nonhomogeneous_markov_seq = ((Nonhomogeneous_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i , args[2].val.i);
+          nonhomogeneous_markov_seq = ((NonhomogeneousMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
+                                                                                                            args[2].val.i);
           break;
         }
       }
@@ -429,43 +431,44 @@ AMObj STAT_Simulate(const AMObjVector &args)
                (args[2].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
                (args[2].tag() == AMObjType::SEMI_MARKOV_DATA) ||
                (args[2].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
-        const Markovian_sequences *iseq;
+        const MarkovianSequences *iseq;
 
 
         switch (args[2].tag()) {
         case AMObjType::MARKOVIAN_SEQUENCES :
-          iseq = (Markovian_sequences*)((STAT_model*)args[2].val.p)->pt;
+          iseq = (MarkovianSequences*)((STAT_model*)args[2].val.p)->pt;
           break;
         case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-          iseq = (Variable_order_markov_data*)((STAT_model*)args[2].val.p)->pt;
+          iseq = (VariableOrderMarkovData*)((STAT_model*)args[2].val.p)->pt;
           break;
         case AMObjType::SEMI_MARKOV_DATA :
-          iseq = (Semi_markov_data*)((STAT_model*)args[2].val.p)->pt;
+          iseq = (SemiMarkovData*)((STAT_model*)args[2].val.p)->pt;
           break;
         case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-          iseq = (Nonhomogeneous_markov_data*)((STAT_model*)args[2].val.p)->pt;
+          iseq = (NonhomogeneousMarkovData*)((STAT_model*)args[2].val.p)->pt;
           break;
         }
 
         switch (args[0].tag()) {
         case AMObjType::VARIABLE_ORDER_MARKOV :
-          variable_order_markov_seq = ((Variable_order_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
-                                                                                                             *iseq);
+          variable_order_markov_seq = ((VariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
+                                                                                                           *iseq);
           break;
         case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV :
-          variable_order_markov_seq = ((Hidden_variable_order_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
-                                                                                                                    *iseq);
+          variable_order_markov_seq = ((HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
+                                                                                                                 *iseq);
           break;
         case AMObjType::SEMI_MARKOV :
-          semi_markov_seq = ((Semi_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
-                                                                                         *iseq , counting_flag);
+          semi_markov_seq = ((SemiMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
+                                                                                        *iseq , counting_flag);
           break;
         case AMObjType::HIDDEN_SEMI_MARKOV :
-          semi_markov_seq = ((Hidden_semi_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
-                                                                                                *iseq , counting_flag);
+          semi_markov_seq = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
+                                                                                              *iseq , counting_flag);
           break;
         case AMObjType::NONHOMOGENEOUS_MARKOV :
-          nonhomogeneous_markov_seq = ((Nonhomogeneous_markov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i , *iseq);
+          nonhomogeneous_markov_seq = ((NonhomogeneousMarkov*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
+                                                                                                            *iseq);
           break;
         }
       }
@@ -479,7 +482,7 @@ AMObj STAT_Simulate(const AMObjVector &args)
 
     else {
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Simulate" , 2 , args[1].tag.string().data() ,
-                  "HISTOGRAM or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA or INT");
+                  "FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA or INT");
       return AMObj(AMObjType::ERROR);
     }
 
@@ -556,8 +559,8 @@ AMObj STAT_Simulate(const AMObjVector &args)
       return AMObj(AMObjType::ERROR);
     }
 
-    tops = ((Top_parameters*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
-                                                                           args[2].val.i , nb_axillary);
+    tops = ((TopParameters*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
+                                                                          args[2].val.i , nb_axillary);
 
     if (tops) {
       STAT_model* model = new STAT_model(tops);
@@ -577,11 +580,11 @@ AMObj STAT_Simulate(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
- *  Comparaison d'histogrammes.
+ *  Comparaison de lois empiriques.
  *
  *--------------------------------------------------------------*/
 
-AMObj STAT_CompareHistograms(const AMObjVector &args)
+AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
 
 {
   RWCString *pstr;
@@ -589,13 +592,13 @@ AMObj STAT_CompareHistograms(const AMObjVector &args)
   bool status = true , file_name_option = false , format_option = false;
   register int i;
   int nb_required , type;
-  const Histogram **histo;
-  Format_error error;
+  const FrequencyDistribution **histo;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
 
-  CHECKCONDVA(nb_required >= 3 , genAMLError(ERRORMSG(NB_HISTO_s) , "Compare"));
+  CHECKCONDVA(nb_required >= 3 , genAMLError(ERRORMSG(NB_FREQUENCY_DISTRIBUTION_s) , "Compare"));
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
               (args.length() == nb_required + 4) ,
@@ -603,41 +606,41 @@ AMObj STAT_CompareHistograms(const AMObjVector &args)
 
   // arguments obligatoires
 
-  histo = new const Histogram*[nb_required - 1];
+  histo = new const FrequencyDistribution*[nb_required - 1];
 
   switch (args[0].tag()) {
-  case AMObjType::HISTOGRAM :
-    histo[0] = (Histogram*)((Distribution_data*)((STAT_model*)args[0].val.p)->pt);
+  case AMObjType::FREQUENCY_DISTRIBUTION :
+    histo[0] = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
     break;
   case AMObjType::MIXTURE_DATA :
-    histo[0] = (Histogram*)((Mixture_data*)((STAT_model*)args[0].val.p)->pt);
+    histo[0] = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[0].val.p)->pt);
     break;
   case AMObjType::CONVOLUTION_DATA :
-    histo[0] = (Histogram*)((Convolution_data*)((STAT_model*)args[0].val.p)->pt);
+    histo[0] = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
     break;
   case AMObjType::COMPOUND_DATA :
-    histo[0] = (Histogram*)((Compound_data*)((STAT_model*)args[0].val.p)->pt);
+    histo[0] = (FrequencyDistribution*)((CompoundData*)((STAT_model*)args[0].val.p)->pt);
     break;
   }
 
   for (i = 1;i < nb_required - 1;i++) {
     switch (args[i].tag()) {
-    case AMObjType::HISTOGRAM :
-      histo[i] = (Histogram*)((Distribution_data*)((STAT_model*)args[i].val.p)->pt);
+    case AMObjType::FREQUENCY_DISTRIBUTION :
+      histo[i] = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[i].val.p)->pt);
       break;
     case AMObjType::MIXTURE_DATA :
-      histo[i] = (Histogram*)((Mixture_data*)((STAT_model*)args[i].val.p)->pt);
+      histo[i] = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[i].val.p)->pt);
       break;
     case AMObjType::CONVOLUTION_DATA :
-      histo[i] = (Histogram*)((Convolution_data*)((STAT_model*)args[i].val.p)->pt);
+      histo[i] = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[i].val.p)->pt);
       break;
     case AMObjType::COMPOUND_DATA :
-      histo[i] = (Histogram*)((Compound_data*)((STAT_model*)args[i].val.p)->pt);
+      histo[i] = (FrequencyDistribution*)((CompoundData*)((STAT_model*)args[i].val.p)->pt);
       break;
     default :
       status = false;
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Compare" , i + 1 , args[i].tag.string().data() ,
-                  "HISTOGRAM or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
+                  "FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
     }
   }
 
@@ -781,8 +784,8 @@ AMObj STAT_CompareVectors(const AMObjVector &args)
 {
   bool status = true , standardization = true;
   int nb_required;
-  Distance_matrix *dist_matrix;
-  Format_error error;
+  DistanceMatrix *dist_matrix;
+  StatError error;
 
 
   nb_required = 2;
@@ -828,7 +831,7 @@ AMObj STAT_CompareVectors(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  dist_matrix = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->comparison(error , *((Vector_distance*)((STAT_model*)args[1].val.p)->pt) , standardization);
+  dist_matrix = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->comparison(error , *((VectorDistance*)((STAT_model*)args[1].val.p)->pt) , standardization);
 
   if (dist_matrix) {
     STAT_model* model = new STAT_model(dist_matrix);
@@ -860,8 +863,8 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
   int nb_required , ref_identifier = I_DEFAULT , test_identifier = I_DEFAULT;
   const Sequences *iseq;
   Sequences *seq;
-  Distance_matrix *dist_matrix;
-  Format_error error;
+  DistanceMatrix *dist_matrix;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
@@ -876,16 +879,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
     iseq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::MARKOVIAN_SEQUENCES :
-    iseq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    iseq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-    iseq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    iseq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::SEMI_MARKOV_DATA :
-    iseq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    iseq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-    iseq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    iseq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   default :
     status = false;
@@ -1207,7 +1210,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
          algorithm_option = false;
     int indel_cost = ADAPTATIVE , algorithm = AGGLOMERATIVE;
     double indel_factor , transposition_factor = TRANSPOSITION_FACTOR;
-    Markovian_sequences *markovian_seq;
+    MarkovianSequences *markovian_seq;
 
 
     CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
@@ -1766,7 +1769,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
         indel_factor = INDEL_FACTOR_1;
       }
 
-      dist_matrix = iseq->alignment(error , &AMLOUTPUT , *((Vector_distance*)((STAT_model*)args[1].val.p)->pt) ,
+      dist_matrix = iseq->alignment(error , &AMLOUTPUT , *((VectorDistance*)((STAT_model*)args[1].val.p)->pt) ,
                                     ref_identifier , test_identifier , begin_free , end_free ,
                                     indel_cost , indel_factor , transposition , transposition_factor ,
                                     file_name , format , alignment_file_name , alignment_format);
@@ -1788,7 +1791,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
         indel_factor = INDEL_FACTOR_N;
       }
 
-      seq = iseq->multiple_alignment(error , AMLOUTPUT , *((Vector_distance*)((STAT_model*)args[1].val.p)->pt) ,
+      seq = iseq->multiple_alignment(error , AMLOUTPUT , *((VectorDistance*)((STAT_model*)args[1].val.p)->pt) ,
                                      begin_free , end_free , indel_cost , indel_factor , algorithm , file_name);
 
       if (seq) {
@@ -1834,8 +1837,8 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
   bool status = true;
   register int i;
   int nb_required , nb_model;
-  Markovian_sequences *seq;
-  Format_error error;
+  MarkovianSequences *seq;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
@@ -1846,16 +1849,16 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
 
   switch (args[0].tag()) {
   case AMObjType::MARKOVIAN_SEQUENCES :
-    seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-    seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::SEMI_MARKOV_DATA :
-    seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-    seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   }
 
@@ -1892,14 +1895,14 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
     switch (args[1].tag()) {
 
     case AMObjType::VARIABLE_ORDER_MARKOV : {
-      const Variable_order_markov **markov;
+      const VariableOrderMarkov **markov;
 
 
       // arguments obligatoires
 
-      markov = new const Variable_order_markov*[nb_model];
+      markov = new const VariableOrderMarkov*[nb_model];
 
-      markov[0] = (Variable_order_markov*)((STAT_model*)args[1].val.p)->pt;
+      markov[0] = (VariableOrderMarkov*)((STAT_model*)args[1].val.p)->pt;
       for (i = 1;i < nb_model;i++) {
         if (args[1 + i].tag() != AMObjType::VARIABLE_ORDER_MARKOV) {
           status = false;
@@ -1907,7 +1910,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
                       args[1 + i].tag.string().data() , "VARIABLE_ORDER_MARKOV");
         }
         else {
-          markov[i] = (Variable_order_markov*)((STAT_model*)args[1 + i].val.p)->pt;
+          markov[i] = (VariableOrderMarkov*)((STAT_model*)args[1 + i].val.p)->pt;
         }
       }
 
@@ -1924,14 +1927,14 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
     }
 
     case AMObjType::SEMI_MARKOV : {
-      const Semi_markov **smarkov;
+      const SemiMarkov **smarkov;
 
 
       // arguments obligatoires
 
-      smarkov = new const Semi_markov*[nb_model];
+      smarkov = new const SemiMarkov*[nb_model];
 
-      smarkov[0] = (Semi_markov*)((STAT_model*)args[1].val.p)->pt;
+      smarkov[0] = (SemiMarkov*)((STAT_model*)args[1].val.p)->pt;
       for (i = 1;i < nb_model;i++) {
         if (args[1 + i].tag() != AMObjType::SEMI_MARKOV) {
           status = false;
@@ -1939,7 +1942,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
                       args[1 + i].tag.string().data() , "SEMI-MARKOV");
         }
         else {
-          smarkov[i] = (Semi_markov*)((STAT_model*)args[1 + i].val.p)->pt;
+          smarkov[i] = (SemiMarkov*)((STAT_model*)args[1 + i].val.p)->pt;
         }
       }
 
@@ -2061,14 +2064,14 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
     switch (args[1].tag()) {
 
     case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV : {
-      const Hidden_variable_order_markov **hmarkov;
+      const HiddenVariableOrderMarkov **hmarkov;
 
 
       // arguments obligatoires
 
-      hmarkov = new const Hidden_variable_order_markov*[nb_model];
+      hmarkov = new const HiddenVariableOrderMarkov*[nb_model];
 
-      hmarkov[0] = (Hidden_variable_order_markov*)((STAT_model*)args[1].val.p)->pt;
+      hmarkov[0] = (HiddenVariableOrderMarkov*)((STAT_model*)args[1].val.p)->pt;
       for (i = 1;i < nb_model;i++) {
         if (args[1 + i].tag() != AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
           status = false;
@@ -2076,7 +2079,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
                       args[1 + i].tag.string().data() , "HIDDEN_VARIABLE_ORDER_MARKOV");
         }
         else {
-          hmarkov[i] = (Hidden_variable_order_markov*)((STAT_model*)args[1 + i].val.p)->pt;
+          hmarkov[i] = (HiddenVariableOrderMarkov*)((STAT_model*)args[1 + i].val.p)->pt;
         }
       }
 
@@ -2093,14 +2096,14 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
     }
 
     case AMObjType::HIDDEN_SEMI_MARKOV : {
-      const Hidden_semi_markov **hsmarkov;
+      const HiddenSemiMarkov **hsmarkov;
 
 
       // arguments obligatoires
 
-      hsmarkov = new const Hidden_semi_markov*[nb_model];
+      hsmarkov = new const HiddenSemiMarkov*[nb_model];
 
-      hsmarkov[0] = (Hidden_semi_markov*)((STAT_model*)args[1].val.p)->pt;
+      hsmarkov[0] = (HiddenSemiMarkov*)((STAT_model*)args[1].val.p)->pt;
       for (i = 1;i < nb_model;i++) {
         if (args[1 + i].tag() != AMObjType::HIDDEN_SEMI_MARKOV) {
           status = false;
@@ -2108,7 +2111,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
                       args[1 + i].tag.string().data() , "HIDDEN_SEMI-MARKOV");
         }
         else {
-          hsmarkov[i] = (Hidden_semi_markov*)((STAT_model*)args[1 + i].val.p)->pt;
+          hsmarkov[i] = (HiddenSemiMarkov*)((STAT_model*)args[1 + i].val.p)->pt;
         }
       }
 
@@ -2154,10 +2157,10 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
   bool status = true;
   register int i;
   int nb_required , nb_model , step , nb_sequence , length;
-  Histogram **hlength = NULL;
-  const Markovian_sequences **seq = NULL;
-  Distance_matrix *dist_matrix;
-  Format_error error;
+  FrequencyDistribution **hlength = NULL;
+  const MarkovianSequences **seq = NULL;
+  DistanceMatrix *dist_matrix;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
@@ -2201,7 +2204,7 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
   }
 
   else {
-    if ((args[1].tag() == AMObjType::HISTOGRAM) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
+    if ((args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
         (args[1].tag() == AMObjType::CONVOLUTION_DATA) || (args[1].tag() == AMObjType::COMPOUND_DATA)) {
       nb_model = nb_required;
     }
@@ -2211,7 +2214,7 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
     }
     else {
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Compare" , 2 , args[1].tag.string().data() ,
-                  "HISTOGRAM or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA");
+                  "FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA");
       return AMObj(AMObjType::ERROR);
     }
 
@@ -2248,47 +2251,47 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
   }
 
   else {
-    if ((args[1].tag() == AMObjType::HISTOGRAM) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
+    if ((args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
         (args[1].tag() == AMObjType::CONVOLUTION_DATA) || (args[1].tag() == AMObjType::COMPOUND_DATA)) {
-      hlength = new Histogram*[nb_model];
+      hlength = new FrequencyDistribution*[nb_model];
 
       for (i = 0;i < nb_model;i++) {
         switch (args[i * step + 1].tag()) {
-        case AMObjType::HISTOGRAM :
-          hlength[i] = (Histogram*)((Distribution_data*)((STAT_model*)args[i * step + 1].val.p)->pt);
+        case AMObjType::FREQUENCY_DISTRIBUTION :
+          hlength[i] = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[i * step + 1].val.p)->pt);
           break;
         case AMObjType::MIXTURE_DATA :
-          hlength[i] = (Histogram*)((Mixture_data*)((STAT_model*)args[i * step + 1].val.p)->pt);
+          hlength[i] = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[i * step + 1].val.p)->pt);
           break;
         case AMObjType::CONVOLUTION_DATA :
-          hlength[i] = (Histogram*)((Convolution_data*)((STAT_model*)args[i * step + 1].val.p)->pt);
+          hlength[i] = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[i * step + 1].val.p)->pt);
           break;
         case AMObjType::COMPOUND_DATA :
-          hlength[i] = (Histogram*)((Compound_data*)((STAT_model*)args[i * step + 1].val.p)->pt);
+          hlength[i] = (FrequencyDistribution*)((CompoundData*)((STAT_model*)args[i * step + 1].val.p)->pt);
           break;
         default :
           status = false;
           genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Compare" , i * step + 2 ,
                       args[i * step + 1].tag.string().data() ,
-                      "HISTOGRAM or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
+                      "FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
         }
       }
     }
 
     else if ((args[1].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
              (args[1].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) || (args[1].tag() == AMObjType::SEMI_MARKOV_DATA)) {
-      seq = new const Markovian_sequences*[nb_model];
+      seq = new const MarkovianSequences*[nb_model];
 
       for (i = 0;i < nb_model;i++) {
         switch (args[i * step + 1].tag()) {
         case AMObjType::MARKOVIAN_SEQUENCES :
-          seq[i] = (Markovian_sequences*)((STAT_model*)args[i * step + 1].val.p)->pt;
+          seq[i] = (MarkovianSequences*)((STAT_model*)args[i * step + 1].val.p)->pt;
           break;
         case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-          seq[i] = (Variable_order_markov_data*)((STAT_model*)args[i * step + 1].val.p)->pt;
+          seq[i] = (VariableOrderMarkovData*)((STAT_model*)args[i * step + 1].val.p)->pt;
           break;
         case AMObjType::SEMI_MARKOV_DATA :
-          seq[i] = (Semi_markov_data*)((STAT_model*)args[i * step + 1].val.p)->pt;
+          seq[i] = (SemiMarkovData*)((STAT_model*)args[i * step + 1].val.p)->pt;
           break;
         default :
           status = false;
@@ -2313,12 +2316,12 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
   switch (args[0].tag()) {
 
   case AMObjType::VARIABLE_ORDER_MARKOV : {
-    const Variable_order_markov **markov;
+    const VariableOrderMarkov **markov;
 
 
-    markov = new const Variable_order_markov*[nb_model];
+    markov = new const VariableOrderMarkov*[nb_model];
 
-    markov[0] = (Variable_order_markov*)((STAT_model*)args[0].val.p)->pt;
+    markov[0] = (VariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt;
     for (i = 1;i < nb_model;i++) {
       if (args[i * step].tag() != AMObjType::VARIABLE_ORDER_MARKOV) {
         status = false;
@@ -2326,12 +2329,12 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
                     args[i * step].tag.string().data() , "VARIABLE_ORDER_MARKOV");
       }
       else {
-        markov[i] = (Variable_order_markov*)((STAT_model*)args[i * step].val.p)->pt;
+        markov[i] = (VariableOrderMarkov*)((STAT_model*)args[i * step].val.p)->pt;
       }
     }
 
     if (status) {
-      if ((args[1].tag() == AMObjType::HISTOGRAM) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
+      if ((args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
           (args[1].tag() == AMObjType::CONVOLUTION_DATA) || (args[1].tag() == AMObjType::COMPOUND_DATA)) {
         dist_matrix = markov[0]->divergence_computation(error , AMLOUTPUT , nb_model , markov + 1 ,
                                                         hlength , file_name);
@@ -2360,12 +2363,12 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
   }
 
   case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV : {
-    const Hidden_variable_order_markov **hmarkov;
+    const HiddenVariableOrderMarkov **hmarkov;
 
 
-    hmarkov = new const Hidden_variable_order_markov*[nb_model];
+    hmarkov = new const HiddenVariableOrderMarkov*[nb_model];
 
-    hmarkov[0] = (Hidden_variable_order_markov*)((STAT_model*)args[0].val.p)->pt;
+    hmarkov[0] = (HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt;
     for (i = 1;i < nb_model;i++) {
       if (args[i * step].tag() != AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
         status = false;
@@ -2373,12 +2376,12 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
                     args[i * step].tag.string().data() , "HIDDEN_VARIABLE_ORDER_MARKOV");
       }
       else {
-        hmarkov[i] = (Hidden_variable_order_markov*)((STAT_model*)args[i * step].val.p)->pt;
+        hmarkov[i] = (HiddenVariableOrderMarkov*)((STAT_model*)args[i * step].val.p)->pt;
       }
     }
 
     if (status) {
-      if ((args[1].tag() == AMObjType::HISTOGRAM) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
+      if ((args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
           (args[1].tag() == AMObjType::CONVOLUTION_DATA) || (args[1].tag() == AMObjType::COMPOUND_DATA)) {
         dist_matrix = hmarkov[0]->divergence_computation(error , AMLOUTPUT , nb_model , hmarkov + 1 ,
                                                          hlength , file_name);
@@ -2407,12 +2410,12 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
   }
 
   case AMObjType::SEMI_MARKOV : {
-    const Semi_markov **smarkov;
+    const SemiMarkov **smarkov;
 
 
-    smarkov = new const Semi_markov*[nb_model];
+    smarkov = new const SemiMarkov*[nb_model];
 
-    smarkov[0] = (Semi_markov*)((STAT_model*)args[0].val.p)->pt;
+    smarkov[0] = (SemiMarkov*)((STAT_model*)args[0].val.p)->pt;
     for (i = 1;i < nb_model;i++) {
       if (args[i * step].tag() != AMObjType::SEMI_MARKOV) {
         status = false;
@@ -2420,12 +2423,12 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
                     args[i * step].tag.string().data() , "SEMI_MARKOV");
       }
       else {
-        smarkov[i] = (Semi_markov*)((STAT_model*)args[i * step].val.p)->pt;
+        smarkov[i] = (SemiMarkov*)((STAT_model*)args[i * step].val.p)->pt;
       }
     }
 
     if (status) {
-      if ((args[1].tag() == AMObjType::HISTOGRAM) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
+      if ((args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
           (args[1].tag() == AMObjType::CONVOLUTION_DATA) || (args[1].tag() == AMObjType::COMPOUND_DATA)) {
         dist_matrix = smarkov[0]->divergence_computation(error , AMLOUTPUT , nb_model , smarkov + 1 ,
                                                          hlength , file_name);
@@ -2454,12 +2457,12 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
   }
 
   case AMObjType::HIDDEN_SEMI_MARKOV : {
-    const Hidden_semi_markov **hsmarkov;
+    const HiddenSemiMarkov **hsmarkov;
 
 
-    hsmarkov = new const Hidden_semi_markov*[nb_model];
+    hsmarkov = new const HiddenSemiMarkov*[nb_model];
 
-    hsmarkov[0] = (Hidden_semi_markov*)((STAT_model*)args[0].val.p)->pt;
+    hsmarkov[0] = (HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt;
     for (i = 1;i < nb_model;i++) {
       if (args[i * step].tag() != AMObjType::HIDDEN_SEMI_MARKOV) {
         status = false;
@@ -2467,12 +2470,12 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
                     args[i * step].tag.string().data() , "HIDDEN_SEMI_MARKOV");
       }
       else {
-        hsmarkov[i] = (Hidden_semi_markov*)((STAT_model*)args[i * step].val.p)->pt;
+        hsmarkov[i] = (HiddenSemiMarkov*)((STAT_model*)args[i * step].val.p)->pt;
       }
     }
 
     if (status) {
-      if ((args[1].tag() == AMObjType::HISTOGRAM) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
+      if ((args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[1].tag() == AMObjType::MIXTURE_DATA) ||
           (args[1].tag() == AMObjType::CONVOLUTION_DATA) || (args[1].tag() == AMObjType::COMPOUND_DATA)) {
         dist_matrix = hsmarkov[0]->divergence_computation(error , AMLOUTPUT , nb_model , hsmarkov + 1 ,
                                                           hlength , file_name);
@@ -2525,11 +2528,11 @@ AMObj STAT_Compare(const AMObjVector &args)
   CHECKCONDVA(args.length() >= 1 ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Compare"));
 
-  // comparaison d'histogrammes
+  // comparaison de lois empiriques
 
-  if ((args[0].tag() == AMObjType::HISTOGRAM) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+  if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
-    return STAT_CompareHistograms(args);
+    return STAT_CompareFrequencyDistributions(args);
   }
 
   // comparaison de vecteurs
@@ -2584,7 +2587,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
   RWCString *pstr;
   bool status = true;
   int nb_required;
-  Format_error error;
+  StatError error;
 
 
   CHECKCONDVA(args.length() >= 2 ,
@@ -2733,7 +2736,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
       }
 
       if (status) {
-        clusters = ((Distance_matrix*)((STAT_model*)args[0].val.p)->pt)->
+        clusters = ((DistanceMatrix*)((STAT_model*)args[0].val.p)->pt)->
         partitioning(error , AMLOUTPUT ,  nb_cluster , prototype,  initialization , algorithm);
       }
 
@@ -2832,8 +2835,8 @@ AMObj STAT_Clustering(const AMObjVector &args)
       }
 
       if (status) {
-        clusters = ((Distance_matrix*)((STAT_model*)args[0].val.p)->pt)->partitioning(error , AMLOUTPUT , nb_cluster ,
-                                                                                      cluster_nb_pattern , cluster_pattern);
+        clusters = ((DistanceMatrix*)((STAT_model*)args[0].val.p)->pt)->partitioning(error , AMLOUTPUT , nb_cluster ,
+                                                                                     cluster_nb_pattern , cluster_pattern);
       }
 
       delete [] cluster_nb_pattern;
@@ -3055,9 +3058,9 @@ AMObj STAT_Clustering(const AMObjVector &args)
       return AMObj(AMObjType::ERROR);
     }
 
-    status = ((Distance_matrix*)((STAT_model*)args[0].val.p)->pt)->hierarchical_clustering(error , AMLOUTPUT ,
-                                                                                           algorithm , criterion ,
-                                                                                           file_name , format);
+    status = ((DistanceMatrix*)((STAT_model*)args[0].val.p)->pt)->hierarchical_clustering(error , AMLOUTPUT ,
+                                                                                          algorithm , criterion ,
+                                                                                          file_name , format);
 
     if (status) {
       return AMObj(AMObjType::VOID);
@@ -3079,7 +3082,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
- *  Test de comparaison d'histogrammes.
+ *  Test de comparaison de lois empiriques.
  *
  *--------------------------------------------------------------*/
 
@@ -3088,8 +3091,8 @@ AMObj STAT_ComparisonTest(const AMObjVector &args)
 {
   RWCString *pstr;
   bool status = true;
-  const Histogram *histo1 , *histo2;
-  Format_error error;
+  const FrequencyDistribution *histo1 , *histo2;
+  StatError error;
 
 
   CHECKCONDVA(args.length() == 3 ,
@@ -3106,42 +3109,42 @@ AMObj STAT_ComparisonTest(const AMObjVector &args)
   }
 
   switch (args[1].tag()) {
-  case AMObjType::HISTOGRAM :
-    histo1 = (Histogram*)((Distribution_data*)((STAT_model*)args[1].val.p)->pt);
+  case AMObjType::FREQUENCY_DISTRIBUTION :
+    histo1 = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[1].val.p)->pt);
     break;
   case AMObjType::MIXTURE_DATA :
-    histo1 = (Histogram*)((Mixture_data*)((STAT_model*)args[1].val.p)->pt);
+    histo1 = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[1].val.p)->pt);
     break;
   case AMObjType::CONVOLUTION_DATA :
-    histo1 = (Histogram*)((Convolution_data*)((STAT_model*)args[1].val.p)->pt);
+    histo1 = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[1].val.p)->pt);
     break;
   case AMObjType::COMPOUND_DATA :
-    histo1 = (Histogram*)((Compound_data*)((STAT_model*)args[1].val.p)->pt);
+    histo1 = (FrequencyDistribution*)((CompoundData*)((STAT_model*)args[1].val.p)->pt);
     break;
   default :
     status = false;
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComparisonTest" , 2 , args[1].tag.string().data() ,
-                "HISTOGRAM or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
+                "FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
     break;
   }
 
   switch (args[2].tag()) {
-  case AMObjType::HISTOGRAM :
-    histo2 = (Histogram*)((Distribution_data*)((STAT_model*)args[2].val.p)->pt);
+  case AMObjType::FREQUENCY_DISTRIBUTION :
+    histo2 = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[2].val.p)->pt);
     break;
   case AMObjType::MIXTURE_DATA :
-    histo2 = (Histogram*)((Mixture_data*)((STAT_model*)args[2].val.p)->pt);
+    histo2 = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[2].val.p)->pt);
     break;
   case AMObjType::CONVOLUTION_DATA :
-    histo2 = (Histogram*)((Convolution_data*)((STAT_model*)args[2].val.p)->pt);
+    histo2 = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[2].val.p)->pt);
     break;
   case AMObjType::COMPOUND_DATA :
-    histo2 = (Histogram*)((Compound_data*)((STAT_model*)args[2].val.p)->pt);
+    histo2 = (FrequencyDistribution*)((CompoundData*)((STAT_model*)args[2].val.p)->pt);
     break;
   default :
     status = false;
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComparisonTest" , 3 , args[2].tag.string().data() ,
-                "HISTOGRAM or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
+                "FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
     break;
   }
 
@@ -3173,7 +3176,7 @@ AMObj STAT_ComparisonTest(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
- *  Ajustement d'une loi a un histogramme.
+ *  Ajustement d'une loi.
  *
  *--------------------------------------------------------------*/
 
@@ -3181,31 +3184,31 @@ AMObj STAT_Fit(const AMObjVector &args)
 
 {
   bool status = true;
-  const Histogram *histo;
-  Parametric_model *dist;
-  Format_error error;
+  const FrequencyDistribution *histo;
+  DiscreteParametricModel *dist;
+  StatError error;
 
 
   CHECKCONDVA(args.length() == 2 ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Fit" , 2));
 
   switch (args[0].tag()) {
-  case AMObjType::HISTOGRAM :
-    histo = (Histogram*)((Distribution_data*)((STAT_model*)args[0].val.p)->pt);
+  case AMObjType::FREQUENCY_DISTRIBUTION :
+    histo = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
     break;
   case AMObjType::MIXTURE_DATA :
-    histo = (Histogram*)((Mixture_data*)((STAT_model*)args[0].val.p)->pt);
+    histo = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[0].val.p)->pt);
     break;
   case AMObjType::CONVOLUTION_DATA :
-    histo = (Histogram*)((Convolution_data*)((STAT_model*)args[0].val.p)->pt);
+    histo = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
     break;
   case AMObjType::COMPOUND_DATA :
-    histo = (Histogram*)((Compound_data*)((STAT_model*)args[0].val.p)->pt);
+    histo = (FrequencyDistribution*)((CompoundData*)((STAT_model*)args[0].val.p)->pt);
     break;
   default :
     status = false;
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Fit" , 1 , args[0].tag.string().data() ,
-                "HISTOGRAM or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
+                "FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
     break;
   }
 
@@ -3219,7 +3222,7 @@ AMObj STAT_Fit(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  dist = histo->fit(error , *((Parametric*)((Parametric_model*)((STAT_model*)args[1].val.p)->pt)));
+  dist = histo->fit(error , *((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[1].val.p)->pt)));
 
   if (dist) {
     STAT_model* model = new STAT_model(dist);
@@ -3243,9 +3246,9 @@ AMObj STAT_TruncateDistribution(const AMObjVector &args)
 
 {
   bool status = true;
-  Format_error error;
+  StatError error;
   const Distribution *idist;
-  Parametric_model *dist;
+  DiscreteParametricModel *dist;
 
 
   CHECKCONDVA(args.length() == 2 ,
@@ -3253,7 +3256,7 @@ AMObj STAT_TruncateDistribution(const AMObjVector &args)
 
   switch (args[0].tag()) {
   case AMObjType::DISTRIBUTION :
-    idist = new Distribution(*((Distribution*)((Parametric_model*)((STAT_model*)args[0].val.p)->pt)));
+    idist = new Distribution(*((Distribution*)((DiscreteParametricModel*)((STAT_model*)args[0].val.p)->pt)));
     break;
   case AMObjType::MIXTURE :
     idist = new Distribution(*((Distribution*)((Mixture*)((STAT_model*)args[0].val.p)->pt)));
@@ -3309,7 +3312,7 @@ AMObj STAT_ComputeRankCorrelation(const AMObjVector &args)
   bool status = true , type_option = false , file_name_option = false;
   register int i;
   int nb_required , type = SPEARMAN;
-  Format_error error;
+  StatError error;
 
 
   nb_required = 1;
@@ -3440,7 +3443,7 @@ AMObj STAT_ContingencyTable(const AMObjVector &args)
   bool status = true , file_name_option = false , format_option = false;
   register int i;
   int nb_required;
-  Format_error error;
+  StatError error;
 
 
   nb_required = 3;
@@ -3587,7 +3590,7 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
   bool status = true , file_name_option = false , format_option = false;
   register int i;
   int nb_required , type;
-  Format_error error;
+  StatError error;
 
 
   nb_required = 4;
@@ -3753,7 +3756,7 @@ AMObj STAT_Regression(const AMObjVector &args)
 {
   RWCString *pstr;
   bool status = true;
-  Format_error error;
+  StatError error;
   Regression *regression;
 
 
@@ -3882,7 +3885,7 @@ AMObj STAT_Regression(const AMObjVector &args)
     else {
       switch (args[4].tag()) {
       case AMObjType::DISTRIBUTION :
-        dist = new Distribution(*((Distribution*)((Parametric_model*)((STAT_model*)args[4].val.p)->pt)));
+        dist = new Distribution(*((Distribution*)((DiscreteParametricModel*)((STAT_model*)args[4].val.p)->pt)));
         break;
       case AMObjType::MIXTURE :
         dist = new Distribution(*((Distribution*)((Mixture*)((STAT_model*)args[4].val.p)->pt)));
@@ -4050,7 +4053,7 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
       type = PEARSON , normalization = EXACT;
   const Sequences *seq;
   Correlation *correl;
-  Format_error error;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
@@ -4070,16 +4073,16 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
     seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::MARKOVIAN_SEQUENCES :
-    seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-    seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::SEMI_MARKOV_DATA :
-    seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-    seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   default :
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeCorrelation" , 1 , args[0].tag.string().data() ,
@@ -4332,7 +4335,7 @@ AMObj STAT_ComputeWhiteNoiseCorrelation(const AMObjVector &args)
   int nb_point = I_DEFAULT , int_sum , *int_filter;
   double sum , *filter;
   const Distribution *dist;
-  Format_error error;
+  StatError error;
 
 
   CHECKCONDVA(args.length() == 2 ,
@@ -4414,7 +4417,7 @@ AMObj STAT_ComputeWhiteNoiseCorrelation(const AMObjVector &args)
   else if (args[1].tag() != AMObjType::INTEGER) {
     switch (args[1].tag()) {
     case AMObjType::DISTRIBUTION :
-      dist = new Distribution(*((Distribution*)((Parametric_model*)((STAT_model*)args[1].val.p)->pt)));
+      dist = new Distribution(*((Distribution*)((DiscreteParametricModel*)((STAT_model*)args[1].val.p)->pt)));
       break;
     case AMObjType::MIXTURE :
       dist = new Distribution(*((Distribution*)((Mixture*)((STAT_model*)args[1].val.p)->pt)));
@@ -4481,7 +4484,7 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
   int nb_required , nb_variable , variable , max_lag = I_DEFAULT , type = PEARSON;
   const Sequences *seq;
   Correlation *correl;
-  Format_error error;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
@@ -4500,16 +4503,16 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
     seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::MARKOVIAN_SEQUENCES :
-    seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-    seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::SEMI_MARKOV_DATA :
-    seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-    seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   default :
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputePartialAutoCorrelation" , 1 , args[0].tag.string().data() ,
@@ -4656,8 +4659,8 @@ AMObj STAT_Segmentation(const AMObjVector &args)
       *model_type , *nb_segment;
   const Sequences *iseq;
   Sequences *seq;
-  Markovian_sequences *markovian_seq;
-  Format_error error;
+  MarkovianSequences *markovian_seq;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
@@ -4671,13 +4674,13 @@ AMObj STAT_Segmentation(const AMObjVector &args)
     iseq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::MARKOVIAN_SEQUENCES :
-    iseq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    iseq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-    iseq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    iseq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::SEMI_MARKOV_DATA :
-    iseq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    iseq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   default :
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , 1 , args[0].tag.string().data() ,
@@ -4748,7 +4751,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
     }
 
     seq = iseq->segmentation(error , args[1].val.i , args[2].val.i ,
-                             *((Vector_distance*)((STAT_model*)args[3].val.p)->pt) , AMLOUTPUT , output);
+                             *((VectorDistance*)((STAT_model*)args[3].val.p)->pt) , AMLOUTPUT , output);
   }
 
   else if (args[1].tag() == AMObjType::ARRAY) {
@@ -5248,7 +5251,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 AMObj STAT_ComputeSelfTransition(const AMObjVector &args)
 
 {
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   CHECKCONDVA(args.length() == 1 ,
@@ -5256,16 +5259,16 @@ AMObj STAT_ComputeSelfTransition(const AMObjVector &args)
 
   switch (args[0].tag()) {
   case AMObjType::MARKOVIAN_SEQUENCES :
-    seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-    seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::SEMI_MARKOV_DATA :
-    seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-    seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   default :
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeSelfTransition" , 1 , args[0].tag.string().data() ,
@@ -5294,8 +5297,8 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
        file_name_option = false , format_option = false;
   register int i;
   int nb_required , estimator = MAXIMUM_LIKELIHOOD;
-  const Markovian_sequences *seq;
-  Format_error error;
+  const MarkovianSequences *seq;
+  StatError error;
 
 
   nb_required = 2;
@@ -5308,16 +5311,16 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
 
   switch (args[0].tag()) {
   case AMObjType::MARKOVIAN_SEQUENCES :
-    seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-    seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::SEMI_MARKOV_DATA :
-    seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-    seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   default :
     status = false;
@@ -5523,8 +5526,8 @@ AMObj STAT_WordCount(const AMObjVector &args)
   register int i;
   int nb_required , nb_variable , variable , offset , begin_state = I_DEFAULT ,
       end_state = I_DEFAULT , min_frequency = 1;
-  Markovian_sequences *seq;
-  Format_error error;
+  MarkovianSequences *seq;
+  StatError error;
 
 
   CHECKCONDVA(args.length() >= 2 ,
@@ -5534,16 +5537,16 @@ AMObj STAT_WordCount(const AMObjVector &args)
 
   switch (args[0].tag()) {
   case AMObjType::MARKOVIAN_SEQUENCES :
-    seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-    seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::SEMI_MARKOV_DATA :
-    seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-    seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   default :
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "WordCount" , 1 , args[0].tag.string().data() ,
@@ -5707,8 +5710,8 @@ AMObj STAT_LumpabilityTest(const AMObjVector &args)
 {
   bool status = true;
   int nb_required , order = 1 , nb_symbol , *symbol = NULL;
-  const Markovian_sequences *seq;
-  Format_error error;
+  const MarkovianSequences *seq;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
@@ -5723,16 +5726,16 @@ AMObj STAT_LumpabilityTest(const AMObjVector &args)
 
   switch (args[0].tag()) {
   case AMObjType::MARKOVIAN_SEQUENCES :
-    seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-    seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::SEMI_MARKOV_DATA :
-    seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-    seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   default :
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "LumpabilityTest" , 1 , args[0].tag.string().data() ,
@@ -5844,36 +5847,36 @@ AMObj STAT_Thresholding(const AMObjVector &args)
 
   if (status) {
     if (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV) {
-      Variable_order_markov *markov;
+      VariableOrderMarkov *markov;
 
-      markov = ((Variable_order_markov*)((STAT_model*)args[0].val.p)->pt)->thresholding(min_probability);
+      markov = ((VariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->thresholding(min_probability);
 
       STAT_model* model = new STAT_model(markov);
       return AMObj(AMObjType::VARIABLE_ORDER_MARKOV , model);
     }
 
     if (args[0].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
-      Hidden_variable_order_markov *hmarkov;
+      HiddenVariableOrderMarkov *hmarkov;
 
-      hmarkov = ((Hidden_variable_order_markov*)((STAT_model*)args[0].val.p)->pt)->thresholding(min_probability);
+      hmarkov = ((HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->thresholding(min_probability);
 
       STAT_model* model = new STAT_model(hmarkov);
       return AMObj(AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV , model);
     }
 
     if (args[0].tag() == AMObjType::SEMI_MARKOV) {
-      Semi_markov *smarkov;
+      SemiMarkov *smarkov;
 
-      smarkov = ((Semi_markov*)((STAT_model*)args[0].val.p)->pt)->thresholding(min_probability);
+      smarkov = ((SemiMarkov*)((STAT_model*)args[0].val.p)->pt)->thresholding(min_probability);
 
       STAT_model* model = new STAT_model(smarkov);
       return AMObj(AMObjType::SEMI_MARKOV , model);
     }
 
     if (args[0].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
-      Hidden_semi_markov *hsmarkov;
+      HiddenSemiMarkov *hsmarkov;
 
-      hsmarkov = ((Hidden_semi_markov*)((STAT_model*)args[0].val.p)->pt)->thresholding(min_probability);
+      hsmarkov = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->thresholding(min_probability);
 
       STAT_model* model = new STAT_model(hsmarkov);
       return AMObj(AMObjType::HIDDEN_SEMI_MARKOV , model);
@@ -5901,9 +5904,9 @@ AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args)
 {
   bool status = true;
   int nb_required , variable , offset , value , max_lag = MAX_LAG;
-  const Variable_order_markov *markov;
+  const VariableOrderMarkov *markov;
   Correlation *correl;
-  Format_error error;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
@@ -5919,12 +5922,12 @@ AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args)
   switch (args[0].tag()) {
 
   case AMObjType::VARIABLE_ORDER_MARKOV : {
-    markov = (Variable_order_markov*)((STAT_model*)args[0].val.p)->pt;
+    markov = (VariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt;
     break;
   }
 
   case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV : {
-    markov = (Hidden_variable_order_markov*)((STAT_model*)args[0].val.p)->pt;
+    markov = (HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt;
     break;
   }
 
@@ -6006,7 +6009,7 @@ AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args)
       correl = markov->state_autocorrelation_computation(error , value , max_lag);
     }
     else {
-      correl = ((Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt)->state_autocorrelation_computation(error , value , max_lag);
+      correl = ((VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt)->state_autocorrelation_computation(error , value , max_lag);
     }
     break;
   }
@@ -6017,7 +6020,7 @@ AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args)
       correl = markov->output_autocorrelation_computation(error , variable , value , max_lag);
     }
     else {
-      correl = ((Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt)->output_autocorrelation_computation(error , variable , value , max_lag);
+      correl = ((VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt)->output_autocorrelation_computation(error , variable , value , max_lag);
     }
     break;
   }
@@ -6046,8 +6049,8 @@ AMObj STAT_ComputeStateSequences(const AMObjVector &args)
 {
   bool status = true , characteristic_flag = true;
   int nb_required;
-  const Markovian_sequences *iseq;
-  Format_error error;
+  const MarkovianSequences *iseq;
+  StatError error;
 
 
   nb_required = 2;
@@ -6059,13 +6062,13 @@ AMObj STAT_ComputeStateSequences(const AMObjVector &args)
 
   switch (args[0].tag()) {
   case AMObjType::MARKOVIAN_SEQUENCES :
-    iseq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    iseq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-    iseq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    iseq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::SEMI_MARKOV_DATA :
-    iseq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    iseq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   default :
     status = false;
@@ -6107,11 +6110,11 @@ AMObj STAT_ComputeStateSequences(const AMObjVector &args)
   switch (args[1].tag()) {
 
   case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV : {
-    Variable_order_markov_data *seq;
+    VariableOrderMarkovData *seq;
 
 
-    seq = ((Hidden_variable_order_markov*)((STAT_model*)args[1].val.p)->pt)->state_sequence_computation(error , *iseq ,
-                                                                                                        characteristic_flag);
+    seq = ((HiddenVariableOrderMarkov*)((STAT_model*)args[1].val.p)->pt)->state_sequence_computation(error , *iseq ,
+                                                                                                     characteristic_flag);
 
     if (seq) {
       STAT_model* model = new STAT_model(seq);
@@ -6125,11 +6128,11 @@ AMObj STAT_ComputeStateSequences(const AMObjVector &args)
   }
 
   case AMObjType::HIDDEN_SEMI_MARKOV : {
-    Semi_markov_data *seq;
+    SemiMarkovData *seq;
 
 
-    seq = ((Hidden_semi_markov*)((STAT_model*)args[1].val.p)->pt)->state_sequence_computation(error , AMLOUTPUT , *iseq ,
-                                                                                              characteristic_flag);
+    seq = ((HiddenSemiMarkov*)((STAT_model*)args[1].val.p)->pt)->state_sequence_computation(error , AMLOUTPUT , *iseq ,
+                                                                                            characteristic_flag);
 
     if (seq) {
       STAT_model* model = new STAT_model(seq);
