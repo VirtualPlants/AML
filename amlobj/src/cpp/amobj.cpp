@@ -141,8 +141,8 @@ RWCString AMObjType::string() const {
     stg = "DRESSING_DATA";
     break;
 
-  case AMObjType::HISTOGRAM:
-    stg = "HISTOGRAM";
+  case AMObjType::FREQUENCY_DISTRIBUTION:
+    stg = "FREQUENCY_DISTRIBUTION";
     break;
   case AMObjType::DISTRIBUTION:
     stg = "DISTRIBUTION";
@@ -340,7 +340,7 @@ AMObj::AMObj(AMObjType t, AMModel* p) {
          t==AMObjType::VIRTUAL_PATTERN ||
          t==AMObjType::DRESSING_DATA ||
 
-         t==AMObjType::HISTOGRAM ||
+         t==AMObjType::FREQUENCY_DISTRIBUTION ||
          t==AMObjType::DISTRIBUTION ||
          t==AMObjType::MIXTURE ||
          t==AMObjType::MIXTURE_DATA ||
@@ -472,7 +472,7 @@ Boolean AMObj::operator==(const AMObj& rec) const {
       case AMObjType::VIRTUAL_PATTERN:
       case AMObjType::DRESSING_DATA:
 
-      case AMObjType::HISTOGRAM:
+      case AMObjType::FREQUENCY_DISTRIBUTION:
       case AMObjType::DISTRIBUTION:
       case AMObjType::MIXTURE:
       case AMObjType::MIXTURE_DATA:
@@ -813,7 +813,7 @@ ostream& AMObj::printValue(ostream& o, int line_size) const {
   case AMObjType::VIRTUAL_PATTERN:
   case AMObjType::DRESSING_DATA:
 
-  case AMObjType::HISTOGRAM:
+  case AMObjType::FREQUENCY_DISTRIBUTION:
   case AMObjType::DISTRIBUTION:
   case AMObjType::MIXTURE:
   case AMObjType::MIXTURE_DATA:
@@ -987,7 +987,7 @@ size_t hashAMObj(const AMObj& v) {
   case AMObjType::VIRTUAL_PATTERN:
   case AMObjType::DRESSING_DATA:
 
-  case AMObjType::HISTOGRAM:
+  case AMObjType::FREQUENCY_DISTRIBUTION:
   case AMObjType::DISTRIBUTION:
   case AMObjType::MIXTURE:
   case AMObjType::MIXTURE_DATA:
