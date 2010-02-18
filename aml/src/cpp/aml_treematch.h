@@ -81,7 +81,7 @@ class AML_TreeMatch : public TreeMatch, public AMModel
                  AMString matching_type,
                  AMString ordered_type,
                  int self_similarity,
-                 Vector_distance& vect_dist,
+                 VectorDistance& vect_dist,
                  double coeff):TreeMatch(mtg,roots,local_functions,matching_type,ordered_type,self_similarity,vect_dist,coeff) {;};
 
   virtual std::ostream& displayOneLine(std::ostream& o) const;
@@ -105,7 +105,7 @@ class AML_TreeMatch_U : public TreeMatch_U, public AMModel
                  AMString mapping_type,
                  AMString mapping,
                  AMString scale_type,
-                 Vector_distance& vect_dist,
+                 VectorDistance& vect_dist,
                  double coeff):TreeMatch_U(mtg,roots,local_functions,matching_type,mapping_type,mapping,scale_type,vect_dist,coeff) {;};
 
   virtual std::ostream& displayOneLine(std::ostream& o) const;
@@ -129,7 +129,7 @@ class AML_TreeMatch_O : public TreeMatch_O, public AMModel
                  AMString mapping_type,
                  AMString mapping,
                  AMString scale_type,
-                 Vector_distance& vect_dist,
+                 VectorDistance& vect_dist,
                  double coeff):TreeMatch_O(mtg,roots,local_functions,matching_type,mapping_type,mapping,scale_type,vect_dist,coeff) {;};
 
   virtual std::ostream& displayOneLine(std::ostream& o) const;
@@ -153,7 +153,7 @@ class AML_TreeMatch_PO : public TreeMatch_PO, public AMModel
                  AMString mapping_type,
                  AMString mapping,
                  AMString scale_type,
-                 Vector_distance& vect_dist,
+                 VectorDistance& vect_dist,
                  double coeff):TreeMatch_PO(mtg,roots,local_functions,matching_type,mapping_type,mapping,scale_type,vect_dist,coeff) {;};
 
   virtual std::ostream& displayOneLine(std::ostream& o) const;
