@@ -89,7 +89,7 @@ enum STAT_ERRORLABEL {
   STAT_MODEL_TYPE_sds ,
   STAT_MODEL_TYPE_DISTRIBUTION_sds ,
   STAT_DATA_TYPE_sds ,
-  STAT_DATA_TYPE_HISTOGRAM_sds ,
+  STAT_DATA_TYPE_FREQUENCY_DISTRIBUTION_sds ,
   STAT_DATA_TYPE_CORRELATION_sds ,
   STAT_DATA_TYPE_TIME_EVENTS_TOPS_sds ,
   ARG_sds ,
@@ -115,9 +115,10 @@ enum STAT_ERRORLABEL {
   POINTWISE_AVERAGE_OUTPUT_sds ,
 
   MODEL_NAME_sd ,
-  NB_DIST_sd ,
+  NB_DISTRIBUTION_sd ,
+  NB_COMPONENT_sd ,
   DISTRIBUTION_NAME_sds ,
-  HISTOGRAM_NAME_sds ,
+  FREQUENCY_DISTRIBUTION_NAME_sds ,
   INF_BOUND_STATUS_sds ,
   PENALTY_TYPE_sds ,
   ESTIMATOR_NAME_sds ,
@@ -128,7 +129,7 @@ enum STAT_ERRORLABEL {
   ALGORITHM_NAME_sds ,
   STRUCTURAL_PARAMETER_sds ,
 
-  NB_HISTO_s ,
+  NB_FREQUENCY_DISTRIBUTION_s ,
   MISSING_TRANSPOSITION_OPTION_s ,
   MISSING_FILE_NAME_OPTION_s ,
   MISSING_ALIGNMENT_FILE_NAME_OPTION_s ,
@@ -156,9 +157,9 @@ enum STAT_ERRORLABEL {
 
 struct STAT_model : public AMModel {
 
-    STAT_interface *pt;
+    StatInterface *pt;
 
-    STAT_model(STAT_interface *ipt) { pt = ipt; }
+    STAT_model(StatInterface *ipt) { pt = ipt; }
     ~STAT_model();
 
     std::ostream& displayOneLine(std::ostream &os) const;
