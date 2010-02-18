@@ -3855,7 +3855,7 @@ static AMObj MTG_TreeMatching(const AMObjVector& args) {
   RWCString scale_type("SingleScale");
   double coeff =.71;
 
-  Vector_distance vect_dist=Vector_distance();
+  VectorDistance vect_dist = VectorDistance();
 
 
   CHECKCOND(active_mtg,NO_MTG_LOADED_ERR);
@@ -3928,7 +3928,7 @@ static AMObj MTG_TreeMatching(const AMObjVector& args) {
       CHECKCONDVA(args[argth+1].tag() ==AMObjType::VECTOR_DISTANCE,
                   genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "TreeMatching", (argth+1)/2+1, "VECTOR_DISTANCE"));
 
-      vect_dist= (*((Vector_distance*)((STAT_model*)args[argth+1].val.p)->pt));
+      vect_dist= (*((VectorDistance*)((STAT_model*)args[argth+1].val.p)->pt));
       //matching_type ="by_weights";
     }
     else  if (*(AMString*)(args[argth].val.p) == "MatchingType") {
