@@ -226,11 +226,11 @@ AMObj STAT_Distribution(const AMObjVector &args)
                           args[0].tag.string().data() , "STRING"));
 
   if (args.length() == 1) {
-    Parametric_model *dist;
-    Format_error error;
+    DiscreteParametricModel *dist;
+    StatError error;
 
 
-    dist = parametric_ascii_read(error , ((AMString*)args[0].val.p)->data());
+    dist = discrete_parametric_ascii_read(error , ((AMString*)args[0].val.p)->data());
 
     if (dist) {
       STAT_model* model = new STAT_model(dist);
@@ -249,7 +249,7 @@ AMObj STAT_Distribution(const AMObjVector &args)
     register int i;
     int ident , inf_bound , sup_bound;
     double parameter , probability;
-    Parametric_model *dist;
+    DiscreteParametricModel *dist;
 
 
     pstr = (AMString*)args[0].val.p;
@@ -290,7 +290,7 @@ AMObj STAT_Distribution(const AMObjVector &args)
       return AMObj(AMObjType::ERROR);
     }
 
-    dist = new Parametric_model(ident , inf_bound , sup_bound , parameter , probability);
+    dist = new DiscreteParametricModel(ident , inf_bound , sup_bound , parameter , probability);
 
     STAT_model* model = new STAT_model(dist);
     return AMObj(AMObjType::DISTRIBUTION , model);
@@ -309,7 +309,7 @@ AMObj STAT_Mixture(const AMObjVector &args)
 
 {
   Mixture *mixt;
-  Format_error error;
+  StatError error;
 
 
   CHECKCONDVA(args.length() >= 1 ,
@@ -330,13 +330,13 @@ AMObj STAT_Mixture(const AMObjVector &args)
     register int i;
     int nb_component = args.length() / 2;
     double weight[MIXTURE_NB_COMPONENT];
-    const Parametric *component[MIXTURE_NB_COMPONENT];
+    const DiscreteParametric *component[MIXTURE_NB_COMPONENT];
 
 
     CHECKCONDVA(args.length() % 2 == 0 ,
                 genAMLError(ERRORMSG(UNEVEN_NB_ARG_s) , "Mixture"));
     CHECKCONDVA((nb_component >= 2) && (nb_component <= MIXTURE_NB_COMPONENT) ,
-                genAMLError(ERRORMSG(NB_DIST_sd) , "Mixture" , MIXTURE_NB_COMPONENT));
+                genAMLError(ERRORMSG(NB_COMPONENT_sd) , "Mixture" , MIXTURE_NB_COMPONENT));
 
     for (i = 0;i < nb_component;i++) {
       if (args[i * 2].tag() != AMObjType::REAL) {
@@ -350,16 +350,16 @@ AMObj STAT_Mixture(const AMObjVector &args)
 
       switch (args[i * 2 + 1].tag()) {
       case AMObjType::DISTRIBUTION :
-        component[i] = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
+        component[i] = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
         break;
       case AMObjType::MIXTURE :
-        component[i] = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
+        component[i] = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
         break;
       case AMObjType::CONVOLUTION :
-        component[i] = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
+        component[i] = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
         break;
       case AMObjType::COMPOUND :
-        component[i] = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
+        component[i] = new DiscreteParametric(*((Distribution*)((Compound*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
         break;
       default :
         component[i] = NULL;
@@ -406,7 +406,7 @@ AMObj STAT_Convolution(const AMObjVector &args)
 
 {
   Convolution *convol;
-  Format_error error;
+  StatError error;
 
 
   CHECKCONDVA(args.length() >= 1 ,
@@ -426,25 +426,25 @@ AMObj STAT_Convolution(const AMObjVector &args)
     bool status = true;
     register int i;
     int nb_dist = args.length();
-    const Parametric *dist[CONVOLUTION_NB_DISTRIBUTION];
+    const DiscreteParametric *dist[CONVOLUTION_NB_DISTRIBUTION];
 
 
     CHECKCONDVA((nb_dist >= 2) && (nb_dist <= CONVOLUTION_NB_DISTRIBUTION) ,
-                genAMLError(ERRORMSG(NB_DIST_sd) , "Convolution" , CONVOLUTION_NB_DISTRIBUTION));
+                genAMLError(ERRORMSG(NB_DISTRIBUTION_sd) , "Convolution" , CONVOLUTION_NB_DISTRIBUTION));
 
     for (i = 0;i < nb_dist;i++) {
       switch (args[i].tag()) {
       case AMObjType::DISTRIBUTION :
-        dist[i] = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[i].val.p)->pt)));
+        dist[i] = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[i].val.p)->pt)));
         break;
       case AMObjType::MIXTURE :
-        dist[i] = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[i].val.p)->pt)));
+        dist[i] = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[i].val.p)->pt)));
         break;
       case AMObjType::CONVOLUTION :
-        dist[i] = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[i].val.p)->pt)));
+        dist[i] = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[i].val.p)->pt)));
         break;
       case AMObjType::COMPOUND :
-        dist[i] = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[i].val.p)->pt)));
+        dist[i] = new DiscreteParametric(*((Distribution*)((Compound*)((STAT_model*)args[i].val.p)->pt)));
         break;
       default :
         dist[i] = NULL;
@@ -491,7 +491,7 @@ AMObj STAT_Compound(const AMObjVector &args)
 
 {
   Compound *cdist;
-  Format_error error;
+  StatError error;
 
 
   CHECKCONDVA(args.length() >= 1 ,
@@ -510,7 +510,7 @@ AMObj STAT_Compound(const AMObjVector &args)
   else {
     bool status = true;
     register int i;
-    Parametric *dist[2];
+    DiscreteParametric *dist[2];
 
 
     CHECKCONDVA(args.length() == 2 ,
@@ -519,16 +519,16 @@ AMObj STAT_Compound(const AMObjVector &args)
     for (i = 0;i < 2;i++) {
       switch (args[i].tag()) {
       case AMObjType::DISTRIBUTION :
-        dist[i] = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[i].val.p)->pt)));
+        dist[i] = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[i].val.p)->pt)));
         break;
       case AMObjType::MIXTURE :
-        dist[i] = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[i].val.p)->pt)));
+        dist[i] = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[i].val.p)->pt)));
         break;
       case AMObjType::CONVOLUTION :
-        dist[i] = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[i].val.p)->pt)));
+        dist[i] = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[i].val.p)->pt)));
         break;
       case AMObjType::COMPOUND :
-        dist[i] = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[i].val.p)->pt)));
+        dist[i] = new DiscreteParametric(*((Distribution*)((Compound*)((STAT_model*)args[i].val.p)->pt)));
         break;
       default :
         dist[i] = NULL;
@@ -566,19 +566,19 @@ AMObj STAT_Compound(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un histogramme a partir d'un objet de type
+ *  Construction d'une loi empirique a partir d'un objet de type
  *  ARRAY(INT) ou a partir d'un fichier.
  *
  *--------------------------------------------------------------*/
 
-AMObj STAT_Histogram(const AMObjVector &args)
+AMObj STAT_FrequencyDistribution(const AMObjVector &args)
 
 {
-  Distribution_data *histo;
+  DiscreteDistributionData *histo;
 
 
   CHECKCONDVA(args.length() == 1 ,
-              genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Histogram"));
+              genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "FrequencyDistribution"));
 
   switch (args[0].tag()) {
 
@@ -590,10 +590,10 @@ AMObj STAT_Histogram(const AMObjVector &args)
 
 
     CHECKCONDVA(parray->entries() > 0 ,
-                genAMLError(ERRORMSG(EMPTY_ARRAY_s) , "Histogram"));
+                genAMLError(ERRORMSG(EMPTY_ARRAY_s) , "FrequencyDistribution"));
 
     CHECKCONDVA(parray->surfaceType() == AMObjType::INTEGER ,
-                genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_sss) , "Histogram" ,
+                genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_sss) , "FrequencyDistribution" ,
                             (parray->surfaceType()).string().data() , "INT"));
 
     nb_element = parray->entries();
@@ -607,14 +607,14 @@ AMObj STAT_Histogram(const AMObjVector &args)
     while (next()) {
       if ((next.key()).tag() != AMObjType::INTEGER) {
         status = false;
-        genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_2_sdss) , "Histogram" , i + 1 ,
+        genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_2_sdss) , "FrequencyDistribution" , i + 1 ,
                     (next.key()).tag.string().data() , "INT");
       }
 
       else {
         if ((next.key()).val.i < 0) {
           status = false;
-          genAMLError(ERRORMSG(ARRAY_ELEMENT_VALUE_sd) , "Histogram" , i + 1);
+          genAMLError(ERRORMSG(ARRAY_ELEMENT_VALUE_sd) , "FrequencyDistribution" , i + 1);
         }
         else {
           element[i] = (next.key()).val.i;
@@ -627,7 +627,7 @@ AMObj STAT_Histogram(const AMObjVector &args)
     delete pnext;
 
     if (status) {
-      histo = new Distribution_data(nb_element , element);
+      histo = new DiscreteDistributionData(nb_element , element);
     }
     delete [] element;
 
@@ -636,32 +636,46 @@ AMObj STAT_Histogram(const AMObjVector &args)
     }
 
     STAT_model* model = new STAT_model(histo);
-    return AMObj(AMObjType::HISTOGRAM , model);
+    return AMObj(AMObjType::FREQUENCY_DISTRIBUTION , model);
   }
 
   case AMObjType::STRING : {
-    Format_error error;
+    StatError error;
 
 
-    histo = histogram_ascii_read(error , ((AMString*)args[0].val.p)->data());
+    histo = frequency_distribution_ascii_read(error , ((AMString*)args[0].val.p)->data());
 
     if (histo) {
       STAT_model* model = new STAT_model(histo);
-      return AMObj(AMObjType::HISTOGRAM , model);
+      return AMObj(AMObjType::FREQUENCY_DISTRIBUTION , model);
     }
     else {
       AMLOUTPUT << "\n" << error;
-      genAMLError(ERRORMSG(STAT_MODULE_s) , "Histogram");
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "FrequencyDistribution");
       return AMObj(AMObjType::ERROR);
     }
   }
 
   default : {
-    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Histogram" ,
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "FrequencyDistribution" ,
                 args[0].tag.string().data() , "ARRAY or STRING");
     return AMObj(AMObjType::ERROR);
   }
   }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une loi empirique a partir d'un objet de type
+ *  ARRAY(INT) ou a partir d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Histogram(const AMObjVector &args)
+
+{
+  return STAT_FrequencyDistribution(args);
 }
 
 
@@ -817,7 +831,7 @@ AMObj STAT_Vectors(const AMObjVector &args)
         **int_vector = NULL;
     double **real_vector = NULL;
     const Array* parray = (Array*)args[0].val.p , *pvector;
-    Format_error error;
+    StatError error;
 
 
     nb_required = 1;
@@ -1048,16 +1062,16 @@ AMObj STAT_Vectors(const AMObjVector &args)
       seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
       break;
     case AMObjType::MARKOVIAN_SEQUENCES :
-      seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+      seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
       break;
     case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-      seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+      seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
       break;
     case AMObjType::SEMI_MARKOV_DATA :
-      seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+      seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
       break;
     case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-      seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+      seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
       break;
     case AMObjType::TOPS :
       seq = (Tops*)((STAT_model*)args[0].val.p)->pt;
@@ -1101,7 +1115,7 @@ AMObj STAT_Vectors(const AMObjVector &args)
   }
 
   if (args[0].tag() == AMObjType::STRING) {
-    Format_error error;
+    StatError error;
 
 
     CHECKCONDVA(args.length() == 1 ,
@@ -1142,8 +1156,8 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
   int nb_required , scale , nb_variable , distance_type = ABSOLUTE_VALUE ,
       variable_type[VECTOR_NB_VARIABLE];
   double *weight;
-  Vector_distance *vector_dist;
-  Format_error error;
+  VectorDistance *vector_dist;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
@@ -1290,7 +1304,7 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  vector_dist = new Vector_distance(nb_variable , variable_type , weight , distance_type);
+  vector_dist = new VectorDistance(nb_variable , variable_type , weight , distance_type);
   delete [] weight;
 
   STAT_model* model = new STAT_model(vector_dist);
@@ -1315,9 +1329,9 @@ AMObj STAT_Renewal(const AMObjVector &args)
   register int i;
   int nb_required , time = DEFAULT_TIME , ident , inf_bound , sup_bound;
   double parameter , probability , scaling_coeff;
-  const Parametric *inter_event , *scaled_inter_event;
+  const DiscreteParametric *inter_event , *scaled_inter_event;
   Renewal *renew;
-  Format_error error;
+  StatError error;
 
 
   nb_required = nb_required_computation(args);
@@ -1375,16 +1389,16 @@ AMObj STAT_Renewal(const AMObjVector &args)
 
     switch (args[0].tag()) {
     case AMObjType::DISTRIBUTION :
-      inter_event = new Parametric(*((Parametric*)((Parametric_model*)((STAT_model*)args[0].val.p)->pt)));
+      inter_event = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[0].val.p)->pt)));
       break;
     case AMObjType::MIXTURE :
-      inter_event = new Parametric(*((Distribution*)((Mixture*)((STAT_model*)args[0].val.p)->pt)));
+      inter_event = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[0].val.p)->pt)));
       break;
     case AMObjType::CONVOLUTION :
-      inter_event = new Parametric(*((Distribution*)((Convolution*)((STAT_model*)args[0].val.p)->pt)));
+      inter_event = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[0].val.p)->pt)));
       break;
     case AMObjType::COMPOUND :
-      inter_event = new Parametric(*((Distribution*)((Compound*)((STAT_model*)args[0].val.p)->pt)));
+      inter_event = new DiscreteParametric(*((Distribution*)((Compound*)((STAT_model*)args[0].val.p)->pt)));
       break;
     default :
       status = false;
@@ -1530,12 +1544,12 @@ AMObj STAT_Renewal(const AMObjVector &args)
     }
 
     else {
-      inter_event = new Parametric(ident , inf_bound , sup_bound , parameter ,
-                                   probability , RENEWAL_THRESHOLD);
+      inter_event = new DiscreteParametric(ident , inf_bound , sup_bound , parameter ,
+                                           probability , RENEWAL_THRESHOLD);
 
       if (scale_option) {
-        // scaled_inter_event = new Parametric(*inter_event , scaling_coeff);
-        scaled_inter_event = new Parametric((Distribution&)*inter_event , scaling_coeff);
+        // scaled_inter_event = new DiscreteParametric(*inter_event , scaling_coeff);
+        scaled_inter_event = new DiscreteParametric((Distribution&)*inter_event , scaling_coeff);
         renew = renewal_building(error , *scaled_inter_event , type , time);
         delete scaled_inter_event;
       }
@@ -1567,15 +1581,15 @@ AMObj STAT_Renewal(const AMObjVector &args)
 /*--------------------------------------------------------------*
  *
  *  Construction d'une structure de donnees renouvellement a partir
- *  d'un ensemble de sequences, d'un histogramme ou d'un fichier.
+ *  d'un ensemble de sequences, d'une loi empirique ou d'un fichier.
  *
  *--------------------------------------------------------------*/
 
 AMObj STAT_TimeEvents(const AMObjVector &args)
 
 {
-  Time_events *timev;
-  Format_error error;
+  TimeEvents *timev;
+  StatError error;
 
 
   CHECKCONDVA(args.length() >= 1 ,
@@ -1726,26 +1740,26 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
     }
   }
 
-  if ((args[0].tag() == AMObjType::HISTOGRAM) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+  if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
-    Histogram *histo;
+    FrequencyDistribution *histo;
 
 
     CHECKCONDVA(args.length() == 2 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "TimeEvents" , 2));
 
     switch (args[0].tag()) {
-    case AMObjType::HISTOGRAM :
-      histo = (Histogram*)((Distribution_data*)((STAT_model*)args[0].val.p)->pt);
+    case AMObjType::FREQUENCY_DISTRIBUTION :
+      histo = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
       break;
     case AMObjType::MIXTURE_DATA :
-      histo = (Histogram*)((Mixture_data*)((STAT_model*)args[0].val.p)->pt);
+      histo = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[0].val.p)->pt);
       break;
     case AMObjType::CONVOLUTION_DATA :
-      histo = (Histogram*)((Convolution_data*)((STAT_model*)args[0].val.p)->pt);
+      histo = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
       break;
     case AMObjType::COMPOUND_DATA :
-      histo = (Histogram*)((Compound_data*)((STAT_model*)args[0].val.p)->pt);
+      histo = (FrequencyDistribution*)((CompoundData*)((STAT_model*)args[0].val.p)->pt);
       break;
     }
 
@@ -1768,7 +1782,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
 
   if (args[0].tag() == AMObjType::STRING) {
     CHECKCONDVA(args.length() == 1 ,
-                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Time_events"));
+                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "TimeEvents"));
 
     timev = time_events_ascii_read(error , ((AMString*)args[0].val.p)->data());
 
@@ -1784,7 +1798,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
   }
 
   genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , 1 , args[0].tag.string().data() ,
-              "SEQUENCES or HISTOGRAM or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA or STRING");
+              "SEQUENCES or FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA or STRING");
   return AMObj(AMObjType::ERROR);
 }
 
@@ -1802,8 +1816,8 @@ AMObj STAT_RenewalData(const AMObjVector &args)
   bool status = true;
   int nb_variable , variable , offset , begin_index , end_index;
   const Sequences *seq;
-  Time_events *timev;
-  Format_error error;
+  TimeEvents *timev;
+  StatError error;
 
 
   CHECKCONDVA(args.length() >= 3 ,
@@ -1814,16 +1828,16 @@ AMObj STAT_RenewalData(const AMObjVector &args)
     seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::MARKOVIAN_SEQUENCES :
-    seq = (Markovian_sequences*)((STAT_model*)args[0].val.p)->pt;
+    seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-    seq = (Variable_order_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::SEMI_MARKOV_DATA :
-    seq = (Semi_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-    seq = (Nonhomogeneous_markov_data*)((STAT_model*)args[0].val.p)->pt;
+    seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   default :
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "RenewalData" , 1 , args[0].tag.string().data() ,
@@ -1899,8 +1913,8 @@ AMObj STAT_VariableOrderMarkov(const AMObjVector &args)
 {
   bool status = true;
   int nb_required , length = DEFAULT_LENGTH;
-  Variable_order_markov *markov;
-  Format_error error;
+  VariableOrderMarkov *markov;
+  StatError error;
 
 
   nb_required = 1;
@@ -1971,8 +1985,8 @@ AMObj STAT_HiddenVariableOrderMarkov(const AMObjVector &args)
 {
   bool status = true;
   int nb_required , length = DEFAULT_LENGTH;
-  Hidden_variable_order_markov *hmarkov;
-  Format_error error;
+  HiddenVariableOrderMarkov *hmarkov;
+  StatError error;
 
 
   nb_required = 1;
@@ -2045,8 +2059,8 @@ AMObj STAT_SemiMarkov(const AMObjVector &args)
   bool status = true , length_option = false , counting_option = false , counting_flag = true;
   register int i;
   int nb_required , length = DEFAULT_LENGTH;
-  Semi_markov *smarkov;
-  Format_error error;
+  SemiMarkov *smarkov;
+  StatError error;
 
 
   nb_required = 1;
@@ -2166,8 +2180,8 @@ AMObj STAT_HiddenSemiMarkov(const AMObjVector &args)
        counting_flag = true , format_option = false , old_format = false;
   register int i;
   int nb_required , length = DEFAULT_LENGTH;
-  Hidden_semi_markov *hsmarkov;
-  Format_error error;
+  HiddenSemiMarkov *hsmarkov;
+  StatError error;
 
 
   nb_required = 1;
@@ -2323,8 +2337,8 @@ AMObj STAT_NonhomogeneousMarkov(const AMObjVector &args)
 {
   bool status = true;
   int nb_required , length = DEFAULT_LENGTH;
-  Nonhomogeneous_markov *markov;
-  Format_error error;
+  NonhomogeneousMarkov *markov;
+  StatError error;
 
 
   nb_required = 1;
@@ -2910,8 +2924,8 @@ AMObj STAT_Sequences(const AMObjVector &args)
       double ***real_sequence;
       const Array *seq_array;
       Sequences *seq;
-      Markovian_sequences *markovian_seq;
-      Format_error error;
+      MarkovianSequences *markovian_seq;
+      StatError error;
 
 
       length = new int[nb_sequence];
@@ -3074,14 +3088,14 @@ AMObj STAT_Sequences(const AMObjVector &args)
 
   case AMObjType::RENEWAL_DATA : {
     Sequences *seq;
-    Markovian_sequences *markovian_seq;
-    Format_error error;
+    MarkovianSequences *markovian_seq;
+    StatError error;
 
 
     CHECKCONDVA(args.length() == 1 ,
                 genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Sequences"));
 
-    seq = new Sequences(*((Renewal_data*)((STAT_model*)args[0].val.p)->pt));
+    seq = new Sequences(*((RenewalData*)((STAT_model*)args[0].val.p)->pt));
 
     markovian_seq = seq->markovian_sequences(error);
     if (markovian_seq) {
@@ -3101,8 +3115,8 @@ AMObj STAT_Sequences(const AMObjVector &args)
     bool status = true , old_format = false;
     int nb_required;
     Sequences *seq;
-    Markovian_sequences *markovian_seq;
-    Format_error error;
+    MarkovianSequences *markovian_seq;
+    StatError error;
 
 
     nb_required = 1;
@@ -3186,8 +3200,8 @@ AMObj STAT_TopParameters(const AMObjVector &args)
   bool status = true;
   int nb_required , max_position = DEFAULT_MAX_POSITION;
   double probability , axillary_probability = D_DEFAULT , rhythm_ratio = D_DEFAULT;
-  Top_parameters *parameters;
-  Format_error error;
+  TopParameters *parameters;
+  StatError error;
 
 
   CHECKCONDVA(args.length() >= 1 ,
@@ -3315,7 +3329,8 @@ AMObj STAT_TopParameters(const AMObjVector &args)
   }
 
   else {
-    parameters = new Top_parameters(probability , axillary_probability , rhythm_ratio , max_position);
+    parameters = new TopParameters(probability , axillary_probability ,
+                                   rhythm_ratio , max_position);
 
     STAT_model* model = new STAT_model(parameters);
     return AMObj(AMObjType::TOP_PARAMETERS , model);
@@ -3346,7 +3361,7 @@ AMObj STAT_Tops(const AMObjVector &args)
     const Array *parray = (Array*)args[0].val.p , *seq_array;
     Sequences *seq;
     Tops *tops;
-    Format_error error;
+    StatError error;
 
 
     nb_required = 1;
@@ -3487,7 +3502,7 @@ AMObj STAT_Tops(const AMObjVector &args)
     bool status = true , old_format = false;
     int nb_required;
     Tops *tops;
-    Format_error error;
+    StatError error;
 
 
     CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
