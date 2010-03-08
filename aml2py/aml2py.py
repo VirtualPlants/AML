@@ -289,7 +289,7 @@ class Aml2Py:
         """ Convert a multi-line exp to a single string """
 
         if s[-1] == '\\': # AML multiline instruction
-	    self.ml.append( s[:-1].strip()+' ' )
+            self.ml.append( s[:-1].strip()+' ' )
             return True
         elif self.ml:
             s= ''.join(self.ml) +  s
