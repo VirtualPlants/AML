@@ -3612,6 +3612,142 @@ AMObj STAT_Round(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
+ *  Changement du pas de regroupement d'un histogramme marginal.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_SelectStep(const AMObjVector &args)
+
+{
+  bool status = true;
+  int nb_variable , variable , offset;
+  double step;
+  Vectors *vec;
+  Sequences *seq;
+  const Histogram *histo;
+  StatError error;
+
+
+  CHECKCONDVA(args.length() >= 2 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "SelectStep"));
+
+  switch (args[0].tag()) {
+  case AMObjType::VECTORS :
+    vec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = vec->get_nb_variable();
+    break;
+  case AMObjType::SEQUENCES :
+    seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = seq->get_nb_variable();
+    break;
+  case AMObjType::MARKOVIAN_SEQUENCES :
+    seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = seq->get_nb_variable();
+    break;
+  case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+    seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = seq->get_nb_variable();
+    break;
+  case AMObjType::SEMI_MARKOV_DATA :
+    seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = seq->get_nb_variable();
+    break;
+  case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+    seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = seq->get_nb_variable();
+    break;
+  default :
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectStep" , 1 , args[0].tag.string().data() ,
+                "VECTORS or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+  }
+
+  if (nb_variable == 1) {
+    offset = 1;
+    variable = 1;
+  }
+
+  else {
+    offset = 2;
+
+    if (args[1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectStep" , 2 ,
+                  args[1].tag.string().data() , "INT");
+    }
+    else {
+      variable = args[1].val.i;
+    }
+  }
+
+  CHECKCONDVA(args.length() == offset + 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "SelectStep" , offset + 1));
+
+  switch (args[offset].tag()) {
+  case AMObjType::INTEGER :
+    step = args[offset].val.i;
+    break;
+  case AMObjType::REAL :
+    step = args[offset].val.r;
+    break;
+  default :
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectStep" , offset + 1 ,
+                args[offset].tag.string().data() , "INT or REAL");
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  if (args[0].tag() == AMObjType::VECTORS) {
+    histo = vec->get_marginal_histogram(variable);
+
+    if (!histo) {
+      genAMLError(ERRORMSG(MARGINAL_HISTOGRAM_s) , "SelectStep");
+      return AMObj(AMObjType::ERROR);
+    }
+
+    status = vec->select_step(error , variable , step);
+
+    if (status) {
+      return AMObj(AMObjType::VOID);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "SelectStep");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  if ((args[0].tag() == AMObjType::SEQUENCES) ||
+      (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
+      (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
+      (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
+      (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
+    histo = seq->get_marginal_histogram(variable);
+
+    if (!histo) {
+      genAMLError(ERRORMSG(MARGINAL_HISTOGRAM_s) , "SelectStep");
+      return AMObj(AMObjType::ERROR);
+    }
+
+    status = seq->select_step(error , variable , step);
+
+    if (status) {
+      return AMObj(AMObjType::VOID);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "SelectStep");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Selection par l'identificateur.
  *
  *--------------------------------------------------------------*/
