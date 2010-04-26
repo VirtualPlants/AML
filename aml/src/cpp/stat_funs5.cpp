@@ -5743,7 +5743,7 @@ AMObj STAT_LumpabilityTest(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  nb_symbol = seq->get_marginal(0)->nb_value;
+  nb_symbol = seq->get_marginal_distribution(0)->nb_value;
 
   if (args[1].tag() != AMObjType::ARRAY) {
     status = false;
