@@ -2653,7 +2653,8 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
   case AMObjType::ARRAY : {
     register int j;
     bool order_option = false , penalty_option = false;
-    int nb_symbol = seq->get_marginal(0)->nb_value , order = 1 , penalty = BIC , *symbol = NULL;
+    int nb_symbol = seq->get_marginal_distribution(0)->nb_value , order = 1 ,
+        penalty = BIC , *symbol = NULL;
 
 
     CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
@@ -4194,7 +4195,7 @@ static AMObj STAT_EstimateNonhomogeneousMarkov(const MarkovianSequences *seq , c
 {
   bool status = true , counting_flag = true;
   register int i , j;
-  int nb_required , nb_state = seq->get_marginal(0)->nb_value , *ident;
+  int nb_required , nb_state = seq->get_marginal_distribution(0)->nb_value , *ident;
   NonhomogeneousMarkov *markov;
   RWCString *pstr;
   StatError error;
