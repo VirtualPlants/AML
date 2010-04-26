@@ -140,6 +140,7 @@ const char *STAT_err_msgs_aml[] = {
 
   "function %s: argument %d: bad clustering method: should be %s" ,
   "function %s: argument %d: bad rounding mode: should be %s" ,
+  "function %s: marginal histogram not built" ,
   "function %s: bad number of classes" ,
   "function %s: argument %d: bad variable index: should be strictly positive" ,
   "function %s: argument %d: bad variable index" ,
@@ -219,6 +220,7 @@ extern AMObj STAT_ValueSelect(const AMObjVector &args);
 
 extern AMObj STAT_VariableScaling(const AMObjVector &args);
 extern AMObj STAT_Round(const AMObjVector &args);
+extern AMObj STAT_SelectStep(const AMObjVector &args);
 extern AMObj STAT_SelectIndividual(const AMObjVector &args);
 extern AMObj STAT_SelectVariable(const AMObjVector &args);
 extern AMObj STAT_MergeVariable(const AMObjVector &args);
@@ -3334,6 +3336,9 @@ void installSTATModule()
 
   type[0] = AMObjType::ANY;
   installFNode("Round" , STAT_Round , 1 , type , AMObjType::VECTORS);
+
+  type[0] = AMObjType::ANY;
+  installFNode("SelectStep" , STAT_SelectStep , 1 , type , AMObjType::VECTORS);
 
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::INTEGER;
