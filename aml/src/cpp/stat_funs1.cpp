@@ -140,7 +140,6 @@ const char *STAT_err_msgs_aml[] = {
 
   "function %s: argument %d: bad clustering method: should be %s" ,
   "function %s: argument %d: bad rounding mode: should be %s" ,
-  "function %s: marginal histogram not built" ,
   "function %s: bad number of classes" ,
   "function %s: argument %d: bad variable index: should be strictly positive" ,
   "function %s: argument %d: bad variable index" ,
