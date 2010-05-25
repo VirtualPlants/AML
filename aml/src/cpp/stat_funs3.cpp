@@ -3624,7 +3624,6 @@ AMObj STAT_SelectStep(const AMObjVector &args)
   double step;
   Vectors *vec;
   Sequences *seq;
-  const Histogram *histo;
   StatError error;
 
 
@@ -3701,13 +3700,6 @@ AMObj STAT_SelectStep(const AMObjVector &args)
   }
 
   if (args[0].tag() == AMObjType::VECTORS) {
-    histo = vec->get_marginal_histogram(variable);
-
-    if (!histo) {
-      genAMLError(ERRORMSG(MARGINAL_HISTOGRAM_s) , "SelectStep");
-      return AMObj(AMObjType::ERROR);
-    }
-
     status = vec->select_step(error , variable , step);
 
     if (status) {
@@ -3725,13 +3717,6 @@ AMObj STAT_SelectStep(const AMObjVector &args)
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
-    histo = seq->get_marginal_histogram(variable);
-
-    if (!histo) {
-      genAMLError(ERRORMSG(MARGINAL_HISTOGRAM_s) , "SelectStep");
-      return AMObj(AMObjType::ERROR);
-    }
-
     status = seq->select_step(error , variable , step);
 
     if (status) {
