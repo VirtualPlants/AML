@@ -1,8 +1,6 @@
 from openalea.core.alea import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-# !!important!! import dataflowview, which defines the fields of each nodes
-from openalea.grapheditor import dataflowview
 
 pm = PackageManager()
 pm.init(verbose=False)

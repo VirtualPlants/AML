@@ -1,6 +1,4 @@
 from openalea.core.alea import *
-# !!important!! import dataflowview, which defines the fields of each nodes
-from openalea.grapheditor import dataflowview
 
 
 pm = PackageManager()
