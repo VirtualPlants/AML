@@ -11,7 +11,7 @@ metadata = read_metainfo('metainfo.ini', verbose=True)
 for key,value in metadata.iteritems():
     exec("%s = '%s'" % (key, value))
 
- 
+
 build_prefix = "build-scons"
 
 # Scons build directory
