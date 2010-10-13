@@ -283,7 +283,8 @@ static AMObj STAT_EstimateMixture(const FrequencyDistribution *histo , const AMO
     case AMObjType::STRING : {
       pstr = (AMString*)args[2 + i].val.p;
       for (j = BINOMIAL;j <= NEGATIVE_BINOMIAL;j++) {
-        if ((*pstr == STAT_distribution_word[j]) || (*pstr == STAT_distribution_letter[j])) {
+        if ((*pstr == STAT_discrete_distribution_word[j]) ||
+            (*pstr == STAT_discrete_distribution_letter[j])) {
           estimate[i] = true;
           ident[i] = j;
           pcomponent[i] = new DiscreteParametric(0 , j);
@@ -1323,8 +1324,8 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
        nb_iteration_option = false , inter_event_mean_option = false , penalty_option = false ,
        weight_option = false , outside_option = false;
   register int i;
-  int nb_required , estimator = LIKELIHOOD , nb_iter = I_DEFAULT , mean_computation = COMPUTED ,
-      penalty = SECOND_DIFFERENCE , outside = ZERO;
+  int nb_required , estimator = LIKELIHOOD , nb_iter = I_DEFAULT ,
+      mean_computation_method = COMPUTED , penalty = SECOND_DIFFERENCE , outside = ZERO;
   double weight = D_DEFAULT;
   const DiscreteParametric *iinter_event = NULL;
   DiscreteParametricModel *inter_event = NULL;
@@ -1501,13 +1502,13 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "Computed") {
-              mean_computation = COMPUTED;
+              mean_computation_method = COMPUTED;
             }
             else if (*pstr == "Estimated") {
-              mean_computation = ESTIMATED;
+              mean_computation_method = ESTIMATED;
             }
             else if (*pstr == "OneStepLate") {
-              mean_computation = ONE_STEP_LATE;
+              mean_computation_method = ONE_STEP_LATE;
             }
             else {
               status = false;
@@ -1641,10 +1642,10 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
 
   if (estimator == PENALIZED_LIKELIHOOD) {
     if (!inter_event_mean_option) {
-      mean_computation = ONE_STEP_LATE;
+      mean_computation_method = ONE_STEP_LATE;
     }
 
-    else if (mean_computation == COMPUTED) {
+    else if (mean_computation_method == COMPUTED) {
       status = false;
       genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Estimate" , "Estimator" , "InterEventMean");
     }
@@ -1676,7 +1677,7 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
                                                                                                               *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[1].val.p)->pt)) ,
                                                                                                               *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[2].val.p)->pt)) ,
                                                                                                               histo , *iinter_event , estimator ,
-                                                                                                              nb_iter , mean_computation ,
+                                                                                                              nb_iter , mean_computation_method ,
                                                                                                               weight , penalty , outside);
       }
       else {
@@ -1684,7 +1685,7 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
                                                                                                               *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[1].val.p)->pt)) ,
                                                                                                               *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[2].val.p)->pt)) ,
                                                                                                               histo , estimator ,
-                                                                                                              nb_iter , mean_computation ,
+                                                                                                              nb_iter , mean_computation_method ,
                                                                                                               weight , penalty , outside);
       }
       break;
@@ -1694,12 +1695,12 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
       if (iinter_event) {
         renew = ((RenewalData*)((STAT_model*)args[0].val.p)->pt)->estimation(error , AMLOUTPUT ,
                                                                              *iinter_event , estimator ,
-                                                                             nb_iter , mean_computation ,
+                                                                             nb_iter , mean_computation_method ,
                                                                              weight , penalty , outside);
       }
       else {
         renew = ((RenewalData*)((STAT_model*)args[0].val.p)->pt)->estimation(error , AMLOUTPUT , estimator ,
-                                                                             nb_iter , mean_computation ,
+                                                                             nb_iter , mean_computation_method ,
                                                                              weight , penalty , outside);
       }
       break;
@@ -1747,7 +1748,7 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
        outside_option = false;
   register int i;
   int nb_required , estimator = LIKELIHOOD , nb_iter = I_DEFAULT , equilibrium_estimator = COMPLETE_LIKELIHOOD ,
-      mean_computation = COMPUTED , penalty = SECOND_DIFFERENCE , outside = ZERO;
+      mean_computation_method = COMPUTED , penalty = SECOND_DIFFERENCE , outside = ZERO;
   double weight = D_DEFAULT;
   const DiscreteParametric *inter_event = NULL;
   Renewal *renew;
@@ -1959,13 +1960,13 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "Computed") {
-              mean_computation = COMPUTED;
+              mean_computation_method = COMPUTED;
             }
             else if (*pstr == "Estimated") {
-              mean_computation = ESTIMATED;
+              mean_computation_method = ESTIMATED;
             }
             else if (*pstr == "OneStepLate") {
-              mean_computation = ONE_STEP_LATE;
+              mean_computation_method = ONE_STEP_LATE;
             }
             else {
               status = false;
@@ -2111,10 +2112,10 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
 
   if (estimator == PENALIZED_LIKELIHOOD) {
     if (!inter_event_mean_option) {
-      mean_computation = ONE_STEP_LATE;
+      mean_computation_method = ONE_STEP_LATE;
     }
 
-    else if (mean_computation == COMPUTED) {
+    else if (mean_computation_method == COMPUTED) {
       status = false;
       genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Estimate" , "Estimator" , "InterEventMean");
     }
@@ -2140,12 +2141,12 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
   if (status) {
     if (inter_event) {
       renew = timev->estimation(error , AMLOUTPUT , type , *inter_event , estimator ,
-                                nb_iter , equilibrium_estimator , mean_computation ,
+                                nb_iter , equilibrium_estimator , mean_computation_method ,
                                 weight , penalty , outside);
     }
     else {
       renew = timev->estimation(error , AMLOUTPUT , type , estimator , nb_iter ,
-                                equilibrium_estimator , mean_computation , weight ,
+                                equilibrium_estimator , mean_computation_method , weight ,
                                 penalty , outside);
     }
   }
@@ -2818,7 +2819,8 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
   bool status = true , counting_option = false , counting_flag = true , estimator_option = false ,
        nb_iteration_option = false , occupancy_mean_option = false;
   register int i;
-  int nb_required , estimator = COMPLETE_LIKELIHOOD , nb_iter = I_DEFAULT , mean_computation = COMPUTED;
+  int nb_required , estimator = COMPLETE_LIKELIHOOD , nb_iter = I_DEFAULT ,
+      mean_computation_method = COMPUTED;
   SemiMarkov *smarkov;
   StatError error;
 
@@ -2967,10 +2969,10 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "Computed") {
-              mean_computation = COMPUTED;
+              mean_computation_method = COMPUTED;
             }
             else if (*pstr == "OneStepLate") {
-              mean_computation = ONE_STEP_LATE;
+              mean_computation_method = ONE_STEP_LATE;
             }
             else {
               status = false;
@@ -3014,7 +3016,7 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
   }
 
   smarkov = seq->semi_markov_estimation(error , AMLOUTPUT , type , estimator , counting_flag ,
-                                        nb_iter , mean_computation);
+                                        nb_iter , mean_computation_method);
 
   if (smarkov) {
     STAT_model* model = new STAT_model(smarkov);
@@ -3039,10 +3041,12 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
 
 {
   RWCString *pstr;
-  bool status = true , algorithm_option = false , counting_option = false , counting_flag = true ,
+  bool status = true , algorithm_option = false , common_dispersion_option = false ,
+       common_dispersion = false , counting_option = false , counting_flag = true ,
        global_initial_transition_option = false , global_initial_transition = true ,
-       nb_iteration_option = false , min_nb_state_sequence_option = false , max_nb_state_sequence_option = false ,
-       parameter_option = false , state_sequences_option = false , state_sequence = true;
+       nb_iteration_option = false , min_nb_state_sequence_option = false ,
+       max_nb_state_sequence_option = false , parameter_option = false ,
+       state_sequences_option = false , state_sequence = true;
   register int i;
   int nb_required , algorithm = FORWARD_BACKWARD , nb_iter = I_DEFAULT ,
       min_nb_state_sequence = MIN_NB_STATE_SEQUENCE , max_nb_state_sequence = MAX_NB_STATE_SEQUENCE;
@@ -3057,7 +3061,7 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
               (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
               (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
               (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ||
-              (args.length() == nb_required + 16) ,
+              (args.length() == nb_required + 16) || (args.length() == nb_required + 18) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
   // argument obligatoire  
@@ -3107,6 +3111,31 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
               genAMLError(ERRORMSG(ALGORITHM_NAME_sds) , "Estimate" ,
                           nb_required + i + 1 , "EM or MCEM");
             }
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "CommonDispersion") {
+        switch (common_dispersion_option) {
+
+        case false : {
+          common_dispersion_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            common_dispersion = args[nb_required + i * 2 + 1].val.b;
           }
           break;
         }
@@ -3302,7 +3331,7 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
       else {
         status = false;
         genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Estimate" ,
-                    nb_required + i + 1 , "Algorithm or Counting or GlobalInitialTransition or NbIteration or MinNbStateSequence or MaxNbStateSequence or Parameter or StateSequences");
+                    nb_required + i + 1 , "Algorithm or CommonDispersion or Counting or GlobalInitialTransition or NbIteration or MinNbStateSequence or MaxNbStateSequence or Parameter or StateSequences");
       }
     }
   }
@@ -3331,12 +3360,14 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
   switch (algorithm) {
   case FORWARD_BACKWARD :
     hmarkov = seq->hidden_variable_order_markov_estimation(error , AMLOUTPUT , *ihmarkov ,
-                                                           global_initial_transition , counting_flag ,
+                                                           global_initial_transition ,
+                                                           common_dispersion , counting_flag ,
                                                            state_sequence , nb_iter);
     break;
   case FORWARD_BACKWARD_SAMPLING :
     hmarkov = seq->hidden_variable_order_markov_stochastic_estimation(error , AMLOUTPUT , *ihmarkov ,
                                                                       global_initial_transition ,
+                                                                      common_dispersion ,
                                                                       min_nb_state_sequence ,
                                                                       max_nb_state_sequence , parameter ,
                                                                       counting_flag , state_sequence , nb_iter);
@@ -3365,14 +3396,15 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
 
 {
   RWCString *pstr;
-  bool status = true , algorithm_option = false , counting_option = false , counting_flag = true ,
+  bool status = true , algorithm_option = false , common_dispersion_option = false ,
+       common_dispersion = false , counting_option = false , counting_flag = true ,
        estimator_option = false , nb_iteration_option = false , min_nb_state_sequence_option = false ,
        max_nb_state_sequence_option = false , parameter_option = false , occupancy_mean_option = false ,
        state_sequences_option = false , state_sequence = true;
   register int i;
   int nb_required , algorithm = FORWARD_BACKWARD , estimator = COMPLETE_LIKELIHOOD , nb_iter = I_DEFAULT ,
       min_nb_state_sequence = MIN_NB_STATE_SEQUENCE , max_nb_state_sequence = MAX_NB_STATE_SEQUENCE ,
-      mean_computation = COMPUTED;
+      mean_computation_method = COMPUTED;
   double parameter = NB_STATE_SEQUENCE_PARAMETER;
   HiddenSemiMarkov *hsmarkov;
   StatError error;
@@ -3394,7 +3426,8 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                 (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
                 (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
                 (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ||
-                (args.length() == nb_required + 16) || (args.length() == nb_required + 18) ,
+                (args.length() == nb_required + 16) || (args.length() == nb_required + 18) ||
+                (args.length() == nb_required + 20) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
     // arguments optionnels
@@ -3433,6 +3466,31 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                 genAMLError(ERRORMSG(ALGORITHM_NAME_sds) , "Estimate" ,
                             nb_required + i + 1 , "EM or MCEM");
               }
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "CommonDispersion") {
+          switch (common_dispersion_option) {
+
+          case false : {
+            common_dispersion_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              common_dispersion = args[nb_required + i * 2 + 1].val.b;
             }
             break;
           }
@@ -3658,10 +3716,10 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
               if (*pstr == "Computed") {
-                mean_computation = COMPUTED;
+                mean_computation_method = COMPUTED;
               }
               else if (*pstr == "OneStepLate") {
-                mean_computation = ONE_STEP_LATE;
+                mean_computation_method = ONE_STEP_LATE;
               }
               else {
                 status = false;
@@ -3708,7 +3766,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
         else {
           status = false;
           genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Estimate" , nb_required + i + 1 ,
-                      "Algorithm or Counting or InitialOccupancyMean or Estimator or NbIteration or MinNbStateSequence or MaxNbStateSequence or Parameter or OccupancyMean or StateSequences");
+                      "Algorithm or CommonDispersion or Counting or InitialOccupancyMean or Estimator or NbIteration or MinNbStateSequence or MaxNbStateSequence or Parameter or OccupancyMean or StateSequences");
         }
       }
     }
@@ -3811,16 +3869,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
     switch (algorithm) {
     case FORWARD_BACKWARD :
       hsmarkov = seq->hidden_semi_markov_estimation(error , AMLOUTPUT , type , nb_state ,
-                                                    left_right , estimator , counting_flag ,
-                                                    state_sequence , occupancy_mean ,
-                                                    nb_iter , mean_computation);
+                                                    left_right , occupancy_mean , common_dispersion ,
+                                                    estimator , counting_flag , state_sequence ,
+                                                    nb_iter , mean_computation_method);
       break;
     case FORWARD_BACKWARD_SAMPLING :
       hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , AMLOUTPUT , type , nb_state ,
-                                                               left_right , min_nb_state_sequence ,
-                                                               max_nb_state_sequence , parameter ,
-                                                               estimator , counting_flag , state_sequence ,
-                                                               occupancy_mean , nb_iter);
+                                                               left_right , occupancy_mean , common_dispersion ,
+                                                               min_nb_state_sequence , max_nb_state_sequence ,
+                                                               parameter , estimator , counting_flag ,
+                                                               state_sequence , nb_iter);
       break;
     }
   }
@@ -3835,7 +3893,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                 (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
                 (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
                 (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ||
-                (args.length() == nb_required + 16) ,
+                (args.length() == nb_required + 16) || (args.length() == nb_required + 18) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
     ihsmarkov = (HiddenSemiMarkov*)((STAT_model*)args[2].val.p)->pt;
@@ -3876,6 +3934,31 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                 genAMLError(ERRORMSG(ALGORITHM_NAME_sds) , "Estimate" ,
                             nb_required + i + 1 , "EM or MCEM");
               }
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "CommonDispersion") {
+          switch (common_dispersion_option) {
+
+          case false : {
+            common_dispersion_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              common_dispersion = args[nb_required + i * 2 + 1].val.b;
             }
             break;
           }
@@ -4071,10 +4154,10 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
               if (*pstr == "Computed") {
-                mean_computation = COMPUTED;
+                mean_computation_method = COMPUTED;
               }
               else if (*pstr == "OneStepLate") {
-                mean_computation = ONE_STEP_LATE;
+                mean_computation_method = ONE_STEP_LATE;
               }
               else {
                 status = false;
@@ -4121,7 +4204,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
         else {
           status = false;
           genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Estimate" , nb_required + i + 1 ,
-                      "Algorithm or Counting or Estimator or NbIteration or MinNbStateSequence or MaxNbStateSequence or Parameter or OccupancyMean or StateSequences");
+                      "Algorithm or CommonDispersion or Counting or Estimator or NbIteration or MinNbStateSequence or MaxNbStateSequence or Parameter or OccupancyMean or StateSequences");
         }
       }
     }
@@ -4153,15 +4236,15 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
 
     switch (algorithm) {
     case FORWARD_BACKWARD :
-      hsmarkov = seq->hidden_semi_markov_estimation(error , AMLOUTPUT , *ihsmarkov ,
+      hsmarkov = seq->hidden_semi_markov_estimation(error , AMLOUTPUT , *ihsmarkov , common_dispersion ,
                                                     estimator , counting_flag , state_sequence ,
-                                                    nb_iter , mean_computation);
+                                                    nb_iter , mean_computation_method);
       break;
     case FORWARD_BACKWARD_SAMPLING :
       hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , AMLOUTPUT , *ihsmarkov ,
-                                                               min_nb_state_sequence , max_nb_state_sequence ,
-                                                               parameter , estimator , counting_flag ,
-                                                               state_sequence , nb_iter);
+                                                               common_dispersion , min_nb_state_sequence ,
+                                                               max_nb_state_sequence , parameter , estimator ,
+                                                               counting_flag , state_sequence , nb_iter);
       break;
     }
   }
@@ -4510,7 +4593,8 @@ AMObj STAT_Estimate(const AMObjVector &args)
 
     pstr = (AMString*)args[1].val.p;
     for (i = NONPARAMETRIC;i <= NEGATIVE_BINOMIAL;i++) {
-      if ((*pstr == STAT_distribution_word[i]) || (*pstr == STAT_distribution_letter[i])) {
+      if ((*pstr == STAT_discrete_distribution_word[i]) ||
+          (*pstr == STAT_discrete_distribution_letter[i])) {
         ident = i;
         model = STATM_DISTRIBUTION;
         break;
