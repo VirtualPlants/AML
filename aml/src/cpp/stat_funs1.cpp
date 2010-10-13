@@ -42,6 +42,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "tool/dirnames.h"
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/mixture.h"
@@ -60,8 +62,6 @@
 #include "sequence_analysis/hidden_semi_markov.h"
 #include "sequence_analysis/nonhomogeneous_markov.h"
 #include "sequence_analysis/tops.h"
-
-#include "tool/dirnames.h"
 
 #include "aml/ammodel.h"
 #include "aml/parseraml.h"
@@ -177,6 +177,7 @@ const char *STAT_err_msgs_aml[] = {
   "function %s: argument %d: bad span" ,
   "function %s: argument %d: bad change-point model: should be %s" ,
   "function %s: argument %d: bad segmentation output: should be %s" ,
+  "function %s: bad segmentation output: should be %s" ,
   "function %s: argument %d: bad number of segments estimation: should be %s"
 };
 
@@ -286,6 +287,7 @@ extern AMObj STAT_LumpabilityTest(const AMObjVector &args);
 extern AMObj STAT_Thresholding(const AMObjVector &args);
 extern AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args);
 extern AMObj STAT_ComputeStateSequences(const AMObjVector &args);
+extern AMObj STAT_BuildAuxiliaryVariable(const AMObjVector &args);
 
 
 
@@ -1107,7 +1109,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
         break;
       default :
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , 1 , args[0].tag.string().data() ,
-                    "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI_MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+                    "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI-MARKOV or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
         return AMObj(AMObjType::ERROR);
       }
 
@@ -1121,7 +1123,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 
       else {
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , 3 , args[2].tag.string().data() ,
-                    "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV");
+                    "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI-MARKOV");
         return AMObj(AMObjType::ERROR);
       }
     }
@@ -2057,7 +2059,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
         break;
       default :
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , 1 , args[0].tag.string().data() ,
-                    "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI_MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+                    "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI-MARKOV or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
         return AMObj(AMObjType::ERROR);
       }
 
@@ -2071,7 +2073,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
 
       else {
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , 4 , args[3].tag.string().data() ,
-                    "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV");
+                    "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI-MARKOV");
         return AMObj(AMObjType::ERROR);
       }
     }
@@ -2993,7 +2995,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
             break;
           default :
             genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , 1 , args[0].tag.string().data() ,
-                        "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI_MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+                        "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI-MARKOV or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
             return AMObj(AMObjType::ERROR);
           }
 
@@ -3007,7 +3009,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
 
           else {
             genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , 3 , args[2].tag.string().data() ,
-                        "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI_MARKOV");
+                        "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI-MARKOV");
             return AMObj(AMObjType::ERROR);
           }
         }
@@ -3533,4 +3535,7 @@ void installSTATModule()
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::ANY;
   installFNode("ComputeStateSequences" , STAT_ComputeStateSequences , 2 , type , AMObjType::VARIABLE_ORDER_MARKOV_DATA);
+
+  type[0] = AMObjType::ANY;
+  installFNode("BuildAuxiliaryVariable" , STAT_BuildAuxiliaryVariable , 1 , type , AMObjType::MARKOVIAN_SEQUENCES);
 }
