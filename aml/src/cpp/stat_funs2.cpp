@@ -254,7 +254,8 @@ AMObj STAT_Distribution(const AMObjVector &args)
 
     pstr = (AMString*)args[0].val.p;
     for (i = BINOMIAL;i <= UNIFORM;i++) {
-      if ((*pstr == STAT_distribution_word[i]) || (*pstr == STAT_distribution_letter[i])) {
+      if ((*pstr == STAT_discrete_distribution_word[i]) ||
+          (*pstr == STAT_discrete_distribution_letter[i])) {
         ident = i;
         break;
       }
@@ -1347,7 +1348,8 @@ AMObj STAT_Renewal(const AMObjVector &args)
     if (nb_required > 1) {
       pstr = (AMString*)args[0].val.p;
       for (i = BINOMIAL;i <= NEGATIVE_BINOMIAL;i++) {
-        if ((*pstr == STAT_distribution_word[i]) || (*pstr == STAT_distribution_letter[i])) {
+        if ((*pstr == STAT_discrete_distribution_word[i]) ||
+            (*pstr == STAT_discrete_distribution_letter[i])) {
           ident = i;
           break;
         }
