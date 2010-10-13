@@ -4690,71 +4690,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
   nb_variable = iseq->get_nb_variable();
 
-  if ((nb_required == 4) && (args[3].tag() == AMObjType::VECTOR_DISTANCE)) {
-    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
-
-    // arguments obligatoires
-
-    if (args[1].tag() != AMObjType::INTEGER) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , 2 ,
-                  args[2].tag.string().data() , "INT");
-    }
-    if (args[2].tag() != AMObjType::INTEGER) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , 3 ,
-                  args[2].tag.string().data() , "INT");
-    }
-
-    output = SEGMENT;
-
-    // argument optionnel
-
-    if (args.length() == nb_required + 2) {
-      if (args[nb_required].tag() != AMObjType::OPTION) {
-        status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + 1 ,
-                    args[nb_required].tag.string().data() , "OPTION");
-      }
-      else {
-        if (*((AMString*)args[nb_required].val.p) != "Output") {
-          status = false;
-          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Segmentation" , nb_required + 1 ,
-                      "Output");
-        }
-      }
-
-      if (args[nb_required + 1].tag() != AMObjType::STRING) {
-        status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + 1 ,
-                    args[nb_required + 1].tag.string().data() , "STRING");
-      }
-      else {
-        pstr = (AMString*)args[nb_required + 1].val.p;
-        if (*pstr == "ChangePoint") {
-          output = CHANGE_POINT;
-        }
-        else if (*pstr == "Segment") {
-          output = SEGMENT;
-        }
-        else {
-          status = false;
-          genAMLError(ERRORMSG(STATE_PROFILE_TYPE_sds) , "Segmentation" ,
-                      nb_required + 1 , "ChangePoint or Segment");
-        }
-      }
-    }
-
-    if (!status) {
-      return AMObj(AMObjType::ERROR);
-    }
-
-    seq = iseq->segmentation(error , args[1].val.i , args[2].val.i ,
-                             *((VectorDistance*)((STAT_model*)args[3].val.p)->pt) , AMLOUTPUT , output);
-  }
-
-  else if (args[1].tag() == AMObjType::ARRAY) {
+  if (args[1].tag() == AMObjType::ARRAY) {
 
     // arguments obligatoires
 
@@ -5068,10 +5004,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                 else if (*pstr == "DivisionResidual") {
                   output = DIVISION_RESIDUAL;
                 }
+                else if (*pstr == "Entropy") {
+                  output = SEGMENTATION_ENTROPY;
+                }
+                else if (*pstr == "Divergence") {
+                  output = SEGMENTATION_DIVERGENCE;
+                }
                 else {
                   status = false;
                   genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + i + 1 ,
-                              "Sequence or Residual");
+                              "Sequence or Residual or Entropy or Divergence");
                 }
               }
               break;
@@ -5093,9 +5035,27 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         }
       }
 
-      if ((nb_segment_estimation) && (output_option)) {
-        status = false;
-        genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Segmentation" , "Output");
+      if (output_option) {
+        switch (nb_segment_estimation) {
+
+        case false : {
+          if ((output == SEGMENTATION_ENTROPY) || (output == SEGMENTATION_DIVERGENCE)) {
+            status = false;
+            genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
+                        "Sequence or Residual");
+          }
+          break;
+        }
+
+        case true : {
+          if ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL)) {
+            status = false;
+            genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
+                        "Sequence or Entropy or Divergence");
+          }
+          break;
+        }
+        }
       }
 
       if (!status) {
@@ -5127,10 +5087,12 @@ AMObj STAT_Segmentation(const AMObjVector &args)
       }
 
       case true : {
-        seq = iseq->segmentation(error , AMLOUTPUT , args[1].val.i , args[2].val.i , model_type);
+        seq = iseq->segmentation(error , AMLOUTPUT , args[1].val.i , args[2].val.i ,
+                                 model_type , output);
         break;
       }
       }
+
       delete [] model_type;
     }
 
@@ -5884,7 +5846,7 @@ AMObj STAT_Thresholding(const AMObjVector &args)
 
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Thresholding" ,
                 1 , args[0].tag.string().data() ,
-                "VARIABLE_ORDER_MARKOV or HIDDEN_VARIABLE_ORDER_MARKOV or SEMI-MARKOV or HIDDEN_SEMI_MARKOV");
+                "VARIABLE_ORDER_MARKOV or HIDDEN_VARIABLE_ORDER_MARKOV or SEMI-MARKOV or HIDDEN_SEMI-MARKOV");
   }
 
   return AMObj(AMObjType::ERROR);
@@ -6150,5 +6112,48 @@ AMObj STAT_ComputeStateSequences(const AMObjVector &args)
                 "HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI-MARKOV");
     return AMObj(AMObjType::ERROR);
   }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction des variables auxilliaires correspondant a la restauration
+ *  des sequences d'etats optimales pour des modeles markoviens caches.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_BuildAuxiliaryVariable(const AMObjVector &args)
+
+{
+  MarkovianSequences *seq;
+  StatError error;
+
+
+  CHECKCONDVA(args.length() == 1 ,
+              genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "BuildAuxiliaryVariable"));
+
+  switch (args[0].tag()) {
+
+  case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+    seq = ((VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt)->build_auxiliary_variable(error);
+    break;
+  case AMObjType::SEMI_MARKOV_DATA :
+    seq = ((SemiMarkovData*)((STAT_model*)args[0].val.p)->pt)->build_auxiliary_variable(error);
+    break;
+  default :
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "BuildAuxiliaryVariable" , 1 , args[0].tag.string().data() ,
+                "VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA");
+    return AMObj(AMObjType::ERROR);
+  }
+
+  if (seq) {
+    STAT_model* model = new STAT_model(seq);
+    return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "BuildAuxiliaryVariable");
+    return AMObj(AMObjType::ERROR);
   }
 }
