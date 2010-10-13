@@ -3612,7 +3612,8 @@ AMObj STAT_Round(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
- *  Changement du pas de regroupement d'un histogramme marginal.
+ *  Changement du pas de regroupement de l'histogramme marginal et
+ *  des histogrammes d'observation pour une variable donnee.
  *
  *--------------------------------------------------------------*/
 
@@ -3624,6 +3625,7 @@ AMObj STAT_SelectStep(const AMObjVector &args)
   double step;
   Vectors *vec;
   Sequences *seq;
+  MarkovianSequences *markovian_seq;
   StatError error;
 
 
@@ -3640,20 +3642,20 @@ AMObj STAT_SelectStep(const AMObjVector &args)
     nb_variable = seq->get_nb_variable();
     break;
   case AMObjType::MARKOVIAN_SEQUENCES :
-    seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
-    nb_variable = seq->get_nb_variable();
+    markovian_seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = markovian_seq->get_nb_variable();
     break;
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-    seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
-    nb_variable = seq->get_nb_variable();
+    markovian_seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = markovian_seq->get_nb_variable();
     break;
   case AMObjType::SEMI_MARKOV_DATA :
-    seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
-    nb_variable = seq->get_nb_variable();
+    markovian_seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = markovian_seq->get_nb_variable();
     break;
   case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-    seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
-    nb_variable = seq->get_nb_variable();
+    markovian_seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = markovian_seq->get_nb_variable();
     break;
   default :
     status = false;
@@ -3712,12 +3714,24 @@ AMObj STAT_SelectStep(const AMObjVector &args)
     }
   }
 
-  if ((args[0].tag() == AMObjType::SEQUENCES) ||
-      (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
+  if (args[0].tag() == AMObjType::SEQUENCES) {
+    status = seq->select_step(error , variable , step);
+
+    if (status) {
+      return AMObj(AMObjType::VOID);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "SelectStep");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  if ((args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
-    status = seq->select_step(error , variable , step);
+    status = markovian_seq->select_step(error , variable , step);
 
     if (status) {
       return AMObj(AMObjType::VOID);
