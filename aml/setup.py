@@ -26,7 +26,7 @@ install_requires = [binary_deps('vplants.amlobj'),
                     ]
 
 if sys.platform.startswith('win'):
-    install_requires += [binary_deps("boostpython"),"gnuplot"]
+    install_requires += [binary_deps("boost"),"gnuplot"]
 
 setup_requires = install_requires + ['openalea.deploy']
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
           
         
           # Packages
-          namespace_packages = [namespace],
+          namespace_packages = ['openalea', 'vplants'],
           create_namespaces = True,
 
           packages=[namespace+".aml", namespace+".aml_wralea", 
