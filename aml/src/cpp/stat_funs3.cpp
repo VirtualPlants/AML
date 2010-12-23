@@ -3622,7 +3622,7 @@ AMObj STAT_SelectStep(const AMObjVector &args)
 {
   bool status = true;
   int nb_variable , variable , offset;
-  double step;
+  double step , min_value = D_INF;
   Vectors *vec;
   Sequences *seq;
   MarkovianSequences *markovian_seq;
@@ -3681,8 +3681,10 @@ AMObj STAT_SelectStep(const AMObjVector &args)
     }
   }
 
-  CHECKCONDVA(args.length() == offset + 1 ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "SelectStep" , offset + 1));
+  CHECKCONDVA((args.length() == offset + 1) || (args.length() == offset + 3) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "SelectStep"));
+
+  // argument obligatoire
 
   switch (args[offset].tag()) {
   case AMObjType::INTEGER :
@@ -3697,12 +3699,42 @@ AMObj STAT_SelectStep(const AMObjVector &args)
                 args[offset].tag.string().data() , "INT or REAL");
   }
 
+  // argument optionnel
+
+  if (args.length() == offset + 3) {
+    if (args[offset + 1].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectStep" , offset + 2 ,
+                  args[offset + 1].tag.string().data() , "OPTION");
+    }
+    else {
+      if (*((AMString*)args[offset + 1].val.p) != "MinValue") {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "SelectStep" , offset + 2 ,
+                    "MinValue");
+      }
+    }
+
+    switch (args[offset + 2].tag()) {
+    case AMObjType::INTEGER :
+      min_value = args[offset + 2].val.i;
+      break;
+    case AMObjType::REAL :
+      min_value = args[offset + 2].val.r;
+      break;
+    default :
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectStep" , offset + 2 ,
+                  args[offset + 2].tag.string().data() , "INT or REAL");
+    }
+  }
+
   if (!status) {
     return AMObj(AMObjType::ERROR);
   }
 
   if (args[0].tag() == AMObjType::VECTORS) {
-    status = vec->select_step(error , variable , step);
+    status = vec->select_step(error , variable , step , min_value);
 
     if (status) {
       return AMObj(AMObjType::VOID);
@@ -3715,7 +3747,7 @@ AMObj STAT_SelectStep(const AMObjVector &args)
   }
 
   if (args[0].tag() == AMObjType::SEQUENCES) {
-    status = seq->select_step(error , variable , step);
+    status = seq->select_step(error , variable , step , min_value);
 
     if (status) {
       return AMObj(AMObjType::VOID);
@@ -3731,7 +3763,7 @@ AMObj STAT_SelectStep(const AMObjVector &args)
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
-    status = markovian_seq->select_step(error , variable , step);
+    status = markovian_seq->select_step(error , variable , step , min_value);
 
     if (status) {
       return AMObj(AMObjType::VOID);
