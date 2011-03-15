@@ -23,7 +23,7 @@ setup(name=name,
       license=license,
 
       py_modules=['aml2py'], 
-
+      package_dir = {'':'src'}, 
       # entry_points
       entry_points = { 
         "console_scripts": ['aml2py = aml2py:main'],

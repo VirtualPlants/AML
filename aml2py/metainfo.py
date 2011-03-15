@@ -1,7 +1,7 @@
 
 [metainfo]
-version = 0.8.0
-release = 0.8
+version = 0.9.0
+release = 0.9
 project = vplants
 name = aml2py
 description = Convert aml files into Python files.
