@@ -1683,12 +1683,12 @@ int SLArray::plotWrite(const char* prefix,
 
 #ifndef STL_EXTENSION
     delete file_name;
-#endif    
+#endif
   }
 
 #ifndef STL_EXTENSION
   delete data_file_name;
-#endif    
+#endif
 
   return status;
 
@@ -1933,7 +1933,7 @@ AMObj SLArray::plot(GP_window& window, const AMObjVector& args) const
     os << "chmod 666 " << Plot_prefix << "*" << ends;
     system(os.str().c_str());
     os.str("");
-    
+
 #endif
 #endif
   }
@@ -1947,7 +1947,7 @@ AMObj SLArray::plot(GP_window& window, const AMObjVector& args) const
 // option ios::nocreate is, in std, the default option
 //  in_file.open(buffer);
 // #else
-  
+
   // prefix= Plot_prefix;
   string name= string( Plot_prefix )+".plot";
   in_file.open( name.c_str() );
@@ -1955,7 +1955,7 @@ AMObj SLArray::plot(GP_window& window, const AMObjVector& args) const
 // #endif
 
   if (in_file.fail()) {
-    genAMLError(ERRORMSG(K_F_FILE_ERR_sss) , "Plot", "temporary file", name);
+    genAMLError(ERRORMSG(K_F_FILE_ERR_sss) , "Plot", "temporary file", name.c_str());
     return AMObj(AMObjType::ERROR);
   }
 
@@ -2127,7 +2127,7 @@ AMObj SLArray::save(const AMObjVector& args) const {
       data_file_name=os.str().c_str();
 #endif
       ofstream datafile(data_file_name);
-      
+
       if (!datafile) {
 
         cerr << "file error: cannot open file " << data_file_name << endl;
