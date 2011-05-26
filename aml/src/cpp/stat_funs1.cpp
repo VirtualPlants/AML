@@ -1687,11 +1687,17 @@ AMObj STAT_model::save(const AMObjVector &args) const
         if (*format_pstr == "Column") {
           format = 'c';
         }
+        else if (*format_pstr == "Vector") {
+          format = 'v';
+        }
         else if (*format_pstr == "Line") {
           format = 'l';
         }
         else if (*format_pstr == "Array") {
           format = 'a';
+        }
+        else if (*format_pstr == "PosteriorProbability") {
+          format = 'p';
         }
         else {
           status = false;
