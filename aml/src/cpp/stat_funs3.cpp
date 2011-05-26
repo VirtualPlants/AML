@@ -5304,7 +5304,9 @@ AMObj STAT_SegmentationExtract(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  bool status = true , keep = true;
+  bool status = true , mode_option = false , keep = true , concatenation_option = false ,
+       concatenation = false;
+  register int i;
   int nb_required , nb_value = I_DEFAULT , *value = NULL;
   const Sequences *iseq;
   Sequences *seq;
@@ -5314,7 +5316,8 @@ AMObj STAT_SegmentationExtract(const AMObjVector &args)
 
   nb_required = 3;
 
-  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+              (args.length() == nb_required + 4) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "SegmentationExtract"));
 
   // arguments obligatoires
@@ -5373,43 +5376,91 @@ AMObj STAT_SegmentationExtract(const AMObjVector &args)
   }
   }
 
-  // argument optionnel
+  // arguments optionnels
 
-  if (args.length() == nb_required + 2) {
-    if (args[nb_required].tag() != AMObjType::OPTION) {
+  for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+    if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SegmentationExtract" , nb_required + 1 ,
-                  args[nb_required].tag.string().data() , "OPTION");
-    }
-    else {
-      if (*((AMString*)args[nb_required].val.p) != "Mode") {
-        status = false;
-        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "SegmentationExtract" , nb_required + 1 , "Mode");
-      }
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SegmentationExtract" , nb_required + i + 1 ,
+                  args[nb_required + i * 2].tag.string().data() , "OPTION");
     }
 
-    if (args[nb_required + 1].tag() != AMObjType::STRING) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SegmentationExtract" , nb_required + 1 ,
-                  args[nb_required + 1].tag.string().data() , "STRING");
-    }
     else {
-      pstr = (AMString*)args[nb_required + 1].val.p;
-      if (*pstr == "Keep") {
-        keep = true;
+      pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+      if (*pstr == "Mode") {
+        switch (mode_option) {
+
+        case false : {
+          mode_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SegmentationExtract" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+          }
+
+          else {
+            pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+            if (*pstr == "Keep") {
+              keep = true;
+            }
+            else if (*pstr == "Reject") {
+              keep = false;
+            }
+            else {
+              status = false;
+              genAMLError(ERRORMSG(ARG_sds) , "SegmentationExtract" ,
+                          nb_required + i + 1 , "Keep or Reject");
+            }
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "SegmentationExtract" , nb_required + i + 1);
+          break;
+        }
+        }
       }
-      else if (*pstr == "Reject") {
-        keep = false;
+
+      else if (*pstr == "Concatenation") {
+        switch (concatenation_option) {
+
+        case false : {
+          concatenation_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SegmentationExtract" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            concatenation = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "SegmentationExtract" , nb_required + i + 1);
+          break;
+        }
+        }
       }
+
       else {
         status = false;
-        genAMLError(ERRORMSG(ARG_sds) , "SegmentationExtract" , nb_required + 1 , "Keep or Reject");
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "SegmentationExtract" , nb_required + i + 1 ,
+                    "Mode or Concatenation");
       }
     }
   }
 
   if (status) {
-    seq = iseq->segmentation_extract(error , args[1].val.i , nb_value , value , keep);
+    seq = iseq->segmentation_extract(error , args[1].val.i , nb_value , value ,
+                                     keep , concatenation);
   }
 
   delete [] value;
