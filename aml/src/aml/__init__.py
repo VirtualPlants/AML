@@ -301,6 +301,7 @@ VtxList
 WaitViewer    
 
 AddAbsorbingRun
+BuildAuxiliaryVariable
 Cluster
 Clustering
 Compare
@@ -324,9 +325,11 @@ Distribution
 Estimate
 ExtractData
 ExtractDistribution
+ExtractFrequencyDistribution
 ExtractHistogram
 ExtractVectors
 Fit
+FrequencyDistribution
 HiddenSemiMarkov
 HiddenVariableOrderMarkov
 Histogram
@@ -353,6 +356,7 @@ Round
 Segmentation
 SegmentationExtract
 SelectIndividual
+SelectStep
 SelectVariable
 SemiMarkov
 Sequences
@@ -366,6 +370,7 @@ TimeScaling
 TimeSelect
 ToDistanceMatrix
 ToDistribution
+ToFrequencyDistribution
 ToHistogram
 TopParameters
 Tops
