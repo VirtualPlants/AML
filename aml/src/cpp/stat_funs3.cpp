@@ -2428,10 +2428,10 @@ AMObj STAT_Cluster(const AMObjVector &args)
             vec = ivec->cluster(error , variable , nb_class + 1 , real_limit);
           }
         }
-      }
 
-      delete [] int_limit;
-      delete [] real_limit;
+        delete [] int_limit;
+        delete [] real_limit;
+      }
 
       if (!status) {
         return AMObj(AMObjType::ERROR);
@@ -2517,10 +2517,10 @@ AMObj STAT_Cluster(const AMObjVector &args)
             seq = iseq->cluster(error , variable , nb_class + 1 , real_limit);
           }
         }
-      }
 
-      delete [] int_limit;
-      delete [] real_limit;
+        delete [] int_limit;
+        delete [] real_limit;
+      }
 
       if (!status) {
         return AMObj(AMObjType::ERROR);
@@ -2612,6 +2612,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
         if ((args.length() != nb_required) && (args.length() != nb_required + 2)) {
           delete [] int_limit;
           delete [] real_limit;
+
           genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Cluster");
           return AMObj(AMObjType::ERROR);
         }
