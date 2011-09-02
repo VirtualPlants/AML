@@ -4862,6 +4862,9 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
           }
+          else if (*pstr == "BayesianPoisson") {
+            model_type[i] = BAYESIAN_POISSON_CHANGE;
+          }
           else if (*pstr == "Ordinal") {
             model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
           }
@@ -4905,6 +4908,9 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           }
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
+          }
+          else if (*pstr == "BayesianPoisson") {
+            model_type[i] = BAYESIAN_POISSON_CHANGE;
           }
           else if (*pstr == "Ordinal") {
             model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
