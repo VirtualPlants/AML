@@ -4326,7 +4326,7 @@ AMObj STAT_MergeVariable(const AMObjVector &args)
       }
       else {
         AMLOUTPUT << "\n" << error;
-        genAMLError(ERRORMSG(STAT_MODULE_s) , "Merge");
+        genAMLError(ERRORMSG(STAT_MODULE_s) , "MergeVariable");
         return AMObj(AMObjType::ERROR);
       }
     }
@@ -6050,7 +6050,8 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
 {
   RWCString *pstr;
   char format = 'a' , *file_name = NULL;
-  bool status = true , standard_deviation_option = false , standard_deviation = false ,
+  bool status = true , circular_option = false , circular = false ,
+       standard_deviation_option = false , standard_deviation = false ,
        output_option = false , file_name_option = false , format_option = false;
   register int i;
   int nb_required , output = SEQUENCE;
@@ -6063,7 +6064,7 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
               (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
-              (args.length() == nb_required + 8) ,
+              (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "PointwiseAverage"));
 
   // argument obligatoire
@@ -6103,7 +6104,32 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
     else {
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
-      if (*pstr == "StandardDeviation") {
+      if (*pstr == "Circular") {
+        switch (circular_option) {
+
+        case false : {
+          circular_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "PointwiseAverage" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            circular = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "StandardDeviation") {
         switch (standard_deviation_option) {
 
         case false : {
@@ -6231,9 +6257,14 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
       else {
         status = false;
         genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "PointwiseAverage" , nb_required + i + 1 ,
-                    "StandardDeviation or Output or FileName or Format");
+                    "Circular or StandardDeviation or Output or FileName or Format");
       }
     }
+  }
+
+  if ((circular) && (output == STANDARDIZED_RESIDUAL)) {
+    status = false;
+    genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "PointwiseAverage" , "Circular" , "Output");
   }
 
   if ((format_option) && (!file_name_option)) {
@@ -6245,7 +6276,8 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->pointwise_average(error , standard_deviation , output , file_name , format);
+  seq = iseq->pointwise_average(error , circular , standard_deviation ,
+                                output , file_name , format);
 
   if (seq) {
     STAT_model* model = new STAT_model(seq);
