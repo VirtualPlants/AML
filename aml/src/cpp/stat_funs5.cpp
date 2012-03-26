@@ -79,6 +79,8 @@ extern int* buildIntArray(const AMObjVector &args , int arg_index , const char *
 extern double* buildRealArray(const AMObjVector &args , int arg_index , const char *function ,
                               int output_index , int &nb_element , bool filter);
 
+extern AMObj STAT_ThresholdingData(const AMObjVector &args);
+
 
 
 /*--------------------------------------------------------------*
@@ -5782,7 +5784,7 @@ AMObj STAT_LumpabilityTest(const AMObjVector &args)
  *
  *--------------------------------------------------------------*/
 
-AMObj STAT_Thresholding(const AMObjVector &args)
+static AMObj STAT_ThresholdingProbability(const AMObjVector &args)
 
 {
   bool status = true;
@@ -5862,6 +5864,29 @@ AMObj STAT_Thresholding(const AMObjVector &args)
   }
 
   return AMObj(AMObjType::ERROR);
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Application d'un seuil.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Thresholding(const AMObjVector &args)
+
+{
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::SEQUENCES) ||
+      (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
+      (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
+      (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
+      (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
+    return STAT_ThresholdingData(args);
+  }
+
+  else {
+    return STAT_ThresholdingProbability(args);
+  }
 }
 
 
