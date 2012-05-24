@@ -19,6 +19,8 @@ scons_parameters=["build_prefix="+build_prefix]
 
 
 # platform dependencies
+install_requires=[]
+"""
 install_requires = [binary_deps('vplants.amlobj'), 
                     binary_deps('vplants.sequence_analysis'),
                     binary_deps('vplants.tree_matching'), 
@@ -27,7 +29,7 @@ install_requires = [binary_deps('vplants.amlobj'),
 
 if sys.platform.startswith('win'):
     install_requires += [binary_deps("boost"),"gnuplot"]
-
+"""
 setup_requires = install_requires + ['openalea.deploy']
 
 if __name__ == '__main__':
@@ -84,7 +86,7 @@ if __name__ == '__main__':
 
           # Dependencies
           setup_requires = setup_requires ,
-          install_requires = install_requires,
+#          install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
 
           # entry_points
