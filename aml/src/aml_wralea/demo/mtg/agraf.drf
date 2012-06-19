@@ -1,6 +1,6 @@
 # Dressing file for apple trees
 
-SMBPath = ../../SMBFiles
+SMBPath = ../../../../database/SMBFiles
 
 SMBModel entrenoeud = nentn103
 SMBModel entrenoeud2 = nentn104

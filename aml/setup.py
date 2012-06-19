@@ -27,8 +27,6 @@ install_requires = [binary_deps('vplants.amlobj'),
                     binary_deps('vplants.mtg'), 
                     ]
 
-if sys.platform.startswith('win'):
-    install_requires += [binary_deps("boost"),"gnuplot"]
 """
 setup_requires = install_requires + ['openalea.deploy']
 

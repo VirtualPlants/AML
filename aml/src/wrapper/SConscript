@@ -15,7 +15,7 @@ if env['compiler'] == 'mingw':
 
 LIBS = ['vpamlobj','vpaml','vptool']
 
-env.EnableQt4Modules( [ 'QtCore', 'QtGui', 'QtOpenGL', 'Qt3Support' , 'QtNetwork', 'QtSql', 'QtXml' ])
+env.EnableQt4Modules( [ 'QtCore', 'QtGui', 'QtOpenGL', 'QtNetwork', 'QtSql', 'QtXml' ])
 
 # STAT module
 LIBS += ['vpstat_tool','vpsequence']
