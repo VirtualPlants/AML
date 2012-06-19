@@ -1,0 +1,11 @@
+vplants-aml2py (1.0.1~ppa1) precise; urgency=low
+
+  *  Release 1.0 on precise  
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Sun, 25 Mar 2012 16:34:47 +0200
+
+vplants-aml2py (1.0.0-1) unstable; urgency=low
+
+  * source package automatically created by stdeb 0.6.0+git
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 12 Jan 2012 18:20:00 +0100
