@@ -175,7 +175,7 @@ def py_semimarkov( filename, length=20, counting=True ):
 #//////////////////////////////////////////////////////////////////////////////
 
 def py_histogram( seq = [] ):
-    """\
+    """
     Histogram([int]) -> Histogram
     Input:
         list of int
