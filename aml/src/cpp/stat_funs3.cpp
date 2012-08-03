@@ -1314,6 +1314,9 @@ AMObj STAT_ExtractVectors(const AMObjVector &args)
   else if (*pstr == "FirstOccurrence") {
     type = FIRST_OCCURRENCE;
   }
+  else if (*pstr == "Sojourn") {
+    type = SOJOURN_TIME;
+  }
   else if (*pstr == "NbRun") {
     type = NB_RUN;
   }
@@ -5784,9 +5787,8 @@ AMObj STAT_Difference(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = NULL;
   bool status = true , variable_option = false , first_element_option = false ,
-       first_element = false , file_name_option = false;
+       first_element = false , normalization_option = false , normalization = false;
   register int i;
   int nb_required , variable = I_DEFAULT;
   const Sequences *iseq;
@@ -5798,7 +5800,7 @@ AMObj STAT_Difference(const AMObjVector &args)
   nb_required = 1;
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
-              (args.length() == nb_required + 4) ,
+              (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Difference"));
 
   // argument obligatoire
@@ -5888,10 +5890,35 @@ AMObj STAT_Difference(const AMObjVector &args)
         }
       }
 
+      else if (*pstr == "Normalization") {
+        switch (normalization_option) {
+
+        case false : {
+          normalization_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Difference" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            normalization = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Difference" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
       else {
         status = false;
         genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Difference" , nb_required + i + 1 ,
-                    "Variable or FirstElement");
+                    "Variable or FirstElement or Normalization");
       }
     }
   }
@@ -5900,7 +5927,7 @@ AMObj STAT_Difference(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->difference(error , variable , first_element);
+  seq = iseq->difference(error , variable , first_element , normalization);
 
   if (seq) {
     markovian_seq = seq->markovian_sequences(error);
