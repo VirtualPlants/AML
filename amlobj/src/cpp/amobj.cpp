@@ -147,11 +147,11 @@ RWCString AMObjType::string() const {
   case AMObjType::DISTRIBUTION:
     stg = "DISTRIBUTION";
     break;
-  case AMObjType::MIXTURE:
-    stg = "MIXTURE";
+  case AMObjType::DISCRETE_MIXTURE:
+    stg = "DISCRETE_MIXTURE";
     break;
-  case AMObjType::MIXTURE_DATA:
-    stg = "MIXTURE_DATA";
+  case AMObjType::DISCRETE_MIXTURE_DATA:
+    stg = "DISCRETE_MIXTURE_DATA";
     break;
   case AMObjType::CONVOLUTION:
     stg = "CONVOLUTION";
@@ -342,8 +342,8 @@ AMObj::AMObj(AMObjType t, AMModel* p) {
 
          t==AMObjType::FREQUENCY_DISTRIBUTION ||
          t==AMObjType::DISTRIBUTION ||
-         t==AMObjType::MIXTURE ||
-         t==AMObjType::MIXTURE_DATA ||
+         t==AMObjType::DISCRETE_MIXTURE ||
+         t==AMObjType::DISCRETE_MIXTURE_DATA ||
          t==AMObjType::CONVOLUTION ||
          t==AMObjType::CONVOLUTION_DATA ||
          t==AMObjType::COMPOUND ||
@@ -474,8 +474,8 @@ Boolean AMObj::operator==(const AMObj& rec) const {
 
       case AMObjType::FREQUENCY_DISTRIBUTION:
       case AMObjType::DISTRIBUTION:
-      case AMObjType::MIXTURE:
-      case AMObjType::MIXTURE_DATA:
+      case AMObjType::DISCRETE_MIXTURE:
+      case AMObjType::DISCRETE_MIXTURE_DATA:
       case AMObjType::CONVOLUTION:
       case AMObjType::CONVOLUTION_DATA:
       case AMObjType::COMPOUND:
@@ -815,8 +815,8 @@ ostream& AMObj::printValue(ostream& o, int line_size) const {
 
   case AMObjType::FREQUENCY_DISTRIBUTION:
   case AMObjType::DISTRIBUTION:
-  case AMObjType::MIXTURE:
-  case AMObjType::MIXTURE_DATA:
+  case AMObjType::DISCRETE_MIXTURE:
+  case AMObjType::DISCRETE_MIXTURE_DATA:
   case AMObjType::CONVOLUTION:
   case AMObjType::CONVOLUTION_DATA:
   case AMObjType::COMPOUND:
@@ -989,8 +989,8 @@ size_t hashAMObj(const AMObj& v) {
 
   case AMObjType::FREQUENCY_DISTRIBUTION:
   case AMObjType::DISTRIBUTION:
-  case AMObjType::MIXTURE:
-  case AMObjType::MIXTURE_DATA:
+  case AMObjType::DISCRETE_MIXTURE:
+  case AMObjType::DISCRETE_MIXTURE_DATA:
   case AMObjType::CONVOLUTION:
   case AMObjType::CONVOLUTION_DATA:
   case AMObjType::COMPOUND:
