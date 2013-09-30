@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -40,7 +40,7 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
-#include "stat_tool/mixture.h"
+#include "stat_tool/discrete_mixture.h"
 #include "stat_tool/convolution.h"
 #include "stat_tool/compound.h"
 #include "stat_tool/vectors.h"
@@ -306,24 +306,24 @@ AMObj STAT_Distribution(const AMObjVector &args)
  *
  *--------------------------------------------------------------*/
 
-AMObj STAT_Mixture(const AMObjVector &args)
+AMObj STAT_DiscreteMixture(const AMObjVector &args)
 
 {
-  Mixture *mixt;
+  DiscreteMixture *mixt;
   StatError error;
 
 
   CHECKCONDVA(args.length() >= 1 ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Mixture"));
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "DiscreteMixture"));
 
   if (args[0].tag() == AMObjType::STRING) {
     CHECKCONDVA(args.length() == 1 ,
-                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Mixture"));
+                genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "DiscreteMixture"));
     CHECKCONDVA(args[0].tag() == AMObjType::STRING ,
-                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Mixture" ,
+                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "DiscreteMixture" ,
                             args[0].tag.string().data() , "STRING"));
 
-    mixt = mixture_ascii_read(error , ((AMString*)args[0].val.p)->data());
+    mixt = discrete_mixture_ascii_read(error , ((AMString*)args[0].val.p)->data());
   }
 
   else {
@@ -335,14 +335,14 @@ AMObj STAT_Mixture(const AMObjVector &args)
 
 
     CHECKCONDVA(args.length() % 2 == 0 ,
-                genAMLError(ERRORMSG(UNEVEN_NB_ARG_s) , "Mixture"));
+                genAMLError(ERRORMSG(UNEVEN_NB_ARG_s) , "DiscreteMixture"));
     CHECKCONDVA((nb_component >= 2) && (nb_component <= MIXTURE_NB_COMPONENT) ,
-                genAMLError(ERRORMSG(NB_COMPONENT_sd) , "Mixture" , MIXTURE_NB_COMPONENT));
+                genAMLError(ERRORMSG(NB_COMPONENT_sd) , "DiscreteMixture" , MIXTURE_NB_COMPONENT));
 
     for (i = 0;i < nb_component;i++) {
       if (args[i * 2].tag() != AMObjType::REAL) {
         status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Mixture" , i * 2 + 1 ,
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "DiscreteMixture" , i * 2 + 1 ,
                     args[i * 2].tag.string().data() , "REAL");
       }
       else {
@@ -353,8 +353,8 @@ AMObj STAT_Mixture(const AMObjVector &args)
       case AMObjType::DISTRIBUTION :
         component[i] = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
         break;
-      case AMObjType::MIXTURE :
-        component[i] = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
+      case AMObjType::DISCRETE_MIXTURE :
+        component[i] = new DiscreteParametric(*((Distribution*)((DiscreteMixture*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
         break;
       case AMObjType::CONVOLUTION :
         component[i] = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[i * 2 + 1].val.p)->pt)));
@@ -365,14 +365,14 @@ AMObj STAT_Mixture(const AMObjVector &args)
       default :
         component[i] = NULL;
         status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Mixture" , i * 2 + 2 , args[i * 2 + 1].tag.string().data() ,
-                    "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "DiscreteMixture" , i * 2 + 2 , args[i * 2 + 1].tag.string().data() ,
+                    "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
         break;
       }
     }
 
     if (status) {
-      mixt = mixture_building(error , nb_component , weight , component);
+      mixt = discrete_mixture_building(error , nb_component , weight , component);
     }
 
     for (i = 0;i < nb_component;i++) {
@@ -386,11 +386,11 @@ AMObj STAT_Mixture(const AMObjVector &args)
 
   if (mixt) {
     STAT_model* model = new STAT_model(mixt);
-    return AMObj(AMObjType::MIXTURE , model);
+    return AMObj(AMObjType::DISCRETE_MIXTURE , model);
   }
   else {
     AMLOUTPUT << "\n" << error;
-    genAMLError(ERRORMSG(STAT_MODULE_s) , "Mixture");
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "DiscreteMixture");
     return AMObj(AMObjType::ERROR);
   }
 }
@@ -438,8 +438,8 @@ AMObj STAT_Convolution(const AMObjVector &args)
       case AMObjType::DISTRIBUTION :
         dist[i] = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[i].val.p)->pt)));
         break;
-      case AMObjType::MIXTURE :
-        dist[i] = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[i].val.p)->pt)));
+      case AMObjType::DISCRETE_MIXTURE :
+        dist[i] = new DiscreteParametric(*((Distribution*)((DiscreteMixture*)((STAT_model*)args[i].val.p)->pt)));
         break;
       case AMObjType::CONVOLUTION :
         dist[i] = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[i].val.p)->pt)));
@@ -451,7 +451,7 @@ AMObj STAT_Convolution(const AMObjVector &args)
         dist[i] = NULL;
         status = false;
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Convolution" , i + 1 , args[i].tag.string().data() ,
-                    "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+                    "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
         break;
       }
     }
@@ -522,8 +522,8 @@ AMObj STAT_Compound(const AMObjVector &args)
       case AMObjType::DISTRIBUTION :
         dist[i] = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[i].val.p)->pt)));
         break;
-      case AMObjType::MIXTURE :
-        dist[i] = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[i].val.p)->pt)));
+      case AMObjType::DISCRETE_MIXTURE :
+        dist[i] = new DiscreteParametric(*((Distribution*)((DiscreteMixture*)((STAT_model*)args[i].val.p)->pt)));
         break;
       case AMObjType::CONVOLUTION :
         dist[i] = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[i].val.p)->pt)));
@@ -535,7 +535,7 @@ AMObj STAT_Compound(const AMObjVector &args)
         dist[i] = NULL;
         status = false;
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Compound" , i + 1 , args[i].tag.string().data() ,
-                    "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+                    "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
         break;
       }
     }
@@ -1393,8 +1393,8 @@ AMObj STAT_Renewal(const AMObjVector &args)
     case AMObjType::DISTRIBUTION :
       inter_event = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[0].val.p)->pt)));
       break;
-    case AMObjType::MIXTURE :
-      inter_event = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[0].val.p)->pt)));
+    case AMObjType::DISCRETE_MIXTURE :
+      inter_event = new DiscreteParametric(*((Distribution*)((DiscreteMixture*)((STAT_model*)args[0].val.p)->pt)));
       break;
     case AMObjType::CONVOLUTION :
       inter_event = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[0].val.p)->pt)));
@@ -1405,7 +1405,7 @@ AMObj STAT_Renewal(const AMObjVector &args)
     default :
       status = false;
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Renewal" , 1 , args[0].tag.string().data() ,
-                  "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+                  "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
       break;
     }
 
@@ -1597,7 +1597,9 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
   CHECKCONDVA(args.length() >= 1 ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "TimeEvents"));
 
-  if (args[0].tag() == AMObjType::SEQUENCES) {
+  if ((args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
+      (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) || (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
+      (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     RWCString *pstr;
     bool status = true , previous_date_option = false , next_date_option = false;
     register int i;
@@ -1606,7 +1608,24 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
     Sequences *seq;
 
 
-    seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
+    switch (args[0].tag()) {
+    case AMObjType::SEQUENCES :
+      seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::MARKOVIAN_SEQUENCES :
+      seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+      seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::SEMI_MARKOV_DATA :
+      seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+      seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    }
+
     nb_variable = seq->get_nb_variable();
     offset = (nb_variable == 1 ? 1 : 2);
 
@@ -1742,7 +1761,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
     }
   }
 
-  if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+  if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
     FrequencyDistribution *histo;
 
@@ -1754,8 +1773,8 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
     case AMObjType::FREQUENCY_DISTRIBUTION :
       histo = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
       break;
-    case AMObjType::MIXTURE_DATA :
-      histo = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[0].val.p)->pt);
+    case AMObjType::DISCRETE_MIXTURE_DATA :
+      histo = (FrequencyDistribution*)((DiscreteMixtureData*)((STAT_model*)args[0].val.p)->pt);
       break;
     case AMObjType::CONVOLUTION_DATA :
       histo = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
@@ -1800,7 +1819,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
   }
 
   genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , 1 , args[0].tag.string().data() ,
-              "SEQUENCES or FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA or STRING");
+              "SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or FREQUENCY_DISTRIBUTION or DISCRETE_MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA or STRING");
   return AMObj(AMObjType::ERROR);
 }
 
