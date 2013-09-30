@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -46,7 +46,7 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
-#include "stat_tool/mixture.h"
+#include "stat_tool/discrete_mixture.h"
 #include "stat_tool/convolution.h"
 #include "stat_tool/compound.h"
 #include "stat_tool/vectors.h"
@@ -183,7 +183,7 @@ const char *STAT_err_msgs_aml[] = {
 
 
 extern AMObj STAT_Distribution(const AMObjVector &args);
-extern AMObj STAT_Mixture(const AMObjVector &args);
+extern AMObj STAT_DiscreteMixture(const AMObjVector &args);
 extern AMObj STAT_Convolution(const AMObjVector &args);
 extern AMObj STAT_Compound(const AMObjVector &args);
 extern AMObj STAT_FrequencyDistribution(const AMObjVector &args);
@@ -229,15 +229,18 @@ extern AMObj STAT_NbEventSelect(const AMObjVector &args);
 extern AMObj STAT_TimeScaling(const AMObjVector &args);
 extern AMObj STAT_TimeSelect(const AMObjVector &args);
 
+extern AMObj STAT_ShiftVariable(const AMObjVector &args);
 extern AMObj STAT_LengthSelect(const AMObjVector &args);
 extern AMObj STAT_RemoveRun(const AMObjVector &args);
 extern AMObj STAT_Reverse(const AMObjVector &args);
 extern AMObj STAT_RemoveIndexParameter(const AMObjVector &args);
+extern AMObj STAT_ExplicitIndexParameter(const AMObjVector &args);
 extern AMObj STAT_IndexParameterSelect(const AMObjVector &args);
 extern AMObj STAT_IndexParameterExtract(const AMObjVector &args);
 extern AMObj STAT_SegmentationExtract(const AMObjVector &args);
 extern AMObj STAT_Cumulate(const AMObjVector &args);
 extern AMObj STAT_Difference(const AMObjVector &args);
+extern AMObj STAT_SequenceNormalization(const AMObjVector &args);
 extern AMObj STAT_MovingAverage(const AMObjVector &args);
 extern AMObj STAT_PointwiseAverage(const AMObjVector &args);
 extern AMObj STAT_RecurrenceTimeSequences(const AMObjVector &args);
@@ -765,7 +768,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
     if ((args[0].tag() != AMObjType::DISTRIBUTION) && (args[0].tag() != AMObjType::FREQUENCY_DISTRIBUTION) &&
-        (args[0].tag() != AMObjType::MIXTURE) && (args[0].tag() != AMObjType::MIXTURE_DATA) &&
+        (args[0].tag() != AMObjType::DISCRETE_MIXTURE) && (args[0].tag() != AMObjType::DISCRETE_MIXTURE_DATA) &&
         (args[0].tag() != AMObjType::CONVOLUTION) && (args[0].tag() != AMObjType::CONVOLUTION_DATA) &&
         (args[0].tag() != AMObjType::COMPOUND) && (args[0].tag() != AMObjType::COMPOUND_DATA) &&
         (args[0].tag() != AMObjType::VECTORS) && (args[0].tag() != AMObjType::REGRESSION) &&
@@ -862,7 +865,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       return AMObj(AMObjType::ERROR);
     }
 
-    if ((args[0].tag() == AMObjType::DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE) ||
+    if ((args[0].tag() == AMObjType::DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE) ||
         (args[0].tag() == AMObjType::CONVOLUTION) || (args[0].tag() == AMObjType::COMPOUND)) {
       Distribution *dist;
 
@@ -871,8 +874,8 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       case AMObjType::DISTRIBUTION :
         dist = (Distribution*)((DiscreteParametricModel*)((STAT_model*)args[0].val.p)->pt);
         break;
-      case AMObjType::MIXTURE :
-        dist = (Distribution*)((Mixture*)((STAT_model*)args[0].val.p)->pt);
+      case AMObjType::DISCRETE_MIXTURE :
+        dist = (Distribution*)((DiscreteMixture*)((STAT_model*)args[0].val.p)->pt);
         break;
       case AMObjType::CONVOLUTION :
         dist = (Distribution*)((Convolution*)((STAT_model*)args[0].val.p)->pt);
@@ -885,7 +888,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       dist->survival_ascii_write(AMLOUTPUT);
     }
 
-    else if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+    else if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
              (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
       FrequencyDistribution *histo;
 
@@ -894,8 +897,8 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       case AMObjType::FREQUENCY_DISTRIBUTION :
         histo = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
         break;
-      case AMObjType::MIXTURE_DATA :
-        histo = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[0].val.p)->pt);
+      case AMObjType::DISCRETE_MIXTURE_DATA :
+        histo = (FrequencyDistribution*)((DiscreteMixtureData*)((STAT_model*)args[0].val.p)->pt);
         break;
       case AMObjType::CONVOLUTION_DATA :
         histo = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
@@ -910,7 +913,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 
     else {
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , 1 , args[0].tag.string().data() ,
-                  "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND or FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
+                  "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND or FREQUENCY_DISTRIBUTION or DISCRETE_MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
       return AMObj(AMObjType::ERROR);
     }
     break;
@@ -970,23 +973,29 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
         pstr = (AMString*)args[i + 3].val.p;
 
         if (i == 0) {
-          if (*pstr == "Multinomial") {
-            model_type[i] = MULTINOMIAL_CHANGE;
+          if (*pstr == "Categorical") {
+            model_type[i] = CATEGORICAL_CHANGE;
           }
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
           }
-          else if (*pstr == "BayesianPoisson") {
-            model_type[i] = BAYESIAN_POISSON_CHANGE;
+          else if (*pstr == "MultivariatePoisson") {
+            model_type[i] = MULTIVARIATE_POISSON_CHANGE;
+          }
+          else if (*pstr == "Geometric") {
+            model_type[i] = GEOMETRIC_0_CHANGE;
+          }
+          else if (*pstr == "ShiftedGeometric") {
+            model_type[i] = GEOMETRIC_1_CHANGE;
+          }
+          else if (*pstr == "MultivariateGeometric") {
+            model_type[i] = MULTIVARIATE_GEOMETRIC_0_CHANGE;
           }
           else if (*pstr == "Ordinal") {
             model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
           }
           else if (*pstr == "Gaussian") {
             model_type[i] = GAUSSIAN_CHANGE;
-          }
-          else if (*pstr == "BayesianGaussian") {
-            model_type[i] = BAYESIAN_GAUSSIAN_CHANGE;
           }
           else if (*pstr == "Mean") {
             model_type[i] = MEAN_CHANGE;
@@ -997,13 +1006,20 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else if (*pstr == "MeanVariance") {
             model_type[i] = MEAN_VARIANCE_CHANGE;
           }
+          else if (*pstr == "BayesianPoisson") {
+            model_type[i] = BAYESIAN_POISSON_CHANGE;
+          }
+          else if (*pstr == "BayesianGaussian") {
+            model_type[i] = BAYESIAN_GAUSSIAN_CHANGE;
+          }
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 4 ,
-                        "Multinomial or Poisson or Ordinal or Gaussian or Mean or Variance or MeanVariance");
+                        "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance");
           }
 
-          if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
+          if ((model_type[i] == MULTIVARIATE_POISSON_CHANGE) || (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) ||
+              (model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
             CHECKCONDVA(nb_required == 4 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
@@ -1020,11 +1036,17 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
         }
 
         else {
-          if (*pstr == "Multinomial") {
-            model_type[i] = MULTINOMIAL_CHANGE;
+          if (*pstr == "Categorical") {
+            model_type[i] = CATEGORICAL_CHANGE;
           }
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
+          }
+          else if (*pstr == "Geometric") {
+            model_type[i] = GEOMETRIC_0_CHANGE;
+          }
+          else if (*pstr == "ShiftedGeometric") {
+            model_type[i] = GEOMETRIC_1_CHANGE;
           }
           else if (*pstr == "Ordinal") {
             model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
@@ -1038,7 +1060,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 4 ,
-                        "Multinomial or Poisson or Ordinal or Gaussian or Variance");
+                        "Categorical or Poisson or Geometric or ShiftedGeometric Ordinal or Gaussian or Variance");
           }
         }
       }
@@ -1567,7 +1589,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
     }
 
     if ((args[0].tag() != AMObjType::DISTRIBUTION) && (args[0].tag() != AMObjType::FREQUENCY_DISTRIBUTION) &&
-        (args[0].tag() != AMObjType::MIXTURE) && (args[0].tag() != AMObjType::MIXTURE_DATA) &&
+        (args[0].tag() != AMObjType::DISCRETE_MIXTURE) && (args[0].tag() != AMObjType::DISCRETE_MIXTURE_DATA) &&
         (args[0].tag() != AMObjType::CONVOLUTION) && (args[0].tag() != AMObjType::CONVOLUTION_DATA) &&
         (args[0].tag() != AMObjType::COMPOUND) && (args[0].tag() != AMObjType::COMPOUND_DATA) &&
         (args[0].tag() != AMObjType::VECTORS) && (args[0].tag() != AMObjType::REGRESSION) &&
@@ -1609,7 +1631,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
     CHECKCONDVA(nb_required == 2 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
 
-    if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+    if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
         (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
       FrequencyDistribution *histo;
 
@@ -1627,8 +1649,8 @@ AMObj STAT_model::save(const AMObjVector &args) const
       case AMObjType::FREQUENCY_DISTRIBUTION :
         histo = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
         break;
-      case AMObjType::MIXTURE_DATA :
-        histo = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[0].val.p)->pt);
+      case AMObjType::DISCRETE_MIXTURE_DATA :
+        histo = (FrequencyDistribution*)((DiscreteMixtureData*)((STAT_model*)args[0].val.p)->pt);
         break;
       case AMObjType::CONVOLUTION_DATA :
         histo = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
@@ -1775,7 +1797,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
       return AMObj(AMObjType::ERROR);
     }
 
-    if ((args[0].tag() == AMObjType::DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE) ||
+    if ((args[0].tag() == AMObjType::DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE) ||
         (args[0].tag() == AMObjType::CONVOLUTION) || (args[0].tag() == AMObjType::COMPOUND)) {
       Distribution *dist;
 
@@ -1784,8 +1806,8 @@ AMObj STAT_model::save(const AMObjVector &args) const
       case AMObjType::DISTRIBUTION :
         dist = (Distribution*)((DiscreteParametricModel*)((STAT_model*)args[0].val.p)->pt);
         break;
-      case AMObjType::MIXTURE :
-        dist = (Distribution*)((Mixture*)((STAT_model*)args[0].val.p)->pt);
+      case AMObjType::DISCRETE_MIXTURE :
+        dist = (Distribution*)((DiscreteMixture*)((STAT_model*)args[0].val.p)->pt);
         break;
       case AMObjType::CONVOLUTION :
         dist = (Distribution*)((Convolution*)((STAT_model*)args[0].val.p)->pt);
@@ -1808,7 +1830,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
       }
     }
 
-    else if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+    else if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
              (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
       FrequencyDistribution *histo;
 
@@ -1817,8 +1839,8 @@ AMObj STAT_model::save(const AMObjVector &args) const
       case AMObjType::FREQUENCY_DISTRIBUTION :
         histo = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
         break;
-      case AMObjType::MIXTURE_DATA :
-        histo = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[0].val.p)->pt);
+      case AMObjType::DISCRETE_MIXTURE_DATA :
+        histo = (FrequencyDistribution*)((DiscreteMixtureData*)((STAT_model*)args[0].val.p)->pt);
         break;
       case AMObjType::CONVOLUTION_DATA :
         histo = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
@@ -1843,7 +1865,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
 
     else {
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , 1 , args[0].tag.string().data() ,
-                  "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND or FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
+                  "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND or FREQUENCY_DISTRIBUTION or DISCRETE_MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
       return AMObj(AMObjType::ERROR);
     }
     break;
@@ -1903,23 +1925,29 @@ AMObj STAT_model::save(const AMObjVector &args) const
         pstr = (AMString*)args[i + 4].val.p;
 
         if (i == 0) {
-          if (*pstr == "Multinomial") {
-            model_type[i] = MULTINOMIAL_CHANGE;
+          if (*pstr == "Categorical") {
+            model_type[i] = CATEGORICAL_CHANGE;
           }
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
           }
-          else if (*pstr == "BayesianPoisson") {
-            model_type[i] = BAYESIAN_POISSON_CHANGE;
+          else if (*pstr == "MultivariatePoisson") {
+            model_type[i] = MULTIVARIATE_POISSON_CHANGE;
+          }
+          else if (*pstr == "Geometric") {
+            model_type[i] = GEOMETRIC_0_CHANGE;
+          }
+          else if (*pstr == "ShiftedGeometric") {
+            model_type[i] = GEOMETRIC_1_CHANGE;
+          }
+          else if (*pstr == "MultivariateGeometric") {
+            model_type[i] = MULTIVARIATE_GEOMETRIC_0_CHANGE;
           }
           else if (*pstr == "Ordinal") {
             model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
           }
           else if (*pstr == "Gaussian") {
             model_type[i] = GAUSSIAN_CHANGE;
-          }
-          else if (*pstr == "BayesianGaussian") {
-            model_type[i] = BAYESIAN_GAUSSIAN_CHANGE;
           }
           else if (*pstr == "Mean") {
             model_type[i] = MEAN_CHANGE;
@@ -1930,13 +1958,20 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else if (*pstr == "MeanVariance") {
             model_type[i] = MEAN_VARIANCE_CHANGE;
           }
+          else if (*pstr == "BayesianPoisson") {
+            model_type[i] = BAYESIAN_POISSON_CHANGE;
+          }
+          else if (*pstr == "BayesianGaussian") {
+            model_type[i] = BAYESIAN_GAUSSIAN_CHANGE;
+          }
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 5 ,
-                        "Multinomial or Poisson or Ordinal or Gaussian or Mean or Variance or MeanVariance");
+                        "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance");
           }
 
-          if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
+          if ((model_type[i] == MULTIVARIATE_POISSON_CHANGE) || (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) ||
+              (model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
             CHECKCONDVA(nb_required == 5 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
 
@@ -1953,11 +1988,17 @@ AMObj STAT_model::save(const AMObjVector &args) const
         }
 
         else {
-          if (*pstr == "Multinomial") {
-            model_type[i] = MULTINOMIAL_CHANGE;
+          if (*pstr == "Categorical") {
+            model_type[i] = CATEGORICAL_CHANGE;
           }
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
+          }
+          else if (*pstr == "Geometric") {
+            model_type[i] = GEOMETRIC_0_CHANGE;
+          }
+          else if (*pstr == "ShiftedGeometric") {
+            model_type[i] = GEOMETRIC_1_CHANGE;
           }
           else if (*pstr == "Ordinal") {
             model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
@@ -1971,7 +2012,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 5 ,
-                        "Multinomial or Poisson or Ordinal or Gaussian or Variance");
+                        "Categorical or Poisson or Geometric or ShiftedGeometric or Ordinal or Gaussian or Variance");
           }
         }
       }
@@ -2148,7 +2189,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
 
   if (nb_required >= 1) {
     if ((args[0].tag() == AMObjType::DISTRIBUTION) || (args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) ||
-        (args[0].tag() == AMObjType::MIXTURE) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+        (args[0].tag() == AMObjType::DISCRETE_MIXTURE) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
         (args[0].tag() == AMObjType::CONVOLUTION) || (args[0].tag() == AMObjType::CONVOLUTION_DATA) ||
         (args[0].tag() == AMObjType::COMPOUND) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
       nb_object = nb_required;
@@ -2157,7 +2198,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       }
 
       else {
-        if ((args[0].tag() == AMObjType::DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE) ||
+        if ((args[0].tag() == AMObjType::DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE) ||
             (args[0].tag() == AMObjType::CONVOLUTION) || (args[0].tag() == AMObjType::COMPOUND)) {
           pdist = new const Distribution*[nb_required];
 
@@ -2165,8 +2206,8 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           case AMObjType::DISTRIBUTION :
             pdist[0] = (Distribution*)((DiscreteParametricModel*)((STAT_model*)args[0].val.p)->pt);
             break;
-          case AMObjType::MIXTURE :
-            pdist[0] = (Distribution*)((Mixture*)((STAT_model*)args[0].val.p)->pt);
+          case AMObjType::DISCRETE_MIXTURE :
+            pdist[0] = (Distribution*)((DiscreteMixture*)((STAT_model*)args[0].val.p)->pt);
             break;
           case AMObjType::CONVOLUTION :
             pdist[0] = (Distribution*)((Convolution*)((STAT_model*)args[0].val.p)->pt);
@@ -2181,8 +2222,8 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
             case AMObjType::DISTRIBUTION :
               pdist[i] = (Distribution*)((DiscreteParametricModel*)((STAT_model*)args[i].val.p)->pt);
               break;
-            case AMObjType::MIXTURE :
-              pdist[i] = (Distribution*)((Mixture*)((STAT_model*)args[i].val.p)->pt);
+            case AMObjType::DISCRETE_MIXTURE :
+              pdist[i] = (Distribution*)((DiscreteMixture*)((STAT_model*)args[i].val.p)->pt);
               break;
             case AMObjType::CONVOLUTION :
               pdist[i] = (Distribution*)((Convolution*)((STAT_model*)args[i].val.p)->pt);
@@ -2193,12 +2234,12 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
             default :
               status = false;
               genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , i + 1 , args[i].tag.string().data() ,
-                          "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+                          "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
             }
           }
         }
 
-        else if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+        else if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
                  (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
           phisto = new const FrequencyDistribution*[nb_required];
 
@@ -2206,8 +2247,8 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           case AMObjType::FREQUENCY_DISTRIBUTION :
             phisto[0] = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
             break;
-          case AMObjType::MIXTURE_DATA :
-            phisto[0] = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[0].val.p)->pt);
+          case AMObjType::DISCRETE_MIXTURE_DATA :
+            phisto[0] = (FrequencyDistribution*)((DiscreteMixtureData*)((STAT_model*)args[0].val.p)->pt);
             break;
           case AMObjType::CONVOLUTION_DATA :
             phisto[0] = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
@@ -2222,8 +2263,8 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
             case AMObjType::FREQUENCY_DISTRIBUTION :
               phisto[i] = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[i].val.p)->pt);
               break;
-            case AMObjType::MIXTURE_DATA :
-              phisto[i] = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[i].val.p)->pt);
+            case AMObjType::DISCRETE_MIXTURE_DATA :
+              phisto[i] = (FrequencyDistribution*)((DiscreteMixtureData*)((STAT_model*)args[i].val.p)->pt);
               break;
             case AMObjType::CONVOLUTION_DATA :
               phisto[i] = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[i].val.p)->pt);
@@ -2234,7 +2275,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
             default :
               status = false;
               genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , i + 1 , args[i].tag.string().data() ,
-                          "FREQUENCY_DISTRIBUTION or MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
+                          "FREQUENCY_DISTRIBUTION or DISCRETE_MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
             }
           }
         }
@@ -2676,7 +2717,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
     case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV : {
       hmarkov = (HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt;
       if ((variable <= hmarkov->get_nb_output_process()) &&
-          (hmarkov->get_nonparametric_process(variable))) {
+          (hmarkov->get_categorical_process(variable - 1))) {
         status = false;
         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot");
       }
@@ -2686,7 +2727,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
     case AMObjType::HIDDEN_SEMI_MARKOV : {
       hsmarkov = (HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt;
       if ((variable <= hsmarkov->get_nb_output_process()) &&
-          (hsmarkov->get_nonparametric_process(variable))) {
+          (hsmarkov->get_categorical_process(variable - 1))) {
         status = false;
         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot");
       }
@@ -2784,7 +2825,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       }
 
       case 's' : {
-        if ((args[0].tag() == AMObjType::DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE) ||
+        if ((args[0].tag() == AMObjType::DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE) ||
             (args[0].tag() == AMObjType::CONVOLUTION) || (args[0].tag() == AMObjType::COMPOUND)) {
           const Distribution *dist;
 
@@ -2793,8 +2834,8 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           case AMObjType::DISTRIBUTION :
             dist = (Distribution*)((DiscreteParametricModel*)((STAT_model*)args[0].val.p)->pt);
             break;
-          case AMObjType::MIXTURE :
-            dist = (Distribution*)((Mixture*)((STAT_model*)args[0].val.p)->pt);
+          case AMObjType::DISCRETE_MIXTURE :
+            dist = (Distribution*)((DiscreteMixture*)((STAT_model*)args[0].val.p)->pt);
             break;
           case AMObjType::CONVOLUTION :
             dist = (Distribution*)((Convolution*)((STAT_model*)args[0].val.p)->pt);
@@ -2807,7 +2848,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           status = dist->survival_plot_write(error , Plot_prefix , title);
         }
 
-        else if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+        else if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
                  (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
           const FrequencyDistribution *histo;
 
@@ -2816,8 +2857,8 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           case AMObjType::FREQUENCY_DISTRIBUTION :
             histo = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
             break;
-          case AMObjType::MIXTURE_DATA :
-            histo = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[0].val.p)->pt);
+          case AMObjType::DISCRETE_MIXTURE_DATA :
+            histo = (FrequencyDistribution*)((DiscreteMixtureData*)((STAT_model*)args[0].val.p)->pt);
             break;
           case AMObjType::CONVOLUTION_DATA :
             histo = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
@@ -2888,23 +2929,29 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
             pstr = (AMString*)args[i + 3].val.p;
 
             if (i == 0) {
-              if (*pstr == "Multinomial") {
-                model_type[i] = MULTINOMIAL_CHANGE;
+              if (*pstr == "Categorical") {
+                model_type[i] = CATEGORICAL_CHANGE;
               }
               else if (*pstr == "Poisson") {
                 model_type[i] = POISSON_CHANGE;
               }
-              else if (*pstr == "BayesianPoisson") {
-                model_type[i] = BAYESIAN_POISSON_CHANGE;
+              else if (*pstr == "MultivariatePoisson") {
+                model_type[i] = MULTIVARIATE_POISSON_CHANGE;
+              }
+              else if (*pstr == "Geometric") {
+                model_type[i] = GEOMETRIC_0_CHANGE;
+              }
+              else if (*pstr == "ShiftedGeometric") {
+                model_type[i] = GEOMETRIC_1_CHANGE;
+              }
+              else if (*pstr == "MultivariateGeometric") {
+                model_type[i] = MULTIVARIATE_GEOMETRIC_0_CHANGE;
               }
               else if (*pstr == "Ordinal") {
                 model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
               }
               else if (*pstr == "Gaussian") {
                 model_type[i] = GAUSSIAN_CHANGE;
-              }
-              else if (*pstr == "BayesianGaussian") {
-                model_type[i] = BAYESIAN_GAUSSIAN_CHANGE;
               }
               else if (*pstr == "Mean") {
                 model_type[i] = MEAN_CHANGE;
@@ -2915,13 +2962,20 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               else if (*pstr == "MeanVariance") {
                 model_type[i] = MEAN_VARIANCE_CHANGE;
               }
+              else if (*pstr == "BayesianPoisson") {
+                model_type[i] = BAYESIAN_POISSON_CHANGE;
+              }
+              else if (*pstr == "BayesianGaussian") {
+                model_type[i] = BAYESIAN_GAUSSIAN_CHANGE;
+              }
               else {
                 status = false;
                 genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 4 ,
-                            "Multinomial or Poisson or Ordinal or Gaussian or Mean or Variance or MeanVariance");
+                            "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance");
               }
 
-              if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
+              if ((model_type[i] == MULTIVARIATE_POISSON_CHANGE) || (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) ||
+                  (model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
                 CHECKCONDVA(nb_required == 4 ,
                             genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot"));
 
@@ -2938,11 +2992,17 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
             }
 
             else {
-              if (*pstr == "Multinomial") {
-                model_type[i] = MULTINOMIAL_CHANGE;
+              if (*pstr == "Categorical") {
+                model_type[i] = CATEGORICAL_CHANGE;
               }
               else if (*pstr == "Poisson") {
                 model_type[i] = POISSON_CHANGE;
+              }
+              else if (*pstr == "Geometric") {
+                model_type[i] = GEOMETRIC_0_CHANGE;
+              }
+              else if (*pstr == "ShiftedGeometric") {
+                model_type[i] = GEOMETRIC_1_CHANGE;
               }
               else if (*pstr == "Ordinal") {
                 model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
@@ -2956,7 +3016,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               else {
                 status = false;
                 genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 4 ,
-                            "Multinomial or Poisson or Ordinal or Gaussian or Variance");
+                            "Categorical or Poisson or Geometric or ShiftedGeometric or Ordinal or Gaussian or Variance");
               }
             }
           }
@@ -3052,13 +3112,13 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
     }
 
     else {
-      if ((args[0].tag() == AMObjType::DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE) ||
+      if ((args[0].tag() == AMObjType::DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE) ||
           (args[0].tag() == AMObjType::CONVOLUTION) || (args[0].tag() == AMObjType::COMPOUND)) {
         status = pdist[0]->plot_write(error , Plot_prefix , nb_object - 1 , pdist + 1 , title);
         delete [] pdist;
       }
 
-      else if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+      else if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
                (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
         status = phisto[0]->plot_write(error , Plot_prefix , nb_object - 1 , phisto + 1 , title);
         delete [] phisto;
@@ -3248,7 +3308,7 @@ void installSTATModule()
   installFNode("Distribution" , STAT_Distribution , 1 , type , AMObjType::DISTRIBUTION);
 
   type[0] = AMObjType::ANY;
-  installFNode("Mixture" , STAT_Mixture , 1 , type , AMObjType::MIXTURE);
+  installFNode("DiscreteMixture" , STAT_DiscreteMixture , 1 , type , AMObjType::DISCRETE_MIXTURE);
 
   type[0] = AMObjType::ANY;
   installFNode("Convolution" , STAT_Convolution , 1 , type , AMObjType::CONVOLUTION);
@@ -3332,7 +3392,7 @@ void installSTATModule()
   installFNode("ExtractVectors" , STAT_ExtractVectors , 2 , type , AMObjType::VECTORS);
 
   type[0] = AMObjType::ANY;
-  installFNode("ExtractData" , STAT_ExtractData , 1 , type , AMObjType::MIXTURE_DATA);
+  installFNode("ExtractData" , STAT_ExtractData , 1 , type , AMObjType::DISCRETE_MIXTURE_DATA);
 
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::ANY;
@@ -3394,6 +3454,11 @@ void installSTATModule()
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::INTEGER;
   type[2] = AMObjType::INTEGER;
+  installFNode("ShiftVariable" , STAT_ShiftVariable , 3 , type , AMObjType::SEQUENCES);
+
+  type[0] = AMObjType::ANY;
+  type[1] = AMObjType::INTEGER;
+  type[2] = AMObjType::INTEGER;
   installFNode("LengthSelect" , STAT_LengthSelect , 3 , type , AMObjType::SEQUENCES);
 
   type[0] = AMObjType::ANY;
@@ -3406,6 +3471,9 @@ void installSTATModule()
 
   type[0] = AMObjType::ANY;
   installFNode("RemoveIndexParameter" , STAT_RemoveIndexParameter , 1 , type , AMObjType::SEQUENCES);
+
+  type[0] = AMObjType::ANY;
+  installFNode("ExplicitIndexParameter" , STAT_ExplicitIndexParameter , 1 , type , AMObjType::SEQUENCES);
 
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::INTEGER;
@@ -3426,6 +3494,9 @@ void installSTATModule()
 
   type[0] = AMObjType::ANY;
   installFNode("Difference" , STAT_Difference , 1 , type , AMObjType::SEQUENCES);
+
+  type[0] = AMObjType::ANY;
+  installFNode("SequenceNormalization" , STAT_SequenceNormalization , 1 , type , AMObjType::SEQUENCES);
 
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::ANY;
