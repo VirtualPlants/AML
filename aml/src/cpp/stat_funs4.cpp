@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
+ *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
@@ -40,7 +40,7 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
-#include "stat_tool/mixture.h"
+#include "stat_tool/discrete_mixture.h"
 #include "stat_tool/convolution.h"
 #include "stat_tool/compound.h"
 #include "stat_tool/regression.h"
@@ -77,7 +77,7 @@ extern int* buildIntArray(const AMObjVector &args , int arg_index , const char *
 
 const char *STAT_model_name[] = {
   "" ,
-  "MIXTURE" ,
+  "DISCRETE_MIXTURE" ,
   "CONVOLUTION" ,
   "COMPOUND" ,
   "VARIABLE_ORDER_MARKOV" ,
@@ -90,7 +90,7 @@ const char *STAT_model_name[] = {
 
 enum {
   STATM_DISTRIBUTION ,
-  STATM_MIXTURE ,
+  STATM_DISCRETE_MIXTURE ,
   STATM_CONVOLUTION ,
   STATM_COMPOUND ,
   STATM_VARIABLE_ORDER_MARKOV ,
@@ -112,7 +112,7 @@ static AMObj STAT_EstimateDistribution(const FrequencyDistribution *histo ,
                                        int ident , const AMObjVector &args)
 
 {
-  if (ident == NONPARAMETRIC) {
+  if (ident == CATEGORICAL) {
     DiscreteParametricModel *dist;
 
 
@@ -246,7 +246,7 @@ static AMObj STAT_EstimateDistribution(const FrequencyDistribution *histo ,
  *
  *--------------------------------------------------------------*/
 
-static AMObj STAT_EstimateMixture(const FrequencyDistribution *histo , const AMObjVector &args)
+static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , const AMObjVector &args)
 
 {
   RWCString *pstr;
@@ -257,7 +257,7 @@ static AMObj STAT_EstimateMixture(const FrequencyDistribution *histo , const AMO
   register int i , j;
   int nb_component , nb_required , min_inf_bound = 0 , penalty = BICc , ident[MIXTURE_NB_COMPONENT];
   const DiscreteParametric *pcomponent[MIXTURE_NB_COMPONENT];
-  Mixture *imixt , *mixt;
+  DiscreteMixture *imixt , *mixt;
   StatError error;
 
 
@@ -305,8 +305,8 @@ static AMObj STAT_EstimateMixture(const FrequencyDistribution *histo , const AMO
       break;
     }
 
-    case AMObjType::MIXTURE : {
-      pcomponent[i] = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[2 + i].val.p)->pt)));
+    case AMObjType::DISCRETE_MIXTURE : {
+      pcomponent[i] = new DiscreteParametric(*((Distribution*)((DiscreteMixture*)((STAT_model*)args[2 + i].val.p)->pt)));
       break;
     }
 
@@ -323,7 +323,7 @@ static AMObj STAT_EstimateMixture(const FrequencyDistribution *histo , const AMO
     default : {
       status = false;
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 3 + i , args[2 + i].tag.string().data() ,
-                  "STRING or DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+                  "STRING or DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
       break;
     }
     }
@@ -535,16 +535,16 @@ static AMObj STAT_EstimateMixture(const FrequencyDistribution *histo , const AMO
 
   if (status) {
     if (!nb_component_estimation) {
-      imixt = new Mixture(nb_component , pcomponent);
+      imixt = new DiscreteMixture(nb_component , pcomponent);
 
-      mixt = histo->mixture_estimation(error , *imixt , estimate , min_inf_bound ,
-                                       flag , component_flag);
+      mixt = histo->discrete_mixture_estimation(error , *imixt , estimate , min_inf_bound ,
+                                                flag , component_flag);
       delete imixt;
     }
 
     else {
-      mixt = histo->mixture_estimation(error , AMLOUTPUT , 1 , nb_component , ident ,
-                                       min_inf_bound , flag , component_flag , penalty);
+      mixt = histo->discrete_mixture_estimation(error , AMLOUTPUT , 1 , nb_component , ident ,
+                                                min_inf_bound , flag , component_flag , penalty);
     }
   }
 
@@ -558,7 +558,7 @@ static AMObj STAT_EstimateMixture(const FrequencyDistribution *histo , const AMO
 
   if (mixt) {
     STAT_model* model = new STAT_model(mixt);
-    return AMObj(AMObjType::MIXTURE , model);
+    return AMObj(AMObjType::DISCRETE_MIXTURE , model);
   }
   else {
     AMLOUTPUT << "\n" << error;
@@ -604,8 +604,8 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
   case AMObjType::DISTRIBUTION :
     known_dist = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[2].val.p)->pt)));
     break;
-  case AMObjType::MIXTURE :
-    known_dist = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[2].val.p)->pt)));
+  case AMObjType::DISCRETE_MIXTURE :
+    known_dist = new DiscreteParametric(*((Distribution*)((DiscreteMixture*)((STAT_model*)args[2].val.p)->pt)));
     break;
   case AMObjType::CONVOLUTION :
     known_dist = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[2].val.p)->pt)));
@@ -616,7 +616,7 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
   default :
     status = false;
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 3 , args[2].tag.string().data() ,
-                "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+                "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
     break;
   }
 
@@ -681,8 +681,8 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
           case AMObjType::DISTRIBUTION :
             unknown_dist = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
-          case AMObjType::MIXTURE :
-            unknown_dist = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+          case AMObjType::DISCRETE_MIXTURE :
+            unknown_dist = new DiscreteParametric(*((Distribution*)((DiscreteMixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::CONVOLUTION :
             unknown_dist = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
@@ -694,7 +694,7 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
             status = false;
             genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
                         args[nb_required + i * 2 + 1].tag.string().data() ,
-                        "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+                        "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
             break;
           }
 
@@ -961,8 +961,8 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
   case AMObjType::DISTRIBUTION :
     known_dist = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[2].val.p)->pt)));
     break;
-  case AMObjType::MIXTURE :
-    known_dist = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[2].val.p)->pt)));
+  case AMObjType::DISCRETE_MIXTURE :
+    known_dist = new DiscreteParametric(*((Distribution*)((DiscreteMixture*)((STAT_model*)args[2].val.p)->pt)));
     break;
   case AMObjType::CONVOLUTION :
     known_dist = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[2].val.p)->pt)));
@@ -973,7 +973,7 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
   default :
     status = false;
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 3 , args[2].tag.string().data() ,
-                "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+                "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
     break;
   }
 
@@ -1057,8 +1057,8 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
           case AMObjType::DISTRIBUTION :
             unknown_dist = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
-          case AMObjType::MIXTURE :
-            unknown_dist = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+          case AMObjType::DISCRETE_MIXTURE :
+            unknown_dist = new DiscreteParametric(*((Distribution*)((DiscreteMixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::CONVOLUTION :
             unknown_dist = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
@@ -1070,7 +1070,7 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
             status = false;
             genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
                         args[nb_required + i * 2 + 1].tag.string().data() ,
-                        "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+                        "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
             break;
           }
 
@@ -1435,8 +1435,8 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
           case AMObjType::DISTRIBUTION :
             iinter_event = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
-          case AMObjType::MIXTURE :
-            iinter_event = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+          case AMObjType::DISCRETE_MIXTURE :
+            iinter_event = new DiscreteParametric(*((Distribution*)((DiscreteMixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::CONVOLUTION :
             iinter_event = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
@@ -1448,7 +1448,7 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
             status = false;
             genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
                         args[nb_required + i * 2 + 1].tag.string().data() ,
-                        "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+                        "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
             break;
           }
 
@@ -1882,8 +1882,8 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
           case AMObjType::DISTRIBUTION :
             inter_event = new DiscreteParametric(*((DiscreteParametric*)((DiscreteParametricModel*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
-          case AMObjType::MIXTURE :
-            inter_event = new DiscreteParametric(*((Distribution*)((Mixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
+          case AMObjType::DISCRETE_MIXTURE :
+            inter_event = new DiscreteParametric(*((Distribution*)((DiscreteMixture*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
             break;
           case AMObjType::CONVOLUTION :
             inter_event = new DiscreteParametric(*((Distribution*)((Convolution*)((STAT_model*)args[nb_required + i * 2 + 1].val.p)->pt)));
@@ -1895,7 +1895,7 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
             status = false;
             genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
                         args[nb_required + i * 2 + 1].tag.string().data() ,
-                        "DISTRIBUTION or MIXTURE or CONVOLUTION or COMPOUND");
+                        "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
             break;
           }
 
@@ -4559,7 +4559,7 @@ AMObj STAT_Estimate(const AMObjVector &args)
 
   // estimation loi/combinaisons de lois
 
-  if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+  if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
     RWCString *pstr;
     register int i;
@@ -4574,8 +4574,8 @@ AMObj STAT_Estimate(const AMObjVector &args)
     case AMObjType::FREQUENCY_DISTRIBUTION :
       histo = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
       break;
-    case AMObjType::MIXTURE_DATA :
-      histo = (FrequencyDistribution*)((MixtureData*)((STAT_model*)args[0].val.p)->pt);
+    case AMObjType::DISCRETE_MIXTURE_DATA :
+      histo = (FrequencyDistribution*)((DiscreteMixtureData*)((STAT_model*)args[0].val.p)->pt);
       break;
     case AMObjType::CONVOLUTION_DATA :
       histo = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
@@ -4592,7 +4592,7 @@ AMObj STAT_Estimate(const AMObjVector &args)
                             args[1].tag.string().data() , "STRING"));
 
     pstr = (AMString*)args[1].val.p;
-    for (i = NONPARAMETRIC;i <= NEGATIVE_BINOMIAL;i++) {
+    for (i = CATEGORICAL;i <= NEGATIVE_BINOMIAL;i++) {
       if ((*pstr == STAT_discrete_distribution_word[i]) ||
           (*pstr == STAT_discrete_distribution_letter[i])) {
         ident = i;
@@ -4602,8 +4602,8 @@ AMObj STAT_Estimate(const AMObjVector &args)
     }
 
     if (i == NEGATIVE_BINOMIAL + 1) {
-      if (*pstr == STAT_model_name[STATM_MIXTURE]) {
-        model = STATM_MIXTURE;
+      if (*pstr == STAT_model_name[STATM_DISCRETE_MIXTURE]) {
+        model = STATM_DISCRETE_MIXTURE;
       }
       else if (*pstr == STAT_model_name[STATM_CONVOLUTION]) {
         model = STATM_CONVOLUTION;
@@ -4620,8 +4620,8 @@ AMObj STAT_Estimate(const AMObjVector &args)
     switch (model) {
     case STATM_DISTRIBUTION :
       return STAT_EstimateDistribution(histo , ident , args);
-    case STATM_MIXTURE :
-      return STAT_EstimateMixture(histo , args);
+    case STATM_DISCRETE_MIXTURE :
+      return STAT_EstimateDiscreteMixture(histo , args);
     case STATM_CONVOLUTION :
       return STAT_EstimateConvolution(histo , args);
     case STATM_COMPOUND :
