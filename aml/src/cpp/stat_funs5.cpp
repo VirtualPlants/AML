@@ -4748,6 +4748,12 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           else if (*pstr == "MeanVariance") {
             model_type[i] = MEAN_VARIANCE_CHANGE;
           }
+          else if (*pstr == "LinearModel") {
+            model_type[i] = LINEAR_MODEL_CHANGE;
+          }
+          else if (*pstr == "InterceptSlope") {
+            model_type[i] = INTERCEPT_SLOPE_CHANGE;
+          }
           else if (*pstr == "BayesianPoisson") {
             model_type[i] = BAYESIAN_POISSON_CHANGE;
           }
@@ -4757,11 +4763,12 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
-                        "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance");
+                        "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance or LinearModel or InterceptSlope");
           }
 
           if ((model_type[i] == MULTIVARIATE_POISSON_CHANGE) || (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) ||
-              (model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
+              (model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE) ||
+              (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
             CHECKCONDVA(nb_required == 3 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
 
@@ -4799,10 +4806,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           else if (*pstr == "Variance") {
             model_type[i] = VARIANCE_CHANGE;
           }
+          else if (*pstr == "LinearModel") {
+            model_type[i] = LINEAR_MODEL_CHANGE;
+          }
+          else if (*pstr == "InterceptSlope") {
+            model_type[i] = INTERCEPT_SLOPE_CHANGE;
+          }
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
-                        "Categorical or Poisson or Geometric or ShiftedGeometric or Ordinal or Gaussian or Variance");
+                        "Categorical or Poisson or Geometric or ShiftedGeometric or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
           }
         }
       }
@@ -4916,6 +4929,12 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           else if (*pstr == "MeanVariance") {
             model_type[i] = MEAN_VARIANCE_CHANGE;
           }
+          else if (*pstr == "LinearModel") {
+            model_type[i] = LINEAR_MODEL_CHANGE;
+          }
+          else if (*pstr == "InterceptSlope") {
+            model_type[i] = INTERCEPT_SLOPE_CHANGE;
+          }
           else if (*pstr == "BayesianPoisson") {
             model_type[i] = BAYESIAN_POISSON_CHANGE;
           }
@@ -4925,11 +4944,12 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 4 ,
-                        "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance");
+                        "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance or LinearModel or InterceptSlope");
           }
 
           if ((model_type[i] == MULTIVARIATE_POISSON_CHANGE) || (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) ||
-              (model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE)) {
+              (model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE) ||
+              (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
             CHECKCONDVA(nb_required == 4 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
 
@@ -4967,10 +4987,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           else if (*pstr == "Variance") {
             model_type[i] = VARIANCE_CHANGE;
           }
+          else if (*pstr == "LinearModel") {
+            model_type[i] = LINEAR_MODEL_CHANGE;
+          }
+          else if (*pstr == "InterceptSlope") {
+            model_type[i] = INTERCEPT_SLOPE_CHANGE;
+          }
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 4 ,
-                        "Categorical or Poisson or Geometric or ShiftedGeometric or Ordinal or Gaussian or Variance");
+                        "Categorical or Poisson or Geometric or ShiftedGeometric or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
           }
         }
       }
