@@ -65,7 +65,7 @@
 
 #ifndef SYSTEM_IS__IRIX
 #include "tool/rw_cstring.h"
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 #include "tool/rw_vector.h"
 #else
 #include <rw/cstring.h>
@@ -80,8 +80,8 @@
 #define DEBUGREFCOUNT
 #endif
 
-typedef RWTValSlist<RWCString> StringList;
-typedef RWTValSlistIterator<RWCString> StringListIter;
+typedef RWTValDlist<RWCString> StringList;
+typedef RWTValDlistIterator<RWCString> StringListIter;
 
 #ifdef _WIN32
 #ifdef ERROR
@@ -344,8 +344,8 @@ std::ostream& operator<<(std::ostream&, const FAMObj&);
 
 typedef RWTValVector<AMObj> AMObjVector;
 
-typedef RWTPtrSlist<FAMObj> FAMObjPtrList;
-typedef RWTPtrSlistIterator<FAMObj> FAMObjPtrListIter;
+typedef RWTPtrDlist<FAMObj> FAMObjPtrList;
+typedef RWTPtrDlistIterator<FAMObj> FAMObjPtrListIter;
 
 typedef AMObj (*PFUN)(const AMObjVector&);
 

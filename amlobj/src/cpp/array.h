@@ -49,11 +49,11 @@ extern const char* SYSTEMCHAR; // prefix of all system command names
 #include "set.h"
 #include "fnode.h"
 
-typedef RWTValSlist<VId> VIdList;
-typedef RWTValSlistIterator<VId> VIdListIter;
+typedef RWTValDlist<VId> VIdList;
+typedef RWTValDlistIterator<VId> VIdListIter;
 
-typedef RWTValSlist<AMObj> AMObjList; // type AMObjList has already been used elsewhere
-typedef RWTValSlistIterator<AMObj> AMObjListIter;
+typedef RWTValDlist<AMObj> AMObjList; // type AMObjList has already been used elsewhere
+typedef RWTValDlistIterator<AMObj> AMObjListIter;
 
 // ------------------------
 // Iterators on collections

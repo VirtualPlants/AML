@@ -46,8 +46,8 @@
 #include "tool/rw_hset.h"
 #include "fnode.h"
 
-typedef RWTValSlist<VId> VIdList;
-typedef RWTValSlistIterator<VId> VIdListIter;
+typedef RWTValDlist<VId> VIdList;
+typedef RWTValDlistIterator<VId> VIdListIter;
 
 typedef RWTValHashSet<AMObj> AMObjSet;
 typedef RWTValHashTableIterator<AMObj> AMObjSetIter; // an RWTValHashSet<T> is an RWTValHashTable<T>

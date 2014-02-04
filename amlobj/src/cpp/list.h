@@ -44,8 +44,8 @@
 
 #include "fnode.h"
 
-typedef RWTValSlist<AMObj> AMObjList; // type AMObjList has already been used elsewhere
-typedef RWTValSlistIterator<AMObj> AMObjListIter;
+typedef RWTValDlist<AMObj> AMObjList; // type AMObjList has already been used elsewhere
+typedef RWTValDlistIterator<AMObj> AMObjListIter;
 
 // ------------------------
 // Iterators on collections

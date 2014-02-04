@@ -49,7 +49,7 @@
 #endif
 
 #include "tool/rw_cstring.h"
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 //#include <rw/tvslist.h>
 //#include <rw/cstring.h>
 
@@ -111,8 +111,8 @@ public:
 
 };
 
-typedef RWTValSlist<AMLErrorItem> AMLErrorItemList;
-typedef RWTValSlistIterator<AMLErrorItem> AMLErrorItemListIter;
+typedef RWTValDlist<AMLErrorItem> AMLErrorItemList;
+typedef RWTValDlistIterator<AMLErrorItem> AMLErrorItemListIter;
 
 static const unsigned int MAXERROR = 3;
 
