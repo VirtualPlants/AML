@@ -369,7 +369,7 @@ FExp :
 
     delete [] $1;
 
-    if (result == -1) system_error(AMLOUTPUT , "Command Failed");
+    if (result == -1) aml_system_error(AMLOUTPUT , "Command Failed");
 
     $$ = new FAMObj(AMObj(AMObjType::VOID));
 
@@ -1658,20 +1658,20 @@ void cleanParser() {
   if(VPTOOLS(exists)(string(Plot_prefix)+string(".plot"))){
 	string cmd = string("ERASE /F /Q ") + Plot_prefix + "*";
     if (system(cmd.c_str()) == -1) {
-        system_error(AMLOUTPUT , "ERASE");
+        aml_system_error(AMLOUTPUT , "ERASE");
     }
   }
 #else
 #ifndef STL_EXTENSION
   std::ostrstream(buffer, 100) << "rm -f " << Plot_prefix << "*" << std::ends;
   if (system(buffer) == -1) {
-    system_error(AMLOUTPUT , "rm -f");
+    aml_system_error(AMLOUTPUT , "rm -f");
   }
 #else
   std::ostringstream os;
   os<< "rm -f " << Plot_prefix << "*" << std::ends;
   if (system(os.str().c_str()) == -1) {
-    system_error(AMLOUTPUT , "rm -f");
+    aml_system_error(AMLOUTPUT , "rm -f");
   }
 
 #endif

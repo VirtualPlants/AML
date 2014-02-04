@@ -832,7 +832,7 @@ AMModel* PyListasSet(PyObject* pobj)
   for(int i=0;i<size;i++)
     {
       AMObj element = (PytoAMObject(PyList_GetItem(pobj,i))).amobj;
-      //printf("element n°%d\n", i);
+      //printf("element nï¿½%d\n", i);
       //element.print(cout);
       *set+=element;
     }
@@ -1006,7 +1006,7 @@ bool containsDoubledValues(PyObject* pobj)
 // Catch the name of the AML object, get the corresponding AML object, convert it to a
 // new AMObj.
 
-static PyObject* get(PyObject *self, PyObject *args, PyObject *kwds)
+static PyObject* aml_get(PyObject *self, PyObject *args, PyObject *kwds)
 {
   char* obj_str;
   AMObj amobj;
@@ -1080,7 +1080,7 @@ static PyObject* get_mode(PyObject *self, PyObject *args)
 
 static PyMethodDef amlPy_methods[] =
  {
-   {"get", (PyCFunction)get, METH_VARARGS | METH_KEYWORDS},
+   {"get", (PyCFunction)(aml_get), METH_KEYWORDS},
    {"set_mode", (PyCFunction)set_mode, METH_VARARGS},
    {"get_mode", (PyCFunction)get_mode, METH_VARARGS},
    {NULL, NULL}

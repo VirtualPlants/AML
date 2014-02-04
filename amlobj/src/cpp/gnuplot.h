@@ -47,7 +47,7 @@
 #include "gnuplot_pipe.h"
 
 
-extern void system_error(std::ostream &os , char *function);
+extern void aml_system_error(std::ostream &os , char *function);
 
 
 

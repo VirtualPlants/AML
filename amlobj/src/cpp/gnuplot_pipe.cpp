@@ -99,7 +99,7 @@ VPTOOLS_USING_NAMESPACE
  *
  *--------------------------------------------------------------*/
 
-void system_error(std::ostream &os , char *function)
+void aml_system_error(std::ostream &os , char *function)
 
 {
   os << function <<": "<< strerror(errno) << std::endl;
@@ -189,14 +189,14 @@ int GnuplotWindow::open(ostream &os)
 	  {
 	    status = FALSE;
 	    cerr << "Command : '" << command << '\'' << endl;
-	    system_error(os , "*** Error on command popen");
+	    aml_system_error(os , "*** Error on command popen");
 	    close(os);
 	  }
 	else if( ferror(fWrite) ){
 	  fWrite = NULL;
 	  status = FALSE;
 	  cerr << "Command : '" << command << '\'' << endl;
-	  system_error(os , "*** Ferror on command popen");
+	  aml_system_error(os , "*** Ferror on command popen");
 	  close(os);
 	}
       }
@@ -207,7 +207,7 @@ int GnuplotWindow::open(ostream &os)
         {
           status = FALSE;
           cerr << "Command : '" << command << '\'' << endl;
-          system_error(os , "*** Error on command popen");
+          aml_system_error(os , "*** Error on command popen");
           close(os);
         }
       else if( ferror(fWrite) )
@@ -215,7 +215,7 @@ int GnuplotWindow::open(ostream &os)
           fWrite = NULL;
           status = FALSE;
           cerr << "Command : '" << command << '\'' << endl;
-          system_error(os , "*** Ferror on command popen");
+          aml_system_error(os , "*** Ferror on command popen");
           close(os);
         }
 #endif //AMAPMOD
@@ -229,7 +229,7 @@ int GnuplotWindow::open(ostream &os)
 
     if ((pipe(ptoc) == -1) || (pipe(ctop) == -1)) {
       status = FALSE;
-      system_error(os , "pipe");
+      aml_system_error(os , "pipe");
     }
 
     son_id = vfork();
@@ -238,7 +238,7 @@ int GnuplotWindow::open(ostream &os)
 
     case -1 : {
       status = FALSE;
-      system_error(os , "fork");
+      aml_system_error(os , "fork");
       break;
     }
 
@@ -250,35 +250,35 @@ int GnuplotWindow::open(ostream &os)
 
       if (::close(0) == -1) {
         status = FALSE;
-        system_error(os , "close");
+        aml_system_error(os , "close");
       }
       if (dup(ptoc[0]) != 0) {
         status = FALSE;
-        system_error(os , "dup");
+        aml_system_error(os , "dup");
       }
 
       // la sortie erreur de Gnuplot est redirigee sur l'entree du pipe ctop
 
       if (::close(2) == -1) {
         status = FALSE;
-        system_error(os , "close");
+        aml_system_error(os , "close");
       }
       if (dup(ctop[1]) != 2) {
         status = FALSE;
-        system_error(os , "dup");
+        aml_system_error(os , "dup");
       }
 
       if ((::close(ptoc[0]) == -1) || (::close(ptoc[1]) == -1) ||
           (::close(ctop[0]) == -1) || (::close(ctop[1]) == -1)) {
         status = FALSE;
-        system_error(os , "close");
+        aml_system_error(os , "close");
       }
 
       // recouvrement du processus fils par Gnuplot
 
       if (execlp("gnuplot" , "gnuplot" , 0) == -1) {
         status = FALSE;
-        system_error(os , "execlp");
+        aml_system_error(os , "execlp");
       }
       break;
     }
@@ -288,7 +288,7 @@ int GnuplotWindow::open(ostream &os)
 
     if ((::close(ptoc[0]) == -1) || (::close(ctop[1]) == -1)) {
       status = FALSE;
-      system_error(os , "close");
+      aml_system_error(os , "close");
     }
 
     fWrite = (FILE *) fdopen(ptoc[1],"w");
@@ -444,7 +444,7 @@ int GnuplotWindow::session(const char *prefix , ostream &os , int output , unsig
     if (tcgetattr(STDIN_FILENO , &itty) == -1)
       {
       status = FALSE;
-      system_error(os , "tcgetattr");
+      aml_system_error(os , "tcgetattr");
       }
     }
 
@@ -460,7 +460,7 @@ int GnuplotWindow::session(const char *prefix , ostream &os , int output , unsig
     if (tcsetattr(STDIN_FILENO , TCSANOW , &tty) == -1)
       {
       status = FALSE;
-      system_error(os , "tcsetattr");
+      aml_system_error(os , "tcsetattr");
       }
 
     if (status)
@@ -599,7 +599,7 @@ int GnuplotWindow::session(const char *prefix , ostream &os , int output , unsig
       if (tcsetattr(STDIN_FILENO , TCSANOW , &itty) == -1)
         {
         status = FALSE;
-        system_error(os , "tcsetattr");
+        aml_system_error(os , "tcsetattr");
         }
 #ifndef STL_EXTENSION
       delete [] command;
@@ -681,12 +681,12 @@ void GnuplotWindow::print( const char *prefix,
 #ifndef STL_EXTENSION  
   ostrstream(command , command_size) << "chmod 666 " << prefix << ".eps" << ends;
   if (system(command) == -1)
-    system_error(os , "chmod");
+    aml_system_error(os , "chmod");
 #else
   o << "chmod 666 " << prefix << ".eps" << ends;
   cmd= o.str().c_str();
   if (system(cmd) == -1)
-    system_error(os , "chmod");
+    aml_system_error(os , "chmod");
   o.str("");
 #endif  
 
@@ -697,12 +697,12 @@ void GnuplotWindow::print( const char *prefix,
 #ifndef STL_EXTENSION  
     ostrstream(command , command_size) << "lp -c " << prefix << ".eps" << ends;
     if (system(command) == -1)
-      system_error(os , "lp");
+      aml_system_error(os , "lp");
 #else
     o << "lp -c " << prefix << ".eps" << ends;
     cmd= o.str().c_str();
     if (system(cmd) == -1)
-      system_error(os , "lp");
+      aml_system_error(os , "lp");
     o.str("");
 #endif    
     }
@@ -711,12 +711,12 @@ void GnuplotWindow::print( const char *prefix,
 #ifndef STL_EXTENSION  
     ostrstream(command , command_size) << "lpr -c " << prefix << ".eps" << ends;
     if (system(command) == -1)
-      system_error(os , "lpr");
+      aml_system_error(os , "lpr");
 #else
     o << "lpr -c " << prefix << ".eps" << ends;
     cmd= o.str().c_str();
     if (system(cmd) == -1)
-      system_error(os , "lpr");
+      aml_system_error(os , "lpr");
     o.str("");
 #endif
     
@@ -730,7 +730,7 @@ void GnuplotWindow::kill_process(ostream &os)
 #ifdef CESTPASEAUJEPENSE
     if (kill(son_id , SIGKILL) == -1)
     {
-    system_error(os , "kill");
+    aml_system_error(os , "kill");
     }
 #endif
   send("quit");
@@ -752,7 +752,7 @@ bool GnuplotWindow::getNbFigures( const char *prefix ,
   file.open(command);
   if( ! file.good() )
     {
-    system_error(os , "open gnuplot file");
+    aml_system_error(os , "open gnuplot file");
     return FALSE;
     }
 
@@ -771,7 +771,7 @@ bool GnuplotWindow::getNbFigures( const char *prefix ,
     return TRUE;
   else
     {
-    system_error(os , "no data to plot");
+    aml_system_error(os , "no data to plot");
     return FALSE;
     }
 #endif

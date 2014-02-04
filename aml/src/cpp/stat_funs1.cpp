@@ -2798,7 +2798,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
     if(VPTOOLS(exists)(string(Plot_prefix) + string(".plot"))) {
       string buffer = string("ERASE /F /Q ") + Plot_prefix + "*";
       if (system(buffer.c_str()) == -1) {
-        system_error(AMLOUTPUT , "ERASE");
+        aml_system_error(AMLOUTPUT , "ERASE");
       }
     }
 #   else
@@ -2806,7 +2806,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       ostringstream buffer;
       buffer << "rm -f " << Plot_prefix << "*";
       if (system((buffer.str()).c_str()) == -1) {
-        system_error(AMLOUTPUT , "rm");
+    	  aml_system_error(AMLOUTPUT , "rm");
       }
     }
 #   endif
@@ -3175,7 +3175,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       ostringstream buffer;
       buffer << "chmod 666 " << Plot_prefix << "*" << ends;
       if (system((buffer.str()).c_str()) == -1) {
-        system_error(AMLOUTPUT , "chmod");
+    	  aml_system_error(AMLOUTPUT , "chmod");
       }
     }
 #   endif

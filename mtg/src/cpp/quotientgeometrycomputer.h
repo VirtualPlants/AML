@@ -153,7 +153,7 @@ public :
 };
 
 /// A structure that store info for all macro vertex.
-typedef STDEXT::hash_map< int , MacroVtxInfo> MacroInfoList;
+typedef hash_map< int , MacroVtxInfo> MacroInfoList;
 
 
 
