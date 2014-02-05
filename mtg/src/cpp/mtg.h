@@ -44,10 +44,6 @@
 #include "tool/rw_stack.h"
 #include "tool/rw_queue.h"
 #include "tool/rw_cstring.h"
-//#include <rw/cstring.h>
-//#include <rw/tvordvec.h>
-//#include <rw/tstack.h>
-//#include <rw/tqueue.h>
 
 
 #include "aml/defs.h"
@@ -61,12 +57,12 @@
 
 typedef RWTValOrderedVector<Vertex>     VertexArray;
 typedef RWTValOrderedVector<Edge>       EdgeArray;
-typedef RWTValSlistIterator<VId>        VIdListIter;
-typedef RWTValSlistIterator<EId>        EIdListIter;
-typedef RWTValSlistIterator<FSetId>     FSetIdListIter;
+typedef RWTValDlistIterator<VId>        VIdListIter;
+typedef RWTValDlistIterator<EId>        EIdListIter;
+typedef RWTValDlistIterator<FSetId>     FSetIdListIter;
 
-typedef RWTValSlist<int>                IntList;
-typedef RWTValSlistIterator<int>        IntListIter;
+typedef RWTValDlist<int>                IntList;
+typedef RWTValDlistIterator<int>        IntListIter;
 
 
 // Pile d'entiers implementee comme un vecteur

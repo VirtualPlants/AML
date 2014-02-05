@@ -56,7 +56,7 @@
 #include "forms.h"
 
 #include "tool/rw_queue.h"
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 //#include <rw/tqueue.h>
 //#include <rw/tvslist.h>
 
@@ -940,7 +940,7 @@ void Coordinates::translatePlantElements(MyVector delta)
 // Classe requiredcoords
 
 
-typedef RWTQueue<BranchElement,RWTValSlist<BranchElement> > BrQueue;
+typedef RWTQueue<BranchElement,RWTValDlist<BranchElement> > BrQueue;
 
 RequiredCoords::RequiredCoords(Plant* plant,
                                FNode* xxf,

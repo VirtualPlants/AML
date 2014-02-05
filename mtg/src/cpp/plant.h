@@ -42,7 +42,7 @@
 #define _EVOPLANT_SAMIR_DEF_
 
 #include "tool/rw_queue.h"
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 // #include <rw/tvsrtvec.h>
 //#include <rw/tqueue.h>
 //#include <rw/tpslist.h>
@@ -194,6 +194,6 @@ class Plant
 
 };
 
-typedef RWTPtrSlist<Plant> PlantList;
+typedef RWTPtrDlist<Plant> PlantList;
 
 #endif

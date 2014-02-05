@@ -44,7 +44,7 @@
 #include "definitions.h"
 #include "vector.h"
 
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 //#include <rw/tpslist.h>
 
 
@@ -110,7 +110,7 @@ class MyColor
   void construct(const MyColor& );
 };
 
-typedef RWTValSlist<MyColor> ColorsTable;
+typedef RWTValDlist<MyColor> ColorsTable;
 
 class ColorLib
 {

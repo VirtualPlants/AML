@@ -49,7 +49,7 @@
 	#include <strstream>
 #endif
 
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 #include "tool/rw_cstring.h"
 //#include <rw/tvslist.h>
 //#include <rw/cstring.h>
@@ -131,8 +131,8 @@ public:
 std::ostream& operator<<(std::ostream& o, const ErrorItem& i);
 
 
-typedef RWTValSlist<ErrorItem> ErrorItemList;
-typedef RWTValSlistIterator<ErrorItem> ErrorItemListIter;
+typedef RWTValDlist<ErrorItem> ErrorItemList;
+typedef RWTValDlistIterator<ErrorItem> ErrorItemListIter;
 
 class ErrorList : public ErrorItemList {
 

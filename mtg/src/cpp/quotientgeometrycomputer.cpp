@@ -436,7 +436,7 @@ QuotientGeometryComputer::compressGeometry(const PlantFrame* _pf,
   vector<BranchInput> input;
   AppearancePtr appe;
   vector<VId> added_roots;
-  hash_set<VId> roots;
+  tool_hash_set<VId> roots;
   
   for (IntType i=0;i<nb_branches;i++) {	
 	const Branch& b = p->findBranch(i); // gets the ith branch of the plant
@@ -874,7 +874,7 @@ QuotientGeometryComputer::computeQuotientInfo( const PlantFrame* _pf) {
 	
 	Discretizer discretizer;
 	
-    hash_map<VId,VId> roots;
+    tool_hash_map<VId,VId> roots;
 	
     // Scan the plantframe _pf
     // and get the top coordinates of each element
@@ -903,7 +903,7 @@ QuotientGeometryComputer::computeQuotientInfo( const PlantFrame* _pf) {
 			
             VId vtx = compo.at(j).getVertex(); // jth vertex of branch b
             VId father = vtx;
-            hash_map<VId,VId>::iterator _it1;
+            tool_hash_map<VId,VId>::iterator _it1;
             if((_it1=roots.find(vtx))!=roots.end())
                 father=_it1->second;
             else{
@@ -969,7 +969,7 @@ QuotientGeometryComputer::computeQuotientInfo( const PlantFrame* _pf) {
                     // compute father of complex
                     VId grandfather = g->si_father(father);
                     if ( grandfather != UNDEF){
-                        hash_map<VId,VId>::iterator _itf;
+                        tool_hash_map<VId,VId>::iterator _itf;
                         if((_itf=roots.find(grandfather))!=roots.end())
                             macroinfos[(int)father]._father = _itf->second;
                     }
@@ -1007,8 +1007,8 @@ QuotientGeometryComputer::computeQuotientedGraph( const PlantFrame* _pf) {
     Plant* p = _pf->_plant;
     MTG* g = p->getMtg();
 
-    hash_map<VId, vector< VId > > graph;
-    hash_map<VId,VId> roots;
+    tool_hash_map<VId, vector< VId > > graph;
+    tool_hash_map<VId,VId> roots;
 
     // Scan the plantframe _pf
     // and get the top coordinates of each element
@@ -1036,7 +1036,7 @@ QuotientGeometryComputer::computeQuotientedGraph( const PlantFrame* _pf) {
 
             VId vtx = compo.at(j).getVertex(); // jth vertex of branch b
             VId father = vtx;
-            hash_map<VId,VId>::iterator _it1;
+            tool_hash_map<VId,VId>::iterator _it1;
             if((_it1=roots.find(vtx))!=roots.end())
                 father=_it1->second;
             else{
@@ -1113,7 +1113,7 @@ QuotientGeometryComputer::computeQuotientedGraph( const PlantFrame* _pf) {
     }
     cerr << "\x0d" << "Already computed : 100 % ... done." << '\n';
     SLArray * graph2=new SLArray;
-    for(hash_map< VId, vector< VId > >::iterator _it3=graph.begin();_it3!=graph.end();_it3++){
+    for(tool_hash_map< VId, vector< VId > >::iterator _it3=graph.begin();_it3!=graph.end();_it3++){
         SLArray *macro_vtx=new SLArray;
         for(vector< VId >::iterator _it4 = (_it3->second).begin();_it4!=(_it3->second).end();_it4++)
             (*macro_vtx)+=AMObj(AMObjType::VTX,*_it4);

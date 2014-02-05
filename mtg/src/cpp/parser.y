@@ -50,7 +50,7 @@
 #include "tool/rw_cstring.h"
 #include "tool/rw_hdict.h"
 #include "tool/rw_vector.h"
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 //#include "tool/rw_zone.h"
 //#include "tool/rw_locale.h"
 //#include <rw/cstring.h>
@@ -88,8 +88,8 @@ static const char rcsid[] = "$Id$";
 #define PARSERDEBUG
 #endif
 
-typedef RWTValSlist<char> SymbList;
-typedef RWTValSlistIterator<char> SymbListIter;
+typedef RWTValDlist<char> SymbList;
+typedef RWTValDlistIterator<char> SymbListIter;
 typedef RWTValHashDictionary<RWCString, size_t> StringIntDict;
 
 

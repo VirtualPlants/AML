@@ -42,7 +42,7 @@
 #define _SYMBOL_SAMIR_DEF_
 
 #include "definitions.h"
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 #include "tool/rw_cstring.h"
 //#include <rw/tvslist.h>
 //#include <rw/cstring.h>
@@ -88,7 +88,7 @@ class MySymbol
 
 };
 
-typedef RWTValSlist<MySymbol> SymbolsTable;
+typedef RWTValDlist<MySymbol> SymbolsTable;
 
 
 class SymbLib

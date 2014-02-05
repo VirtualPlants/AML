@@ -46,7 +46,7 @@
 #include <iostream>
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 //#include <rw/ctoken.h>
 //#include <rw/rwfile.h>
 //#include <rw/cstring.h>
@@ -82,7 +82,7 @@ class FSymb
 
 };
 
-typedef RWTValSlist<FSymb> VarTable;
+typedef RWTValDlist<FSymb> VarTable;
 
 // Noms associes a une forme de branche.
 
@@ -103,7 +103,7 @@ class NCrv
 
 };
 
-typedef RWTValSlist<NCrv> CrvTable;
+typedef RWTValDlist<NCrv> CrvTable;
 
 
 struct DRFErrorMsg {

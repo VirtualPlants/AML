@@ -44,7 +44,7 @@
 #include "definitions.h"
 #include "vector.h"
 #include <iostream>
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 //#include <rw/tvslist.h>
 
 class Voxel
@@ -92,7 +92,7 @@ class Voxel
 };
 
 
-typedef RWTValSlist<Voxel> ListOfVoxels;
+typedef RWTValDlist<Voxel> ListOfVoxels;
 
 class Squares
 {

@@ -45,7 +45,7 @@
 
 #include <iostream>
 
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 //#include <rw/tvslist.h>
 
 #ifndef CPL
@@ -54,7 +54,7 @@
 #include "bitvec.h"
 #endif
 
-typedef RWTValSlist<EId> EIdList;
+typedef RWTValDlist<EId> EIdList;
 
 // Une edge n'a que un vertex father et un vertex cible.
 // Dans le cas general, une edge peut avoir plusieurs explications

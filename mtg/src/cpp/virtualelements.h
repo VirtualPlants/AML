@@ -71,7 +71,7 @@ class VirtualSymbol
 
 };
 
-typedef RWTValSlist<VirtualSymbol> VirtualSymbolTable;
+typedef RWTValDlist<VirtualSymbol> VirtualSymbolTable;
 
 
 class VirtualElements : public AMModel

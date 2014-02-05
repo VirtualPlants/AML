@@ -42,14 +42,14 @@
 
 #include <iostream>
 
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 //#include <rw/tvslist.h>
 
 #include "aml/defs.h"
 #include "edge.h"
 
-typedef RWTValSlist<VId> VIdList;
-typedef RWTValSlist<FSetId> FSetIdList;
+typedef RWTValDlist<VId> VIdList;
+typedef RWTValDlist<FSetId> FSetIdList;
 
 
 // Types utilises:

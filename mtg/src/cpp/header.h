@@ -42,7 +42,7 @@
 
 #include <assert.h>
 
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_vector.h"
 #include "tool/rw_bitvec.h"
@@ -58,7 +58,7 @@
 
 typedef RWTValOrderedVector<char> CharArray;
 typedef RWTValOrderedVector<int> IntArray;
-typedef RWTValSlist<VClass> VClassList;
+typedef RWTValDlist<VClass> VClassList;
 
 typedef RWTValOrderedVector<String> StringArray;
 typedef RWTValOrderedVector<FType> FTypeArray;

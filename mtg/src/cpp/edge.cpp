@@ -41,7 +41,7 @@
 
 using namespace std;
 
-typedef RWTValSlistIterator<EId>        EIdListIter;
+typedef RWTValDlistIterator<EId>        EIdListIter;
 
 //static const char rcsid[] = "$Id$";
 

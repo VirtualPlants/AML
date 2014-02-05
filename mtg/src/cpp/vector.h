@@ -43,7 +43,7 @@
 
 #include <math.h>
 #include "definitions.h"
-#include "tool/rw_slist.h"
+#include "tool/rw_list.h"
 //#include <rw/tvslist.h>
 #include <stdio.h>
 
@@ -109,7 +109,7 @@ class MyVector
 
 };
 
-typedef RWTValSlist<MyVector> ListOfMyVectors;
+typedef RWTValDlist<MyVector> ListOfMyVectors;
 
 #endif
 
