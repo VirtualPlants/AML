@@ -90,6 +90,8 @@ libaml = env_aml.ALEALibrary("vpaml", sources)
 # Build the program
 LIBS = list(env_aml["LIBS"])
 LIBS.append("vpaml")
+prefix = env_aml['build_prefix']
+
 sources= ["mainaml.cpp","guicon.cpp"]
 aml_exe = env_aml.ALEAProgram("aml", sources, LIBS=LIBS)
 
