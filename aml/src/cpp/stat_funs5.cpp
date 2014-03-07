@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -43,10 +43,11 @@
 #include "stat_tool/discrete_mixture.h"
 #include "stat_tool/convolution.h"
 #include "stat_tool/compound.h"
-#include "stat_tool/vectors.h"
-#include "stat_tool/regression.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/mixture.h"
+#include "stat_tool/regression.h"
 #include "stat_tool/distance_matrix.h"
 
 #include "sequence_analysis/renewal.h"
@@ -182,6 +183,29 @@ AMObj STAT_Simulate(const AMObjVector &args)
     if (compound_histo) {
       STAT_model* model = new STAT_model(compound_histo);
       return AMObj(AMObjType::COMPOUND_DATA , model);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "Simulate");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
+  if (args[0].tag() == AMObjType::MIXTURE) {
+    MixtureData *vec;
+
+
+    CHECKCONDVA(args.length() == 2 ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Simulate" , 2));
+    CHECKCONDVA(args[1].tag() == AMObjType::INTEGER ,
+                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Simulate" , 2 ,
+                            args[1].tag.string().data() , "INT"));
+
+    vec = ((Mixture*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i);
+
+    if (vec) {
+      STAT_model* model = new STAT_model(vec);
+      return AMObj(AMObjType::MIXTURE_DATA , model);
     }
     else {
       AMLOUTPUT << "\n" << error;
@@ -2739,7 +2763,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
 
       if (status) {
         clusters = ((DistanceMatrix*)((STAT_model*)args[0].val.p)->pt)->
-        partitioning(error , AMLOUTPUT ,  nb_cluster , prototype,  initialization , algorithm);
+        partitioning(error , AMLOUTPUT , nb_cluster , prototype , initialization , algorithm);
       }
 
      delete [] prototype;
