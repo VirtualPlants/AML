@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -43,9 +43,11 @@
 #include "stat_tool/discrete_mixture.h"
 #include "stat_tool/convolution.h"
 #include "stat_tool/compound.h"
-#include "stat_tool/regression.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/mixture.h"
+#include "stat_tool/regression.h"
 
 #include "sequence_analysis/renewal.h"
 #include "sequence_analysis/sequences.h"
@@ -253,10 +255,10 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
   bool status = true , min_inf_bound_option = false , inf_bound_status_option = false ,
        dist_inf_bound_status_option = false , flag = true , component_flag = true ,
        nb_component_option = false , nb_component_estimation = false , penalty_option = false ,
-       estimate[MIXTURE_NB_COMPONENT];
+       estimate[DISCRETE_MIXTURE_NB_COMPONENT];
   register int i , j;
-  int nb_component , nb_required , min_inf_bound = 0 , penalty = BICc , ident[MIXTURE_NB_COMPONENT];
-  const DiscreteParametric *pcomponent[MIXTURE_NB_COMPONENT];
+  int nb_component , nb_required , min_inf_bound = 0 , penalty = BICc , ident[DISCRETE_MIXTURE_NB_COMPONENT];
+  const DiscreteParametric *pcomponent[DISCRETE_MIXTURE_NB_COMPONENT];
   DiscreteMixture *imixt , *mixt;
   StatError error;
 
@@ -264,8 +266,8 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
   nb_required = nb_required_computation(args);
   nb_component = nb_required - 2;
 
-  CHECKCONDVA((nb_component >= 2) && (nb_component <= MIXTURE_NB_COMPONENT) ,
-              genAMLError(ERRORMSG(NB_COMPONENT_sd) , "Estimate" , MIXTURE_NB_COMPONENT));
+  CHECKCONDVA((nb_component >= 2) && (nb_component <= DISCRETE_MIXTURE_NB_COMPONENT) ,
+              genAMLError(ERRORMSG(NB_COMPONENT_sd) , "Estimate" , DISCRETE_MIXTURE_NB_COMPONENT));
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
               (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
@@ -1300,6 +1302,680 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
   if (cdist) {
     STAT_model* model = new STAT_model(cdist);
     return AMObj(AMObjType::COMPOUND , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "Estimate");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Estimation des parametres d'un melange multivarie.
+ *
+ *--------------------------------------------------------------*/
+
+static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
+
+{
+  RWCString *pstr;
+  bool status = true , algorithm_option = false , nb_iteration_option = false ,
+       min_nb_assignment_option = false , max_nb_assignment_option = false , parameter_option = false ,
+       assignment_option = false , assignment = true;
+  register int i;
+  int nb_required , algorithm = EM , nb_iter = I_DEFAULT ,
+      min_nb_assignment = MIN_NB_ASSIGNMENT , max_nb_assignment = MAX_NB_ASSIGNMENT;
+  double parameter = NB_ASSIGNMENT_PARAMETER;
+  Mixture *mixt;
+  StatError error;
+
+
+  if (args[2].tag() == AMObjType::MIXTURE) {
+    bool known_component_option = false , known_component = false , common_dispersion_option = false ,
+         common_dispersion = false;
+    Mixture *imixt = NULL;
+
+
+    nb_required = 3;
+
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+                (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
+                (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
+                (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ||
+                (args.length() == nb_required + 16) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
+
+    imixt = (Mixture*)((STAT_model*)args[2].val.p)->pt;
+
+    // arguments optionnels
+
+    for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+      if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                    args[nb_required + i * 2].tag.string().data() , "OPTION");
+      }
+
+      else {
+        pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+        if (*pstr == "Algorithm") {
+          switch (algorithm_option) {
+
+          case false : {
+            algorithm_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+            }
+            else {
+              pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+              if (*pstr == "EM") {
+                algorithm = EM;
+              }
+              else if (*pstr == "MCEM") {
+                algorithm = MCEM;
+              }
+              else {
+                status = false;
+                genAMLError(ERRORMSG(ALGORITHM_NAME_sds) , "Estimate" ,
+                            nb_required + i + 1 , "EM or MCEM");
+              }
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "KnownComponent") {
+          switch (known_component_option) {
+
+          case false : {
+            known_component_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              known_component = args[nb_required + i * 2 + 1].val.b;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "CommonDispersion") {
+          switch (common_dispersion_option) {
+
+          case false : {
+            common_dispersion_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              common_dispersion = args[nb_required + i * 2 + 1].val.b;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "NbIteration") {
+          switch (nb_iteration_option) {
+
+          case false : {
+            nb_iteration_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+            }
+            else {
+              nb_iter = args[nb_required + i * 2 + 1].val.i;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "MinNbAssignment") {
+          switch (min_nb_assignment_option) {
+
+          case false : {
+            min_nb_assignment_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+            }
+            else {
+              min_nb_assignment = args[nb_required + i * 2 + 1].val.i;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "MaxNbAssignment") {
+          switch (max_nb_assignment_option) {
+
+          case false : {
+            max_nb_assignment_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+            }
+            else {
+              max_nb_assignment = args[nb_required + i * 2 + 1].val.i;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+        }
+        }
+
+        else if (*pstr == "Parameter") {
+          switch (parameter_option) {
+
+          case false : {
+            parameter_option = true;
+
+            switch (args[nb_required + i * 2 + 1].tag()) {
+            case AMObjType::INTEGER :
+              parameter = args[nb_required + i * 2 + 1].val.i;
+              break;
+            case AMObjType::REAL :
+              parameter = args[nb_required + i * 2 + 1].val.r;
+              break;
+            default :
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
+              break;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "Assignment") {
+          switch (assignment_option) {
+
+          case false : {
+            assignment_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              assignment = args[nb_required + i * 2 + 1].val.b;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else {
+          status = false;
+          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Estimate" ,
+                      nb_required + i + 1 , "Algorithm or KnownComponent or CommonDispersion or NbIteration or MinNbAssignment or MaxNbAssignment or Parameter or Assignment");
+        }
+      }
+    }
+
+    if ((algorithm != MCEM) && (min_nb_assignment_option)) {
+      status = false;
+      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MinNbAssignment");
+    }
+    if ((algorithm != MCEM) && (max_nb_assignment_option)) {
+      status = false;
+      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MaxNbAssignment");
+    }
+    if ((algorithm != MCEM) && (parameter_option)) {
+      status = false;
+      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Parameter");
+    }
+
+    if (!status) {
+      return AMObj(AMObjType::ERROR);
+    }
+
+    switch (algorithm) {
+    case EM :
+      mixt = vec->mixture_estimation(error , AMLOUTPUT , *imixt ,
+                                     known_component , common_dispersion ,
+                                     INDEPENDENT , assignment , nb_iter);
+      break;
+    case MCEM :
+      mixt = vec->mixture_stochastic_estimation(error , AMLOUTPUT , *imixt ,
+                                                known_component , common_dispersion ,
+                                                INDEPENDENT , min_nb_assignment ,
+                                                max_nb_assignment , parameter ,
+                                                assignment , nb_iter);
+      break;
+    }
+  }
+
+  else if (args[2].tag() == AMObjType::INTEGER) {
+    bool variance_factor_option = false , tied_location_option = false , tied_location = true;
+    int ident , variance_factor = SCALING_FACTOR;
+    double mean , standard_deviation;
+
+
+    nb_required = 6;
+
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+                (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
+                (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
+                (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ||
+                (args.length() == nb_required + 16) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
+
+    // arguments obligatoires
+
+    if (args[3].tag() != AMObjType::STRING) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 4 ,
+                  args[3].tag.string().data() , "STRING");
+    }
+    else {
+      pstr = (AMString*)args[3].val.p;
+      if ((*pstr == STAT_continuous_distribution_word[GAMMA]) ||
+          (*pstr == STAT_continuous_distribution_letter[GAMMA])) {
+        ident = GAMMA;
+      }
+      else if ((*pstr == STAT_continuous_distribution_word[GAUSSIAN]) ||
+               (*pstr == STAT_continuous_distribution_letter[GAUSSIAN])) {
+        ident = GAUSSIAN;
+      }
+      else {
+        status = false;
+        genAMLError(ERRORMSG(DISTRIBUTION_NAME_sds) , "Estimate" , 4 ,
+                    "GAMMA(Ga) or GAUSSIAN(G)");
+      }
+    }
+
+    switch (args[4].tag()) {
+    case AMObjType::INTEGER :
+      mean = args[4].val.i;
+      break;
+    case AMObjType::REAL :
+      mean = args[4].val.r;
+      break;
+    default :
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 5 ,
+                  args[4].tag.string().data() , "INT or REAL");
+    }
+
+    switch (args[5].tag()) {
+    case AMObjType::INTEGER :
+      standard_deviation = args[5].val.i;
+      break;
+    case AMObjType::REAL :
+      standard_deviation = args[5].val.r;
+      break;
+    default :
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 6 ,
+                  args[5].tag.string().data() , "INT or REAL");
+    }
+
+    // arguments optionnels
+
+    for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+      if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                    args[nb_required + i * 2].tag.string().data() , "OPTION");
+      }
+
+      else {
+        pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+        if (*pstr == "Algorithm") {
+          switch (algorithm_option) {
+
+          case false : {
+            algorithm_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+            }
+            else {
+              pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+              if (*pstr == "EM") {
+                algorithm = EM;
+              }
+              else if (*pstr == "MCEM") {
+                algorithm = MCEM;
+              }
+              else {
+                status = false;
+                genAMLError(ERRORMSG(ALGORITHM_NAME_sds) , "Estimate" ,
+                            nb_required + i + 1 , "EM or MCEM");
+              }
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "TiedLocation") {
+          switch (tied_location_option) {
+
+          case false : {
+            tied_location_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              tied_location = args[nb_required + i * 2 + 1].val.b;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "VarianceFactor") {
+          switch (variance_factor_option) {
+
+          case false : {
+            variance_factor_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+            }
+            else {
+              pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+              if (*pstr == "Convolution") {
+                variance_factor = CONVOLUTION_FACTOR;
+              }
+              else if (*pstr == "Scaling") {
+                variance_factor = SCALING_FACTOR;
+              }
+              else {
+                status = false;
+                genAMLError(ERRORMSG(VARIANCE_FACTOR_sds) , "Estimate" ,
+                            nb_required + i + 1 , "Convolution or Scaling");
+              }
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "NbIteration") {
+          switch (nb_iteration_option) {
+
+          case false : {
+            nb_iteration_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+            }
+            else {
+              nb_iter = args[nb_required + i * 2 + 1].val.i;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "MinNbAssignment") {
+          switch (min_nb_assignment_option) {
+
+          case false : {
+            min_nb_assignment_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+            }
+            else {
+              min_nb_assignment = args[nb_required + i * 2 + 1].val.i;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "MaxNbAssignment") {
+          switch (max_nb_assignment_option) {
+
+          case false : {
+            max_nb_assignment_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+            }
+            else {
+              max_nb_assignment = args[nb_required + i * 2 + 1].val.i;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+        }
+        }
+
+        else if (*pstr == "Parameter") {
+          switch (parameter_option) {
+
+          case false : {
+            parameter_option = true;
+
+            switch (args[nb_required + i * 2 + 1].tag()) {
+            case AMObjType::INTEGER :
+              parameter = args[nb_required + i * 2 + 1].val.i;
+              break;
+            case AMObjType::REAL :
+              parameter = args[nb_required + i * 2 + 1].val.r;
+              break;
+            default :
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
+              break;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "Assignment") {
+          switch (assignment_option) {
+
+          case false : {
+            assignment_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              assignment = args[nb_required + i * 2 + 1].val.b;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else {
+          status = false;
+          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Estimate" ,
+                      nb_required + i + 1 , "Algorithm or TiedLocation or VarianceFactor or NbIteration or MinNbAssignment or MaxNbAssignment or Parameter or Assignment");
+        }
+      }
+    }
+
+    if ((ident != GAUSSIAN) && (variance_factor_option)) {
+      status = false;
+      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "VarianceFactor");
+    }
+    if ((algorithm != MCEM) && (min_nb_assignment_option)) {
+      status = false;
+      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MinNbAssignment");
+    }
+    if ((algorithm != MCEM) && (max_nb_assignment_option)) {
+      status = false;
+      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MaxNbAssignment");
+    }
+    if ((algorithm != MCEM) && (parameter_option)) {
+      status = false;
+      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Parameter");
+    }
+
+    if (!status) {
+      return AMObj(AMObjType::ERROR);
+    }
+
+    switch (algorithm) {
+    case EM :
+      mixt = vec->mixture_estimation(error , AMLOUTPUT , args[2].val.i ,
+                                     ident , mean , standard_deviation , tied_location ,
+                                     variance_factor , assignment , nb_iter);
+      break;
+    case MCEM :
+      mixt = vec->mixture_stochastic_estimation(error , AMLOUTPUT , args[2].val.i ,
+                                                ident , mean , standard_deviation , tied_location ,
+                                                variance_factor , min_nb_assignment ,
+                                                max_nb_assignment , parameter ,
+                                                assignment , nb_iter);
+      break;
+    }
+  }
+
+  else {
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 3 ,
+                args[2].tag.string().data() , "INT or MIXTURE");
+    return AMObj(AMObjType::ERROR);
+  }
+
+  if (mixt) {
+    STAT_model* model = new STAT_model(mixt);
+    return AMObj(AMObjType::MIXTURE , model);
   }
   else {
     AMLOUTPUT << "\n" << error;
@@ -3048,7 +3724,7 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
        max_nb_state_sequence_option = false , parameter_option = false ,
        state_sequences_option = false , state_sequence = true;
   register int i;
-  int nb_required , algorithm = FORWARD_BACKWARD , nb_iter = I_DEFAULT ,
+  int nb_required , algorithm = EM , nb_iter = I_DEFAULT ,
       min_nb_state_sequence = MIN_NB_STATE_SEQUENCE , max_nb_state_sequence = MAX_NB_STATE_SEQUENCE;
   double parameter = NB_STATE_SEQUENCE_PARAMETER;
   HiddenVariableOrderMarkov *ihmarkov = NULL , *hmarkov;
@@ -3101,10 +3777,10 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "EM") {
-              algorithm = FORWARD_BACKWARD;
+              algorithm = EM;
             }
             else if (*pstr == "MCEM") {
-              algorithm = FORWARD_BACKWARD_SAMPLING;
+              algorithm = MCEM;
             }
             else {
               status = false;
@@ -3340,15 +4016,15 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
     status = false;
     genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "GlobalInitialTransition");
   }
-  if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (min_nb_state_sequence_option)) {
+  if ((algorithm != MCEM) && (min_nb_state_sequence_option)) {
     status = false;
     genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MinNbStateSequence");
   }
-  if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (max_nb_state_sequence_option)) {
+  if ((algorithm != MCEM) && (max_nb_state_sequence_option)) {
     status = false;
     genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MaxNbStateSequence");
   }
-  if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (parameter_option)) {
+  if ((algorithm != MCEM) && (parameter_option)) {
     status = false;
     genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Parameter");
   }
@@ -3358,13 +4034,13 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
   }
 
   switch (algorithm) {
-  case FORWARD_BACKWARD :
+  case EM :
     hmarkov = seq->hidden_variable_order_markov_estimation(error , AMLOUTPUT , *ihmarkov ,
                                                            global_initial_transition ,
                                                            common_dispersion , counting_flag ,
                                                            state_sequence , nb_iter);
     break;
-  case FORWARD_BACKWARD_SAMPLING :
+  case MCEM :
     hmarkov = seq->hidden_variable_order_markov_stochastic_estimation(error , AMLOUTPUT , *ihmarkov ,
                                                                       global_initial_transition ,
                                                                       common_dispersion ,
@@ -3402,7 +4078,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
        max_nb_state_sequence_option = false , parameter_option = false , occupancy_mean_option = false ,
        state_sequences_option = false , state_sequence = true;
   register int i;
-  int nb_required , algorithm = FORWARD_BACKWARD , estimator = COMPLETE_LIKELIHOOD , nb_iter = I_DEFAULT ,
+  int nb_required , algorithm = EM , estimator = COMPLETE_LIKELIHOOD , nb_iter = I_DEFAULT ,
       min_nb_state_sequence = MIN_NB_STATE_SEQUENCE , max_nb_state_sequence = MAX_NB_STATE_SEQUENCE ,
       mean_computation_method = COMPUTED;
   double parameter = NB_STATE_SEQUENCE_PARAMETER;
@@ -3456,10 +4132,10 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
               if (*pstr == "EM") {
-                algorithm = FORWARD_BACKWARD;
+                algorithm = EM;
               }
               else if (*pstr == "MCEM") {
-                algorithm = FORWARD_BACKWARD_SAMPLING;
+                algorithm = MCEM;
               }
               else {
                 status = false;
@@ -3771,18 +4447,18 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
       }
     }
 
-    if ((algorithm != FORWARD_BACKWARD) && (estimator == KAPLAN_MEIER)) {
+    if ((algorithm != EM) && (estimator == KAPLAN_MEIER)) {
       estimator = COMPLETE_LIKELIHOOD;
     }
-    if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (min_nb_state_sequence_option)) {
+    if ((algorithm != MCEM) && (min_nb_state_sequence_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MinNbStateSequence");
     }
-    if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (max_nb_state_sequence_option)) {
+    if ((algorithm != MCEM) && (max_nb_state_sequence_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MaxNbStateSequence");
     }
-    if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (parameter_option)) {
+    if ((algorithm != MCEM) && (parameter_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Parameter");
     }
@@ -3856,7 +4532,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
     }
     }
 
-    if (((type != 'e') || (estimator == PARTIAL_LIKELIHOOD) || (algorithm != FORWARD_BACKWARD)) &&
+    if (((type != 'e') || (estimator == PARTIAL_LIKELIHOOD) || (algorithm != EM)) &&
         (occupancy_mean_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "OccupancyMean");
@@ -3867,13 +4543,13 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
     }
 
     switch (algorithm) {
-    case FORWARD_BACKWARD :
+    case EM :
       hsmarkov = seq->hidden_semi_markov_estimation(error , AMLOUTPUT , type , nb_state ,
                                                     left_right , occupancy_mean , common_dispersion ,
                                                     estimator , counting_flag , state_sequence ,
                                                     nb_iter , mean_computation_method);
       break;
-    case FORWARD_BACKWARD_SAMPLING :
+    case MCEM :
       hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , AMLOUTPUT , type , nb_state ,
                                                                left_right , occupancy_mean , common_dispersion ,
                                                                min_nb_state_sequence , max_nb_state_sequence ,
@@ -3924,10 +4600,10 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
               if (*pstr == "EM") {
-                algorithm = FORWARD_BACKWARD;
+                algorithm = EM;
               }
               else if (*pstr == "MCEM") {
-                algorithm = FORWARD_BACKWARD_SAMPLING;
+                algorithm = MCEM;
               }
               else {
                 status = false;
@@ -4209,23 +4885,23 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
       }
     }
 
-    if ((algorithm != FORWARD_BACKWARD) && (estimator == KAPLAN_MEIER)) {
+    if ((algorithm != EM) && (estimator == KAPLAN_MEIER)) {
       estimator = COMPLETE_LIKELIHOOD;
     }
-    if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (min_nb_state_sequence_option)) {
+    if ((algorithm != MCEM) && (min_nb_state_sequence_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MinNbStateSequence");
     }
-    if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (max_nb_state_sequence_option)) {
+    if ((algorithm != MCEM) && (max_nb_state_sequence_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MaxNbStateSequence");
     }
-    if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (parameter_option)) {
+    if ((algorithm != MCEM) && (parameter_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Parameter");
     }
     if ((((ihsmarkov) && (((Chain*)ihsmarkov)->type == 'o')) || (estimator == PARTIAL_LIKELIHOOD) ||
-         (algorithm != FORWARD_BACKWARD)) && (occupancy_mean_option)) {
+         (algorithm != EM)) && (occupancy_mean_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "OccupancyMean");
     }
@@ -4235,12 +4911,12 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
     }
 
     switch (algorithm) {
-    case FORWARD_BACKWARD :
+    case EM :
       hsmarkov = seq->hidden_semi_markov_estimation(error , AMLOUTPUT , *ihsmarkov , common_dispersion ,
                                                     estimator , counting_flag , state_sequence ,
                                                     nb_iter , mean_computation_method);
       break;
-    case FORWARD_BACKWARD_SAMPLING :
+    case MCEM :
       hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , AMLOUTPUT , *ihsmarkov ,
                                                                common_dispersion , min_nb_state_sequence ,
                                                                max_nb_state_sequence , parameter , estimator ,
@@ -4629,7 +5305,26 @@ AMObj STAT_Estimate(const AMObjVector &args)
     }
   }
 
-  // estimation processus markovien
+  // estimation melanges multivaries
+
+  if ((args[0].tag() == AMObjType::VECTORS) ||
+      (args[0].tag() == AMObjType::MIXTURE_DATA)) {
+    const Vectors *vec;
+
+
+    switch (args[0].tag()) {
+    case AMObjType::VECTORS :
+      vec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::MIXTURE_DATA :
+      vec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    }
+
+    return STAT_EstimateMixture(vec , args);
+  }
+
+  // estimation processus markoviens
 
   if ((args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
