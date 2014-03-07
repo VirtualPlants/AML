@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -49,10 +49,11 @@
 #include "stat_tool/discrete_mixture.h"
 #include "stat_tool/convolution.h"
 #include "stat_tool/compound.h"
-#include "stat_tool/vectors.h"
-#include "stat_tool/regression.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/mixture.h"
+#include "stat_tool/regression.h"
 
 #include "sequence_analysis/renewal.h"
 #include "sequence_analysis/sequences.h"
@@ -153,13 +154,14 @@ const char *STAT_err_msgs_aml[] = {
   "function %s: argument %d: bad distribution name: should be %s" ,
   "function %s: argument %d: bad histogram name: should be %s" ,
   "function %s: argument %d: bad inferior bound status: should be %s" ,
+  "function %s: argument %d: bad variance factor: should be %s" ,
+  "function %s: argument %d: bad algorithm name: should be %s" ,
   "function %s: argument %d: bad penalty type: should be %s" ,
   "function %s: argument %d: bad estimator name: should be %s" ,
   "function %s: argument %d: bad side effect management type: should be %s" ,
   "function %s: argument %d: bad mean computation method: should be %s" ,
   "function %s: argument %d: bad function name: should be %s" ,
   "function %s: argument %d: bad underlying Markov chain type: should be %s" ,
-  "function %s: argument %d: bad algorithm name: should be %s" ,
   "function %s: argument %d: bad structural parameter: should be %s" ,
 
   "function %s: bad number of frequency distributions" ,
@@ -188,6 +190,7 @@ extern AMObj STAT_Convolution(const AMObjVector &args);
 extern AMObj STAT_Compound(const AMObjVector &args);
 extern AMObj STAT_FrequencyDistribution(const AMObjVector &args);
 extern AMObj STAT_Histogram(const AMObjVector &args);  // pour compatibilite ascendante
+extern AMObj STAT_Mixture(const AMObjVector &args);
 extern AMObj STAT_Vectors(const AMObjVector &args);
 extern AMObj STAT_VectorDistance(const AMObjVector &args);
 extern AMObj STAT_Renewal(const AMObjVector &args);
@@ -771,7 +774,8 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
         (args[0].tag() != AMObjType::DISCRETE_MIXTURE) && (args[0].tag() != AMObjType::DISCRETE_MIXTURE_DATA) &&
         (args[0].tag() != AMObjType::CONVOLUTION) && (args[0].tag() != AMObjType::CONVOLUTION_DATA) &&
         (args[0].tag() != AMObjType::COMPOUND) && (args[0].tag() != AMObjType::COMPOUND_DATA) &&
-        (args[0].tag() != AMObjType::VECTORS) && (args[0].tag() != AMObjType::REGRESSION) &&
+        (args[0].tag() != AMObjType::MIXTURE) && (args[0].tag() != AMObjType::VECTORS) &&
+        (args[0].tag() != AMObjType::MIXTURE_DATA) && (args[0].tag() != AMObjType::REGRESSION) &&
         (args[0].tag() != AMObjType::VECTOR_DISTANCE) && (args[0].tag() != AMObjType::RENEWAL) &&
         (args[0].tag() != AMObjType::TIME_EVENTS) && (args[0].tag() != AMObjType::RENEWAL_DATA) &&
         (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV) &&
@@ -801,7 +805,10 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
     CHECKCONDVA(nb_required == 1 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
-    if (args[0].tag() == AMObjType::VECTORS) {
+    if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
+      Vectors *vec;
+
+
       if (format_option) {
         status = false;
         genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Display");
@@ -811,7 +818,16 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
         return AMObj(AMObjType::ERROR);
       }
 
-      ((Vectors*)((STAT_model*)args[0].val.p)->pt)->ascii_data_write(AMLOUTPUT , exhaustive);
+      switch (args[0].tag()) {
+      case AMObjType::VECTORS :
+        vec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+        break;
+      case AMObjType::MIXTURE_DATA :
+        vec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
+        break;
+      }
+
+      vec->ascii_data_write(AMLOUTPUT , exhaustive);
     }
 
     else if ((args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
@@ -851,7 +867,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 
     else {
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , 1 , args[0].tag.string().data() ,
-                  "VECTORS or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or TOPS");
+                  "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or TOPS");
       return AMObj(AMObjType::ERROR);
     }
     break;
@@ -1605,10 +1621,10 @@ AMObj STAT_model::save(const AMObjVector &args) const
         (args[0].tag() != AMObjType::DISCRETE_MIXTURE) && (args[0].tag() != AMObjType::DISCRETE_MIXTURE_DATA) &&
         (args[0].tag() != AMObjType::CONVOLUTION) && (args[0].tag() != AMObjType::CONVOLUTION_DATA) &&
         (args[0].tag() != AMObjType::COMPOUND) && (args[0].tag() != AMObjType::COMPOUND_DATA) &&
-        (args[0].tag() != AMObjType::VECTORS) && (args[0].tag() != AMObjType::REGRESSION) &&
+        (args[0].tag() != AMObjType::MIXTURE) && (args[0].tag() != AMObjType::VECTORS) &&
+        (args[0].tag() != AMObjType::MIXTURE_DATA) && (args[0].tag() != AMObjType::REGRESSION) &&
         (args[0].tag() != AMObjType::RENEWAL) && (args[0].tag() != AMObjType::TIME_EVENTS) &&
-        (args[0].tag() != AMObjType::RENEWAL_DATA) &&
-        (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV) &&
+        (args[0].tag() != AMObjType::RENEWAL_DATA) && (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV) &&
         (args[0].tag() != AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) &&
         (args[0].tag() != AMObjType::SEMI_MARKOV) && (args[0].tag() != AMObjType::HIDDEN_SEMI_MARKOV) &&
         (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV) && (args[0].tag() != AMObjType::SEQUENCES) &&
@@ -1676,7 +1692,10 @@ AMObj STAT_model::save(const AMObjVector &args) const
       status = histo->ascii_write(error , ((AMString*)args[1].val.p)->data());
     }
 
-    else if (args[0].tag() == AMObjType::VECTORS) {
+    else if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
+      Vectors *vec;
+
+
       if (format_option) {
         status = false;
         genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Save");
@@ -1686,8 +1705,16 @@ AMObj STAT_model::save(const AMObjVector &args) const
         return AMObj(AMObjType::ERROR);
       }
 
-      status = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->ascii_data_write(error , ((AMString*)args[1].val.p)->data() ,
-                                                                              exhaustive);
+      switch (args[0].tag()) {
+      case AMObjType::VECTORS :
+        vec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+        break;
+      case AMObjType::MIXTURE_DATA :
+        vec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
+        break;
+      }
+
+      status = vec->ascii_data_write(error , ((AMString*)args[1].val.p)->data() , exhaustive);
     }
 
     else if ((args[0].tag() == AMObjType::TIME_EVENTS) || (args[0].tag() == AMObjType::RENEWAL_DATA)) {
@@ -2330,7 +2357,8 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       data = true;
     }
 
-    else if (args[0].tag() == AMObjType::VECTORS) {
+    else if ((args[0].tag() == AMObjType::MIXTURE) || (args[0].tag() == AMObjType::VECTORS) ||
+             (args[0].tag() == AMObjType::MIXTURE_DATA)) {
       if (nb_required > 2) {
         status = false;
         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot");
@@ -3360,6 +3388,9 @@ void installSTATModule()
 
   type[0] = AMObjType::ANY;  // pour compatibilite ascendante
   installFNode("Histogram" , STAT_Histogram , 1 , type , AMObjType::FREQUENCY_DISTRIBUTION);
+
+  type[0] = AMObjType::STRING;
+  installFNode("Mixture" , STAT_Mixture , 1 , type , AMObjType::MIXTURE);
 
   type[0] = AMObjType::ANY;
   installFNode("Vectors" , STAT_Vectors , 1 , type , AMObjType::VECTORS);
