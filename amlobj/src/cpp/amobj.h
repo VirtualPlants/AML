@@ -134,6 +134,8 @@ public:
 
     VECTORS,
     REGRESSION,
+    MIXTURE,
+    MIXTURE_DATA,
 
     VECTOR_DISTANCE,
 
