@@ -172,6 +172,12 @@ RWCString AMObjType::string() const {
   case AMObjType::REGRESSION:
     stg = "REGRESSION";
     break;
+  case AMObjType::MIXTURE:
+    stg = "MIXTURE";
+    break;
+  case AMObjType::MIXTURE_DATA:
+    stg = "MIXTURE_DATA";
+    break;
 
   case AMObjType::VECTOR_DISTANCE:
     stg = "VECTOR_DISTANCE";
@@ -351,6 +357,8 @@ AMObj::AMObj(AMObjType t, AMModel* p) {
 
          t==AMObjType::VECTORS ||
          t==AMObjType::REGRESSION ||
+         t==AMObjType::MIXTURE ||
+         t==AMObjType::MIXTURE_DATA ||
 
          t==AMObjType::VECTOR_DISTANCE ||
 
@@ -483,6 +491,8 @@ Boolean AMObj::operator==(const AMObj& rec) const {
 
       case AMObjType::VECTORS:
       case AMObjType::REGRESSION:
+      case AMObjType::MIXTURE:
+      case AMObjType::MIXTURE_DATA:
 
       case AMObjType::VECTOR_DISTANCE:
 
@@ -824,6 +834,8 @@ ostream& AMObj::printValue(ostream& o, int line_size) const {
 
   case AMObjType::VECTORS:
   case AMObjType::REGRESSION:
+  case AMObjType::MIXTURE:
+  case AMObjType::MIXTURE_DATA:
 
   case AMObjType::VECTOR_DISTANCE:
 
@@ -998,6 +1010,8 @@ size_t hashAMObj(const AMObj& v) {
 
   case AMObjType::VECTORS:
   case AMObjType::REGRESSION:
+  case AMObjType::MIXTURE:
+  case AMObjType::MIXTURE_DATA:
 
   case AMObjType::VECTOR_DISTANCE:
 
