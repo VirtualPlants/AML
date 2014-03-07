@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -43,10 +43,11 @@
 #include "stat_tool/discrete_mixture.h"
 #include "stat_tool/convolution.h"
 #include "stat_tool/compound.h"
-#include "stat_tool/vectors.h"
-#include "stat_tool/regression.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/mixture.h"
+#include "stat_tool/regression.h"
 #include "stat_tool/distance_matrix.h"
 
 #include "sequence_analysis/renewal.h"
@@ -330,14 +331,14 @@ AMObj STAT_DiscreteMixture(const AMObjVector &args)
     bool status = true;
     register int i;
     int nb_component = args.length() / 2;
-    double weight[MIXTURE_NB_COMPONENT];
-    const DiscreteParametric *component[MIXTURE_NB_COMPONENT];
+    double weight[DISCRETE_MIXTURE_NB_COMPONENT];
+    const DiscreteParametric *component[DISCRETE_MIXTURE_NB_COMPONENT];
 
 
     CHECKCONDVA(args.length() % 2 == 0 ,
                 genAMLError(ERRORMSG(UNEVEN_NB_ARG_s) , "DiscreteMixture"));
-    CHECKCONDVA((nb_component >= 2) && (nb_component <= MIXTURE_NB_COMPONENT) ,
-                genAMLError(ERRORMSG(NB_COMPONENT_sd) , "DiscreteMixture" , MIXTURE_NB_COMPONENT));
+    CHECKCONDVA((nb_component >= 2) && (nb_component <= DISCRETE_MIXTURE_NB_COMPONENT) ,
+                genAMLError(ERRORMSG(NB_COMPONENT_sd) , "DiscreteMixture" , DISCRETE_MIXTURE_NB_COMPONENT));
 
     for (i = 0;i < nb_component;i++) {
       if (args[i * 2].tag() != AMObjType::REAL) {
@@ -677,6 +678,43 @@ AMObj STAT_Histogram(const AMObjVector &args)
 
 {
   return STAT_FrequencyDistribution(args);
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un melange multivarie a partir d'un fichier.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_Mixture(const AMObjVector &args)
+
+{
+  RWCString *pstr;
+  Mixture *mixt;
+  StatError error;
+
+
+  CHECKCONDVA(args.length() == 1 ,
+              genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Mixture"));
+
+  if (args[0].tag() != AMObjType::STRING) {
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Mixture" , 1 ,
+                args[0].tag.string().data() , "STRING");
+    return AMObj(AMObjType::ERROR);
+  }
+
+  mixt = mixture_ascii_read(error , ((AMString*)args[0].val.p)->data());
+
+  if (mixt) {
+    STAT_model* model = new STAT_model(mixt);
+    return AMObj(AMObjType::MIXTURE , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "Mixture");
+    return AMObj(AMObjType::ERROR);
+  }
 }
 
 
