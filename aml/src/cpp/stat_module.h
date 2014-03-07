@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -120,13 +120,14 @@ enum STAT_ERRORLABEL {
   DISTRIBUTION_NAME_sds ,
   FREQUENCY_DISTRIBUTION_NAME_sds ,
   INF_BOUND_STATUS_sds ,
+  VARIANCE_FACTOR_sds ,
+  ALGORITHM_NAME_sds ,
   PENALTY_TYPE_sds ,
   ESTIMATOR_NAME_sds ,
   SIDE_EFFECT_MANAGEMENT_TYPE_sds ,
   MEAN_COMPUTATION_METHOD_sds ,
   FUNCTION_NAME_sds ,
   MARKOV_CHAIN_TYPE_sds ,
-  ALGORITHM_NAME_sds ,
   STRUCTURAL_PARAMETER_sds ,
 
   NB_FREQUENCY_DISTRIBUTION_s ,
