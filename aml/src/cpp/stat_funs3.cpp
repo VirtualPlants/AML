@@ -3,9 +3,9 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2013 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
@@ -43,10 +43,11 @@
 #include "stat_tool/discrete_mixture.h"
 #include "stat_tool/convolution.h"
 #include "stat_tool/compound.h"
-#include "stat_tool/vectors.h"
-#include "stat_tool/regression.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/mixture.h"
+#include "stat_tool/regression.h"
 #include "stat_tool/distance_matrix.h"
 
 #include "sequence_analysis/renewal.h"
@@ -376,7 +377,7 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
         ident = FORWARD_RECURRENCE_TIME;
       }
       else if (*pstr == "Mixture") {
-        ident = MIXTURE;
+        ident = NB_EVENT_MIXTURE;
       }
       else {
         genAMLError(ERRORMSG(DISTRIBUTION_NAME_sds) , "ExtractDistribution" , 2 ,
@@ -798,14 +799,22 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
     }
   }
 
-  if (args[0].tag() == AMObjType::VECTORS) {
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
     int nb_variable , variable;
     DiscreteDistributionData *histo;
     const Vectors *vec;
     StatError error;
 
 
-    vec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+    switch (args[0].tag()) {
+    case AMObjType::VECTORS :
+      vec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::MIXTURE_DATA :
+      vec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    }
+
     nb_variable = vec->get_nb_variable();
 
     if (nb_variable == 1) {
@@ -899,10 +908,10 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
     if (*pstr == "Mixture") {
       switch (args[0].tag()) {
       case AMObjType::TIME_EVENTS :
-        histo = time_events->extract(error , MIXTURE);
+        histo = time_events->extract(error , NB_EVENT_MIXTURE);
         break;
       case AMObjType::RENEWAL_DATA :
-        histo = renewal_data->extract(error , MIXTURE);
+        histo = renewal_data->extract(error , NB_EVENT_MIXTURE);
         break;
       }
 
@@ -1467,6 +1476,24 @@ AMObj STAT_ExtractData(const AMObjVector &args)
     }
   }
 
+  case AMObjType::MIXTURE : {
+    MixtureData *vec;
+    StatError error;
+
+
+    vec = ((Mixture*)((STAT_model*)args[0].val.p)->pt)->extract_data(error);
+
+    if (vec) {
+      STAT_model* model = new STAT_model(vec);
+      return AMObj(AMObjType::MIXTURE_DATA , model);
+    }
+    else {
+      AMLOUTPUT << "\n" << error;
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "ExtractData");
+      return AMObj(AMObjType::ERROR);
+    }
+  }
+
   case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV : {
     VariableOrderMarkovData *seq;
     StatError error;
@@ -1505,7 +1532,7 @@ AMObj STAT_ExtractData(const AMObjVector &args)
 
   default : {
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "ExtractData" , args[0].tag.string().data() ,
-                "DISCRETE_MIXTURE or CONVOLUTION or COMPOUND or HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI-MARKOV");
+                "DISCRETE_MIXTURE or CONVOLUTION or COMPOUND or MIXTURE or HIDDEN_VARIABLE_ORDER_MARKOV or HIDDEN_SEMI-MARKOV");
     return AMObj(AMObjType::ERROR);
   }
   }
@@ -1573,23 +1600,26 @@ AMObj STAT_Merge(const AMObjVector &args)
     return AMObj(AMObjType::FREQUENCY_DISTRIBUTION , model);
   }
 
-  if (args[0].tag() == AMObjType::VECTORS) {
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
     const Vectors **pvec;
     Vectors *vec;
     StatError error;
 
 
     pvec = new const Vectors*[nb_sample];
-    pvec[0] = (Vectors*)((STAT_model*)args[0].val.p)->pt;
 
-    for (i = 1;i < nb_sample;i++) {
-      if (args[i].tag() != AMObjType::VECTORS) {
+    for (i = 0;i < nb_sample;i++) {
+      switch (args[i].tag()) {
+      case AMObjType::VECTORS :
+        pvec[i] = (Vectors*)((STAT_model*)args[i].val.p)->pt;
+        break;
+      case AMObjType::MIXTURE_DATA :
+        pvec[i] = (MixtureData*)((STAT_model*)args[i].val.p)->pt;
+        break;
+      default :
         status = false;
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Merge" , i + 1 ,
-                    args[i].tag.string().data() , "VECTORS");
-      }
-      else {
-        pvec[i] = (Vectors*)((STAT_model*)args[i].val.p)->pt;
+                    args[i].tag.string().data() , "VECTORS or MIXTURE_DATA");
       }
     }
 
@@ -1934,8 +1964,8 @@ AMObj STAT_Shift(const AMObjVector &args)
     }
   }
 
-  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::SEQUENCES) ||
-      (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+      (args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
@@ -1949,6 +1979,10 @@ AMObj STAT_Shift(const AMObjVector &args)
     switch (args[0].tag()) {
     case AMObjType::VECTORS :
       ivec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+      nb_variable = ivec->get_nb_variable();
+      break;
+    case AMObjType::MIXTURE_DATA :
+      ivec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
       nb_variable = ivec->get_nb_variable();
       break;
     case AMObjType::SEQUENCES :
@@ -1998,7 +2032,7 @@ AMObj STAT_Shift(const AMObjVector &args)
     CHECKCONDVA(args.length() == offset + 1 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Shift" , offset + 1));
 
-    if (args[0].tag() == AMObjType::VECTORS) {
+    if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
       Vectors *vec;
 
 
@@ -2099,6 +2133,10 @@ AMObj STAT_ThresholdingData(const AMObjVector &args)
     ivec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
     nb_variable = ivec->get_nb_variable();
     break;
+  case AMObjType::MIXTURE_DATA :
+    ivec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = ivec->get_nb_variable();
+    break;
   case AMObjType::SEQUENCES :
     iseq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
     nb_variable = iseq->get_nb_variable();
@@ -2121,7 +2159,7 @@ AMObj STAT_ThresholdingData(const AMObjVector &args)
     break;
   default :
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Thresholding" , 1 , args[0].tag.string().data() ,
-                "VECTORS or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+                "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
     return AMObj(AMObjType::ERROR);
   }
 
@@ -2169,7 +2207,7 @@ AMObj STAT_ThresholdingData(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  if (args[0].tag() == AMObjType::VECTORS) {
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA))  {
     Vectors *vec;
 
 
@@ -2414,8 +2452,8 @@ AMObj STAT_Cluster(const AMObjVector &args)
     }
   }
 
-  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::SEQUENCES) ||
-      (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+      (args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
@@ -2435,6 +2473,10 @@ AMObj STAT_Cluster(const AMObjVector &args)
     switch (args[0].tag()) {
     case AMObjType::VECTORS :
       ivec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+      nb_variable = ivec->get_nb_variable();
+      break;
+    case AMObjType::MIXTURE_DATA :
+      ivec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
       nb_variable = ivec->get_nb_variable();
       break;
     case AMObjType::SEQUENCES :
@@ -2528,7 +2570,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
                   "Step or Limit");
     }
 
-    if (args[0].tag() == AMObjType::VECTORS) {
+    if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
       Vectors *vec;
 
 
@@ -2926,23 +2968,27 @@ AMObj STAT_Transcode(const AMObjVector &args)
     }
   }
 
-  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::SEQUENCES) ||
-      (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+      (args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     bool status = true;
     int nb_required , nb_variable , variable = I_DEFAULT , offset ,
         nb_symbol = I_DEFAULT , *symbol = NULL;
-    const Vectors *ivec;
-    const Sequences *iseq;
-    const MarkovianSequences *imarkovian_seq;
+    const Vectors *ivec = NULL;
+    const Sequences *iseq = NULL;
+    const MarkovianSequences *imarkovian_seq = NULL;
     StatError error;
 
 
     switch (args[0].tag()) {
     case AMObjType::VECTORS :
       ivec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+      nb_variable = ivec->get_nb_variable();
+      break;
+    case AMObjType::MIXTURE_DATA :
+      ivec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
       nb_variable = ivec->get_nb_variable();
       break;
     case AMObjType::SEQUENCES :
@@ -2992,16 +3038,14 @@ AMObj STAT_Transcode(const AMObjVector &args)
     CHECKCONDVA(args.length() >= nb_required ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Transcode"));
 
-    switch (args[0].tag()) {
-    case AMObjType::VECTORS :
+    if (ivec) {
       nb_symbol = (int)(ivec->get_max_value(variable - 1) - ivec->get_min_value(variable - 1)) + 1;
-      break;
-    case AMObjType::SEQUENCES :
+    }
+    else if (iseq) {
       nb_symbol = (int)(iseq->get_max_value(variable - 1) - iseq->get_min_value(variable - 1)) + 1;
-      break;
-    default :
+    }
+    else {
       nb_symbol = (int)(imarkovian_seq->get_max_value(variable - 1) - imarkovian_seq->get_min_value(variable - 1)) + 1;
-      break;
     }
 
     if (args[offset].tag() != AMObjType::ARRAY) {
@@ -3016,7 +3060,7 @@ AMObj STAT_Transcode(const AMObjVector &args)
       }
     }
 
-    if (args[0].tag() == AMObjType::VECTORS) {
+    if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
       Vectors *vec;
 
 
@@ -3284,8 +3328,8 @@ AMObj STAT_ValueSelect(const AMObjVector &args)
     }
   }
 
-  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::SEQUENCES) ||
-      (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA) ||
+      (args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
@@ -3298,6 +3342,10 @@ AMObj STAT_ValueSelect(const AMObjVector &args)
     switch (args[0].tag()) {
     case AMObjType::VECTORS :
       ivec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+      nb_variable = ivec->get_nb_variable();
+      break;
+    case AMObjType::MIXTURE_DATA :
+      ivec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
       nb_variable = ivec->get_nb_variable();
       break;
     case AMObjType::SEQUENCES :
@@ -3393,7 +3441,7 @@ AMObj STAT_ValueSelect(const AMObjVector &args)
       return AMObj(AMObjType::ERROR);
     }
 
-    if (args[0].tag() == AMObjType::VECTORS) {
+    if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
       Vectors *vec;
 
 
@@ -3487,6 +3535,10 @@ AMObj STAT_VariableScaling(const AMObjVector &args)
     ivec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
     nb_variable = ivec->get_nb_variable();
     break;
+  case AMObjType::MIXTURE_DATA :
+    ivec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = ivec->get_nb_variable();
+    break;
   case AMObjType::SEQUENCES :
     iseq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
     nb_variable = iseq->get_nb_variable();
@@ -3509,7 +3561,7 @@ AMObj STAT_VariableScaling(const AMObjVector &args)
     break;
   default :
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "VariableScaling" , 1 , args[0].tag.string().data() ,
-                "VECTORS or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+                "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
     return AMObj(AMObjType::ERROR);
   }
 
@@ -3538,7 +3590,7 @@ AMObj STAT_VariableScaling(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  if (args[0].tag() == AMObjType::VECTORS) {
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
     Vectors *vec;
 
 
@@ -3719,11 +3771,21 @@ AMObj STAT_Round(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  if (args[0].tag() == AMObjType::VECTORS) {
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
+    const Vectors *ivec;
     Vectors *vec;
 
 
-    vec = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->round(error , variable , mode);
+    switch (args[0].tag()) {
+    case AMObjType::VECTORS :
+      ivec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::MIXTURE_DATA :
+      ivec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    }
+
+    vec = ivec->round(error , variable , mode);
 
     if (vec) {
       STAT_model* model = new STAT_model(vec);
@@ -3788,7 +3850,7 @@ AMObj STAT_Round(const AMObjVector &args)
   }
 
   genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Round" , args[0].tag.string().data() ,
-              "VECTORS or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+              "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
   return AMObj(AMObjType::ERROR);
 }
 
@@ -3820,6 +3882,10 @@ AMObj STAT_SelectStep(const AMObjVector &args)
     vec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
     nb_variable = vec->get_nb_variable();
     break;
+  case AMObjType::MIXTURE_DATA :
+    vec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
+    nb_variable = vec->get_nb_variable();
+    break;
   case AMObjType::SEQUENCES :
     seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
     nb_variable = seq->get_nb_variable();
@@ -3842,7 +3908,7 @@ AMObj STAT_SelectStep(const AMObjVector &args)
     break;
   default :
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectStep" , 1 , args[0].tag.string().data() ,
-                "VECTORS or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+                "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
     return AMObj(AMObjType::ERROR);
   }
 
@@ -3916,7 +3982,7 @@ AMObj STAT_SelectStep(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  if (args[0].tag() == AMObjType::VECTORS) {
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
     status = vec->select_step(error , variable , step , min_value);
 
     if (status) {
@@ -4034,12 +4100,21 @@ AMObj STAT_SelectIndividual(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  if (args[0].tag() == AMObjType::VECTORS) {
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
+    const Vectors *ivec;
     Vectors *vec;
 
 
-    vec = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->select_individual(error , nb_pattern ,
-                                                                          identifier , keep);
+    switch (args[0].tag()) {
+    case AMObjType::VECTORS :
+      ivec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::MIXTURE_DATA :
+      ivec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    }
+
+    vec = ivec->select_individual(error , nb_pattern , identifier , keep);
     delete [] identifier;
 
     if (vec) {
@@ -4146,7 +4221,7 @@ AMObj STAT_SelectIndividual(const AMObjVector &args)
 
   delete [] identifier;
   genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectIndividual" , 1 , args[0].tag.string().data() ,
-              "VECTORS or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or TOPS or DISTANCE_MATRIX");
+              "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or TOPS or DISTANCE_MATRIX");
   return AMObj(AMObjType::ERROR);
 }
 
@@ -4238,12 +4313,21 @@ AMObj STAT_SelectVariable(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  if (args[0].tag() == AMObjType::VECTORS) {
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
+    const Vectors *ivec;
     Vectors *vec;
 
 
-    vec = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->select_variable(error , nb_variable ,
-                                                                        variable , keep);
+    switch (args[0].tag()) {
+    case AMObjType::VECTORS :
+      ivec = (Vectors*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    case AMObjType::MIXTURE_DATA :
+      ivec = (MixtureData*)((STAT_model*)args[0].val.p)->pt;
+      break;
+    }
+
+    vec = ivec->select_variable(error , nb_variable , variable , keep);
     delete [] variable;
 
     if (vec) {
@@ -4327,7 +4411,7 @@ AMObj STAT_SelectVariable(const AMObjVector &args)
 
   delete [] variable;
   genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectVariable" , 1 , args[0].tag.string().data() ,
-              "VECTORS or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+              "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
   return AMObj(AMObjType::ERROR);
 }
 
@@ -4381,23 +4465,27 @@ AMObj STAT_MergeVariable(const AMObjVector &args)
     }
   }
 
-  if (args[0].tag() == AMObjType::VECTORS) {
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
     const Vectors **pvec;
     Vectors *vec;
     StatError error;
 
 
     pvec = new const Vectors*[nb_required];
-    pvec[0] = (Vectors*)((STAT_model*)args[0].val.p)->pt;
 
-    for (i = 1;i < nb_required;i++) {
-      if (args[i].tag() != AMObjType::VECTORS) {
+    for (i = 0;i < nb_required;i++) {
+      switch (args[i].tag()) {
+      case AMObjType::VECTORS :
+        pvec[i] = (Vectors*)((STAT_model*)args[i].val.p)->pt;
+        break;
+      case AMObjType::MIXTURE_DATA :
+        pvec[i] = (MixtureData*)((STAT_model*)args[i].val.p)->pt;
+        break;
+      default :
         status = false;
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "MergeVariable" , i + 1 ,
-                    args[i].tag.string().data() , "VECTORS");
-      }
-      else {
-        pvec[i] = (Vectors*)((STAT_model*)args[i].val.p)->pt;
+                    args[i].tag.string().data() , "VECTORS or MIXTURE_DATA");
+        break;
       }
     }
 
@@ -4515,7 +4603,7 @@ AMObj STAT_MergeVariable(const AMObjVector &args)
   }
 
   genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "MergeVariable" , 1 , args[0].tag.string().data() ,
-              "VECTORS or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+              "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
   return AMObj(AMObjType::ERROR);
 }
 
