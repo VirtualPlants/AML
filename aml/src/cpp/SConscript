@@ -93,5 +93,8 @@ LIBS.append("vpaml")
 prefix = env_aml['build_prefix']
 
 sources= ["mainaml.cpp","guicon.cpp"]
+
+# Add LIBS dependencies
+LIBS.append("CGAL")
 aml_exe = env_aml.ALEAProgram("aml", sources, LIBS=LIBS)
 

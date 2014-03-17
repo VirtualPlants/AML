@@ -13,7 +13,7 @@ common_tools = ['vplants.mtg', 'vplants.plantgl', 'vplants.tool', 'vplants.amlob
                 'vplants.stat_tool', 'vplants.sequence_analysis',
                 'vplants.tree_matching','boost_python']
 
-tools = ['python','flex','qt4'] + common_tools
+tools = ['python','flex','install', 'qt4', 'cgal'] + common_tools
 
 env = ALEASolution(options, tools)
 
