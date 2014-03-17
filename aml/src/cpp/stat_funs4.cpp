@@ -1930,10 +1930,6 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
       }
     }
 
-    if ((ident != GAUSSIAN) && (variance_factor_option)) {
-      status = false;
-      genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "VarianceFactor");
-    }
     if ((algorithm != MCEM) && (min_nb_assignment_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MinNbAssignment");
