@@ -135,18 +135,18 @@ static int loadInitFile(const char* init_file) {
 
   if (!file_init_read_line(name.data())) {
 
-	if(name == INIT_FILE){
-	  string home = getHome();
+    if(name == INIT_FILE){
+      string home = getHome();
 
-	  name.prepend("/");
-	  name.prepend((char*)(!home.empty()?home.c_str():""));
+      name.prepend("/");
+      name.prepend((char*)(!home.empty()?home.c_str():""));
 
-	  if (!file_init_read_line(name.data())) return UNDEF;
-	}
-	else {
-	  cerr << " ... Cannot load initialization file : \"" << name.data() << "\"" << endl;
-	  return UNDEF;
-	}
+      if (!file_init_read_line(name.data())) return UNDEF;
+    }
+    else {
+      cerr << " ... Cannot load initialization file : \"" << name.data() << "\"" << endl;
+      return UNDEF;
+    }
 
   }
 
@@ -194,16 +194,16 @@ static int aml(const char* file, const StringList& init_files) {
 
 #ifdef _WIN32
   if (file != NULL) {
-	string f(file);
-	if(f[0]>= 'A' && f[0] <= 'Z' && f[1] == ':')
-	chg_dir(get_dirname(f));
+      string f(file);
+      if(f[0]>= 'A' && f[0] <= 'Z' && f[1] == ':')
+          chg_dir(get_dirname(f));
   }
   else {
-	if(!init_files.empty()){
-	  string f (init_files[init_files.entries()-1].data());
-	  if(f!=INIT_FILE && f != getAMAPmodDir() + '\\' + string("init.aml"))
-		chg_dir(get_dirname(f));
-	}
+      if(!init_files.empty()){
+          string f (init_files[init_files.entries()-1].data());
+          if(f!=INIT_FILE && f != getAMAPmodDir() + '\\' + string("init.aml"))
+              chg_dir(get_dirname(f));
+      }
   }
 #endif
 
@@ -218,7 +218,7 @@ static int aml(const char* file, const StringList& init_files) {
 
   amlEchoOn();
 
-  if (file == NULL) { 	// Interactive mode
+  if (file == NULL) {     // Interactive mode
 #if defined(_WIN32) || defined(__APPLE__)
 #else
     gnu_init_readline();
@@ -302,8 +302,8 @@ int main(int argc, char** argv) {
   string initfile;
   string adir = getAMAPmodDir();
   if(!adir.empty()){
-	  initfile = std::string(adir) + '\\' + string("init.aml");
-	  if(exists(initfile))init_files.insert(initfile);
+      initfile = std::string(adir) + '\\' + string("init.aml");
+      if(exists(initfile))init_files.insert(initfile);
   }
 
   if(exists(INIT_FILE) || exists(getHome()+'/'+INIT_FILE))
@@ -323,36 +323,36 @@ int main(int argc, char** argv) {
         return main_usage(exec_name);
       }
       else if (strcmp(*argv, "-init") == 0 || strcmp(*argv, "-i") == 0) {
-		++argv;
-		--argc;
-		if(!init_files.empty())init_files.remove(INIT_FILE);
-		if(!init_files.empty())init_files.remove(initfile);
-		if (argc) {
-		  if (*argv[0] != '-' && *argv[0] != '+') {
-			init_files.insert(*argv);
-		  }
-		  else {
-			argc++;
-			argv--;
-		  }
-		}
-		else {
-		  argc++;
-		  argv--;
-		}
+        ++argv;
+        --argc;
+        if(!init_files.empty())init_files.remove(INIT_FILE);
+        if(!init_files.empty())init_files.remove(initfile);
+        if (argc) {
+          if (*argv[0] != '-' && *argv[0] != '+') {
+            init_files.insert(*argv);
+          }
+          else {
+            argc++;
+            argv--;
+          }
+        }
+        else {
+          argc++;
+          argv--;
+        }
       }
       else if (strcmp(*argv, "-batch")== 0 || strcmp(*argv, "-b") == 0) {
-		if (!--argc) return main_usage(exec_name);
-		cerr << "Aml - Batch Mode on File : " << *(++argv) << endl;
-		batch_file = *argv;
-		break;
+        if (!--argc) return main_usage(exec_name);
+        cerr << "Aml - Batch Mode on File : " << *(++argv) << endl;
+        batch_file = *argv;
+        break;
       }
       else if (strcmp(*argv, "-freestorelooptest") == 0 || strcmp(*argv, "-l") == 0) {
-		if (!--argc) {
-		  cerr << "Aml - Memory Allocation test on initialization file(s): " << endl;
-		  testMemAllocAml(init_files);
-		}
-		else return main_usage(exec_name);
+        if (!--argc) {
+          cerr << "Aml - Memory Allocation test on initialization file(s): " << endl;
+          testMemAllocAml(init_files);
+        }
+        else return main_usage(exec_name);
       }
       else return main_usage(exec_name);
 
@@ -361,16 +361,16 @@ int main(int argc, char** argv) {
     case '+':
 
       if (strcmp(*argv , "+init") == 0 || strcmp(*argv, "+i") == 0) {
-		++argv;
-		--argc;
-		while(argc) {
-		  if (*argv[0] != '-' && *argv[0] != '+') init_files.insert(*argv);
-		  else break;
-		  ++argv;
-		  --argc;
-		}
-		--argv;
-		++argc;
+        ++argv;
+        --argc;
+        while(argc) {
+          if (*argv[0] != '-' && *argv[0] != '+') init_files.insert(*argv);
+          else break;
+          ++argv;
+          --argc;
+        }
+        --argv;
+        ++argc;
       }
       else return main_usage(exec_name);
 
@@ -390,28 +390,26 @@ int main(int argc, char** argv) {
   cerr << "\tAMAPmod : Exploring and Modeling Plant Architecture" << endl;
   cerr << "\t" << getOSFamily().c_str() << " version " << release_number() << "\t" << current_release_date() << endl;
   cerr << endl;
-  cerr << "\tCopyright(C) 1995-2003    " << endl << endl;
-  cerr << "\tChristophe Godin,  Yann Guedon" << endl << endl;
-  cerr << "\tCIRAD/INRA - UMR Modelisation des Plantes" << endl;
+  cerr << "\tCopyright(C) 1995-2014    " << endl << endl;
+  cerr << "\tChristophe Godin,  Yann Guedon,  Frederic Boudon,  Christophe Pradal" << endl << endl;
+  cerr << "\tCIRAD/INRA/INRIA - EPI VirtualPlants" << endl;
   cerr << endl;
 
   cerr << "\twith contribution of: " << endl;
-  cerr << "\tSamir Bellouti,        Frederic Boudon," << endl;
-  cerr << "\tPascal Ferraro,        Nicolas Dones," << endl;
-  cerr << "\tChristophe Nouguier,   Boris Adam,"  << endl;
-  cerr << "\tChristophe Pradal." << endl << endl;
-  cerr << "\tOpen Software used: gnuplot v3.7" ;
+  cerr << "\tSamir Bellouti,    Pascal Ferraro," << endl;
+  cerr << "\tNicolas Dones,    Christophe Nouguier," << endl;
+  cerr << "\tBoris Adam."  << endl;
+  cerr << "\tOpen Software used: gnuplot v4.6" ;
 #ifdef __GNUC__
-  cerr << ", readline v2.2 (GNU)" ;
+  cerr << ", readline v6.2 (GNU)" ;
 #endif
   cerr << "." << endl << endl << "\tForum for AMAPmod users         : amapmod@cirad.fr" << endl;
   cerr << "\tSend reports on bugs or comments: aml@cirad.fr" << endl;
   cerr << endl;
 
-  cerr << "\tForum archive:http://www.cirad.fr/mail-archives/listes/amapmod" << endl;
+  cerr << "\tForum archive: https://gforge.inria.fr/forum/forum.php?forum_id=1735&group_id=79" << endl;
   cerr << "\tOnline doc   :http://amap.cirad.fr/amapmod/refermanual18/couverture.html" << endl;
   cerr << "\tE-learning   :http://amap-e-learning.cirad.fr" << endl;
-  cerr << "\tOther infos  :http://www.cirad.fr/presentation/programmes/amap/logiciels/amap_mod" << endl;
 
   cerr << endl;
   cerr << endl;
