@@ -4742,6 +4742,9 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           if (*pstr == "Categorical") {
             model_type[i] = CATEGORICAL_CHANGE;
           }
+          else if (*pstr == "MultivariateCategorical") {
+            model_type[i] = MULTIVARIATE_CATEGORICAL_CHANGE;
+          }
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
           }
@@ -4790,9 +4793,9 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                         "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance or LinearModel or InterceptSlope");
           }
 
-          if ((model_type[i] == MULTIVARIATE_POISSON_CHANGE) || (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) ||
-              (model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE) ||
-              (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
+          if ((model_type[i] == MULTIVARIATE_CATEGORICAL_CHANGE) || (model_type[i] == MULTIVARIATE_POISSON_CHANGE) ||
+              (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i] == MEAN_CHANGE) ||
+              (model_type[i] == MEAN_VARIANCE_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
             CHECKCONDVA(nb_required == 3 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
 
@@ -4923,6 +4926,9 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           if (*pstr == "Categorical") {
             model_type[i] = CATEGORICAL_CHANGE;
           }
+          else if (*pstr == "MultivariateCategorical") {
+            model_type[i] = MULTIVARIATE_CATEGORICAL_CHANGE;
+          }
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
           }
@@ -4971,9 +4977,9 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                         "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance or LinearModel or InterceptSlope");
           }
 
-          if ((model_type[i] == MULTIVARIATE_POISSON_CHANGE) || (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) ||
-              (model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE) ||
-              (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
+          if ((model_type[i] == MULTIVARIATE_CATEGORICAL_CHANGE) || (model_type[i] == MULTIVARIATE_POISSON_CHANGE) ||
+              (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i] == MEAN_CHANGE) ||
+              (model_type[i] == MEAN_VARIANCE_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
             CHECKCONDVA(nb_required == 4 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
 
