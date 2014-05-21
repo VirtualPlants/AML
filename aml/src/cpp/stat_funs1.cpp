@@ -992,6 +992,9 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           if (*pstr == "Categorical") {
             model_type[i] = CATEGORICAL_CHANGE;
           }
+          else if (*pstr == "MultivariateCategorical") {
+            model_type[i] = MULTIVARIATE_CATEGORICAL_CHANGE;
+          }
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
           }
@@ -1040,9 +1043,9 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
                         "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance or LinearModel or InterceptSlope");
           }
 
-          if ((model_type[i] == MULTIVARIATE_POISSON_CHANGE) || (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) ||
-              (model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE) ||
-              (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
+          if ((model_type[i] == MULTIVARIATE_CATEGORICAL_CHANGE) || (model_type[i] == MULTIVARIATE_POISSON_CHANGE) ||
+              (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i] == MEAN_CHANGE) ||
+              (model_type[i] == MEAN_VARIANCE_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
             CHECKCONDVA(nb_required == 4 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
@@ -1968,6 +1971,9 @@ AMObj STAT_model::save(const AMObjVector &args) const
           if (*pstr == "Categorical") {
             model_type[i] = CATEGORICAL_CHANGE;
           }
+          else if (*pstr == "MultivariateCategorical") {
+            model_type[i] = MULTIVARIATE_CATEGORICAL_CHANGE;
+          }
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
           }
@@ -2016,9 +2022,9 @@ AMObj STAT_model::save(const AMObjVector &args) const
                         "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance or LinearModel or InterceptSlope");
           }
 
-          if ((model_type[i] == MULTIVARIATE_POISSON_CHANGE) || (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) ||
-              (model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE) ||
-              (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
+          if ((model_type[i] == MULTIVARIATE_CATEGORICAL_CHANGE) || (model_type[i] == MULTIVARIATE_POISSON_CHANGE) ||
+              (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i] == MEAN_CHANGE) ||
+              (model_type[i] == MEAN_VARIANCE_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
             CHECKCONDVA(nb_required == 5 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
 
@@ -2352,7 +2358,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       }
     }
 
-    else if ((args[0].tag() == AMObjType::SEQUENCES)  && (nb_required == 1)) {
+    else if ((args[0].tag() == AMObjType::SEQUENCES) && (nb_required == 1)) {
       nb_object = 1;
       data = true;
     }
@@ -2834,7 +2840,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       ostringstream buffer;
       buffer << "rm -f " << Plot_prefix << "*";
       if (system((buffer.str()).c_str()) == -1) {
-    	  aml_system_error(AMLOUTPUT , "rm");
+        aml_system_error(AMLOUTPUT , "rm");
       }
     }
 #   endif
@@ -2986,6 +2992,9 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               if (*pstr == "Categorical") {
                 model_type[i] = CATEGORICAL_CHANGE;
               }
+              else if (*pstr == "MultivariateCategorical") {
+                model_type[i] = MULTIVARIATE_CATEGORICAL_CHANGE;
+              }
               else if (*pstr == "Poisson") {
                 model_type[i] = POISSON_CHANGE;
               }
@@ -3034,9 +3043,9 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
                             "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance or LinearModel or InterceptSlope");
               }
 
-              if ((model_type[i] == MULTIVARIATE_POISSON_CHANGE) || (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) ||
-                  (model_type[i] == MEAN_CHANGE) || (model_type[i] == MEAN_VARIANCE_CHANGE) ||
-                  (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
+              if ((model_type[i] == MULTIVARIATE_CATEGORICAL_CHANGE) || (model_type[i] == MULTIVARIATE_POISSON_CHANGE) ||
+                  (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i] == MEAN_CHANGE) ||
+                  (model_type[i] == MEAN_VARIANCE_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
                 CHECKCONDVA(nb_required == 4 ,
                             genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot"));
 
@@ -3203,7 +3212,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       ostringstream buffer;
       buffer << "chmod 666 " << Plot_prefix << "*" << ends;
       if (system((buffer.str()).c_str()) == -1) {
-    	  aml_system_error(AMLOUTPUT , "chmod");
+        aml_system_error(AMLOUTPUT , "chmod");
       }
     }
 #   endif
