@@ -80,18 +80,18 @@ using namespace std;
   // copy this macro as is, just chaging its name so that it coincides with
   // the prefix in use.
 #ifndef SYSTEM_IS__CYGWIN
-#define lsystemToMTG_yyerror(_msg){		\
+#define lsystemToMTG_yyerror(parser,_msg){		\
         yyerrok;\
         yyclearin;\
-        parser(p);\
+	GenericParser<SMB_TABLE_TYPE> p = *(GenericParser<SMB_TABLE_TYPE> *)parser; \
         p.handleError(std::string(_msg), yychar, yytname[YYTRANSLATE((yychar>=0?yychar:-yychar))]);\
         postream(p) << std::endl; }
 /*#################################*/
 #else
-#define lsystemToMTG_yyerror(_msg){		\
+#define lsystemToMTG_yyerror(parser,_msg){		\
         yyerrok;\
         yyclearin;\
-        parser(p);\
+	GenericParser<SMB_TABLE_TYPE> p = *(GenericParser<SMB_TABLE_TYPE> *)parser; \
         p.handleError(std::string(_msg), yychar, "");\
 	postream(p) << std::endl;}
 #endif
@@ -407,6 +407,9 @@ static void write_symbol_line(char symbol, std::list<double>* pl, std::ostream& 
 
 %pure_parser                    /* asks for a reentrant parser: don't remove ! */
 %token_table                    /* generates a token table (names of the tokens) */
+%name-prefix "lsystemToMTG_yy"
+%parse-param {void * parser}
+%lex-param {GENERIC_LEXER * YYLEX_PARAM }
 
 /* possible types of tokens returned by the lexer */
 
