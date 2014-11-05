@@ -85,7 +85,7 @@ class MyColor
   // Virtuals methods for Interpoled colors.
 
 
-  Boolean isInterpoled() const { return _isInterpol;};
+  AmlBoolean isInterpoled() const { return _isInterpol;};
   ValType getMax() const { return _maxRange;};
   ValType getMin() const { return _minRange;};
   void putMin(ValType min);
@@ -93,11 +93,11 @@ class MyColor
   //Operators
 
   virtual const MyColor& operator=(const MyColor& );
-  Boolean operator==(const MyColor&) const;
+  AmlBoolean operator==(const MyColor&) const;
 
  protected:
 
-  Boolean _isInterpol;
+  AmlBoolean _isInterpol;
   ValType _minRange;
   ValType _maxRange;
   char _symbol;

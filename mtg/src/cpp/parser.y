@@ -178,11 +178,11 @@ static VtxInfo* vinfo = 0;            // line nbs where a vertex occurs
 
 // Flags positionned on the first error occuring in a certain file section
 
-static Boolean classes_flag_err = FALSE;
-static Boolean descrip_flag_err = FALSE;
-static Boolean feature_flag_err = FALSE;
-static Boolean mtghead_flag_err = FALSE;
-static Boolean code_flag_err = FALSE;
+static AmlBoolean classes_flag_err = FALSE;
+static AmlBoolean descrip_flag_err = FALSE;
+static AmlBoolean feature_flag_err = FALSE;
+static AmlBoolean mtghead_flag_err = FALSE;
+static AmlBoolean code_flag_err = FALSE;
 
 static const char* token_name[] = {
 
@@ -2876,7 +2876,7 @@ const char* inputLine() {
 
 }
 
-Boolean lineCodeErrorState() {
+AmlBoolean lineCodeErrorState() {
 
   return code_flag_err;
 

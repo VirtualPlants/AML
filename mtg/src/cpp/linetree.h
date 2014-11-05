@@ -129,9 +129,9 @@ class LineTree : public AMModel
 
   /// Virtual Elements
 
-  Boolean _areLeaves;
-  Boolean _areFlowers;
-  Boolean _areFruits;
+  AmlBoolean _areLeaves;
+  AmlBoolean _areFlowers;
+  AmlBoolean _areFruits;
 
   VirtualElements *_virtualLeaves, *_virtualFruits, *_virtualFlowers;
 
@@ -140,7 +140,7 @@ class LineTree : public AMModel
   void makeVirtualFlowers(VirtualElements*);
 
   // checks whether context for addition of virtual leaves is set
-  Boolean _isEnvironementSet;
+  AmlBoolean _isEnvironementSet;
 
   VirtualSymbolTable* _virtualTable;
   VId _vertexNumber;
@@ -183,25 +183,25 @@ class LineTree : public AMModel
               MaterialPtr& pmat) const;
 
 
-  Boolean makeLigFile(const Plant&,
+  AmlBoolean makeLigFile(const Plant&,
                       const char*,
                       const CorrTable&) const;
 
-  Boolean makeInfFile(const MyVector& min_MyVector,
+  AmlBoolean makeInfFile(const MyVector& min_MyVector,
                       const MyVector& max_MyVector,
                       const char*) const;
 
-  Boolean makeDtaFile(const ColorsTable&,
+  AmlBoolean makeDtaFile(const ColorsTable&,
                       const SymbLib&,
                       const char*) const;
 
-  /* Boolean makeArcFile(const Plant&,
+  /* AmlBoolean makeArcFile(const Plant&,
                       const char*); */
 
   /// Save LineTree as XML
-  Boolean saveAsXML(const char *) const;
+  AmlBoolean saveAsXML(const char *) const;
 
-  Boolean _state;
+  AmlBoolean _state;
 
   void writeRecord(const SymbType,
                    const LongType,
@@ -236,7 +236,7 @@ class LineTree : public AMModel
 
   VirtualSymbol getVirtualSymbol(VId vertex) const;
 
-  Boolean viewer(const FNode* filter, bool display_on);
+  AmlBoolean viewer(const FNode* filter, bool display_on);
 
   virtual AMObj display(std::ostream& o, const AMObjVector& args) const;
   virtual AMObj plot(GP_window&, const AMObjVector& args) const;

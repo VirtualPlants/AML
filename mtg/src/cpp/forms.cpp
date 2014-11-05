@@ -57,9 +57,9 @@ Forms::Forms(IntType category)
   _category=category;
 }
 
-Boolean Forms::operator==(const Forms& form) const
+AmlBoolean Forms::operator==(const Forms& form) const
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
   if (_category==form._category)
   {
@@ -69,9 +69,9 @@ Boolean Forms::operator==(const Forms& form) const
   return result;
 }
 
-Boolean Forms::operator<(const Forms& form) const
+AmlBoolean Forms::operator<(const Forms& form) const
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
   if (_category<form._category)
   {

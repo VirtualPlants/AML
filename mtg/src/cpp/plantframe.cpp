@@ -503,7 +503,7 @@ IntType PlantFrame::mtgType(MTG* mtg)
   // Type=3 : Mtg with cartesian coordinates.
 
   IntType result=1;
-  Boolean end_of_loop=FALSE;
+  AmlBoolean end_of_loop=FALSE;
   IntType i=0;
 
   end_of_loop=(i>=mtg->featureNb());
@@ -548,11 +548,11 @@ IntType PlantFrame::mtgType(MTG* mtg)
   return result;
 }
 
-Boolean PlantFrame::verifyTriangRef(MTG* mtg)
+AmlBoolean PlantFrame::verifyTriangRef(MTG* mtg)
 {
   // Verify if all the attributes for a triangular reference system exist
 
-  Boolean DAB,DBC,DAC,L1,L2,L3;
+  AmlBoolean DAB,DBC,DAC,L1,L2,L3;
 
   DAB=DAC=DBC=L1=L2=L3=FALSE;
 
@@ -590,16 +590,16 @@ Boolean PlantFrame::verifyTriangRef(MTG* mtg)
 
   }
 
-  Boolean result=DAB && DBC && DAC && L1 && L2 && L3;
+  AmlBoolean result=DAB && DBC && DAC && L1 && L2 && L3;
 
   return result;
 }
 
-Boolean PlantFrame::verifyCartesianRef(MTG* mtg)
+AmlBoolean PlantFrame::verifyCartesianRef(MTG* mtg)
 {
   // Verify if all the attributes for a triangular reference system exist
 
-  Boolean X,Y,Z;
+  AmlBoolean X,Y,Z;
 
   X=Y=Z=FALSE;
 
@@ -621,7 +621,7 @@ Boolean PlantFrame::verifyCartesianRef(MTG* mtg)
     }
   }
 
-  Boolean result=X && Y && Z;
+  AmlBoolean result=X && Y && Z;
 
   return result;
 }

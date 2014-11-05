@@ -109,7 +109,7 @@ Edge& Edge::operator=(const Edge& edge) {
 
 }
 
-Boolean Edge::operator==(const Edge& edge) const{
+AmlBoolean Edge::operator==(const Edge& edge) const{
 
   if (this == &edge) return TRUE;
   else if (_eid == edge._eid) return TRUE;

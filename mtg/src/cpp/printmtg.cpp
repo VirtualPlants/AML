@@ -40,7 +40,7 @@
 
 using namespace std;
 
-static Boolean testLabel(MTG* mtg, VId x, void* c) {
+static AmlBoolean testLabel(MTG* mtg, VId x, void* c) {
 
   int xclass = mtg->vclass(x);
   char symb = mtg->classSymbol(xclass);

@@ -91,7 +91,7 @@ IntType Measures::lookForLevel(VId vertex)
   if (lookForFeature(vertex)==LUNDEF)
   {
     VIdList* list=_plant->compoSons(vertex);
-    Boolean end_of_loop=FALSE;
+    AmlBoolean end_of_loop=FALSE;
     IntType i=0;
 
     while ((i<list->entries()) && (!end_of_loop))
@@ -368,7 +368,7 @@ IntType Category::ramOrder(const Branch& branch)
     const Branch* the_branch=NULL;
 
     BranchElement skey (support);
-    Boolean end_of_loop=!(i<nb_branches);
+    AmlBoolean end_of_loop=!(i<nb_branches);
 
     size_t index=RW_NPOS;
 
@@ -496,7 +496,7 @@ ValType Azimut::lookDownForAzimut(VId vertex) const
       VIdList* list=_plant->topoSons(detailed_relation,edge);
 
       IntType i=0;
-      Boolean end_of_loop=FALSE;
+      AmlBoolean end_of_loop=FALSE;
       VId the_vertex=UNDEF;
 
       while ((i<list->entries()) && (!end_of_loop))
@@ -1259,7 +1259,7 @@ CoordLength::~CoordLength()
 
 void CoordLength::computeBranchLengths(Branch& branch, Measures* coordobj)
 {
-  Boolean is_coords= isThereCoords(branch, coordobj);
+  AmlBoolean is_coords= isThereCoords(branch, coordobj);
 
   // cerr << "*** CoordLength::computeBranchLengths" << endl;
   // cerr << "\tCalcul des LONGUEURS des entites de la branche " << endl;
@@ -1511,14 +1511,14 @@ void CoordLength::computeBranchLengths(Branch& branch, Measures* coordobj)
 
 }
 
-Boolean CoordLength::isThereCoords(Branch& br, Measures* coordobj)
+AmlBoolean CoordLength::isThereCoords(Branch& br, Measures* coordobj)
 {
   // Verifie s'il y a des coordonnees renseignees dans cette branche.
 
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
   size_t nb_elements=br._components->entries();
   size_t i=0;
-  Boolean end_of_loop= (result) ||
+  AmlBoolean end_of_loop= (result) ||
                        (i>=nb_elements);
 
   RequiredCoords* coords = (RequiredCoords*)coordobj;
@@ -1581,7 +1581,7 @@ int CoordLength::nextIndex(Branch& br, size_t i, Measures* coordobj)
   int result=RW_NPOS;
   size_t nb_elements=br._components->entries();
 
-  Boolean end_of_loop=(i==RW_NPOS);
+  AmlBoolean end_of_loop=(i==RW_NPOS);
 
   MyVector vec;
   ValType l1=0,l2=0,l3=0;

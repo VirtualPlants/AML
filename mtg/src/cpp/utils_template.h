@@ -58,7 +58,7 @@ public:
 
   TwoDimArray<T>& operator=(const TwoDimArray<T>&);
 
-  Boolean isCreated() const {return (Boolean) _t;}
+  AmlBoolean isCreated() const {return (AmlBoolean) _t;}
 
   int dim1() const {return _dim1;}
   int dim2() const {return _dim2;}

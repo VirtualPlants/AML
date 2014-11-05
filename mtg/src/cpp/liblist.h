@@ -54,9 +54,9 @@ class LibElement
   LibElement(const LibElement&);
   LibElement();
 
-  Boolean operator==(const LibElement&) const;
+  AmlBoolean operator==(const LibElement&) const;
   const LibElement& operator=(const LibElement&);
-  Boolean operator<(const LibElement&) const;
+  AmlBoolean operator<(const LibElement&) const;
 
   ValType getValue() const { return _value; };
   char getSymbol() const { return _symbol; };

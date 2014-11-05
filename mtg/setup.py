@@ -21,7 +21,7 @@ scons_parameters = ["build_prefix="+build_prefix]
 # dependencies
 install_requires = [binary_deps('vplants.amlobj'), 
                     binary_deps('vplants.plantgl')]
-#install_requires = []
+install_requires = []
 setup_requires = ['openalea.deploy'] 
 
 if __name__ == '__main__':

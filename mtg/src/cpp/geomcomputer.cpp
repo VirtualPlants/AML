@@ -83,7 +83,7 @@ GeomComputer::~GeomComputer()
   delete _psi;
 }
 
-Boolean GeomComputer::euler(VId v) const {
+AmlBoolean GeomComputer::euler(VId v) const {
 
   if (_eulerf) {
 

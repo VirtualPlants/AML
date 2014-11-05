@@ -81,7 +81,7 @@ public:
   int binaryStoreSize() const;
 
   Edge& operator=(const Edge&);
-  Boolean operator==(const Edge&) const;
+  AmlBoolean operator==(const Edge&) const;
 
   EId eid() const {return _eid;}
   EType type() const {return _etype;}

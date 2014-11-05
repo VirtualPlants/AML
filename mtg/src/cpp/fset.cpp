@@ -143,7 +143,7 @@ void FSetArray::resize(int size) {
 
 }
 
-Boolean FSetArray::storeFeature(FSetId fsetid, int findex, const Feature& f) {
+AmlBoolean FSetArray::storeFeature(FSetId fsetid, int findex, const Feature& f) {
 
   if (isValidIndex(fsetid+findex))  {
     _f[fsetid+findex] = f;

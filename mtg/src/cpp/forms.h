@@ -56,8 +56,8 @@ class Forms
   Forms(IntType category);
   Forms(const Forms&);
 
-  Boolean operator==(const Forms&) const;
-  Boolean operator<(const Forms&) const;
+  AmlBoolean operator==(const Forms&) const;
+  AmlBoolean operator<(const Forms&) const;
   const Forms& operator=(const Forms&);
 
 

@@ -988,7 +988,7 @@ void MTG::changeTopoEdgeSon(VId y, VId z, VId x) {
 
 }
 
-Boolean MTG::checkVertexInsertion(VId x) const {
+AmlBoolean MTG::checkVertexInsertion(VId x) const {
 
   // Axiome A7 : si x et y ont pour complexes respectifs X et Y, que X != Y
   //             alors il doit exister une relation de type topoedge entre X et Y.
@@ -999,7 +999,7 @@ Boolean MTG::checkVertexInsertion(VId x) const {
   VIdList* slist = topoSons(x, ANYTOPO);
   assert(slist);
 
-  Boolean flagerr = FALSE;
+  AmlBoolean flagerr = FALSE;
 
   VIdListIter nexts(*slist);
 

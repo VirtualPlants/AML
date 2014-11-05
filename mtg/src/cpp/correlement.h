@@ -58,8 +58,8 @@ class CorrElement
   CorrElement(VId vertex);
   CorrElement();
 
-  Boolean operator==(const CorrElement&) const;
-  Boolean operator<(const CorrElement&) const;
+  AmlBoolean operator==(const CorrElement&) const;
+  AmlBoolean operator<(const CorrElement&) const;
   const CorrElement& operator=(const CorrElement&);
 
   SymbType getSymbol() const { return _symbol;};

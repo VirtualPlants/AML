@@ -127,7 +127,7 @@ static std::ifstream* input_stream = 0;
 static std::ofstream* log_file = 0;
 static AMLErrorList* errlist = 0;
 
-static Boolean AMLECHO = TRUE;
+static AmlBoolean AMLECHO = TRUE;
 
 // ----------------------------
 // static functions declaration
@@ -136,11 +136,11 @@ static Boolean AMLECHO = TRUE;
 static NextLineFunc AMLGetNextLine;
 static int getNextLine();
 static StringList* makeFreeVarList(const FAMObjPtrList*);
-static Boolean matchVarLists(const StringList* list1, const StringList* list2, int* result);
+static AmlBoolean matchVarLists(const StringList* list1, const StringList* list2, int* result);
 static FAMObj* eval(RWCString, const FAMObjPtrList&);
 static FAMObj* iter_eval(RWCString, const FAMObjPtrList&, RWCString);
 static void printErrorList();
-static Boolean anyErrors();
+static AmlBoolean anyErrors();
 
 static const char* token_name[] = {
 
@@ -398,7 +398,7 @@ FExp :
     RWCString fname($1);
     delete [] $1;
 
-    Boolean testintable = FALSE;
+    AmlBoolean testintable = FALSE;
 
     if (amobjTable()->contains(fname)) {
       testintable = TRUE;
@@ -467,7 +467,7 @@ FExp :
 
     FAMObjPtrListIter next(*$3);
     StringList* arglist = new StringList;
-    Boolean error_flag = FALSE;
+    AmlBoolean error_flag = FALSE;
     while (next()) {
       FAMObj* famobj = next.key();
       if (!error_flag) {
@@ -550,7 +550,7 @@ FExp :
 
           int* imatch = new int[varnb];
 
-          Boolean res;
+          AmlBoolean res;
           int rightvarnb = $7->arglist ? $7->arglist->entries(): 0;
 
           if (rightvarnb) res = matchVarLists(arglist, $7->arglist, imatch);
@@ -1243,7 +1243,7 @@ Atom :
 
 %%
 
-static Boolean checkEvalArgListValidity(const FAMObjPtrList& list) {
+static AmlBoolean checkEvalArgListValidity(const FAMObjPtrList& list) {
 
   FAMObjPtrListIter next((FAMObjPtrList&)list);
 
@@ -1265,7 +1265,7 @@ static Boolean checkEvalArgListValidity(const FAMObjPtrList& list) {
 
 }
 
-static Boolean checkIterEvalArgListValidity(const FAMObjPtrList& list) {
+static AmlBoolean checkIterEvalArgListValidity(const FAMObjPtrList& list) {
 
   FAMObjPtrListIter next((FAMObjPtrList&)list);
 
@@ -1551,7 +1551,7 @@ static StringList* makeFreeVarList(const FAMObjPtrList* objlist) {
 // if a requirement is not met, a boolean False is returned
 //
 
-static Boolean matchVarLists(const StringList* list1, const StringList* list2, int* result) {
+static AmlBoolean matchVarLists(const StringList* list1, const StringList* list2, int* result) {
 
   assert(list1);
   assert(list2);
@@ -2127,7 +2127,7 @@ AMLErrorList* getAMLErrorList() {
 
 }
 
-static Boolean anyErrors() {
+static AmlBoolean anyErrors() {
 
   assert(errlist);
 

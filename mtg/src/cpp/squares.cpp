@@ -86,7 +86,7 @@ void Voxel::putMax(MyVector max)
   _maxVector=max;
 }
 
-Boolean Voxel::operator==(const Voxel& v) const
+AmlBoolean Voxel::operator==(const Voxel& v) const
 {
   if (_index==v._index)
   {
@@ -175,7 +175,7 @@ void Squares::computePositions(size_t n)
   size_t nb_voxels=_voxels->entries();
   size_t index=0;
 
-  Boolean end_of_loop=!(index<nb_voxels);
+  AmlBoolean end_of_loop=!(index<nb_voxels);
 
   ValType ddy=0;
   ValType ddx=_deltaPlant;

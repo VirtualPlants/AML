@@ -53,7 +53,7 @@ public:
   RefSystem() {}
   virtual ~RefSystem() {}
 
-  virtual Boolean findPoint(ValType, ValType, ValType, MyVector&) const = 0;
+  virtual AmlBoolean findPoint(ValType, ValType, ValType, MyVector&) const = 0;
 
 
 };
@@ -79,7 +79,7 @@ public:
   TriangRefSystem(ValType dAB, ValType dAC, ValType dBC);
   virtual ~TriangRefSystem() {}
 
-  virtual Boolean findPoint(ValType , ValType , ValType, MyVector&) const;
+  virtual AmlBoolean findPoint(ValType , ValType , ValType, MyVector&) const;
 
   MyVector pointA() const {return ptA;}
   MyVector pointB() const {return ptB;}
@@ -94,7 +94,7 @@ public:
   CartesianRefSystem() {};
   virtual ~CartesianRefSystem() {};
   
-  virtual Boolean findPoint(ValType , ValType , ValType, MyVector& ) const;
+  virtual AmlBoolean findPoint(ValType , ValType , ValType, MyVector& ) const;
 };
 
 #endif

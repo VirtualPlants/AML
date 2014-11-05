@@ -86,12 +86,12 @@ class BranchElement
 
   // Operators
 
-  Boolean operator==(const BranchElement&) const;
+  AmlBoolean operator==(const BranchElement&) const;
   const BranchElement& operator=(const BranchElement&);
 
   // Test the element
 
-  Boolean isValid() const;
+  AmlBoolean isValid() const;
 
   // Constructors
 
@@ -168,8 +168,8 @@ class Branch
   ~Branch();
 
   const Branch& operator=(const Branch&);
-  Boolean operator==(const Branch& ) const;
-  Boolean operator<(const Branch& ) const;
+  AmlBoolean operator==(const Branch& ) const;
+  AmlBoolean operator<(const Branch& ) const;
 
   void addElement(const BranchElement ); // Adds a new element to the branch.
   const BranchCompoList& branchComponents() const;

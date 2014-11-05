@@ -62,8 +62,8 @@ public:
 
   virtual ~SetIter() {};
 
-  virtual Boolean operator++() = 0;
-  virtual Boolean operator()()  = 0;
+  virtual AmlBoolean operator++() = 0;
+  virtual AmlBoolean operator()()  = 0;
 
   virtual void reset() = 0;
 
@@ -83,8 +83,8 @@ public:
 
   RWTValHashTable<AMObj>* container() const {return _next.container();}
 
-  virtual Boolean operator++() {return ++_next;}
-  virtual Boolean operator()() {return _next();}
+  virtual AmlBoolean operator++() {return ++_next;}
+  virtual AmlBoolean operator()() {return _next();}
 
   virtual void reset() {_next.reset();}
 
@@ -100,7 +100,7 @@ class Set : public AMModel {
 
 protected:
 
-  Boolean _state;
+  AmlBoolean _state;
 
   AMObj* _an_element;
 
@@ -124,9 +124,9 @@ public:
   virtual int isValid() const {return _state;}
   virtual SetIter* iterator() const = 0;
 
-  virtual Boolean contains(const Set& set) const = 0;
-  virtual Boolean contains(const AMObj& obj) const = 0;
-  virtual Boolean operator==(const Set& set) const = 0;
+  virtual AmlBoolean contains(const Set& set) const = 0;
+  virtual AmlBoolean contains(const AMObj& obj) const = 0;
+  virtual AmlBoolean operator==(const Set& set) const = 0;
 
   virtual Set& operator+=(const Set*) = 0;
   virtual Set& operator+=(const AMObj&) = 0;
@@ -134,13 +134,13 @@ public:
 
   const AMObj* anElement() const {return _an_element;}
 
-  Boolean checkDefined() const;
+  AmlBoolean checkDefined() const;
 
   AMObjType surfaceType() const {
     if (_an_element) return _an_element->tag();
     else return AMObjType::ANY;
   }
-  Boolean matchesSetType(const AMObj& obj) const {
+  AmlBoolean matchesSetType(const AMObj& obj) const {
     if (_an_element) return obj && (*_an_element);
     else return TRUE; // the set is empty and any type matches the set type
   }
@@ -169,9 +169,9 @@ public:
   virtual int entries() const {return AMObjSet::entries();}
   virtual SetIter* iterator() const {return new HashSetIter((AMObjSet*)this);}
 
-  virtual Boolean contains(const Set& set) const;
-  virtual Boolean contains(const AMObj& obj) const;
-  virtual Boolean operator==(const Set& set) const;
+  virtual AmlBoolean contains(const Set& set) const;
+  virtual AmlBoolean contains(const AMObj& obj) const;
+  virtual AmlBoolean operator==(const Set& set) const;
 
   virtual Set& operator+=(const AMObj&);
   virtual Set& operator+=(const Set* pset);

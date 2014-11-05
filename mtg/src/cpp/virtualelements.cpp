@@ -106,7 +106,7 @@ const VirtualSymbol& VirtualSymbol::operator=(const VirtualSymbol& v)
   return *this;
 }
 
-Boolean VirtualSymbol::operator==(const VirtualSymbol& v ) const
+AmlBoolean VirtualSymbol::operator==(const VirtualSymbol& v ) const
 {
   if (_element==v._element)
   {

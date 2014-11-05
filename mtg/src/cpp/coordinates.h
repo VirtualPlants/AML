@@ -68,7 +68,7 @@ class Coordinates : public Measures
   virtual ~Coordinates();
 
   virtual void computeBranchCoordinates(Branch&);
-  virtual Boolean areValidCoordinates() const {return _areValidCoordinates;};
+  virtual AmlBoolean areValidCoordinates() const {return _areValidCoordinates;};
 
   void translatePlantElements();
   void translatePlantElements(MyVector delta);
@@ -84,7 +84,7 @@ class Coordinates : public Measures
   ValType lookForRatio(VId,VId);
   MyVector _origin;
   const DressingFile* _dressingFile;
-  Boolean _areValidCoordinates;
+  AmlBoolean _areValidCoordinates;
   Squares* _squares;
 
  
@@ -139,14 +139,14 @@ class RequiredCoords : public Coordinates
   Measures* _xcoord;
   Measures* _ycoord;
   Measures* _zcoord;
-  Boolean _isValidRefSystem;
+  AmlBoolean _isValidRefSystem;
   IntType _sysLevel;
 
-  Boolean lookForRefSystem();
-  Boolean lookForCoords(VId vertex,MyVector& vector);
-  Boolean lookUpCoords(VId vertex,MyVector& vector);
+  AmlBoolean lookForRefSystem();
+  AmlBoolean lookForCoords(VId vertex,MyVector& vector);
+  AmlBoolean lookUpCoords(VId vertex,MyVector& vector);
   MyVector lookForOrigin(BranchElement&);
-  Boolean findFeature(VId,IntType,ValType&);
+  AmlBoolean findFeature(VId,IntType,ValType&);
 
 
 };

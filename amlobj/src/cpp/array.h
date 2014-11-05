@@ -65,8 +65,8 @@ public:
 
   virtual ~ArrayIter() {};
 
-  virtual Boolean operator++() = 0;
-  virtual Boolean operator()()  = 0;
+  virtual AmlBoolean operator++() = 0;
+  virtual AmlBoolean operator()()  = 0;
 
   virtual void reset() = 0;
 
@@ -86,8 +86,8 @@ public:
 
   AMObjList* container() const {return _next.container();}
 
-  virtual Boolean operator++() {return ++_next;}
-  virtual Boolean operator()() {return _next();}
+  virtual AmlBoolean operator++() {return ++_next;}
+  virtual AmlBoolean operator()() {return _next();}
 
   virtual void reset() {_next.reset();}
 
@@ -105,7 +105,7 @@ protected:
 
   int nestedDepth() const;
 
-  Boolean _state;
+  AmlBoolean _state;
 
   AMObj* _an_element;
 
@@ -119,9 +119,9 @@ public:
 
   virtual ArrayIter* iterator() const = 0;
 
-  virtual Boolean contains(const Array& array) const = 0;
-  virtual Boolean contains(const AMObj& obj) const = 0;
-  virtual Boolean operator==(const Array& array) const = 0;
+  virtual AmlBoolean contains(const Array& array) const = 0;
+  virtual AmlBoolean contains(const AMObj& obj) const = 0;
+  virtual AmlBoolean operator==(const Array& array) const = 0;
 
   virtual Array& operator+=(const Array*) = 0;
   virtual Array& operator+=(const AMObj&) = 0;
@@ -132,13 +132,13 @@ public:
 
   const AMObj* anElement() const {return _an_element;}
 
-  Boolean checkDefined() const;
+  AmlBoolean checkDefined() const;
 
   AMObjType surfaceType() const {
     if (_an_element) return _an_element->tag();
     else return AMObjType::ANY;
   }
-  Boolean matchesArrayType(const AMObj& obj) const {
+  AmlBoolean matchesArrayType(const AMObj& obj) const {
     if (_an_element) return obj && (*_an_element);
     else return TRUE; // the array is empty and any type matches the array type
   }
@@ -195,9 +195,9 @@ public:
 
   virtual ArrayIter* iterator() const {return new SLArrayIter((AMObjList*)this);}
 
-  virtual Boolean contains(const Array& array) const;
-  virtual Boolean contains(const AMObj& obj) const;
-  virtual Boolean operator==(const Array& array) const;
+  virtual AmlBoolean contains(const Array& array) const;
+  virtual AmlBoolean contains(const AMObj& obj) const;
+  virtual AmlBoolean operator==(const Array& array) const;
 
   virtual Array& operator+=(const AMObj&);
   virtual Array& operator-=(const AMObj&);

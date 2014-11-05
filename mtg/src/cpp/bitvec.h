@@ -95,8 +95,8 @@ using namespace std;
 // o.fs.print(str);     // imprime 10000000 correspondant a BLUE
 
 #ifndef CPL
-#ifndef Boolean
-#define Boolean int
+#ifndef AmlBoolean
+#define AmlBoolean int
 #endif
 #else
 #include "aml/defs.h"
@@ -142,23 +142,23 @@ public:
   void clear() {flags = (BITVECTYPE)0;} // clear all bits
   void set() {flags = (BITVECTYPE)0; flags = ~flags;} // set all bits
 
-  Boolean isSet(BitVec fs) const {return (Boolean) (flags & fs.flags);}
-  Boolean isSet(int f) const {return (Boolean) (flags & ((BITVECTYPE)01 << f));}
-  Boolean isSet() const {return (Boolean) flags;}
-  Boolean isOnlySet(BitVec fs) const {return (Boolean) ( (flags & fs.flags) == flags);}
-  Boolean isOnlySet(int f) const {return (Boolean) ((flags & ((BITVECTYPE)01 << f)) == flags);}
-  Boolean isClear() const { return (Boolean) !flags; }
+  AmlBoolean isSet(BitVec fs) const {return (AmlBoolean) (flags & fs.flags);}
+  AmlBoolean isSet(int f) const {return (AmlBoolean) (flags & ((BITVECTYPE)01 << f));}
+  AmlBoolean isSet() const {return (AmlBoolean) flags;}
+  AmlBoolean isOnlySet(BitVec fs) const {return (AmlBoolean) ( (flags & fs.flags) == flags);}
+  AmlBoolean isOnlySet(int f) const {return (AmlBoolean) ((flags & ((BITVECTYPE)01 << f)) == flags);}
+  AmlBoolean isClear() const { return (AmlBoolean) !flags; }
 
   int firstTrue() const; // retourne l'index du premier flag leve; ex: 3 si flags == 0010
                          // retourne 0 si tous les flags sont baisses
 
-  Boolean operator*() const {return (Boolean) flags;}         // like isSet
+  AmlBoolean operator*() const {return (AmlBoolean) flags;}         // like isSet
 
-  Boolean operator==(Boolean b) const {return b == isSet();}
-  Boolean operator==(const BitVec& fs) const {return flags == fs.flags;}
+  AmlBoolean operator==(AmlBoolean b) const {return b == isSet();}
+  AmlBoolean operator==(const BitVec& fs) const {return flags == fs.flags;}
 
-  Boolean operator!=(Boolean b) const {return b != isSet();}
-  Boolean operator!=(const BitVec& fs) const {return flags != fs.flags;}
+  AmlBoolean operator!=(AmlBoolean b) const {return b != isSet();}
+  AmlBoolean operator!=(const BitVec& fs) const {return flags != fs.flags;}
 
   int nbBitsSet() const;
 

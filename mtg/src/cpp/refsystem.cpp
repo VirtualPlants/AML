@@ -84,7 +84,7 @@ TriangRefSystem::TriangRefSystem(ValType _lab, ValType _lac, ValType _lbc) : Ref
 
 }
 
-Boolean TriangRefSystem::findPoint(ValType la, ValType lb, ValType lc, MyVector& p) const {
+AmlBoolean TriangRefSystem::findPoint(ValType la, ValType lb, ValType lc, MyVector& p) const {
 
   int above = 1;
   if (la < 0) {
@@ -130,7 +130,7 @@ Boolean TriangRefSystem::findPoint(ValType la, ValType lb, ValType lc, MyVector&
 }
 
 
-Boolean CartesianRefSystem::findPoint(ValType x, ValType y, ValType z, MyVector& v) const
+AmlBoolean CartesianRefSystem::findPoint(ValType x, ValType y, ValType z, MyVector& v) const
 { 
   
   v=MyVector(x,y,z);

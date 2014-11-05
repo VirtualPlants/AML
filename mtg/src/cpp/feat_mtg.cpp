@@ -130,7 +130,7 @@ Date MTG::lastDate(VId id) const {
 
 }
 
-Boolean MTG::isDefAtDate(VId id, Date date) const {
+AmlBoolean MTG::isDefAtDate(VId id, Date date) const {
 
   if(existsVertex(id)) {
 

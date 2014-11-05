@@ -137,9 +137,9 @@ void MyColor::putMax(ValType max)
 
 
 
-Boolean MyColor::operator==(const MyColor& color) const
+AmlBoolean MyColor::operator==(const MyColor& color) const
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
   if ((_symbol==color.getSymbol())
       && (_emission==color._emission)

@@ -260,7 +260,7 @@ void Diameters::computeDiameters(Branch& branch)
 
   BranchCompoList* compo_list=branch._components;
   IntType next_index=-1;
-  Boolean interpol_dia=TRUE;
+  AmlBoolean interpol_dia=TRUE;
 
   for(size_t i=0;i<compo_list->entries();i++)
   {
@@ -448,7 +448,7 @@ BranchElement Diameters::nextDefinedTopDia(const Branch& branch,
   IntType index=components.index(start_element);
   IntType nb_element=components.entries();
   IntType i=index;
-  Boolean end_of_loop=FALSE;
+  AmlBoolean end_of_loop=FALSE;
 
   while ((!end_of_loop) && (i<nb_element))
   {
@@ -474,7 +474,7 @@ BranchElement Diameters::nextDefinedBottomDia(const Branch& branch,
   IntType index=components.index(start_element);
   IntType nb_element=components.entries();
   IntType i=index;
-  Boolean end_of_loop=FALSE;
+  AmlBoolean end_of_loop=FALSE;
 
   while ((!end_of_loop) && (i<nb_element))
   {

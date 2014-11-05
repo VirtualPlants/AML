@@ -208,15 +208,15 @@ SLList::SLList(const List* list, const PFNode* pred, const AMObj* arg) {
 }
 
 
-Boolean SLList::contains(const AMObj& obj) const {
+AmlBoolean SLList::contains(const AMObj& obj) const {
 
   return AMObjList::contains(obj);
 
 }
 
-Boolean SLList::contains(const List& list) const {
+AmlBoolean SLList::contains(const List& list) const {
 
-  Boolean result = TRUE;
+  AmlBoolean result = TRUE;
 
   ListIter* pnext = list.iterator();
   ListIter& next = *pnext;
@@ -236,11 +236,11 @@ Boolean SLList::contains(const List& list) const {
 
 }
 
-Boolean SLList::operator==(const List& list) const {
+AmlBoolean SLList::operator==(const List& list) const {
 
   if (list.entries() != entries()) return FALSE;
 
-  Boolean result = TRUE;
+  AmlBoolean result = TRUE;
 
   ListIter* pnext = iterator();
   ListIter* pnext2 = list.iterator();

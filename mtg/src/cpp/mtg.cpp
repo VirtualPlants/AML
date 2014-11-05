@@ -457,7 +457,7 @@ char MTG::edgeSymbol(EType e) const {
 
 // test si father est un ascendant complex de x (vrai si father == x)
 
-Boolean MTG::isCompoAncestorOf(VId father, VId x) const {
+AmlBoolean MTG::isCompoAncestorOf(VId father, VId x) const {
 
   if (existsVertex(father) && existsVertex(x)) {
     if (x == father) return TRUE;
@@ -470,7 +470,7 @@ Boolean MTG::isCompoAncestorOf(VId father, VId x) const {
 
 // test si son est un descendant topologique de x (vrai si son == x)
 
-Boolean MTG::isCompoDescendantOf(VId son, VId x) const {
+AmlBoolean MTG::isCompoDescendantOf(VId son, VId x) const {
 
   if (existsVertex(son) && existsVertex(x)) {
 
@@ -495,7 +495,7 @@ Boolean MTG::isCompoDescendantOf(VId son, VId x) const {
 
 // test si father est un ascendant topologique de x (vrai si father == x)
 
-Boolean MTG::isTopoAncestorOf(VId father, VId x, EType filter) const {
+AmlBoolean MTG::isTopoAncestorOf(VId father, VId x, EType filter) const {
 
   if (existsVertex(father) && existsVertex(x)) {
 
@@ -512,7 +512,7 @@ Boolean MTG::isTopoAncestorOf(VId father, VId x, EType filter) const {
 
 // test si son est un descendant topologique de x (vrai si son == x)
 
-Boolean MTG::isTopoDescendantOf(VId son, VId x, EType filter) const {
+AmlBoolean MTG::isTopoDescendantOf(VId son, VId x, EType filter) const {
 
   if (existsVertex(son) && existsVertex(x)) {
 
@@ -536,7 +536,7 @@ Boolean MTG::isTopoDescendantOf(VId son, VId x, EType filter) const {
 }
 
 // is id root at scale scale(id) ?
-Boolean MTG::isGlobalTopoRoot(VId id) const {
+AmlBoolean MTG::isGlobalTopoRoot(VId id) const {
 
   if (existsVertex(id)) {
 
@@ -553,7 +553,7 @@ Boolean MTG::isGlobalTopoRoot(VId id) const {
 }
 
 // is id root of its compoFather ?
-Boolean MTG::isLocalTopoRoot(VId id) const {
+AmlBoolean MTG::isLocalTopoRoot(VId id) const {
 
   if (existsVertex(id)) {
 
@@ -603,7 +603,7 @@ EType MTG::edgeType(VId v1, VId v2) const {
 
 }
 
-Boolean MTG::scaleEdge(VId v1, VId v2) const {
+AmlBoolean MTG::scaleEdge(VId v1, VId v2) const {
 
   if (existsVertex(v1) && existsVertex(v2)) {
 

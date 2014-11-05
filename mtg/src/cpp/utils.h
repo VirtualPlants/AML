@@ -75,8 +75,8 @@ public:
   String& operator=(const String& st) {strncpy(s, st.s, MAXSTRINGSIZE); return *this;}
   String& operator=(const char* st) {strncpy(s, st, MAXSTRINGSIZE); return *this;}
 
-  Boolean operator==(const String& st) const {return !strcmp(s, st.s);}
-  Boolean operator==(const char* st) const {return !strcmp(s, st);}
+  AmlBoolean operator==(const String& st) const {return !strcmp(s, st.s);}
+  AmlBoolean operator==(const char* st) const {return !strcmp(s, st);}
 
   const char* operator()() const {return s;}
   char& operator[](int i) {return s[i];}
@@ -102,7 +102,7 @@ public:
   int& Min() {return _min;}
   int& Max() {return _max;}
 
-  Boolean isIn(int i) const {return (i>=_min && i<=_max);}
+  AmlBoolean isIn(int i) const {return (i>=_min && i<=_max);}
 
 };
 

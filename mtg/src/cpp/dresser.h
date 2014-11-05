@@ -128,8 +128,8 @@ class Painter
   ValType _maxTreshold;
   ValType _minTreshold;
   ValType _mediumTreshold;
-  Boolean _isInterpol, _isColor,_isColorRGB,_isMaterial,_isGeometry,_isSymbolFun;
-  Boolean _isMaxTreshold, _isMinTreshold, _isMediumTreshold;
+  AmlBoolean _isInterpol, _isColor,_isColorRGB,_isMaterial,_isGeometry,_isSymbolFun;
+  AmlBoolean _isMaxTreshold, _isMinTreshold, _isMediumTreshold;
 
   MyColor computeColor(VId vertex);
 
@@ -181,9 +181,9 @@ class Dresser
   Painter* _painter;
   const ColorLib* _colorLib;
   Plant* _plant;
-  Boolean _isInterpol;
-  Boolean _isMaxTreshold;
-  Boolean _isMinTreshold;
+  AmlBoolean _isInterpol;
+  AmlBoolean _isMaxTreshold;
+  AmlBoolean _isMinTreshold;
 
   FNode* _interpolFun;
 

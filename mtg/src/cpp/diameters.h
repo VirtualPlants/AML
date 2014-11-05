@@ -100,13 +100,13 @@ class Diameters : public TopDia, public BottomDia
 	    const ValType scale);
 
   virtual void computeDiameters(Branch&);
-  Boolean areValidDiameters() const { return _areValidDiameters;};
+  AmlBoolean areValidDiameters() const { return _areValidDiameters;};
 
 
  private:
   
   const DressingFile* _dressingFile;
-  Boolean _areValidDiameters;
+  AmlBoolean _areValidDiameters;
  
   ValType computeDiamsRatio(IntType, ValType, ValType);
   BranchElement nextDefinedTopDia(const Branch&, const BranchElement );

@@ -76,7 +76,7 @@ class GeomComputer
   // A constructor with FNODEs may be delared further.
 
 
-  Boolean isAValidGeometry() const {return _isAValidGeometry;};
+  AmlBoolean isAValidGeometry() const {return _isAValidGeometry;};
 
   virtual void computeGeometry()=0; 
   virtual void coord3D(VId, ValType*) const=0;
@@ -91,14 +91,14 @@ class GeomComputer
     Measures* _phi;
     Measures* _psi;
     
-    Boolean euler(VId) const; 
+    AmlBoolean euler(VId) const; 
 
  protected:
 
   Plant* _plant;
   MTG* _mtg;
   const DressingFile* _dressingFile;
-  Boolean _isAValidGeometry;
+  AmlBoolean _isAValidGeometry;
 
   // Some FNODE*s munbers must be declared here
 

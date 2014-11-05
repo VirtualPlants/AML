@@ -72,7 +72,7 @@ if __name__ == '__main__':
                        },
       
           # Add package platform libraries if any
-          package_data = {namespace+".aml" : ['*.*'],},
+          package_data = {namespace+".aml" : ['*.*'], "": ['*.mtg', '*.drf','*.smb','*.png', '*.hsc', '*.seq']},
           include_package_data=True,
           zip_safe = False,
 

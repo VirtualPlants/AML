@@ -68,8 +68,8 @@ class Measures
   virtual void computeBranchPhi(Branch&) {assert(1==0);}; 
   virtual void computeBranchPsi(Branch&) {assert(1==0);}; 
   virtual void computeBranchCategory(Branch&) {assert(1==0);};
-  virtual Boolean areValidCoordinates() const  {assert(1==0); return 1;};
-  virtual Boolean areValidLengths() const {assert(1==0); return 1; };
+  virtual AmlBoolean areValidCoordinates() const  {assert(1==0); return 1;};
+  virtual AmlBoolean areValidLengths() const {assert(1==0); return 1; };
 
   virtual void translatePlantElements() {assert(1==0);};
   virtual void translatePlantElements(MyVector) {assert(1==0);};
@@ -129,13 +129,13 @@ class Length : public Measures
 	 const ValType scale);
 
   virtual void computeBranchLengths( Branch&, Measures*);
-  virtual Boolean areValidLengths() const { return _areValidLengths;};
+  virtual AmlBoolean areValidLengths() const { return _areValidLengths;};
 
   ValType lookDown(const VId) const;
 
  protected:
   
-  Boolean _areValidLengths;
+  AmlBoolean _areValidLengths;
   const DressingFile* _dressingFile;
 
   ValType lookUp(const VId) const;
@@ -176,14 +176,14 @@ class CoordLength : public Measures
   
  private:
   
-  Boolean _isValid;
+  AmlBoolean _isValid;
   const FNode* _function;
   const DressingFile* _dressingFile;
   Measures* _length;
 
   RWCString _length_algo;
 
-  Boolean isThereCoords(Branch&, Measures*);
+  AmlBoolean isThereCoords(Branch&, Measures*);
   ValType computeElementLength(VId,
 			       IntType,
 			       IntType,
@@ -212,8 +212,8 @@ class Azimut : public Measures
   
  private: 
 
-  Boolean _isPosition;
-  Boolean _isAzimut;
+  AmlBoolean _isPosition;
+  AmlBoolean _isAzimut;
   ValType _base;
   ValType _nbTours;
 

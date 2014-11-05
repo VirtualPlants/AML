@@ -74,7 +74,7 @@ class FSymb
   FSymb(RWCString var_name,RWCString file_name);
   FSymb(RWCString var_name);
 
-  Boolean operator==(const FSymb& var_name) const;
+  AmlBoolean operator==(const FSymb& var_name) const;
   const FSymb& operator=(const FSymb&);
 
   RWCString _varName;
@@ -95,7 +95,7 @@ class NCrv
   NCrv(RWCString crv_name);
   ~NCrv();
 
-  Boolean operator==(const NCrv&) const;
+  AmlBoolean operator==(const NCrv&) const;
   const NCrv& operator=(const NCrv&);
 
   RWCString _crvName;
@@ -108,10 +108,10 @@ typedef RWTValDlist<NCrv> CrvTable;
 
 struct DRFErrorMsg {
 
-  DRFErrorMsg(Boolean, RWCString);
+  DRFErrorMsg(AmlBoolean, RWCString);
   DRFErrorMsg();
 
-  Boolean _isError;
+  AmlBoolean _isError;
   RWCString _errorMsg;
 
   void display();
@@ -135,7 +135,7 @@ class DressingFile : public DressingData
 
   VarTable* _varTable;
   CrvTable* _crvTable;
-  Boolean _isValid;
+  AmlBoolean _isValid;
 
   GeometrySymbolTable* _geom_table; // Symbol table containing Geoms (if any)
   AppearanceSymbolTable* _mat_table;  // Symbol table containing Materials (if any)
@@ -214,11 +214,11 @@ class DressingFile : public DressingData
 
 
 
- //  Boolean function(const char* chaine);
+ //  AmlBoolean function(const char* chaine);
 
   // Tools functions
 
-  Boolean readCrvFile(const char* file_name);
+  AmlBoolean readCrvFile(const char* file_name);
 
 };
 

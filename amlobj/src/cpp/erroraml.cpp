@@ -183,7 +183,7 @@ AMLErrorItem& AMLErrorItem::operator=(const AMLErrorItem& err) {
   return *this;
 }
 
-Boolean AMLErrorItem::operator==(const AMLErrorItem& err) {
+AmlBoolean AMLErrorItem::operator==(const AMLErrorItem& err) {
 
   if (this == &err) return TRUE;
   else {

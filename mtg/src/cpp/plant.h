@@ -103,14 +103,14 @@ class Plant
   IntType getPlantCounter() const { return _plantCounter; };
 
 
-  Boolean operator==(const Plant&) const;
+  AmlBoolean operator==(const Plant&) const;
 
   BranchElement searchForElement(VId vertex) const;
 
   MTG* getMtg();
   const MTG* getMtg() const;
 
-  Boolean isAValidPlant() const {return _isValid;};
+  AmlBoolean isAValidPlant() const {return _isValid;};
 
 
   // Methods for mtg exploring.
@@ -136,7 +136,7 @@ class Plant
   virtual int vindex(VId vertex) const { return _mtg->vindex(vertex);};
   virtual const Feature* feature(VId v, FIndex i, Date d) const { return _mtg->feature(v,i,d);};
   virtual Date lastDate(VId v) const { return _mtg->lastDate(v);};
-  virtual Boolean hasFeatures(VId v) const { return _mtg->hasFeatures(v);};
+  virtual AmlBoolean hasFeatures(VId v) const { return _mtg->hasFeatures(v);};
   virtual VId mtgTopoFather(VId v, EType edge) const { return _mtg->topoFather(v,edge);};
   virtual VId mtgTopoFather(VId v) const { return _mtg->topoFather(v,ANY);};
 
@@ -169,9 +169,9 @@ class Plant
   LongType _number;
   MyTree* _myTree;
   EType _defaultEdge;
-  Boolean _isValid;
+  AmlBoolean _isValid;
   LongType _plantId;
-  Boolean _isSympodial;
+  AmlBoolean _isSympodial;
 
 
   static LongType _plantNumber;
@@ -185,7 +185,7 @@ class Plant
   void lookForFather(MyNode&);
   void buildMyTree();
   void buildSympodialTree();
-  Boolean areEqualLists(VIdList*,VIdList*);
+  AmlBoolean areEqualLists(VIdList*,VIdList*);
   void compare();
 
  private:

@@ -431,7 +431,7 @@ AMObj::AMObj(const AMObj& rec) {
 
 }
 
-Boolean AMObj::operator==(const AMObj& rec) const {
+AmlBoolean AMObj::operator==(const AMObj& rec) const {
   if (this != &rec) {
     AMObjType tmin = (tag & rec.tag);
     //cerr << tag << "&" << rec.tag << " = " << tmin << endl;
@@ -538,7 +538,7 @@ Boolean AMObj::operator==(const AMObj& rec) const {
   else return TRUE;
 }
 
-Boolean AMObj::operator<(const AMObj& rec) const {
+AmlBoolean AMObj::operator<(const AMObj& rec) const {
   if (this != &rec) {
     AMObjType tmin = (tag & rec.tag);
     if (tmin() != AMObjType::UNDEF) {
@@ -568,7 +568,7 @@ Boolean AMObj::operator<(const AMObj& rec) const {
   else return FALSE;
 }
 
-Boolean AMObj::isaAMModel() const {
+AmlBoolean AMObj::isaAMModel() const {
 
     switch(tag()) {
 
@@ -1052,7 +1052,7 @@ size_t hashAMObj(const AMObj& v) {
 
 }
 
-Boolean operator&&(const AMObj& x, const AMObj& y) {
+AmlBoolean operator&&(const AMObj& x, const AMObj& y) {
 
   if (x.tag == y.tag) {
 

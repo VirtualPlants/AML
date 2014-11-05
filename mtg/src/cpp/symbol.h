@@ -72,10 +72,10 @@ class MySymbol
   char getSymbol() const {return _symbol;};
   // Operators
 
-  Boolean operator==(const MySymbol&) const;
+  AmlBoolean operator==(const MySymbol&) const;
   const MySymbol& operator=(const MySymbol&);
 
-  Boolean isValid();
+  AmlBoolean isValid();
 
  private:
 
@@ -99,7 +99,7 @@ class SymbLib
   ~SymbLib();
 
   const MySymbol lookForASymbol(const char) const;
-  Boolean addSymbol(const MySymbol);
+  AmlBoolean addSymbol(const MySymbol);
   const SymbolsTable& getSymbolsTable() const;
   void clear();
 

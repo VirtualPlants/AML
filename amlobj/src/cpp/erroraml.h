@@ -103,7 +103,7 @@ public:
   AMLErrorItem(const AMLErrorItem&);
 
   AMLErrorItem& operator=(const AMLErrorItem&);
-  Boolean operator==(const AMLErrorItem&);
+  AmlBoolean operator==(const AMLErrorItem&);
 
   void complete(const char* file, int line, const char* module, const char* message);
 

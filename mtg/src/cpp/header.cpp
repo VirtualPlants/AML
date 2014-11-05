@@ -122,7 +122,7 @@ VClass ClassDef::vClass(char c) const {
 
 }
 
-Boolean ClassDef::isValid(char c) const {
+AmlBoolean ClassDef::isValid(char c) const {
 
   if (_class_symbol.index(c) != RW_NPOS) return TRUE;
   else return FALSE;
@@ -227,7 +227,7 @@ FFlag FSetDef::fFlag(int index) const {
 }
 
 
-Boolean FSetDef::existsType(FType type) const {
+AmlBoolean FSetDef::existsType(FType type) const {
 
   for (int i=0; i<_fnb; i++) {
 
@@ -237,7 +237,7 @@ Boolean FSetDef::existsType(FType type) const {
   return FALSE;
 }
 
-Boolean FSetDef::existsName(const String& name) const {
+AmlBoolean FSetDef::existsName(const String& name) const {
 
   for (int i=0; i<FSetDef::_fnb; i++) {
 

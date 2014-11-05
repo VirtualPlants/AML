@@ -168,7 +168,7 @@ void activateMTG(AMObj g) {
 
 }
 
-Boolean isCurrentMTGValid() {
+AmlBoolean isCurrentMTGValid() {
 
   return activeMTG().val.p != 0;
 
@@ -499,7 +499,7 @@ static AMObj MTG_MTG(const AMObjVector& args) {
 
 }
 
-static Boolean vtxTestScale(MTG* g, VId v, void* pscale) {
+static AmlBoolean vtxTestScale(MTG* g, VId v, void* pscale) {
 
   assert(g);
   assert(pscale);

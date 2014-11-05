@@ -81,7 +81,7 @@ extern int lineNb();
 extern int columnNb();
 extern int firstFeatCol();
 extern const char* inputLine();
-extern Boolean lineCodeErrorState();
+extern AmlBoolean lineCodeErrorState();
 
 extern int yyerror(char* errtype); // creates a error item with correct line and column nbs
 

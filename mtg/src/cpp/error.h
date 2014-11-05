@@ -114,7 +114,7 @@ public:
   ErrorItem(const ErrorItem&);
 
   ErrorItem& operator=(const ErrorItem&);
-  Boolean operator==(const ErrorItem&);
+  AmlBoolean operator==(const ErrorItem&);
 
   int& type() {return _type;}
   int& code() {return _code;}

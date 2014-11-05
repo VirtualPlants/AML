@@ -198,15 +198,15 @@ public:
 
   AMObjType operator&(AMObjType t) const;
 
-  Boolean operator==(const AMObjType& t) const {
+  AmlBoolean operator==(const AMObjType& t) const {
     if (this == &t) return TRUE;
     else if (t.type == UNDEF || type == UNDEF) return TRUE; // UNDEF is of anytype
     else return type == t.type;
   }
 
-  Boolean operator!=(const AMObjType& t) const {return !(*this == t);}
-  Boolean operator==(AMOBJTYPE t) const {return type == t;}
-  Boolean operator!=(AMOBJTYPE t) const {return type != t;}
+  AmlBoolean operator!=(const AMObjType& t) const {return !(*this == t);}
+  AmlBoolean operator==(AMOBJTYPE t) const {return type == t;}
+  AmlBoolean operator!=(AMOBJTYPE t) const {return type != t;}
 
   AMOBJTYPE operator()() const {return type;}
 
@@ -220,7 +220,7 @@ class AMModel;
 std::ostream& operator<<(std::ostream& o, AMObjType t);
 
 typedef union {
-  Boolean b;    // BOOL
+  AmlBoolean b;    // BOOL
   int t;        // TYPE
   int v;        // VTX
   int i;        // INT
@@ -274,14 +274,14 @@ public:
 
   AMObj& operator=(const AMObj& rec);
 
-  Boolean operator==(const AMObj& rec) const;
-  Boolean operator<(const AMObj& rec) const;
+  AmlBoolean operator==(const AMObj& rec) const;
+  AmlBoolean operator<(const AMObj& rec) const;
 
-  Boolean operator!=(const AMObj& rec) const {
+  AmlBoolean operator!=(const AMObj& rec) const {
     return !(operator==(rec));
   }
 
-  Boolean isaAMModel() const;
+  AmlBoolean isaAMModel() const;
   int isLocked() const;
 
   void operator++();
@@ -291,7 +291,7 @@ public:
   std::ostream& printTag(std::ostream& o) const;
   std::ostream& printValue(std::ostream& o, int line_size = 0) const; // By default the entire object is printed
 
-  Boolean isValid() const {return tag.type != AMObjType::ERROR;}
+  AmlBoolean isValid() const {return tag.type != AMObjType::ERROR;}
   AMObjType type() const {return tag;}
 
 };
@@ -322,7 +322,7 @@ struct FAMObj : public AMObj {
   }
 
   // two FAMObj match whatever their arglist
-  Boolean operator==(const FAMObj& rec) const {
+  AmlBoolean operator==(const FAMObj& rec) const {
     if (this != &rec) {
       if ( *(AMObj*)this == (AMObj&)rec ){
         return TRUE;
@@ -339,7 +339,7 @@ struct FAMObj : public AMObj {
 };
 
 // compares types of arguments and returns TRUE if they are structurally equivalent:
-Boolean operator&&(const AMObj&, const AMObj&);
+AmlBoolean operator&&(const AMObj&, const AMObj&);
 
 std::ostream& operator<<(std::ostream&, const AMObj&);
 std::ostream& operator<<(std::ostream&, const FAMObj&);

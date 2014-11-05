@@ -56,7 +56,7 @@
 
 
 
-Boolean MTG::checkAlias(VId vtx, const Feature* fset, int findex) const {
+AmlBoolean MTG::checkAlias(VId vtx, const Feature* fset, int findex) const {
 
   assert(existsVertex(vtx));
 
@@ -65,7 +65,7 @@ Boolean MTG::checkAlias(VId vtx, const Feature* fset, int findex) const {
 
 }
 
-Boolean MTG::checkDate(VId vtx, const Feature* fset, int findex) const {
+AmlBoolean MTG::checkDate(VId vtx, const Feature* fset, int findex) const {
 
   assert(existsVertex(vtx));
 
@@ -210,7 +210,7 @@ Boolean MTG::checkDate(VId vtx, const Feature* fset, int findex) const {
 
 }
 
-Boolean MTG::checkState(VId vtx, const Feature* fset, int findex) const {
+AmlBoolean MTG::checkState(VId vtx, const Feature* fset, int findex) const {
 
   assert(existsVertex(vtx));
 
@@ -222,21 +222,7 @@ Boolean MTG::checkState(VId vtx, const Feature* fset, int findex) const {
 
 }
 
-Boolean MTG::checkNbEl(VId vtx, const Feature* fset, int findex) const {
-
-  assert(existsVertex(vtx));
-
-  if (isDefFeature(DATE_F)) {
-
-  }
-  if (isDefFeature(STATE_F)) {
-
-  }
-
-  return TRUE;
-}
-
-Boolean MTG::checkDiam(VId vtx, const Feature* fset, int findex) const {
+AmlBoolean MTG::checkNbEl(VId vtx, const Feature* fset, int findex) const {
 
   assert(existsVertex(vtx));
 
@@ -250,7 +236,21 @@ Boolean MTG::checkDiam(VId vtx, const Feature* fset, int findex) const {
   return TRUE;
 }
 
-Boolean MTG::checkLength(VId vtx, const Feature* fset, int findex) const {
+AmlBoolean MTG::checkDiam(VId vtx, const Feature* fset, int findex) const {
+
+  assert(existsVertex(vtx));
+
+  if (isDefFeature(DATE_F)) {
+
+  }
+  if (isDefFeature(STATE_F)) {
+
+  }
+
+  return TRUE;
+}
+
+AmlBoolean MTG::checkLength(VId vtx, const Feature* fset, int findex) const {
 
   assert(existsVertex(vtx));
 
@@ -266,7 +266,7 @@ Boolean MTG::checkLength(VId vtx, const Feature* fset, int findex) const {
 
 
 
-Boolean MTG::checkFeature(VId vtx, const Feature* fset, int findex) const {
+AmlBoolean MTG::checkFeature(VId vtx, const Feature* fset, int findex) const {
 
   FFlag feat_nature = fFlag(findex);
 

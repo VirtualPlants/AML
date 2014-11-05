@@ -163,7 +163,7 @@ ostream& Set::displayOneLine(ostream& o) const {
 
 }
 
-Boolean Set::checkDefined() const {
+AmlBoolean Set::checkDefined() const {
   if (surfaceType() == AMObjType::ARRAY) {
     return ((Array*)(_an_element->val.p))->checkDefined();
   }
@@ -250,15 +250,15 @@ HashSet::HashSet(const Set* set, const PFNode* pred, const AMObj* arg) : AMObjSe
 
 }
 
-Boolean HashSet::contains(const AMObj& obj) const {
+AmlBoolean HashSet::contains(const AMObj& obj) const {
 
   return AMObjSet::contains(obj);
 
 }
 
-Boolean HashSet::contains(const Set& set) const {
+AmlBoolean HashSet::contains(const Set& set) const {
 
-  Boolean result = TRUE;
+  AmlBoolean result = TRUE;
 
   SetIter* pnext = set.iterator();
   SetIter& next = *pnext;
@@ -278,7 +278,7 @@ Boolean HashSet::contains(const Set& set) const {
 
 }
 
-Boolean HashSet::operator==(const Set& set) const {
+AmlBoolean HashSet::operator==(const Set& set) const {
 
   if (contains(set) && set.contains(*this)) return TRUE;
   else return FALSE;

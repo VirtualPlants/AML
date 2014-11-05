@@ -85,9 +85,9 @@ const RWCString& MySymbol::getSymbolName() const
   return *_symbolName;
 }
 
-Boolean MySymbol::operator==(const MySymbol& sym ) const
+AmlBoolean MySymbol::operator==(const MySymbol& sym ) const
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
   if (_symbol==sym._symbol)
   {
@@ -121,9 +121,9 @@ void MySymbol::symbolCopy(const MySymbol& symbol)
   _symbol=symbol._symbol;
 }
 
-Boolean MySymbol::isValid()
+AmlBoolean MySymbol::isValid()
 {
-  Boolean result=TRUE;
+  AmlBoolean result=TRUE;
 
 
   return result;
@@ -140,7 +140,7 @@ SymbLib::~SymbLib()
   delete _symbList;
 }
 
-Boolean SymbLib::addSymbol(const MySymbol symbol)
+AmlBoolean SymbLib::addSymbol(const MySymbol symbol)
 {
   if (!_symbList->contains(symbol))
   {

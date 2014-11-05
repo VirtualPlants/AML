@@ -116,9 +116,9 @@ const MyVector& MyVector::operator=(const MyVector& v)
   return *this;
 }
 
-Boolean MyVector::operator==(const MyVector& v) const
+AmlBoolean MyVector::operator==(const MyVector& v) const
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
   if ((_x==v[0]) && (_y==v[1]) && (_z==v[2]))
   {

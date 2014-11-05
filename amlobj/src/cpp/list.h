@@ -57,8 +57,8 @@ public:
 
   virtual ~ListIter() {};
 
-  virtual Boolean operator++() = 0;
-  virtual Boolean operator()()  = 0;
+  virtual AmlBoolean operator++() = 0;
+  virtual AmlBoolean operator()()  = 0;
 
   virtual void reset() = 0;
 
@@ -78,8 +78,8 @@ public:
 
   AMObjList* container() const {return _next.container();}
 
-  virtual Boolean operator++() {return ++_next;}
-  virtual Boolean operator()() {return _next();}
+  virtual AmlBoolean operator++() {return ++_next;}
+  virtual AmlBoolean operator()() {return _next();}
 
   virtual void reset() {_next.reset();}
 
@@ -106,9 +106,9 @@ public:
   virtual int isValid() const {return _valid;}
   virtual ListIter* iterator() const = 0;
 
-  virtual Boolean contains(const List& list) const = 0;
-  virtual Boolean contains(const AMObj& obj) const = 0;
-  virtual Boolean operator==(const List& list) const = 0;
+  virtual AmlBoolean contains(const List& list) const = 0;
+  virtual AmlBoolean contains(const AMObj& obj) const = 0;
+  virtual AmlBoolean operator==(const List& list) const = 0;
 
   virtual List& operator+=(const List*) = 0;
   virtual List& operator+=(const AMObj&) = 0;
@@ -145,9 +145,9 @@ public:
 
   virtual ListIter* iterator() const {return new SLListIter((AMObjList*)this);}
 
-  virtual Boolean contains(const List& list) const;
-  virtual Boolean contains(const AMObj& obj) const;
-  virtual Boolean operator==(const List& list) const;
+  virtual AmlBoolean contains(const List& list) const;
+  virtual AmlBoolean contains(const AMObj& obj) const;
+  virtual AmlBoolean operator==(const List& list) const;
 
   virtual List& operator+=(const AMObj&);
   virtual List& operator-=(const AMObj&);

@@ -61,7 +61,7 @@ class VirtualSymbol
   VirtualSymbol(const VirtualSymbol&);
 
   const VirtualSymbol& operator=(const VirtualSymbol& );
-  Boolean operator==(const VirtualSymbol&) const;
+  AmlBoolean operator==(const VirtualSymbol&) const;
 
   IntType _element;
   IntType _bearing_element;

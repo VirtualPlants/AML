@@ -19,10 +19,10 @@ build_prefix = "build-scons"
 scons_parameters=["build_prefix="+build_prefix]
 
 # dependencies
-install_requires = [binary_deps('vplants.tool')]
-setup_requires = install_requires + ['openalea.deploy']
-
+setup_requires = install_requires =[]
 if sys.platform.startswith('win'):
+    install_requires = [binary_deps('vplants.tool')]
+    setup_requires = install_requires + ['openalea.deploy']
     setup_requires += ['bisonflex']
 
 if __name__ == '__main__':

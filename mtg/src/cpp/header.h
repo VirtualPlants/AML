@@ -98,8 +98,8 @@ public:
 
   ClassDef& operator=(const ClassDef&);
 
-  Boolean isValid(char i) const;
-  Boolean isValid(VClass i) const {return (i>=0 && i<_class_nb);}
+  AmlBoolean isValid(char i) const;
+  AmlBoolean isValid(VClass i) const {return (i>=0 && i<_class_nb);}
 
   VClass vClass(char c) const;
 
@@ -155,11 +155,11 @@ public:
   int fNb() {return _fnb;}
   int findex(FFlag f) const;
   FFlag fFlag(int index) const;
-  Boolean isFFlagSet(FFlag i) const {return _fflags.testBit((int) i);}
+  AmlBoolean isFFlagSet(FFlag i) const {return _fflags.testBit((int) i);}
 
-  Boolean existsType(FType type) const;
-  Boolean existsName(const String& name) const;
-  Boolean existsIndex(int index) const {return index < FSetDef::_fnb && index >=0 ? TRUE : FALSE;}
+  AmlBoolean existsType(FType type) const;
+  AmlBoolean existsName(const String& name) const;
+  AmlBoolean existsIndex(int index) const {return index < FSetDef::_fnb && index >=0 ? TRUE : FALSE;}
 
   int typeIndex(FType type) const;
   int nameIndex(const String& name) const;
@@ -200,8 +200,8 @@ public:
   int scaleNb() const {return _scale_nb;}
 
   VClass vClass(char c) const {return _cldef->vClass(c);}
-  Boolean isValidClass(char i) const{return _cldef->isValid(i);}
-  Boolean isValidClass(VClass i) const {return _cldef->isValid(i);}
+  AmlBoolean isValidClass(char i) const{return _cldef->isValid(i);}
+  AmlBoolean isValidClass(VClass i) const {return _cldef->isValid(i);}
 
   char symbol(VClass c) const {return _cldef->symbol(c);}
 
@@ -221,16 +221,16 @@ public:
 
   int fNb() const {return _fsetdef->fNb();}
 
-  Boolean existsFType(FType type) const {return _fsetdef->existsType(type);}
-  Boolean existsFName(const String& name) const {return _fsetdef->existsName(name);}
-  Boolean existsFIndex(int index) const {return _fsetdef->existsIndex(index);}
+  AmlBoolean existsFType(FType type) const {return _fsetdef->existsType(type);}
+  AmlBoolean existsFName(const String& name) const {return _fsetdef->existsName(name);}
+  AmlBoolean existsFIndex(int index) const {return _fsetdef->existsIndex(index);}
 
   int fTypeIndex(FType type) const {return _fsetdef->typeIndex(type);}
   int fNameIndex(const String& name) const {return _fsetdef->nameIndex(name);}
 
   int fIndex(FFlag f) const {return _fsetdef->findex(f);}
   FFlag fFlag(int index) const {return _fsetdef->fFlag(index);}
-  Boolean isFFlagSet(FFlag i)const {return _fsetdef->isFFlagSet(i);}
+  AmlBoolean isFFlagSet(FFlag i)const {return _fsetdef->isFFlagSet(i);}
 
   String fName(int i) const {return _fsetdef->name(i);}
   FType fType(int i) const {return _fsetdef->type(i);}

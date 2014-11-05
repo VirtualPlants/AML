@@ -1007,9 +1007,9 @@ RequiredCoords::~RequiredCoords()
 
 
 
-Boolean RequiredCoords::lookForRefSystem()
+AmlBoolean RequiredCoords::lookForRefSystem()
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
   IntType dab_index=UNDEF;
   IntType dbc_index=UNDEF;
   IntType dac_index=UNDEF;
@@ -1224,9 +1224,9 @@ MyVector RequiredCoords::findOrigin(VId vertex)
 */
 
 
-Boolean RequiredCoords::lookForCoords(VId vertex,MyVector& _vect)
+AmlBoolean RequiredCoords::lookForCoords(VId vertex,MyVector& _vect)
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
   //cerr << "_scale(" << vertex << ")="<<_plant->vscale(vertex);
   //cerr << "_level(" << vertex << ")="<<_level << endl;
@@ -1259,14 +1259,14 @@ Boolean RequiredCoords::lookForCoords(VId vertex,MyVector& _vect)
 }
 
 
-Boolean RequiredCoords::lookUpCoords(VId vertex, MyVector& _vect)
+AmlBoolean RequiredCoords::lookUpCoords(VId vertex, MyVector& _vect)
 {
 
   ValType xx=_xcoord->lookForFeature(vertex);
   ValType yy=_ycoord->lookForFeature(vertex);
   ValType zz=_zcoord->lookForFeature(vertex);
 
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
   if ((xx!=LUNDEF) &&
       (yy!=LUNDEF) &&
@@ -1382,7 +1382,7 @@ void RequiredCoords::computeBranchCoordinates(Branch& branch)
   _plant->_maxpoint=max;
   _plant->_minpoint=min;
 
-  Boolean new_element=TRUE;
+  AmlBoolean new_element=TRUE;
   size_t nb_element=branch._components->entries();
   MyVector dirp,dirs;
 
@@ -1743,11 +1743,11 @@ void RequiredCoords::computeBranchCoordinates(Branch& branch)
 
 
 
-Boolean RequiredCoords::findFeature(VId vertex,
+AmlBoolean RequiredCoords::findFeature(VId vertex,
                                     IntType index,
                                     ValType& value)
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
   const Feature* feature;
   Date date;

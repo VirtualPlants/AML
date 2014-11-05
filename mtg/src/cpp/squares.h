@@ -70,7 +70,7 @@ class Voxel
   MyVector getMin() const {return _minVector;};
   MyVector getMax() const {return _maxVector;};
 
-  Boolean operator==(const Voxel&) const;
+  AmlBoolean operator==(const Voxel&) const;
   const Voxel& operator=(const Voxel&);
 
   void translate();

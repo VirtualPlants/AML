@@ -63,8 +63,8 @@ class MyNode
   MyNode();
   ~MyNode();
 
-  Boolean operator<(const MyNode&) const;
-  Boolean operator==(const MyNode&) const;
+  AmlBoolean operator<(const MyNode&) const;
+  AmlBoolean operator==(const MyNode&) const;
   const MyNode& operator=(const MyNode&);
 
   void addLessSons(VId vertex);

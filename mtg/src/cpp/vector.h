@@ -67,7 +67,7 @@ class MyVector
   MyVector();
 
   const MyVector& operator=(const MyVector&);
-  Boolean operator==(const MyVector&) const;
+  AmlBoolean operator==(const MyVector&) const;
 
   const ValType& operator[](const IntType index ) const;
   ValType& operator[](const IntType index ) ;

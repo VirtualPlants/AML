@@ -76,11 +76,11 @@ class DressingData : public AMModel
   ValType getDefaultPsi() const {return _defaultPsi;};
   IntType getDefaultCategory() const {return _defaultCategory;};
   IntType getAxeDefaultCategory() const {return _axeDefaultCategory;};
-  Boolean isIndicePhillotaxy() const {return _isIndice;};
+  AmlBoolean isIndicePhillotaxy() const {return _isIndice;};
   ValType getPhillotaxy() const {return _phillotaxy;};
   ValType getNbTours() const {return _nbTours;};
   ValType getNbLeaves() const {return _nbLeaves;};
-  Boolean isAlphaRelative() const {return _isAlphaRelative;};
+  AmlBoolean isAlphaRelative() const {return _isAlphaRelative;};
 
   ValType getMediumTresholdGreen() const {return _mediumTresholdGreen;};
   ValType getMaxTresholdGreen() const {return _maxTresholdGreen;};
@@ -150,7 +150,7 @@ class DressingData : public AMModel
   SymbLib* _symbLib;
   ColorLib* _colorLib;
   EType _defaultEdge;
-  Boolean _isAlphaRelative;
+  AmlBoolean _isAlphaRelative;
   ValType _defaultAlpha;
   ValType _defaultTeta;
   ValType _defaultPhi;
@@ -161,7 +161,7 @@ class DressingData : public AMModel
   ValType _phillotaxy;
   ValType _nbTours;
   ValType _nbLeaves;
-  Boolean _isIndice;
+  AmlBoolean _isIndice;
   ValType _mediumTresholdGreen;
   ValType _minTresholdGreen;
   ValType _maxTresholdGreen;

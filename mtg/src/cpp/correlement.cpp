@@ -80,7 +80,7 @@ void CorrElement::translateRange(ValType delta)
   assert(_range>=0);
 }
 
-Boolean CorrElement::operator==(const CorrElement& corr_element) const
+AmlBoolean CorrElement::operator==(const CorrElement& corr_element) const
 {
   if (_vertex==corr_element._vertex)
   {
@@ -92,7 +92,7 @@ Boolean CorrElement::operator==(const CorrElement& corr_element) const
   }
 }
 
-Boolean CorrElement::operator<(const CorrElement& corr_element) const
+AmlBoolean CorrElement::operator<(const CorrElement& corr_element) const
 {
   if (_vertex<corr_element._vertex)
   {

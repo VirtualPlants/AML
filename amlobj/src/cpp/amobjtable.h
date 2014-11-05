@@ -54,7 +54,7 @@ public:
   AMObjTable(size_t (*hashfunc)(const RWCString&)): RWTValHashDictionary<RWCString, AMObj>(hashfunc) {}
 
   AMObj* insert(const RWCString& key, const AMObj& data);
-  Boolean isValueIn(const AMObj& item) const;
+  AmlBoolean isValueIn(const AMObj& item) const;
 
 };
 

@@ -268,9 +268,9 @@ Plant::~Plant()
   delete _myTree;
 }
 
-Boolean Plant::operator==(const Plant& plant) const
+AmlBoolean Plant::operator==(const Plant& plant) const
 {
-  Boolean result=0;
+  AmlBoolean result=0;
 
   if (_plantId==plant._plantId)
   {
@@ -325,7 +325,7 @@ void Plant::lookForBranches(VId origin)
 
   branch->addElement(*branch_element);
 
-  Boolean end_of_loop=FALSE;
+  AmlBoolean end_of_loop=FALSE;
 
   while (!end_of_loop)
   {
@@ -461,7 +461,7 @@ VIdList* Plant::lookForComponents(const VIdList* vid_list,IntType level)
 BranchElement Plant::searchForElement(VId vertex) const
 {
   IntType nb_branches=_branches->entries();
-  Boolean end_of_loop=FALSE;
+  AmlBoolean end_of_loop=FALSE;
   BranchElement result;
   IntType i=0;
 
@@ -806,7 +806,7 @@ IntType Plant::pathLength(VId father, VId vertex, EType edge) const
     {
       VId tmp_vertex=vertex;
       result=0;
-      Boolean end_of_loop=((tmp_vertex==UNDEF) || (tmp_vertex==father));
+      AmlBoolean end_of_loop=((tmp_vertex==UNDEF) || (tmp_vertex==father));
       while(!end_of_loop)
       {
         tmp_vertex=topoFather(vertex,edge);
@@ -949,7 +949,7 @@ void Plant::buildSympodialTree()
 
     VId compo_father=_mtg->compoFather(vertex);
 
-    Boolean is_linear=FALSE;
+    AmlBoolean is_linear=FALSE;
 
     if (compo_father!=UNDEF)
     {
@@ -983,7 +983,7 @@ void Plant::buildSympodialTree()
     // Si c'est lineaire les PlusSons deviennent LessSons si ils
     // ont le meme complexe que leur topoFather.
 
-    Boolean is_pure_linear=FALSE;
+    AmlBoolean is_pure_linear=FALSE;
 
     VIdListIter next(*list1);
 
@@ -1268,9 +1268,9 @@ void Plant::compare()
 
 
 
-Boolean Plant::areEqualLists(VIdList* list1,VIdList* list2)
+AmlBoolean Plant::areEqualLists(VIdList* list1,VIdList* list2)
 {
-  Boolean result=TRUE;
+  AmlBoolean result=TRUE;
 
   if  (list1->entries()!=list2->entries())
   {

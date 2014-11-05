@@ -64,7 +64,7 @@ class FSetArray{
 
   Feature* _f;
   
-  Boolean isValidIndex(FSetId i) const {if (i<_MAXSIZE && i>0) return TRUE; else return FALSE;}
+  AmlBoolean isValidIndex(FSetId i) const {if (i<_MAXSIZE && i>0) return TRUE; else return FALSE;}
 
 public:
 
@@ -87,7 +87,7 @@ public:
   int length() const {return _size;} // total length in Features
   int fsetLength() const {return (_FNB) ? (_size / _FNB) : 0;} // total length in FeatureSets
   
-  Boolean storeFeature(FSetId fsetid, FId findex, const Feature& f);
+  AmlBoolean storeFeature(FSetId fsetid, FId findex, const Feature& f);
 
   FSetId addFSet(); // cree un ensemble vierge de features
   FSetId addFSet(const Feature*); // cree un "ensemble de features" par copie

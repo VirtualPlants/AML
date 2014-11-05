@@ -99,7 +99,7 @@ BranchElement::~BranchElement()
 {
 }
 
-Boolean BranchElement::operator==(const BranchElement& b ) const
+AmlBoolean BranchElement::operator==(const BranchElement& b ) const
 {
   if (_vertex==b._vertex)
   {
@@ -131,10 +131,10 @@ const BranchElement& BranchElement::operator=(const BranchElement& b )
   return *this;
 }
 
-Boolean BranchElement::isValid() const
+AmlBoolean BranchElement::isValid() const
 {
 
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
   if ((_length!=VAL_ERROR) &&
       (_topdia!=VAL_ERROR) &&
@@ -264,10 +264,10 @@ const Branch& Branch::operator=(const Branch& b)
   return *this;
 }
 
-Boolean Branch::operator==(const Branch& b) const
+AmlBoolean Branch::operator==(const Branch& b) const
 {
 
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
 /*  if ((_support!=UNDEF) && (b._support!=UNDEF) && (_plantNumber==b._plantNumber))
   {
@@ -301,9 +301,9 @@ Boolean Branch::operator==(const Branch& b) const
 
 }
 
-Boolean Branch::operator<(const Branch& b) const
+AmlBoolean Branch::operator<(const Branch& b) const
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
 /*  if ((_support!=UNDEF) && (b._support!=UNDEF) && (_plantNumber==b._plantNumber))
   {

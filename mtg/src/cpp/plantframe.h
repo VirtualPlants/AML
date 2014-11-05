@@ -110,7 +110,7 @@ PlantFrame(const VIdList*,
 
   ~PlantFrame();
 
-  Boolean isValid()const { return _plant->isAValidPlant();};
+  AmlBoolean isValid()const { return _plant->isAValidPlant();};
 
 
   void coord3D(VId vertex, ValType* v) const;
@@ -141,11 +141,11 @@ PlantFrame(const VIdList*,
  private:
 
   const DressingFile* _dressingFile;
-  Boolean _isMyDressingFile;
+  AmlBoolean _isMyDressingFile;
   RWCString* _displayMessage;
-  Boolean mtgType(MTG*);
-  Boolean verifyCartesianRef(MTG*);
-  Boolean verifyTriangRef(MTG*);
+  AmlBoolean mtgType(MTG*);
+  AmlBoolean verifyCartesianRef(MTG*);
+  AmlBoolean verifyTriangRef(MTG*);
 
 };
 

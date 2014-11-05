@@ -629,7 +629,7 @@ bool LineTree::matptr(VId vtx, SymbType symbol, MaterialPtr& pmat) const {
   return ((pmat)&&(pmat->isValid()));
 }
 
-Boolean LineTree::viewer(const FNode* filter, bool display_on)
+AmlBoolean LineTree::viewer(const FNode* filter, bool display_on)
 {
 
   // table defining a list of pairs of class and "standard" AML colors
@@ -1786,7 +1786,7 @@ AMObj LineTree::save(const AMObjVector& args) const {
 
 
 
-Boolean LineTree::makeLigFile(const Plant& plant,
+AmlBoolean LineTree::makeLigFile(const Plant& plant,
                               const char* file_name,
                               const CorrTable& corr_table) const
 {
@@ -1794,7 +1794,7 @@ Boolean LineTree::makeLigFile(const Plant& plant,
 
   // Make the copy of the 80 first characters
 
-  Boolean result = FALSE;
+  AmlBoolean result = FALSE;
 
   RWCString extended_name(file_name);
 
@@ -1898,12 +1898,12 @@ Boolean LineTree::makeLigFile(const Plant& plant,
   return result;
 }
 
-Boolean LineTree::makeInfFile(const MyVector& min,
+AmlBoolean LineTree::makeInfFile(const MyVector& min,
                               const MyVector& max,
                               const char* file_name ) const
 {
 
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
   IntType simplification=0;
   IntType seed=10;
   IntType age=5;
@@ -1958,12 +1958,12 @@ Boolean LineTree::makeInfFile(const MyVector& min,
 
 }
 
-Boolean LineTree::makeDtaFile(const ColorsTable& color_table,
+AmlBoolean LineTree::makeDtaFile(const ColorsTable& color_table,
                               const SymbLib& symb_lib,
                               const char* file_name) const
 {
 
-  Boolean result=TRUE;
+  AmlBoolean result=TRUE;
 
   RWCString extended_name (file_name);
 
@@ -2076,7 +2076,7 @@ Boolean LineTree::makeDtaFile(const ColorsTable& color_table,
 
 
 /*
-Boolean LineTree::makeArcFile(const Plant& plant,
+AmlBoolean LineTree::makeArcFile(const Plant& plant,
                               const char* file_name)
 {
   return TRUE;
@@ -2084,7 +2084,7 @@ Boolean LineTree::makeArcFile(const Plant& plant,
 
 */
 
-Boolean LineTree::saveAsXML(const char* file_name) const
+AmlBoolean LineTree::saveAsXML(const char* file_name) const
 {
   ofstream stream(file_name);
   if(!stream)return FALSE;

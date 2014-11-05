@@ -66,9 +66,9 @@ LibElement::LibElement()
   _value=VAL_ERROR;
 }
 
-Boolean LibElement::operator==(const LibElement& lb) const
+AmlBoolean LibElement::operator==(const LibElement& lb) const
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
   
   if (_symbol==lb._symbol)
   {
@@ -78,9 +78,9 @@ Boolean LibElement::operator==(const LibElement& lb) const
   return result;
 }
 
-Boolean LibElement::operator<(const LibElement& lb) const
+AmlBoolean LibElement::operator<(const LibElement& lb) const
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
   
   if (_symbol<lb._symbol)
   {

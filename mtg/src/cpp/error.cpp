@@ -176,7 +176,7 @@ ErrorItem& ErrorItem::operator=(const ErrorItem& err) {
 
 }
 
-Boolean ErrorItem::operator==(const ErrorItem& err) {
+AmlBoolean ErrorItem::operator==(const ErrorItem& err) {
 
   if (this == &err) return TRUE;
   else {

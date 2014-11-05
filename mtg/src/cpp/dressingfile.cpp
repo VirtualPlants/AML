@@ -254,7 +254,7 @@ FSymb::FSymb(RWCString var_name)
   _varName=var_name;
 }
 
-Boolean FSymb::operator==(const FSymb& fsymb) const
+AmlBoolean FSymb::operator==(const FSymb& fsymb) const
 {
   if (_varName==fsymb._varName)
   {
@@ -307,7 +307,7 @@ NCrv::~NCrv()
   delete _pointList;
 }
 
-Boolean NCrv::operator==(const NCrv& ncrv) const
+AmlBoolean NCrv::operator==(const NCrv& ncrv) const
 {
   if (_crvName==ncrv._crvName)
   {
@@ -336,7 +336,7 @@ const NCrv& NCrv::operator=(const NCrv& ncrv)
 /*           Methodes pour les erreurs             */
 /***************************************************/
 
-DRFErrorMsg::DRFErrorMsg(Boolean is_error,
+DRFErrorMsg::DRFErrorMsg(AmlBoolean is_error,
                          RWCString str_msg)
 {
   _errorMsg= str_msg;
@@ -493,7 +493,7 @@ DressingFile::~DressingFile()
 DRFErrorMsg  DressingFile::minLengthFun( RWCTokenizer next)
 {
   RWCString* error_msg=NULL;
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
 
   ValType value;
   char symbol;
@@ -549,7 +549,7 @@ DRFErrorMsg  DressingFile::minLengthFun( RWCTokenizer next)
 DRFErrorMsg DressingFile::symbolFun( RWCTokenizer next)
 {
 
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -671,7 +671,7 @@ DRFErrorMsg DressingFile::symbolFun( RWCTokenizer next)
 DRFErrorMsg DressingFile::symbolPathFun( RWCTokenizer next)
 {
 
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -729,7 +729,7 @@ DRFErrorMsg DressingFile::symbolPathFun( RWCTokenizer next)
 DRFErrorMsg DressingFile::geometryFun( RWCTokenizer next)
 {
 
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -847,7 +847,7 @@ DRFErrorMsg DressingFile::geometryFun( RWCTokenizer next)
 DRFErrorMsg DressingFile::appearanceFun( RWCTokenizer next)
 {
 
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -961,7 +961,7 @@ DRFErrorMsg DressingFile::appearanceFun( RWCTokenizer next)
 DRFErrorMsg DressingFile::symbolPatternFun( RWCTokenizer next)
 {
 
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -1047,7 +1047,7 @@ DRFErrorMsg DressingFile::symbolPatternFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::branchPatternFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -1112,7 +1112,7 @@ DRFErrorMsg  DressingFile::branchPatternFun( RWCTokenizer next)
 
 DRFErrorMsg DressingFile::minTopDiaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -1167,7 +1167,7 @@ DRFErrorMsg DressingFile::minTopDiaFun( RWCTokenizer next)
 
 DRFErrorMsg DressingFile::minBotDiaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
   char symbol;
@@ -1225,7 +1225,7 @@ DRFErrorMsg  DressingFile::diametersUnitFun( RWCTokenizer next)
 {
 
   ValType value;
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -1276,7 +1276,7 @@ DRFErrorMsg  DressingFile::azimutUnitFun( RWCTokenizer next)
 {
 
   ValType value;
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -1327,7 +1327,7 @@ DRFErrorMsg  DressingFile::alphaUnitFun( RWCTokenizer next)
 {
 
   ValType value;
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -1377,7 +1377,7 @@ DRFErrorMsg  DressingFile::nbpLineFun( RWCTokenizer next)
 {
 
   IntType value;
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -1427,7 +1427,7 @@ DRFErrorMsg  DressingFile::defaultDistanceFun( RWCTokenizer next)
 {
 
   IntType value;
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -1476,7 +1476,7 @@ DRFErrorMsg  DressingFile::defaultDistanceFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::lengthUnitFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
 
@@ -1527,7 +1527,7 @@ DRFErrorMsg  DressingFile::lengthUnitFun( RWCTokenizer next)
 
 DRFErrorMsg DressingFile::defaultEdgeFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   RWCString* value=NULL;
 
@@ -1607,7 +1607,7 @@ DRFErrorMsg DressingFile::defaultEdgeFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::defaultAlphaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -1657,7 +1657,7 @@ DRFErrorMsg  DressingFile::defaultAlphaFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::defaultTetaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -1708,7 +1708,7 @@ DRFErrorMsg  DressingFile::defaultTetaFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::defaultPhiFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -1758,7 +1758,7 @@ DRFErrorMsg  DressingFile::defaultPhiFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::defaultPsiFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -1809,7 +1809,7 @@ DRFErrorMsg  DressingFile::defaultPsiFun( RWCTokenizer next)
 DRFErrorMsg  DressingFile::defaultCategoryFun( RWCTokenizer next)
 {
   IntType value;
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -1855,7 +1855,7 @@ DRFErrorMsg  DressingFile::defaultCategoryFun( RWCTokenizer next)
 }
 DRFErrorMsg  DressingFile::defaultAxeCategoryFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   IntType value;
 
@@ -1904,7 +1904,7 @@ DRFErrorMsg  DressingFile::defaultAxeCategoryFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::mediumTresholdGreen( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
 
@@ -1954,7 +1954,7 @@ DRFErrorMsg  DressingFile::mediumTresholdGreen( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::verticilleFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   IntType value;
 
@@ -2003,7 +2003,7 @@ DRFErrorMsg  DressingFile::verticilleFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::mediumTresholdBlue( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
 
@@ -2051,7 +2051,7 @@ DRFErrorMsg  DressingFile::mediumTresholdBlue( RWCTokenizer next)
 }
 DRFErrorMsg  DressingFile::mediumTresholdRed( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
 
@@ -2100,7 +2100,7 @@ DRFErrorMsg  DressingFile::mediumTresholdRed( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::minTresholdGreen( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
 
@@ -2149,7 +2149,7 @@ DRFErrorMsg  DressingFile::minTresholdGreen( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::minTresholdBlue( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
 
@@ -2198,7 +2198,7 @@ DRFErrorMsg  DressingFile::minTresholdBlue( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::minTresholdRed( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
 
@@ -2247,7 +2247,7 @@ DRFErrorMsg  DressingFile::minTresholdRed( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::maxTresholdGreen( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
 
@@ -2296,7 +2296,7 @@ DRFErrorMsg  DressingFile::maxTresholdGreen( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::maxTresholdBlue( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
 
@@ -2346,7 +2346,7 @@ DRFErrorMsg  DressingFile::maxTresholdBlue( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::maxTresholdRed( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
 
@@ -2394,7 +2394,7 @@ DRFErrorMsg  DressingFile::maxTresholdRed( RWCTokenizer next)
 }
 DRFErrorMsg  DressingFile::elementLength(RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
 
@@ -2442,7 +2442,7 @@ DRFErrorMsg  DressingFile::elementLength(RWCTokenizer next)
 }
 DRFErrorMsg  DressingFile::deltaIndex(RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   IntType value;
 
@@ -2491,7 +2491,7 @@ DRFErrorMsg  DressingFile::deltaIndex(RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::phillotaxyFun(RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   ValType value;
 
@@ -2554,7 +2554,7 @@ DRFErrorMsg  DressingFile::phillotaxyFun(RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::formFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
   RWCString token;
   IntType category;
@@ -2637,9 +2637,9 @@ DRFErrorMsg  DressingFile::formFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::alphaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
-  Boolean isAbsolute;
+  AmlBoolean isAbsolute;
 
 
   RWCString token;
@@ -2703,10 +2703,10 @@ DRFErrorMsg  DressingFile::alphaFun( RWCTokenizer next)
 }
 
 
-Boolean DressingFile::readCrvFile(const char* name)
+AmlBoolean DressingFile::readCrvFile(const char* name)
 {
 
-  Boolean result=TRUE;
+  AmlBoolean result=TRUE;
   RWCString file_name(name);
 
   ifstream file(file_name.data());
@@ -2722,7 +2722,7 @@ Boolean DressingFile::readCrvFile(const char* name)
     file >> nb_curves;
 
     IntType i=0;
-    Boolean end_of_loop=(i>=nb_curves);
+    AmlBoolean end_of_loop=(i>=nb_curves);
 
     while(!end_of_loop)
     {
@@ -2739,7 +2739,7 @@ Boolean DressingFile::readCrvFile(const char* name)
         if (file >> nb_vectors)
         {
           IntType j=0;
-          Boolean loop2=(j>=nb_vectors);
+          AmlBoolean loop2=(j>=nb_vectors);
 
           ListOfMyVectors point_list;
 
@@ -2800,7 +2800,7 @@ DRFErrorMsg  DressingFile::fruitSymbolFun( RWCTokenizer next)
 {
 
   char value;
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -2850,7 +2850,7 @@ DRFErrorMsg  DressingFile::flowerSymbolFun( RWCTokenizer next)
 {
 
   char value;
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -2900,7 +2900,7 @@ DRFErrorMsg  DressingFile::leafSymbolFun( RWCTokenizer next)
 {
 
   char value;
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   RWCString token;
@@ -2948,7 +2948,7 @@ DRFErrorMsg  DressingFile::leafSymbolFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::leafAlphaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -2997,7 +2997,7 @@ DRFErrorMsg  DressingFile::leafAlphaFun( RWCTokenizer next)
 }
 DRFErrorMsg  DressingFile::fruitAlphaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3047,7 +3047,7 @@ DRFErrorMsg  DressingFile::fruitAlphaFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::flowerAlphaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3097,7 +3097,7 @@ DRFErrorMsg  DressingFile::flowerAlphaFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::leafLengthFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3146,7 +3146,7 @@ DRFErrorMsg  DressingFile::leafLengthFun( RWCTokenizer next)
 }
 DRFErrorMsg  DressingFile::fruitLengthFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3197,7 +3197,7 @@ DRFErrorMsg  DressingFile::fruitLengthFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::flowerLengthFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3247,7 +3247,7 @@ DRFErrorMsg  DressingFile::flowerLengthFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::leafBottomDiaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3297,7 +3297,7 @@ DRFErrorMsg  DressingFile::leafBottomDiaFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::fruitBottomDiaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3347,7 +3347,7 @@ DRFErrorMsg  DressingFile::fruitBottomDiaFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::flowerBottomDiaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3397,7 +3397,7 @@ DRFErrorMsg  DressingFile::flowerBottomDiaFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::leafTopDiaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3447,7 +3447,7 @@ DRFErrorMsg  DressingFile::leafTopDiaFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::flowerTopDiaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3496,7 +3496,7 @@ DRFErrorMsg  DressingFile::flowerTopDiaFun( RWCTokenizer next)
 }
 DRFErrorMsg  DressingFile::fruitTopDiaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3545,7 +3545,7 @@ DRFErrorMsg  DressingFile::fruitTopDiaFun( RWCTokenizer next)
 }
 DRFErrorMsg  DressingFile::leafBetaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3594,7 +3594,7 @@ DRFErrorMsg  DressingFile::leafBetaFun( RWCTokenizer next)
 }
 DRFErrorMsg  DressingFile::fruitBetaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;
@@ -3644,7 +3644,7 @@ DRFErrorMsg  DressingFile::fruitBetaFun( RWCTokenizer next)
 
 DRFErrorMsg  DressingFile::flowerBetaFun( RWCTokenizer next)
 {
-  Boolean is_error=FALSE;
+  AmlBoolean is_error=FALSE;
   RWCString* error_msg=NULL;
 
   ValType value;

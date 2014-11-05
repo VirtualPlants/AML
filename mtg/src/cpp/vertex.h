@@ -133,7 +133,7 @@ public:
   int binaryStoreSize() const;
 
   Vertex& operator=(const Vertex&);
-  Boolean operator==(const Vertex&) const;
+  AmlBoolean operator==(const Vertex&) const;
 
   // each time a topo mother edge is added, a vprefix has also to be
   // defined, even if there is no topo edge (id = UNDEF), then loc is

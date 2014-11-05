@@ -125,7 +125,7 @@ RWCString itorwcstring(long i) {
 }
 
 
-static Boolean onlyDigits(const char* stg) {
+static AmlBoolean onlyDigits(const char* stg) {
     register int i;
     for( i=0; i< strlen(stg); i++) if (!isdigit(stg[i])) return FALSE;
     return TRUE;
@@ -135,7 +135,7 @@ Date encodeDate(const char* stg, int type) {
 
   RWCString alpha(stg);
 
-  Boolean error = FALSE;
+  AmlBoolean error = FALSE;
 
   unsigned int day = 1;         // default values
   unsigned int month = 1;

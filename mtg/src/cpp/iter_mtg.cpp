@@ -43,14 +43,14 @@
 
 #include "mtg.h"
 
-//typedef Boolean VertexTester(MTG*, VId, void*);
+//typedef AmlBoolean VertexTester(MTG*, VId, void*);
 
 //static const char rcsid[] = "$Id$";
 
 
 // ---------- Class  MTGVertexIter     -----------
 
-Boolean MTGVertexIter::operator+=(int n) {
+AmlBoolean MTGVertexIter::operator+=(int n) {
 
   for(int i=0; i<n; i++) _cv++;
 
@@ -65,7 +65,7 @@ Boolean MTGVertexIter::operator+=(int n) {
 // decrite par testFun. Si aucun element n'est trouve, la fonction renvoie FALSE
 // et la position de l'iterateur est indeterminee.
 /*
-Boolean 
+AmlBoolean 
 MTGVertexIter::findNext(VertexTester _fun, void* _pdata) {
 
   // Note: Il semble que la syntaxe if ((*fun)(_g, _cv, pdata)) ... soit egalement
@@ -79,7 +79,7 @@ MTGVertexIter::findNext(VertexTester _fun, void* _pdata) {
 */
 // ---------- Class  MTGEdgeIter       -----------
 
-Boolean MTGEdgeIter::operator+=(int n) {
+AmlBoolean MTGEdgeIter::operator+=(int n) {
 
   for(int i=0; i<n; i++) _ce++;
 
@@ -88,7 +88,7 @@ Boolean MTGEdgeIter::operator+=(int n) {
 }
 
 /*
-Boolean MTGEdgeIter::findNext(VertexTester fun, void* pdata) {
+AmlBoolean MTGEdgeIter::findNext(VertexTester fun, void* pdata) {
 
   while((*this)()) if ((*fun)(_g, _ce, pdata)) return TRUE;
 
@@ -124,7 +124,7 @@ void MTGDepthFirstIter::push(VIdList* vlist) {
 
 // Recherche des ancetres en profondeur d'abord:
 
-Boolean MTGDepthFirstIter::operator()() {
+AmlBoolean MTGDepthFirstIter::operator()() {
 
   if (_s.isEmpty()) return FALSE;
   else {
@@ -142,7 +142,7 @@ Boolean MTGDepthFirstIter::operator()() {
 
 }
 
-Boolean MTGDepthFirstIter::operator+=(int n) {
+AmlBoolean MTGDepthFirstIter::operator+=(int n) {
 
   for(int i=0; i<n; i++) if (!(*this)()) return FALSE;
 
@@ -151,7 +151,7 @@ Boolean MTGDepthFirstIter::operator+=(int n) {
 }
 
 /*
-Boolean 
+AmlBoolean 
 MTGDepthFirstIter::findNext(VertexTester fun, void* pdata) {
 
   while((*this)()) if ((*fun)(_g, _cv, pdata)) return TRUE;
@@ -199,7 +199,7 @@ void MTGPostFixIter::mark(VId x) {
 
 }
 
-Boolean MTGPostFixIter::isMarked(VId x) {
+AmlBoolean MTGPostFixIter::isMarked(VId x) {
 
   if (_used.isEmpty()) return FALSE;
 
@@ -214,7 +214,7 @@ Boolean MTGPostFixIter::isMarked(VId x) {
 
 // Recherche des ancetres en profondeur d'abord, sous forme postfixee:
 
-Boolean MTGPostFixIter::operator()() {
+AmlBoolean MTGPostFixIter::operator()() {
 
   if (_s.isEmpty()) return FALSE;
   else {
@@ -244,7 +244,7 @@ Boolean MTGPostFixIter::operator()() {
   return TRUE;
 }
 
-Boolean MTGPostFixIter::operator+=(int n) {
+AmlBoolean MTGPostFixIter::operator+=(int n) {
 
   for(int i=0; i<n; i++) if (!(*this)()) return FALSE;
 
@@ -253,7 +253,7 @@ Boolean MTGPostFixIter::operator+=(int n) {
 }
 
 /*
-Boolean 
+AmlBoolean 
 MTGPostFixIter::findNext(VertexTester fun, void* pdata) {
 
   while((*this)()) if ((*fun)(_g,_cv, pdata)) return TRUE;
@@ -299,7 +299,7 @@ void MTGBreadthFirstIter::push(VIdList* vlist) {
 
 // Recherche des ancetres en profondeur d'abord:
 
-Boolean MTGBreadthFirstIter::operator()() {
+AmlBoolean MTGBreadthFirstIter::operator()() {
 
   if (_q.isEmpty()) return FALSE;
   else {
@@ -316,7 +316,7 @@ Boolean MTGBreadthFirstIter::operator()() {
   }
 
 }
-Boolean MTGBreadthFirstIter::operator+=(int n) {
+AmlBoolean MTGBreadthFirstIter::operator+=(int n) {
 
   for(int i=0; i<n; i++) if (!(*this)()) return FALSE;
 
@@ -324,7 +324,7 @@ Boolean MTGBreadthFirstIter::operator+=(int n) {
 
 }
 
-Boolean MTGBreadthFirstIter::findNext(VertexTester fun, void* pdata) {
+AmlBoolean MTGBreadthFirstIter::findNext(VertexTester fun, void* pdata) {
 
   while((*this)()) if ((*fun)(_g,_cv, pdata)) return TRUE;
 

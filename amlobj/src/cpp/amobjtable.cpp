@@ -68,7 +68,7 @@ AMObj* AMObjTable::insert(const RWCString& key, const AMObj& data) {
 }
 
 
-Boolean AMObjTable::isValueIn(const AMObj& item) const {
+AmlBoolean AMObjTable::isValueIn(const AMObj& item) const {
 
   AMObjTableIter next(*(AMObjTable*)this);
 

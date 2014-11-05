@@ -58,8 +58,8 @@
 
 #else
 
-#ifndef Boolean
-#define Boolean int
+#ifndef AmlBoolean
+#define AmlBoolean int
 #endif
 
 #endif
@@ -140,7 +140,7 @@ typedef union _Feature {
   }
   */
 
-  Boolean operator==(const _Feature& f) const {return i == f.i;}
+  AmlBoolean operator==(const _Feature& f) const {return i == f.i;}
 
 } Feature;
 

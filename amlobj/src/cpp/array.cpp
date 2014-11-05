@@ -249,7 +249,7 @@ ostream& Array::displaySpreadSheet(ostream& o, int level = 0, const char* sep = 
 
 }
 
-Boolean Array::checkDefined() const {
+AmlBoolean Array::checkDefined() const {
   if (surfaceType() == AMObjType::ARRAY) {
     return ((Array*)(_an_element->val.p))->checkDefined();
   }
@@ -276,7 +276,7 @@ SLArray::SLArray(const VIdList* list) : Array() {
 }
 
 
-static Boolean putToken(Array* thearray, RWCString token) {
+static AmlBoolean putToken(Array* thearray, RWCString token) {
 
   RWLocaleSnapshot french("fr");
 
@@ -565,7 +565,7 @@ SLArray::SLArray(const char* filename, int dim, const int* dimarray) : Array() {
 
 }
 
-static Boolean findOpenBracket(istream& is) {
+static AmlBoolean findOpenBracket(istream& is) {
 
   char c;
 
@@ -639,7 +639,7 @@ static char getNextNWSChar(istream& is) {
 // The array passed as an argument is the array to which
 // elements have to be added by the function
 
-static Boolean getBracketedArray(istream& is, Array* thearray) {
+static AmlBoolean getBracketedArray(istream& is, Array* thearray) {
 
   char c = getNextNWSChar(is); // reads the next non white space character from the input stream
 
@@ -664,7 +664,7 @@ static Boolean getBracketedArray(istream& is, Array* thearray) {
 
       }
       Array* a = new SLArray;
-      Boolean flag = getBracketedArray(is, a);
+      AmlBoolean flag = getBracketedArray(is, a);
 
       if (!flag) {
 
@@ -852,15 +852,15 @@ SLArray::SLArray(const Set* set) {
 }
 
 
-Boolean SLArray::contains(const AMObj& obj) const {
+AmlBoolean SLArray::contains(const AMObj& obj) const {
 
   return AMObjList::contains(obj);
 
 }
 
-Boolean SLArray::contains(const Array& array) const {
+AmlBoolean SLArray::contains(const Array& array) const {
 
-  Boolean result = TRUE;
+  AmlBoolean result = TRUE;
 
   ArrayIter* pnext = array.iterator();
   ArrayIter& next = *pnext;
@@ -880,11 +880,11 @@ Boolean SLArray::contains(const Array& array) const {
 
 }
 
-Boolean SLArray::operator==(const Array& array) const {
+AmlBoolean SLArray::operator==(const Array& array) const {
 
   if (array.entries() != entries()) return FALSE;
 
-  Boolean result = TRUE;
+  AmlBoolean result = TRUE;
 
   ArrayIter* pnext = iterator();
   ArrayIter* pnext2 = array.iterator();
@@ -1015,10 +1015,10 @@ int SLArray::plotWrite(const char* prefix,
   register int i;
 
   int status = TRUE;
-  Boolean XMINFIXED = (xmin == -MAXDOUBLE) ? FALSE : TRUE;
-  Boolean XMAXFIXED = (xmax == MAXDOUBLE) ? FALSE : TRUE;
-  Boolean YMINFIXED = (ymin == -MAXDOUBLE) ? FALSE : TRUE;
-  Boolean YMAXFIXED = (ymax == MAXDOUBLE) ? FALSE : TRUE;
+  AmlBoolean XMINFIXED = (xmin == -MAXDOUBLE) ? FALSE : TRUE;
+  AmlBoolean XMAXFIXED = (xmax == MAXDOUBLE) ? FALSE : TRUE;
+  AmlBoolean YMINFIXED = (ymin == -MAXDOUBLE) ? FALSE : TRUE;
+  AmlBoolean YMAXFIXED = (ymax == MAXDOUBLE) ? FALSE : TRUE;
 
   int nb_curve = 1;
   int nested_level = 0;         // nb of nested arrays (at least 1)

@@ -138,16 +138,16 @@ class MTG {
   // vertex id1 and id2 must be valid vertex of the same scale >= 1
   void cutVertexConnection(VId id1, VId id2);
 
-  Boolean checkAlias(VId vtx, const Feature* fset, int findex) const;
-  Boolean checkDate(VId vtx, const Feature* fset, int findex) const;
-  Boolean checkState(VId vtx, const Feature* fset, int findex) const;
-  Boolean checkNbEl(VId vtx, const Feature* fset, int findex) const;
-  Boolean checkDiam(VId vtx, const Feature* fset, int findex) const;
-  Boolean checkLength(VId vtx, const Feature* fset, int findex) const;
+  AmlBoolean checkAlias(VId vtx, const Feature* fset, int findex) const;
+  AmlBoolean checkDate(VId vtx, const Feature* fset, int findex) const;
+  AmlBoolean checkState(VId vtx, const Feature* fset, int findex) const;
+  AmlBoolean checkNbEl(VId vtx, const Feature* fset, int findex) const;
+  AmlBoolean checkDiam(VId vtx, const Feature* fset, int findex) const;
+  AmlBoolean checkLength(VId vtx, const Feature* fset, int findex) const;
 
   // Accessing FSetIds
 
-  Boolean existsFSetId(FSetId f) const {if (f < _fs.length() && f >=0) return TRUE; else return FALSE;}
+  AmlBoolean existsFSetId(FSetId f) const {if (f < _fs.length() && f >=0) return TRUE; else return FALSE;}
 
   // may return a null pointer if the entity has no features
   const FSetIdList* fsetIds(VId id) const {assert(existsVertex(id));
@@ -216,8 +216,8 @@ public:
 
   // Arguments can be not valid
 
-  Boolean existsVertex(VId v) const {if (v < (VId)_v.entries() && v >=0) return TRUE; else return FALSE;}
-  Boolean existsEdge(EId e) const {if (e < (VId)_e.entries() && e>=0) return TRUE; else return FALSE;}
+  AmlBoolean existsVertex(VId v) const {if (v < (VId)_v.entries() && v >=0) return TRUE; else return FALSE;}
+  AmlBoolean existsEdge(EId e) const {if (e < (VId)_e.entries() && e>=0) return TRUE; else return FALSE;}
 
   /** relative name of id in the context of id0.
    the arguments need be valid and return a NULL pointer in case of nonsense
@@ -232,15 +232,15 @@ public:
   ///@name Header properties
   //@{
 
-  Boolean isValidClass(VClass vclass) const {return _header->isValidClass(vclass);}
-  Boolean isValidClass(char cc) const {return _header->isValidClass(cc);}
-  Boolean isValidScale(int scale) const {return scale >=0 || scale<= scaleNb();}
-  Boolean isValidIndex(int index) const {return index>=0;}
-  Boolean isValidTopoEdgeType(EType edgetype) const {return *(edgetype & ANYTOPO);} //
-  Boolean existsFType(FType type) const {return _header->existsFType(type);}
-  Boolean existsFName(const String& name) const {return _header->existsFName(name);}
-  Boolean existsFIndex(int index) const {return _header->existsFIndex(index);}
-  Boolean isDefFeature(FFlag f) const {return _header->isFFlagSet(f);}
+  AmlBoolean isValidClass(VClass vclass) const {return _header->isValidClass(vclass);}
+  AmlBoolean isValidClass(char cc) const {return _header->isValidClass(cc);}
+  AmlBoolean isValidScale(int scale) const {return scale >=0 || scale<= scaleNb();}
+  AmlBoolean isValidIndex(int index) const {return index>=0;}
+  AmlBoolean isValidTopoEdgeType(EType edgetype) const {return *(edgetype & ANYTOPO);} //
+  AmlBoolean existsFType(FType type) const {return _header->existsFType(type);}
+  AmlBoolean existsFName(const String& name) const {return _header->existsFName(name);}
+  AmlBoolean existsFIndex(int index) const {return _header->existsFIndex(index);}
+  AmlBoolean isDefFeature(FFlag f) const {return _header->isFFlagSet(f);}
 
   /// finds the feature index of the first feature being of type type. UNDEF if not found.
   int fTypeIndex(FType type) const {return _header->fTypeIndex(type);}
@@ -275,7 +275,7 @@ public:
   VId mtgRoot() const {if (_v.entries() == 0) return UNDEF; else return 0;}
 
   // Argument need not be valid
-  Boolean isMTGRoot(VId id) const {return id == mtgRoot();}
+  AmlBoolean isMTGRoot(VId id) const {return id == mtgRoot();}
 
   // Arguments need be valid
   VClass vclass(VId id) const {assert(existsVertex(id)); return vertex(id).vclass();}
@@ -300,7 +300,7 @@ public:
   EType edgeType(VId v1, VId v2) const; // returns NONE if no edge
 
   // Arguments need not be valid
-  Boolean scaleEdge(VId v1, VId v2) const;
+  AmlBoolean scaleEdge(VId v1, VId v2) const;
 
   const char* edgeLabel(EId) const;
 
@@ -315,7 +315,7 @@ public:
 
   // All these functions only applies to defined vertex.
 
-  Boolean hasFeatures(VId id) const {return fsetIds(id) != NULL;}
+  AmlBoolean hasFeatures(VId id) const {return fsetIds(id) != NULL;}
 
   FType fType(int index) const {assert(index<=featureNb()&&index>=0);
                                 return _header->fType(index);}
@@ -329,11 +329,11 @@ public:
   IntList* dateSample(VId id);
 
   // argument need not be defined
-  Boolean isDefAtDate(VId, Date) const; // is the first observation date LESS THAN date ?
+  AmlBoolean isDefAtDate(VId, Date) const; // is the first observation date LESS THAN date ?
 
   int cumulatedFValueOnComponentsAt(VId, Date, FIndex);
 
-  Boolean checkFeature(VId vtx, const Feature* fset, int findex) const;
+  AmlBoolean checkFeature(VId vtx, const Feature* fset, int findex) const;
 
   //@}
 
@@ -390,14 +390,14 @@ public:
   VIdList* path(VId v1, VId v2) const;
 
   // Arguments need not be valid
-  Boolean isCompoAncestorOf(VId father, VId x) const; // (notamment vrai si father == x)
-  Boolean isCompoDescendantOf(VId son, VId x) const; // (notamment vrai si father == x)
-  Boolean isTopoAncestorOf(VId father, VId x, EType filter) const; // (notamment vrai si father == x)
-  Boolean isTopoDescendantOf(VId son, VId x, EType filter) const; // (notamment vrai si son == x)
+  AmlBoolean isCompoAncestorOf(VId father, VId x) const; // (notamment vrai si father == x)
+  AmlBoolean isCompoDescendantOf(VId son, VId x) const; // (notamment vrai si father == x)
+  AmlBoolean isTopoAncestorOf(VId father, VId x, EType filter) const; // (notamment vrai si father == x)
+  AmlBoolean isTopoDescendantOf(VId son, VId x, EType filter) const; // (notamment vrai si son == x)
 
   // Arguments need not be valid
-  Boolean isGlobalTopoRoot(VId id) const;
-  Boolean isLocalTopoRoot(VId id) const;
+  AmlBoolean isGlobalTopoRoot(VId id) const;
+  AmlBoolean isLocalTopoRoot(VId id) const;
 
   // positive only distance : give the number of CONTIGUOUS EDGES OF TYPE FILTER between v1 and v2
   // pathLength(v1,v2,filter)>0       <=> v2 topodescendant of v1 (including v1 itself) on path of type filter
@@ -548,7 +548,7 @@ public:
   void changeTopoEdgeSon(VId y,VId z,VId x);// change a topo edge (y,z) in an edge (y,x)
 
   // call this member once a vertex has been fully inserted in the MTG
-  Boolean checkVertexInsertion(VId x) const;
+  AmlBoolean checkVertexInsertion(VId x) const;
 
   //@}
 
@@ -643,7 +643,7 @@ std::ostream& operator<<(std::ostream& o, const MTG& obj);
 
 // prototype d'une fonction faisant un test booleen sur une vertex donne.
 
-typedef Boolean VertexTester(MTG*, VId, void*);
+typedef AmlBoolean VertexTester(MTG*, VId, void*);
 
 typedef VIdList* (MTG::* SonListFunc)(VId, EType) const;
 
@@ -661,10 +661,10 @@ public:
 
   MTG* container() const {return _g;}
 
-   Boolean operator++() {return (++_cv < (VId)_g->_v.entries());}
-   Boolean operator+=(int n);
-   Boolean operator()() {return (++_cv < (VId)_g->_v.entries());}
-   Boolean findNext(VertexTester _fun, void* _pdata) {
+   AmlBoolean operator++() {return (++_cv < (VId)_g->_v.entries());}
+   AmlBoolean operator+=(int n);
+   AmlBoolean operator()() {return (++_cv < (VId)_g->_v.entries());}
+   AmlBoolean findNext(VertexTester _fun, void* _pdata) {
     // Note: Il semble que la syntaxe if ((*fun)(_g, _cv, pdata)) ... soit egalement
     // permise: c'est teste dans test1
     while((*this)()) if ((*_fun)(_g,_cv, _pdata)) return TRUE;
@@ -691,10 +691,10 @@ public:
 
   MTG* container() const {return _g;}
 
-   Boolean operator++() {return (++_ce < (VId)_g->_e.entries());}
-   Boolean operator+=(int n);
-   Boolean operator()() {return (++_ce < (VId)_g->_e.entries());}
-   Boolean findNext(VertexTester fun , void* pdata){
+   AmlBoolean operator++() {return (++_ce < (VId)_g->_e.entries());}
+   AmlBoolean operator+=(int n);
+   AmlBoolean operator()() {return (++_ce < (VId)_g->_e.entries());}
+   AmlBoolean findNext(VertexTester fun , void* pdata){
         while((*this)()) if ((*fun)(_g, _ce, pdata)) return TRUE;
         return FALSE;
    }
@@ -726,10 +726,10 @@ public:
 
   MTG* container() const {return _g;}
 
-   Boolean operator++() {return (*this)();}
-   Boolean operator+=(int n);
-   Boolean operator()();
-   Boolean findNext(VertexTester fun , void* pdata) {
+   AmlBoolean operator++() {return (*this)();}
+   AmlBoolean operator+=(int n);
+   AmlBoolean operator()();
+   AmlBoolean findNext(VertexTester fun , void* pdata) {
           while((*this)()) if ((*fun)(_g, _cv, pdata)) return TRUE;
           return FALSE;
         }
@@ -754,7 +754,7 @@ class MTGPostFixIter {
 
   void push(VIdList*);
   void mark(VId);
-  Boolean isMarked(VId);
+  AmlBoolean isMarked(VId);
 
 public:
 
@@ -763,10 +763,10 @@ public:
 
   MTG* container() const {return _g;}
 
-   Boolean operator++() {return (*this)();}
-   Boolean operator+=(int n);
-   Boolean operator()();
-   Boolean findNext(VertexTester fun , void* pdata){
+   AmlBoolean operator++() {return (*this)();}
+   AmlBoolean operator+=(int n);
+   AmlBoolean operator()();
+   AmlBoolean findNext(VertexTester fun , void* pdata){
           while((*this)()) if ((*fun)(_g,_cv, pdata)) return TRUE;
           return FALSE;
         }
@@ -801,11 +801,11 @@ public:
   MTG* container() const {return _g;}
 
 
-  Boolean operator++() {return (*this)();}
-  Boolean operator+=(int n);
+  AmlBoolean operator++() {return (*this)();}
+  AmlBoolean operator+=(int n);
 
-  Boolean operator()();
-  Boolean findNext(VertexTester, void*);
+  AmlBoolean operator()();
+  AmlBoolean findNext(VertexTester, void*);
 
   void reset();
 

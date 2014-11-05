@@ -188,7 +188,7 @@ Vertex& Vertex::operator=(const Vertex& v) {
 
 // Test l'egalite des deux vertex a partir de leur identificateur
 
-Boolean Vertex::operator==(const Vertex& vtx) const {
+AmlBoolean Vertex::operator==(const Vertex& vtx) const {
 
   if (this == &vtx) return TRUE;
   else if (_vid == vtx._vid) return TRUE;

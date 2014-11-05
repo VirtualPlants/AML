@@ -88,9 +88,9 @@ MyNode::~MyNode()
   clearAndDestroy();
 }
 
-Boolean MyNode::operator<(const MyNode& a_node) const
+AmlBoolean MyNode::operator<(const MyNode& a_node) const
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
   if (_vertex<a_node._vertex)
   {
@@ -100,9 +100,9 @@ Boolean MyNode::operator<(const MyNode& a_node) const
   return result;
 }
 
-Boolean MyNode::operator==(const MyNode& a_node) const
+AmlBoolean MyNode::operator==(const MyNode& a_node) const
 {
-  Boolean result=FALSE;
+  AmlBoolean result=FALSE;
 
   if (_vertex==a_node._vertex)
   {

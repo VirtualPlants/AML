@@ -78,7 +78,7 @@ class FNode : public AMModel {
   HeadArgType* _hargtype;       // may contain negative values
   AMObj* _harg;         // this list should be closed before being passed to _head for evaluation
 
-  Boolean _valid;
+  AmlBoolean _valid;
 
   void lockHead() {
     assert(_headtype != FNode::PFUNC);
@@ -134,12 +134,12 @@ public:
   AMObjType retType() const {return _rettype;}
   RWCString name() const {return _name;}
 
-  Boolean isPredicate() const {return retType() == AMObjType::BOOL;}
+  AmlBoolean isPredicate() const {return retType() == AMObjType::BOOL;}
   virtual void clearAndDestroy();
 
   FNode& operator=(const FNode& node);
 
-  Boolean isValid() const {return _valid;}
+  AmlBoolean isValid() const {return _valid;}
 
   void giveName(RWCString name, int argnb, const int* index_match);
 
@@ -179,7 +179,7 @@ public:
   int argRef(int i) const {return _argref[i];}
   const FNode* fnode() const {assert(isValid()); return (FNode*)_fn.val.p;}
 
-  Boolean isValid() const {return _fn.tag == AMObjType::FNODE;}
+  AmlBoolean isValid() const {return _fn.tag == AMObjType::FNODE;}
 
   const PFNode& operator=(const PFNode& pf);
 
