@@ -254,10 +254,10 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
   RWCString *pstr;
   bool status = true , min_inf_bound_option = false , inf_bound_status_option = false ,
        dist_inf_bound_status_option = false , flag = true , component_flag = true ,
-       nb_component_option = false , nb_component_estimation = false , penalty_option = false ,
+       nb_component_option = false , nb_component_estimation = false , criterion_option = false ,
        estimate[DISCRETE_MIXTURE_NB_COMPONENT];
   register int i , j;
-  int nb_component , nb_required , min_inf_bound = 0 , penalty = BICc , ident[DISCRETE_MIXTURE_NB_COMPONENT];
+  int nb_component , nb_required , min_inf_bound = 0 , criterion = BICc , ident[DISCRETE_MIXTURE_NB_COMPONENT];
   const DiscreteParametric *pcomponent[DISCRETE_MIXTURE_NB_COMPONENT];
   DiscreteMixture *imixt , *mixt;
   StatError error;
@@ -476,11 +476,11 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
         }
       }
 
-      else if (*pstr == "Penalty") {
-        switch (penalty_option) {
+      else if (*pstr == "Criterion") {
+        switch (criterion_option) {
 
         case false : {
-          penalty_option = true;
+          criterion_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
             status = false;
@@ -491,13 +491,13 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             for (j = AIC;j <= BICc;j++) {
               if (*pstr == STAT_criterion_word[j]) {
-                penalty = j;
+                criterion = j;
                 break;
               }
             }
             if (j == BICc + 1) {
               status = false;
-              genAMLError(ERRORMSG(PENALTY_TYPE_sds) , "Estimate" ,
+              genAMLError(ERRORMSG(MODEL_SELECTION_CRITERION_sds) , "Estimate" ,
                           nb_required + i + 1 , "AIC or AICc or BIC or BICc");
             }
           }
@@ -515,14 +515,14 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
       else {
         status = false;
         genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Estimate" , nb_required + i + 1 ,
-                    "MinInfBound or InfBoundStatus or DistInfBoundStatus or NbComponent or Penalty");
+                    "MinInfBound or InfBoundStatus or DistInfBoundStatus or NbComponent or Criterion");
       }
     }
   }
 
-  if ((!nb_component_estimation) && (penalty_option)) {
+  if ((!nb_component_estimation) && (criterion_option)) {
     status = false;
-    genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Penalty");
+    genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Criterion");
   }
 
   if (nb_component_estimation) {
@@ -546,7 +546,7 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
 
     else {
       mixt = histo->discrete_mixture_estimation(error , AMLOUTPUT , 1 , nb_component , ident ,
-                                                min_inf_bound , flag , component_flag , penalty);
+                                                min_inf_bound , flag , component_flag , criterion);
     }
   }
 
@@ -3325,9 +3325,9 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
 
   case AMObjType::ARRAY : {
     register int j;
-    bool order_option = false , penalty_option = false;
+    bool order_option = false , criterion_option = false;
     int nb_symbol = seq->get_marginal_distribution(0)->nb_value , order = 1 ,
-        penalty = BIC , *symbol = NULL;
+        criterion = BIC , *symbol = NULL;
 
 
     CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
@@ -3403,11 +3403,11 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
           }
         }
 
-        else if (*pstr == "Penalty") {
-          switch (penalty_option) {
+        else if (*pstr == "Criterion") {
+          switch (criterion_option) {
 
           case false : {
-            penalty_option = true;
+            criterion_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
               status = false;
@@ -3418,13 +3418,13 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
               for (j = AIC;j <= BIC;j++) {
                 if (*pstr == STAT_criterion_word[j]) {
-                  penalty = j;
+                  criterion = j;
                   break;
                 }
               }
               if (j == BIC + 1) {
                 status = false;
-                genAMLError(ERRORMSG(PENALTY_TYPE_sds) , "Estimate" ,
+                genAMLError(ERRORMSG(MODEL_SELECTION_CRITERION_sds) , "Estimate" ,
                             nb_required + i + 1 , "AIC or AICc or BIC");
               }
             }
@@ -3442,7 +3442,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
         else {
           status = false;
           genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Estimate" ,
-                      nb_required + i + 1 , "Counting or Order or Penalty");
+                      nb_required + i + 1 , "Counting or Order or Criterion");
         }
       }
     }
@@ -3452,7 +3452,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
       return AMObj(AMObjType::ERROR);
     }
 
-    markov = seq->lumpability_estimation(error , AMLOUTPUT , symbol , penalty ,
+    markov = seq->lumpability_estimation(error , AMLOUTPUT , symbol , criterion ,
                                          order , counting_flag);
     delete [] symbol;
     break;
