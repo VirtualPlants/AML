@@ -2646,7 +2646,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
 
     case AMObjType::INTEGER : {
       RWCString *pstr;
-      bool prototypes_option = false , initialization_option = false , algorithm_option = false;
+      bool prototype_option = false , initialization_option = false , algorithm_option = false;
       register int i;
       int nb_cluster , *prototype = NULL , initialization = 1 , algorithm = 1;
 
@@ -2670,10 +2670,10 @@ AMObj STAT_Clustering(const AMObjVector &args)
           pstr = (AMString*)args[nb_required + i * 2].val.p;
 
           if (*pstr == "Prototypes") {
-            switch (prototypes_option) {
+            switch (prototype_option) {
 
             case false : {
-              prototypes_option = true;
+              prototype_option = true;
 
               if (args[nb_required + i * 2 + 1].tag() != AMObjType::ARRAY) {
                 status = false;
@@ -2756,7 +2756,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
         }
       }
 
-      if ((prototypes_option) && (initialization_option)) {
+      if ((prototype_option) && (initialization_option)) {
         status = false;
         genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Clustering" , "Prototypes" , "Initialization");
       }
@@ -5033,11 +5033,14 @@ AMObj STAT_Segmentation(const AMObjVector &args)
     }
 
     if (args[2].tag() == AMObjType::INTEGER) {
-      int nb_segment_option = false , nb_segment_estimation = true;
+      bool criterion_option = false , penalty_shape_option = false , min_nb_segment_option = false ,
+           nb_segment_option = false , nb_segment_estimation = true;
+      int criterion = LIKELIHOOD_SLOPE , penalty_shape = 2 , min_nb_segment = 0;
 
 
       CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
-                  (args.length() == nb_required + 4) ,
+                  (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
+                  (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ,
                   genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Segmentation" , nb_required));
 
       output = SEQUENCE;
@@ -5054,7 +5057,75 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         else {
           pstr = (AMString*)args[nb_required + i * 2].val.p;
 
-          if (*pstr == "NbSegment") {
+          if (*pstr == "Criterion") {
+            switch (criterion_option) {
+
+            case false : {
+              criterion_option = true;
+
+              if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+                status = false;
+                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                            args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+              }
+              else {
+                pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+
+                if (*pstr == STAT_criterion_word[ICL]) {
+                  criterion = ICL;
+                }
+                else if (*pstr == "LogLikelihoodSlope") {
+                  criterion = LIKELIHOOD_SLOPE;
+                }
+                else if (*pstr == STAT_criterion_word[mBIC]) {
+                  criterion = mBIC;
+                }
+                else if (*pstr == "SegmentationLogLikelihoodSlope") {
+                  criterion = SEGMENTATION_LIKELIHOOD_SLOPE;
+                }
+                else {
+                  status = false;
+                  genAMLError(ERRORMSG(MODEL_SELECTION_CRITERION_sds) , "Segmentation" ,
+                              nb_required + i + 1 , "ICL or LogLikelihoodSlope or mBIC or SegmentationLogLikelihoodSlope");
+                }
+              }
+              break;
+            }
+
+            case true : {
+              status = false;
+              genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+              break;
+            }
+            }
+          }
+
+          else if (*pstr == "MinNbSegment") {
+            switch (min_nb_segment_option) {
+
+            case false : {
+              min_nb_segment_option = true;
+
+              if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+                status = false;
+                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                            args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+              }
+              else {
+                min_nb_segment = args[nb_required + i * 2 + 1].val.i;
+              }
+              break;
+            }
+
+            case true : {
+              status = false;
+              genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+              break;
+            }
+            }
+          }
+
+          else if (*pstr == "NbSegment") {
             switch (nb_segment_option) {
 
             case false : {
@@ -5118,11 +5189,39 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                 else if (*pstr == "Divergence") {
                   output = SEGMENTATION_DIVERGENCE;
                 }
+                else if (*pstr == "LogLikelihoodSlope") {
+                  output = LOG_LIKELIHOOD_SLOPE;
+                }
                 else {
                   status = false;
                   genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + i + 1 ,
-                              "Sequence or Residual or Entropy or Divergence");
+                              "Sequence or Residual or Entropy or Divergence or LogLikelihoodSlope");
                 }
+              }
+              break;
+            }
+
+            case true : {
+              status = false;
+              genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+              break;
+            }
+            }
+          }
+
+          else if (*pstr == "PenaltyShape") {
+            switch (penalty_shape_option) {
+
+            case false : {
+              penalty_shape_option = true;
+
+              if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+                status = false;
+                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                            args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+              }
+              else {
+                penalty_shape = args[nb_required + i * 2 + 1].val.i;
               }
               break;
             }
@@ -5138,7 +5237,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           else {
             status = false;
             genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Segmentation" , nb_required + i + 1 ,
-                        "NbSegment or Output");
+                        "Criterion or MinNbSegment or NbSegment or Output or PenaltyShape");
           }
         }
       }
@@ -5147,10 +5246,24 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         switch (nb_segment_estimation) {
 
         case false : {
-          if ((output == SEGMENTATION_ENTROPY) || (output == SEGMENTATION_DIVERGENCE)) {
+          if ((output == SEGMENTATION_ENTROPY) || (output == SEGMENTATION_DIVERGENCE) ||
+              (output == LOG_LIKELIHOOD_SLOPE)) {
             status = false;
             genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
                         "Sequence or Residual");
+          }
+
+          if (criterion_option) {
+            status = false;
+            genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "Crierion");
+          }
+          if (min_nb_segment_option) {
+            status = false;
+            genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "MinNbSegment");
+          }
+          if (penalty_shape_option) {
+            status = false;
+            genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "PenaltyShape");
           }
           break;
         }
@@ -5159,7 +5272,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
           if ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL)) {
             status = false;
             genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
-                        "Sequence or Entropy or Divergence");
+                        "Sequence or Entropy or Divergence or LogLikelihoodSlope");
           }
           break;
         }
@@ -5196,7 +5309,8 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
       case true : {
         seq = iseq->segmentation(error , AMLOUTPUT , args[1].val.i , args[2].val.i ,
-                                 model_type , output);
+                                 model_type , criterion , min_nb_segment ,
+                                 penalty_shape , output);
         break;
       }
       }
