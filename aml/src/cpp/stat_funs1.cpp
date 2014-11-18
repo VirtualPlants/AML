@@ -156,6 +156,7 @@ const char *STAT_err_msgs_aml[] = {
   "function %s: argument %d: bad inferior bound status: should be %s" ,
   "function %s: argument %d: bad variance factor: should be %s" ,
   "function %s: argument %d: bad algorithm name: should be %s" ,
+  "function %s: argument %d: bad model selection criterion: should be %s" ,
   "function %s: argument %d: bad penalty type: should be %s" ,
   "function %s: argument %d: bad estimator name: should be %s" ,
   "function %s: argument %d: bad side effect management type: should be %s" ,
