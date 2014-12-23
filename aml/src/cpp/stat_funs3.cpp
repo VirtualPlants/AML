@@ -57,7 +57,7 @@
 #include "sequence_analysis/semi_markov.h"
 #include "sequence_analysis/hidden_semi_markov.h"
 #include "sequence_analysis/nonhomogeneous_markov.h"
-#include "sequence_analysis/tops.h"
+// #include "sequence_analysis/tops.h"
 
 #include "aml/ammodel.h"
 #include "aml/parseraml.h"
@@ -579,31 +579,6 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
         break;
       }
     }
-
-    if (dist) {
-      STAT_model* model = new STAT_model(dist);
-      return AMObj(AMObjType::DISTRIBUTION , model);
-    }
-    else {
-      AMLOUTPUT << "\n" << error;
-      genAMLError(ERRORMSG(STAT_MODULE_s) , "ExtractDistribution");
-      return AMObj(AMObjType::ERROR);
-    }
-  }
-
-  if (args[0].tag() == AMObjType::TOP_PARAMETERS) {
-    DiscreteParametricModel *dist;
-    StatError error;
-
-
-    CHECKCONDVA(args.length() == 2 ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "ExtractDistribution" , 2));
-
-    CHECKCONDVA(args[1].tag() == AMObjType::INTEGER ,
-                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ExtractDistribution" , 2 ,
-                            args[1].tag.string().data() , "INT"));
-
-    dist = ((TopParameters*)((STAT_model*)args[0].val.p)->pt)->extract(error , args[1].val.i);
 
     if (dist) {
       STAT_model* model = new STAT_model(dist);
@@ -1176,56 +1151,6 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
       genAMLError(ERRORMSG(STAT_MODULE_s) , "ExtractFrequencyDistribution");
       return AMObj(AMObjType::ERROR);
     }
-  }
-
-  if (args[0].tag() == AMObjType::TOPS) {
-    RWCString *pstr;
-    DiscreteDistributionData *histo;
-    StatError error;
-
-
-    CHECKCONDVA(args.length() >= 2 ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ExtractFrequencyDistribution"));
-
-    CHECKCONDVA(args[1].tag() == AMObjType::STRING ,
-                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ExtractFrequencyDistribution" , 2 ,
-                            args[1].tag.string().data() , "STRING"));
-
-    pstr = (AMString*)args[1].val.p;
-
-    if (*pstr == "Main") {
-      CHECKCONDVA(args.length() == 2 ,
-                  genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "ExtractFrequencyDistribution" , 2));
-
-      histo = new DiscreteDistributionData(*(((Tops*)((STAT_model*)args[0].val.p)->pt)->get_length_distribution()));
-
-      STAT_model* model = new STAT_model(histo);
-      return AMObj(AMObjType::FREQUENCY_DISTRIBUTION , model);
-    }
-
-    if (*pstr == "Axillary") {
-      CHECKCONDVA(args.length() == 3 ,
-                  genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "ExtractFrequencyDistribution" , 3));
-
-      CHECKCONDVA(args[2].tag() == AMObjType::INTEGER ,
-                  genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ExtractFrequencyDistribution" , 3 ,
-                              args[2].tag.string().data() , "INT"));
-
-      histo = ((Tops*)((STAT_model*)args[0].val.p)->pt)->extract(error , args[2].val.i);
-
-      if (histo) {
-        STAT_model* model = new STAT_model(histo);
-        return AMObj(AMObjType::FREQUENCY_DISTRIBUTION , model);
-      }
-      else {
-        AMLOUTPUT << "\n" << error;
-        genAMLError(ERRORMSG(STAT_MODULE_s) , "ExtractFrequencyDistribution");
-        return AMObj(AMObjType::ERROR);
-      }
-    }
-
-    genAMLError(ERRORMSG(FREQUENCY_DISTRIBUTION_NAME_sds) , "ExtractFrequencyDistribution" , 2 , "Main or Axillary");
-    return AMObj(AMObjType::ERROR);
   }
 
   genAMLError(ERRORMSG(STAT_DATA_TYPE_FREQUENCY_DISTRIBUTION_sds) , "ExtractFrequencyDistribution" , 1 ,
@@ -1824,39 +1749,6 @@ AMObj STAT_Merge(const AMObjVector &args)
     }
   }
 
-  if (args[0].tag() == AMObjType::TOPS) {
-    const Tops **ptops;
-    Tops *tops;
-
-
-    ptops = new const Tops*[nb_sample];
-    ptops[0] = (Tops*)((STAT_model*)args[0].val.p)->pt;
-
-    for (i = 1;i < nb_sample;i++) {
-      if (args[i].tag() != AMObjType::TOPS) {
-        status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Merge" , i + 1 ,
-                    args[i].tag.string().data() , "TOPS");
-      }
-      else {
-        ptops[i] = (Tops*)((STAT_model*)args[i].val.p)->pt;
-      }
-    }
-
-    if (status) {
-      tops = new Tops(nb_sample , ptops);
-    }
-
-    delete [] ptops;
-
-    if (!status) {
-      return AMObj(AMObjType::ERROR);
-    }
-
-    STAT_model* model = new STAT_model(tops);
-    return AMObj(AMObjType::TOPS , model);
-  }
-
   if (args[0].tag() == AMObjType::CORRELATION) {
     const Correlation **pcorrel;
     Correlation *correl;
@@ -2102,7 +1994,8 @@ AMObj STAT_Shift(const AMObjVector &args)
     }
   }
 
-  genAMLError(ERRORMSG(STAT_DATA_TYPE_TIME_EVENTS_TOPS_sds) , "Shift" , 1 ,
+//  genAMLError(ERRORMSG(STAT_DATA_TYPE_TIME_EVENTS_TOPS_sds) , "Shift" , 1 ,
+  genAMLError(ERRORMSG(STAT_DATA_TYPE_TIME_EVENTS_sds) , "Shift" , 1 ,
               args[0].tag.string().data());
   return AMObj(AMObjType::ERROR);
 }
@@ -2888,7 +2781,8 @@ AMObj STAT_Cluster(const AMObjVector &args)
     }
   }
 
-  genAMLError(ERRORMSG(STAT_DATA_TYPE_TIME_EVENTS_TOPS_sds) , "Cluster" , 1 ,
+//  genAMLError(ERRORMSG(STAT_DATA_TYPE_TIME_EVENTS_TOPS_sds) , "Cluster" , 1 ,
+  genAMLError(ERRORMSG(STAT_DATA_TYPE_TIME_EVENTS_sds) , "Cluster" , 1 ,
               args[0].tag.string().data());
   return AMObj(AMObjType::ERROR);
 }
@@ -3194,7 +3088,8 @@ AMObj STAT_Transcode(const AMObjVector &args)
     }
   }
 
-  genAMLError(ERRORMSG(STAT_DATA_TYPE_TIME_EVENTS_TOPS_sds) , "Transcode" , 1 ,
+//  genAMLError(ERRORMSG(STAT_DATA_TYPE_TIME_EVENTS_TOPS_sds) , "Transcode" , 1 ,
+  genAMLError(ERRORMSG(STAT_DATA_TYPE_TIME_EVENTS_sds) , "Transcode" , 1 ,
               args[0].tag.string().data());
   return AMObj(AMObjType::ERROR);
 }
@@ -3505,7 +3400,8 @@ AMObj STAT_ValueSelect(const AMObjVector &args)
     }
   }
 
-  genAMLError(ERRORMSG(STAT_DATA_TYPE_TIME_EVENTS_TOPS_sds) , "ValueSelect" , 1 ,
+//  genAMLError(ERRORMSG(STAT_DATA_TYPE_TIME_EVENTS_TOPS_sds) , "ValueSelect" , 1 ,
+  genAMLError(ERRORMSG(STAT_DATA_TYPE_TIME_EVENTS_sds) , "ValueSelect" , 1 ,
               args[0].tag.string().data());
   return AMObj(AMObjType::ERROR);
 }
@@ -4180,26 +4076,6 @@ AMObj STAT_SelectIndividual(const AMObjVector &args)
     }
   }
 
-  if (args[0].tag() == AMObjType::TOPS) {
-    Tops *tops;
-    StatError error;
-
-
-    tops = ((Tops*)((STAT_model*)args[0].val.p)->pt)->select_individual(error , nb_pattern ,
-                                                                        identifier , keep);
-    delete [] identifier;
-
-    if (tops) {
-      STAT_model* model = new STAT_model(tops);
-      return AMObj(AMObjType::TOPS , model);
-    }
-    else {
-      AMLOUTPUT << "\n" << error;
-      genAMLError(ERRORMSG(STAT_MODULE_s) , "SelectIndividual");
-      return AMObj(AMObjType::ERROR);
-    }
-  }
-
   if (args[0].tag() == AMObjType::DISTANCE_MATRIX) {
     DistanceMatrix *dist_matrix;
 
@@ -4220,8 +4096,10 @@ AMObj STAT_SelectIndividual(const AMObjVector &args)
   }
 
   delete [] identifier;
-  genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectIndividual" , 1 , args[0].tag.string().data() ,
-              "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or TOPS or DISTANCE_MATRIX");
+//   genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectIndividual" , 1 , args[0].tag.string().data() ,
+//               "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or TOPS or DISTANCE_MATRIX");
+   genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectIndividual" , 1 , args[0].tag.string().data() ,
+              "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or DISTANCE_MATRIX");
   return AMObj(AMObjType::ERROR);
 }
 
@@ -5270,26 +5148,10 @@ AMObj STAT_Reverse(const AMObjVector &args)
     return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
   }
 
-  if (args[0].tag() == AMObjType::TOPS) {
-    Tops *tops;
-    StatError error;
-
-
-    tops = ((Tops*)((STAT_model*)args[0].val.p)->pt)->reverse(error);
-
-    if (tops) {
-      STAT_model* model = new STAT_model(tops);
-      return AMObj(AMObjType::TOPS , model);
-    }
-    else {
-      AMLOUTPUT << "\n" << error;
-      genAMLError(ERRORMSG(STAT_MODULE_s) , "Reverse");
-      return AMObj(AMObjType::ERROR);
-    }
-  }
-
+//  genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Reverse" , args[0].tag.string().data() ,
+//              "SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or TOPS");
   genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Reverse" , args[0].tag.string().data() ,
-              "SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or TOPS");
+              "SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
   return AMObj(AMObjType::ERROR);
 }
 
@@ -6095,8 +5957,7 @@ AMObj STAT_Difference(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  bool status = true , variable_option = false , first_element_option = false ,
-       first_element = false , normalization_option = false , normalization = false;
+  bool status = true , variable_option = false , first_element_option = false , first_element = false;
   register int i;
   int nb_required , variable = I_DEFAULT;
   const Sequences *iseq;
@@ -6108,7 +5969,7 @@ AMObj STAT_Difference(const AMObjVector &args)
   nb_required = 1;
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
-              (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ,
+              (args.length() == nb_required + 4) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Difference"));
 
   // argument obligatoire
@@ -6198,35 +6059,10 @@ AMObj STAT_Difference(const AMObjVector &args)
         }
       }
 
-      else if (*pstr == "Normalization") {
-        switch (normalization_option) {
-
-        case false : {
-          normalization_option = true;
-
-          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
-            status = false;
-            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Difference" , nb_required + i + 1 ,
-                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
-          }
-          else {
-            normalization = args[nb_required + i * 2 + 1].val.b;
-          }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Difference" , nb_required + i + 1);
-          break;
-        }
-        }
-      }
-
       else {
         status = false;
         genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Difference" , nb_required + i + 1 ,
-                    "Variable or FirstElement or Normalization");
+                    "Variable or FirstElement");
       }
     }
   }
@@ -6235,7 +6071,7 @@ AMObj STAT_Difference(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->difference(error , variable , first_element , normalization);
+  seq = iseq->difference(error , variable , first_element);
 
   if (seq) {
     markovian_seq = seq->markovian_sequences(error);
@@ -6255,6 +6091,112 @@ AMObj STAT_Difference(const AMObjVector &args)
   else {
     AMLOUTPUT << "\n" << error;
     genAMLError(ERRORMSG(STAT_MODULE_s) , "Difference");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Computation of relative growth rates on the basis of cumulative dimensions.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_RelativeGrowthRate(const AMObjVector &args)
+
+{
+  RWCString *pstr;
+  bool status = true;
+  int nb_required;
+  double growth_factor = GROWTH_FACTOR;
+  const Sequences *iseq;
+  Sequences *seq;
+  MarkovianSequences *markovian_seq;
+  StatError error;
+
+
+  nb_required = 1;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "RelativeGrowthRate"));
+
+  // argument obligatoire
+
+  switch (args[0].tag()) {
+  case AMObjType::SEQUENCES :
+    iseq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::MARKOVIAN_SEQUENCES :
+    iseq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+    iseq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::SEMI_MARKOV_DATA :
+    iseq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+    iseq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  default :
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "RelativeGrowthRate" , args[0].tag.string().data() ,
+                "SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+    break;
+  }
+
+  // argument optionnel
+
+  if (args.length() == nb_required + 2) {
+    if (args[nb_required].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "RelativeGrowthRate" , nb_required + 1 ,
+                  args[nb_required].tag.string().data() , "OPTION");
+    }
+    else {
+      if (*((AMString*)args[nb_required].val.p) != "GrowthFactor") {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "RelativeGrowthRate" , nb_required + 1 , "GrowthFactor");
+      }
+    }
+
+    if (args[nb_required + 1].tag() == AMObjType::INTEGER) {
+      growth_factor = args[nb_required + 1].val.i;
+    }
+    if (args[nb_required + 1].tag() == AMObjType::REAL) {
+      growth_factor = args[nb_required + 1].val.r;
+    }
+    else {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "RelativeGrowthRate" , nb_required + 1 ,
+                  args[nb_required + 1].tag.string().data() , "INT or REAL");
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  seq = iseq->relative_growth_rate(error , growth_factor);
+
+  if (seq) {
+    markovian_seq = seq->markovian_sequences(error);
+    if (markovian_seq) {
+      delete seq;
+      STAT_model* model = new STAT_model(markovian_seq);
+      return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
+    }
+    else {
+      AMLOUTPUT << "\n";
+      error.ascii_write(AMLOUTPUT , WARNING);
+      STAT_model* model = new STAT_model(seq);
+      return AMObj(AMObjType::SEQUENCES , model);
+    }
+  }
+
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "RelativeGrowthRate");
     return AMObj(AMObjType::ERROR);
   }
 }
@@ -7647,53 +7589,6 @@ AMObj STAT_Unnormalize(const AMObjVector &args)
   else {
     AMLOUTPUT << "\n" << error;
     genAMLError(ERRORMSG(STAT_MODULE_s) , "Unnormalize");
-    return AMObj(AMObjType::ERROR);
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Suppression des premiers entrenoeuds de l'axe porteur.
- *
- *--------------------------------------------------------------*/
-
-AMObj STAT_RemoveApicalInternodes(const AMObjVector &args)
-
-{
-  bool status = true;
-  Tops *tops;
-  StatError error;
-
-
-  CHECKCONDVA(args.length() == 2 ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "RemoveApicalInternodes" , 2));
-
-  if (args[0].tag() != AMObjType::TOPS) {
-    status = false;
-    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "RemoveApicalInternodes" , 1 ,
-                args[0].tag.string().data() , "TOPS");
-  }
-
-  if (args[1].tag() != AMObjType::INTEGER) {
-    status = false;
-    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "RemoveApicalInternodes" , 2 ,
-                args[1].tag.string().data() , "INT");
-  }
-
-  if (!status) {
-    return AMObj(AMObjType::ERROR);
-  }
-
-  tops = ((Tops*)((STAT_model*)args[0].val.p)->pt)->shift(error , args[1].val.i);
-
-  if (tops) {
-    STAT_model* model = new STAT_model(tops);
-    return AMObj(AMObjType::TOPS , model);
-  }
-  else {
-    AMLOUTPUT << "\n" << error;
-    genAMLError(ERRORMSG(STAT_MODULE_s) , "RemoveApicalInternodes");
     return AMObj(AMObjType::ERROR);
   }
 }
