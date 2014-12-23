@@ -234,12 +234,12 @@ RWCString AMObjType::string() const {
     stg = "CORRELATION";
     break;
 
-  case AMObjType::TOPS:
-    stg = "TOPS";
-    break;
-  case AMObjType::TOP_PARAMETERS:
-    stg = "TOP_PARAMETERS";
-    break;
+//  case AMObjType::TOPS:
+//    stg = "TOPS";
+//    break;
+//  case AMObjType::TOP_PARAMETERS:
+//    stg = "TOP_PARAMETERS";
+//    break;
 
   case AMObjType::OCTREE:
     stg = "OCTREE";
@@ -381,8 +381,8 @@ AMObj::AMObj(AMObjType t, AMModel* p) {
          t==AMObjType::MARKOVIAN_SEQUENCES ||
          t==AMObjType::CORRELATION ||
 
-         t==AMObjType::TOPS ||
-         t==AMObjType::TOP_PARAMETERS ||
+//         t==AMObjType::TOPS ||
+//         t==AMObjType::TOP_PARAMETERS ||
 
          t==AMObjType::OCTREE ||
          t==AMObjType::MSVOXEL ||
@@ -515,8 +515,8 @@ AmlBoolean AMObj::operator==(const AMObj& rec) const {
       case AMObjType::MARKOVIAN_SEQUENCES:
       case AMObjType::CORRELATION:
 
-      case AMObjType::TOPS:
-      case AMObjType::TOP_PARAMETERS:
+//      case AMObjType::TOPS:
+//      case AMObjType::TOP_PARAMETERS:
 
       case AMObjType::OCTREE:
       case AMObjType::MSVOXEL:
@@ -858,8 +858,8 @@ ostream& AMObj::printValue(ostream& o, int line_size) const {
   case AMObjType::MARKOVIAN_SEQUENCES:
   case AMObjType::CORRELATION:
 
-  case AMObjType::TOPS:
-  case AMObjType::TOP_PARAMETERS:
+//  case AMObjType::TOPS:
+//  case AMObjType::TOP_PARAMETERS:
 
   case AMObjType::OCTREE:
   case AMObjType::MSVOXEL:
@@ -1034,8 +1034,8 @@ size_t hashAMObj(const AMObj& v) {
   case AMObjType::MARKOVIAN_SEQUENCES:
   case AMObjType::CORRELATION:
 
-  case AMObjType::TOPS:
-  case AMObjType::TOP_PARAMETERS:
+//  case AMObjType::TOPS:
+//  case AMObjType::TOP_PARAMETERS:
 
   case AMObjType::OCTREE:
   case AMObjType::MSVOXEL:
