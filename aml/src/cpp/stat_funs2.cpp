@@ -57,7 +57,7 @@
 #include "sequence_analysis/semi_markov.h"
 #include "sequence_analysis/hidden_semi_markov.h"
 #include "sequence_analysis/nonhomogeneous_markov.h"
-#include "sequence_analysis/tops.h"
+// #include "sequence_analysis/tops.h"
 #include "sequence_analysis/sequence_label.h"
 
 #include "aml/ammodel.h"
@@ -1083,7 +1083,8 @@ AMObj STAT_Vectors(const AMObjVector &args)
   if ((args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
-      (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA) || (args[0].tag() == AMObjType::TOPS)) {
+      (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
+//      (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA) || (args[0].tag() == AMObjType::TOPS)) {
     bool status = true , index_variable = false;
     int nb_required;
     Sequences *seq;
@@ -1112,9 +1113,9 @@ AMObj STAT_Vectors(const AMObjVector &args)
     case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
       seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
       break;
-    case AMObjType::TOPS :
-      seq = (Tops*)((STAT_model*)args[0].val.p)->pt;
-      break;
+//    case AMObjType::TOPS :
+//      seq = (Tops*)((STAT_model*)args[0].val.p)->pt;
+//      break;
     }
 
     // argument optionnel
@@ -1174,7 +1175,8 @@ AMObj STAT_Vectors(const AMObjVector &args)
   }
 
   genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Vectors" , args[0].tag.string().data() ,
-              "ARRAY or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or TOPS or STRING");
+//              "ARRAY or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or TOPS or STRING");
+              "ARRAY or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or STRING");
   return AMObj(AMObjType::ERROR);
 }
 
@@ -3240,379 +3242,6 @@ AMObj STAT_Sequences(const AMObjVector &args)
   default : {
     genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Sequences" ,
                 args[0].tag.string().data() , "ARRAY or RENEWAL_DATA or STRING");
-    return AMObj(AMObjType::ERROR);
-  }
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction des parametres d'une cime a partir d'un fichier ou
- *  a partir des parametres donnes un par un.
- *
- *--------------------------------------------------------------*/
-
-AMObj STAT_TopParameters(const AMObjVector &args)
-
-{
-  bool status = true;
-  int nb_required , max_position = DEFAULT_MAX_POSITION;
-  double probability , axillary_probability = D_DEFAULT , rhythm_ratio = D_DEFAULT;
-  TopParameters *parameters;
-  StatError error;
-
-
-  CHECKCONDVA(args.length() >= 1 ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "TopParameters"));
-
-  // argument obligatoire
-
-  if (args[0].tag() == AMObjType::STRING) {
-    nb_required = 1;
-
-    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "TopParameters"));
-  }
-
-  else if ((args[0].tag() == AMObjType::INTEGER) || (args[0].tag() == AMObjType::REAL)) {
-    nb_required = 3;
-
-    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "TopParameters"));
-
-    switch (args[0].tag()) {
-    case AMObjType::INTEGER :
-      probability = args[0].val.i;
-      break;
-    case AMObjType::REAL :
-      probability = args[0].val.r;
-      break;
-    }
-    if ((probability < TOP_MIN_PROBABILITY) || (probability > 1.)) {
-      status = false;
-      genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , "TopParameters" , 1);
-    }
-
-    switch (args[1].tag()) {
-    case AMObjType::INTEGER :
-      axillary_probability = args[1].val.i;
-      break;
-    case AMObjType::REAL :
-      axillary_probability = args[1].val.r;
-      break;
-    default :
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TopParameters" , 2 ,
-                  args[1].tag.string().data() , "INT or REAL");
-      break;
-    }
-    if ((axillary_probability != D_DEFAULT) &&
-        ((axillary_probability < TOP_MIN_PROBABILITY) || (axillary_probability > 1.))) {
-      status = false;
-      genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , "TopParameters" , 2);
-    }
-
-    switch (args[2].tag()) {
-    case AMObjType::INTEGER :
-      rhythm_ratio = args[2].val.i;
-      break;
-    case AMObjType::REAL :
-      rhythm_ratio = args[2].val.r;
-      break;
-    default :
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TopParameters" , 3 ,
-                  args[2].tag.string().data() , "INT or REAL");
-      break;
-    }
-    if ((rhythm_ratio != D_DEFAULT) &&
-        ((rhythm_ratio < MIN_RHYTHM_RATIO) || (rhythm_ratio > 1. / MIN_RHYTHM_RATIO))) {
-      status = false;
-      genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , "TopParameters" , 3);
-    }
-  }
-
-  else {
-    status = false;
-    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TopParameters" , 1 ,
-                args[0].tag.string().data() , "STRING or INT or REAL");
-  }
-
-  // argument optionnel
-
-  if (args.length() == nb_required + 2) {
-    if (args[nb_required].tag() != AMObjType::OPTION) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TopParameters" , nb_required + 1 ,
-                  args[nb_required].tag.string().data() , "OPTION");
-    }
-    else {
-      if (*((AMString*)args[nb_required].val.p) != "MaxPosition") {
-        status = false;
-        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "TopParameters" , nb_required + 1 ,
-                    "MaxPosition");
-      }
-    }
-
-    if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TopParameters" , nb_required + 1 ,
-                  args[nb_required + 1].tag.string().data() , "INT");
-    }
-    else {
-      max_position = args[nb_required + 1].val.i;
-      if ((max_position < 1) || (max_position > MAX_POSITION)) {
-        status = false;
-        genAMLError(ERRORMSG(MAX_POSITION_sd) , "TopParameters" , nb_required + 1);
-      }
-    }
-  }
-
-  if (!status) {
-    return AMObj(AMObjType::ERROR);
-  }
-
-  if (args[0].tag() == AMObjType::STRING) {
-    parameters = top_parameters_ascii_read(error , ((AMString*)args[0].val.p)->data() , max_position);
-
-    if (parameters) {
-      STAT_model* model = new STAT_model(parameters);
-      return AMObj(AMObjType::TOP_PARAMETERS , model);
-    }
-    else {
-      AMLOUTPUT << "\n" << error;
-      genAMLError(ERRORMSG(STAT_MODULE_s) , "TopParameters");
-      return AMObj(AMObjType::ERROR);
-    }
-  }
-
-  else {
-    parameters = new TopParameters(probability , axillary_probability ,
-                                   rhythm_ratio , max_position);
-
-    STAT_model* model = new STAT_model(parameters);
-    return AMObj(AMObjType::TOP_PARAMETERS , model);
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction d'un ensemble de cimes a partir d'un objet de type
- *  ARRAY(ARRAY(ARRAY(INT))) ou a partir d'un fichier.
- *
- *--------------------------------------------------------------*/
-
-AMObj STAT_Tops(const AMObjVector &args)
-
-{
-  CHECKCONDVA(args.length() >= 1 ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Tops"));
-
-  switch (args[0].tag()) {
-
-  case AMObjType::ARRAY : {
-    bool status = true;
-    register int i , j;
-    int nb_required , nb_sequence , nb_variable = 0 , *type , *length ,
-        *identifier = NULL , ***int_sequence;
-    const Array *parray = (Array*)args[0].val.p , *seq_array;
-    Sequences *seq;
-    Tops *tops;
-    StatError error;
-
-
-    nb_required = 1;
-
-    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Tops"));
-
-    CHECKCONDVA(parray->surfaceType() == AMObjType::ARRAY ,
-                genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_1_sdss) , "Tops" , 1 ,
-                            (parray->surfaceType()).string().data() , "ARRAY"));
-
-    nb_sequence = parray->entries();
-
-    // argument obligatoire
-
-    length = new int[nb_sequence];
-    int_sequence = new int**[nb_sequence];
-    for (i = 0;i < nb_sequence;i++) {
-      int_sequence[i] = NULL;
-    }
-
-    ArrayIter* pnext = parray->iterator();
-    ArrayIter& next = *pnext;
-
-    i = 0;
-    while (next()) {
-      seq_array = (Array*)(next.key()).val.p;
- 
-      if (seq_array->surfaceType() != AMObjType::ARRAY) {
-        genAMLError(ERRORMSG(SEQUENCE_ARRAY_ELEMENT_TYPE_sdss) , "Tops" , i + 1 ,
-                    (seq_array->surfaceType()).string().data() , "ARRAY");
-      }
-      else {
-        int_sequence[i] = buildIntArraySequence(seq_array , length[i] , POSITION ,
-                                                nb_variable , i , "Tops");
-      }
-
-      if (!int_sequence[i]) {
-        status = false;
-        break;
-      }
-      i++;
-    }
-
-    delete pnext;
-
-    if (nb_variable != 2) {
-      status = false;
-      genAMLError(ERRORMSG(NB_VARIABLE_2_sd) , "Tops" , 2);
-    }
-
-    // argument optionnel
-
-    if (args.length() == nb_required + 2) {
-      if (args[nb_required].tag() != AMObjType::OPTION) {
-        status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Tops" , nb_required + 1 ,
-                    args[nb_required].tag.string().data() , "OPTION");
-      }
-      else {
-        if (*((AMString*)args[nb_required].val.p) != "Identifiers") {
-          status = false;
-          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Tops" , nb_required + 1 ,
-                      "Identifiers");
-        }
-      }
-
-      if (args[nb_required + 1].tag() != AMObjType::ARRAY) {
-        status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Tops" , nb_required + 1 ,
-                    args[nb_required + 1].tag.string().data() , "ARRAY");
-      }
-      else {
-        identifier = buildIntArray(args , nb_required + 1 , "Tops" ,
-                                   nb_required + 1 , nb_sequence);
-        if (!identifier) {
-          status = false;
-        }
-        else {
-          for (i = 0;i < nb_sequence;i++) {
-            if (identifier[i] <= 0) {
-              status = false;
-              genAMLError(ERRORMSG(ARRAY_ELEMENT_VALUE_sdd) , "Tops" ,
-                          nb_required + 1 , i + 1);
-            }
-          }
-        }
-      }
-    }
-
-    if (status) {
-      nb_variable--;
-      seq = new Sequences(nb_sequence , identifier , length , POSITION ,
-                          nb_variable , NB_INTERNODE , int_sequence);
-
-      status = seq->check(error , SEQ_label[SEQL_TOP]);
-
-      if (!status) {
-        delete seq;
-        AMLOUTPUT << "\n" << error;
-        genAMLError(ERRORMSG(STAT_MODULE_s) , "Tops");
-      }
-    }
-
-    delete [] identifier;
-
-    delete [] length;
-
-    for (i = 0;i < nb_sequence;i++) {
-      if (int_sequence[i]) {
-        for (j = 0;j < nb_variable;j++) {
-          delete [] int_sequence[i][j];
-        }
-        delete [] int_sequence[i];
-      }
-    }
-    delete [] int_sequence;
-
-    if (!status) {
-      return AMObj(AMObjType::ERROR);
-    }
-
-    tops = seq->tops(error);
-    delete seq;
-
-    if (tops) {
-      STAT_model* model = new STAT_model(tops);
-      return AMObj(AMObjType::TOPS , model);
-    }
-    else {
-      AMLOUTPUT << "\n" << error;
-      genAMLError(ERRORMSG(STAT_MODULE_s) , "Tops");
-      return AMObj(AMObjType::ERROR);
-    }
-  }
-
-  case AMObjType::STRING : {
-    bool status = true , old_format = false;
-    int nb_required;
-    Tops *tops;
-    StatError error;
-
-
-    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Tops"));
-
-    // argument optionnel
-
-    if (args.length() == nb_required + 2) {
-      if (args[nb_required].tag() != AMObjType::OPTION) {
-        status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Tops" , nb_required + 1 ,
-                    args[nb_required].tag.string().data() , "OPTION");
-      }
-      else {
-        if (*((AMString*)args[nb_required].val.p) != "OldFormat") {
-          status = false;
-          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Tops" , nb_required + 1 ,
-                      "OldFormat");
-        }
-      }
-
-      if (args[nb_required + 1].tag() != AMObjType::BOOL) {
-       status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Tops" , nb_required + 1 ,
-                    args[nb_required + 1].tag.string().data() , "BOOL");
-      }
-      else {
-        old_format = args[nb_required + 1].val.b;
-      }
-
-      if (!status) {
-        return AMObj(AMObjType::ERROR);
-      }
-    }
-
-    tops = tops_ascii_read(error , ((AMString*)args[0].val.p)->data() , old_format);
-
-    if (tops) {
-      STAT_model* model = new STAT_model(tops);
-      return AMObj(AMObjType::TOPS , model);
-    }
-    else {
-      AMLOUTPUT << "\n" << error;
-      genAMLError(ERRORMSG(STAT_MODULE_s) , "Tops");
-      return AMObj(AMObjType::ERROR);
-    }
-  }
-
-  default : {
-    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Tops" ,
-                args[0].tag.string().data() , "ARRAY or STRING");
     return AMObj(AMObjType::ERROR);
   }
   }
