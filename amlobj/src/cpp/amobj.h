@@ -158,8 +158,8 @@ public:
     MARKOVIAN_SEQUENCES,
     CORRELATION,
 
-    TOPS,
-    TOP_PARAMETERS,
+//    TOPS,
+//    TOP_PARAMETERS,
 
     STRING,
     OPTION,
