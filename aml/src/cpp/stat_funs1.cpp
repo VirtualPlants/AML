@@ -62,7 +62,7 @@
 #include "sequence_analysis/semi_markov.h"
 #include "sequence_analysis/hidden_semi_markov.h"
 #include "sequence_analysis/nonhomogeneous_markov.h"
-#include "sequence_analysis/tops.h"
+// #include "sequence_analysis/tops.h"
 
 #include "aml/ammodel.h"
 #include "aml/parseraml.h"
@@ -125,7 +125,8 @@ const char *STAT_err_msgs_aml[] = {
   "function %s: argument %d: bad argument type %s: should be a STAT module data type" ,
   "function %s: argument %d: bad argument type %s: should be a STAT module data type except FREQUENCY_DISTRIBUTION" ,
   "function %s: argument %d: bad argument type %s: should be a STAT module data type or CORRELATION" ,
-  "function %s: argument %d: bad argument type %s: should be a STAT module data type except TIME_EVENTS, RENEWAL_DATA and TOPS" ,
+//  "function %s: argument %d: bad argument type %s: should be a STAT module data type except TIME_EVENTS, RENEWAL_DATA and TOPS" ,
+  "function %s: argument %d: bad argument type %s: should be a STAT module data type except TIME_EVENTS, RENEWAL_DATA" ,
   "function %s: argument %d: bad argument: should be %s" ,
   "function %s: bad arguments" ,
   "function %s: bad argument %d value: should be positive" ,
@@ -203,8 +204,8 @@ extern AMObj STAT_SemiMarkov(const AMObjVector &args);
 extern AMObj STAT_HiddenSemiMarkov(const AMObjVector &args);
 extern AMObj STAT_NonhomogeneousMarkov(const AMObjVector &args);
 extern AMObj STAT_Sequences(const AMObjVector &args);
-extern AMObj STAT_TopParameters(const AMObjVector &args);
-extern AMObj STAT_Tops(const AMObjVector &args);
+// extern AMObj STAT_TopParameters(const AMObjVector &args);
+// extern AMObj STAT_Tops(const AMObjVector &args);
 // extern AMObj STAT_Load(const AMObjVector &args);
 
 extern AMObj STAT_ToDistribution(const AMObjVector &args);
@@ -244,6 +245,7 @@ extern AMObj STAT_IndexParameterExtract(const AMObjVector &args);
 extern AMObj STAT_SegmentationExtract(const AMObjVector &args);
 extern AMObj STAT_Cumulate(const AMObjVector &args);
 extern AMObj STAT_Difference(const AMObjVector &args);
+extern AMObj STAT_RelativeGrowthRate(const AMObjVector &args);
 extern AMObj STAT_SequenceNormalization(const AMObjVector &args);
 extern AMObj STAT_MovingAverage(const AMObjVector &args);
 extern AMObj STAT_PointwiseAverage(const AMObjVector &args);
@@ -261,7 +263,7 @@ extern AMObj STAT_ToDistanceMatrix(const AMObjVector &args);
 extern AMObj STAT_Symmetrize(const AMObjVector &args);
 extern AMObj STAT_Unnormalize(const AMObjVector &args);
 
-extern AMObj STAT_RemoveApicalInternodes(const AMObjVector &args);
+// extern AMObj STAT_RemoveApicalInternodes(const AMObjVector &args);
 
 extern AMObj STAT_Estimate(const AMObjVector &args);
 
@@ -788,8 +790,8 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
         (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
         (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA) &&
         (args[0].tag() != AMObjType::CORRELATION) &&
-        (args[0].tag() != AMObjType::DISTANCE_MATRIX) && (args[0].tag() != AMObjType::CLUSTERS) &&
-        (args[0].tag() != AMObjType::TOP_PARAMETERS) && (args[0].tag() != AMObjType::TOPS)) {
+        (args[0].tag() != AMObjType::DISTANCE_MATRIX) && (args[0].tag() != AMObjType::CLUSTERS)) {
+//        (args[0].tag() != AMObjType::TOP_PARAMETERS) && (args[0].tag() != AMObjType::TOPS)) {
       status = false;
       genAMLError(ERRORMSG(STAT_TYPE_sds) , "Display" , 1 , args[0].tag.string().data());
     }
@@ -834,7 +836,8 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
     else if ((args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
              (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
              (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
-             (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA) || (args[0].tag() == AMObjType::TOPS)) {
+             (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
+//             (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA) || (args[0].tag() == AMObjType::TOPS)) {
       Sequences *seq;
 
 
@@ -854,9 +857,9 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
         seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
         break;
-      case AMObjType::TOPS :
-        seq = (Tops*)((STAT_model*)args[0].val.p)->pt;
-        break;
+//      case AMObjType::TOPS :
+//        seq = (Tops*)((STAT_model*)args[0].val.p)->pt;
+//        break;
       }
 
       if (!status) {
@@ -868,7 +871,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 
     else {
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , 1 , args[0].tag.string().data() ,
-                  "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA or TOPS");
+                  "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
       return AMObj(AMObjType::ERROR);
     }
     break;
@@ -1636,8 +1639,8 @@ AMObj STAT_model::save(const AMObjVector &args) const
         (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) && (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
         (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA) &&
         (args[0].tag() != AMObjType::CORRELATION) && (args[0].tag() != AMObjType::DISTANCE_MATRIX) &&
-        (args[0].tag() != AMObjType::CLUSTERS) && (args[0].tag() != AMObjType::TOP_PARAMETERS) &&
-        (args[0].tag() != AMObjType::TOPS)) {
+        (args[0].tag() != AMObjType::CLUSTERS)) {
+//        (args[0].tag() != AMObjType::TOP_PARAMETERS) && (args[0].tag() != AMObjType::TOPS)) {
       status = false;
       genAMLError(ERRORMSG(STAT_TYPE_sds) , "Save" , 1 , args[0].tag.string().data());
     }
@@ -1749,7 +1752,8 @@ AMObj STAT_model::save(const AMObjVector &args) const
     else if ((args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
              (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
              (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
-             (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA) || (args[0].tag() == AMObjType::TOPS)) {
+             (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
+//             (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA) || (args[0].tag() == AMObjType::TOPS)) {
       const Sequences *seq;
 
 
@@ -1798,9 +1802,9 @@ AMObj STAT_model::save(const AMObjVector &args) const
       case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
         seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
         break;
-      case AMObjType::TOPS :
-        seq = (Tops*)((STAT_model*)args[0].val.p)->pt;
-        break;
+//      case AMObjType::TOPS :
+//        seq = (Tops*)((STAT_model*)args[0].val.p)->pt;
+//        break;
       }
 
       status = seq->ascii_data_write(error , ((AMString*)args[1].val.p)->data() ,
@@ -2345,17 +2349,17 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
     else if ((args[0].tag() == AMObjType::REGRESSION) || (args[0].tag() == AMObjType::RENEWAL) ||
              (args[0].tag() == AMObjType::TIME_EVENTS) || (args[0].tag() == AMObjType::RENEWAL_DATA) ||
              (args[0].tag() == AMObjType::CORRELATION) || (args[0].tag() == AMObjType::DISTANCE_MATRIX) ||
-             (args[0].tag() == AMObjType::CLUSTERS) || (args[0].tag() == AMObjType::TOP_PARAMETERS) ||
-             (args[0].tag() == AMObjType::TOPS)) {
+             (args[0].tag() == AMObjType::CLUSTERS)) {
+//             (args[0].tag() == AMObjType::TOP_PARAMETERS) || (args[0].tag() == AMObjType::TOPS)) {
       if (nb_required != 1) {
         status = false;
         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot");
       }
       else {
         nb_object = 1;
-        if (args[0].tag() == AMObjType::TOPS) {
-          data = true;
-        }
+//        if (args[0].tag() == AMObjType::TOPS) {
+//          data = true;
+//        }
       }
     }
 
@@ -2876,9 +2880,9 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
         case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
           seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
           break;
-        case AMObjType::TOPS :
-          seq = (Tops*)((STAT_model*)args[0].val.p)->pt;
-          break;
+//        case AMObjType::TOPS :
+//          seq = (Tops*)((STAT_model*)args[0].val.p)->pt;
+//          break;
         }
 
         status = seq->plot_data_write(error , Plot_prefix , title);
@@ -3437,11 +3441,11 @@ void installSTATModule()
   type[0] = AMObjType::ANY;
   installFNode("Sequences" , STAT_Sequences , 1 , type , AMObjType::MARKOVIAN_SEQUENCES);
 
-  type[0] = AMObjType::ANY;
-  installFNode("TopParameters" , STAT_TopParameters , 1 , type , AMObjType::TOP_PARAMETERS);
+//  type[0] = AMObjType::ANY;
+//  installFNode("TopParameters" , STAT_TopParameters , 1 , type , AMObjType::TOP_PARAMETERS);
 
-  type[0] = AMObjType::ANY;
-  installFNode("Tops" , STAT_Tops , 1 , type , AMObjType::TOPS);
+//  type[0] = AMObjType::ANY;
+//  installFNode("Tops" , STAT_Tops , 1 , type , AMObjType::TOPS);
 
 //  type[0] = AMObjType::STRING;
 //  installFNode("Load" , STAT_Load , 1 , type , AMObjType::DISTRIBUTION);
@@ -3576,6 +3580,9 @@ void installSTATModule()
   installFNode("Difference" , STAT_Difference , 1 , type , AMObjType::SEQUENCES);
 
   type[0] = AMObjType::ANY;
+  installFNode("RelativeGrowthRate" , STAT_RelativeGrowthRate , 1 , type , AMObjType::SEQUENCES);
+
+  type[0] = AMObjType::ANY;
   installFNode("SequenceNormalization" , STAT_SequenceNormalization , 1 , type , AMObjType::SEQUENCES);
 
   type[0] = AMObjType::ANY;
@@ -3621,9 +3628,9 @@ void installSTATModule()
   type[0] = AMObjType::DISTANCE_MATRIX;
   installFNode("Unnormalize" , STAT_Unnormalize , 1 , type , AMObjType::DISTANCE_MATRIX);
 
-  type[0] = AMObjType::TOPS;
-  type[1] = AMObjType::INTEGER;
-  installFNode("RemoveApicalInternodes" , STAT_RemoveApicalInternodes , 2 , type , AMObjType::TOPS);
+//  type[0] = AMObjType::TOPS;
+//  type[1] = AMObjType::INTEGER;
+//  installFNode("RemoveApicalInternodes" , STAT_RemoveApicalInternodes , 2 , type , AMObjType::TOPS);
 
   type[0] = AMObjType::ANY;
   installFNode("Estimate" , STAT_Estimate , 1 , type , AMObjType::DISTRIBUTION);
