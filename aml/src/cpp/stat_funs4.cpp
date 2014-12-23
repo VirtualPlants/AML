@@ -56,7 +56,7 @@
 #include "sequence_analysis/semi_markov.h"
 #include "sequence_analysis/hidden_semi_markov.h"
 #include "sequence_analysis/nonhomogeneous_markov.h"
-#include "sequence_analysis/tops.h"
+// #include "sequence_analysis/tops.h"
 
 #include "aml/ammodel.h"
 #include "aml/parseraml.h"
@@ -5042,171 +5042,6 @@ static AMObj STAT_EstimateNonhomogeneousMarkov(const MarkovianSequences *seq , c
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une cime.
- *
- *--------------------------------------------------------------*/
-
-static AMObj STAT_EstimateTopParameters(const AMObjVector &args)
-
-{
-  RWCString *pstr;
-  bool status = true , min_position_option = false , max_position_option = false ,
-       neighborhood_option = false , equal_probability_option = false , equal_proba = false;
-  register int i;
-  int nb_required , min_position = 1 , max_position = ((Tops*)((STAT_model*)args[0].val.p)->pt)->get_max_position() ,
-      neighborhood = 1;
-  TopParameters *param;
-  StatError error;
-
-
-  nb_required = 1;
-
-  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
-              (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
-              (args.length() == nb_required + 8) ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
-
-  // arguments optionnels
-
-  for (i = 0;i < (args.length() - nb_required) / 2;i++) {
-    if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
-                  args[nb_required + i * 2].tag.string().data() , "OPTION");
-    }
-
-    else {
-      pstr = (AMString*)args[nb_required + i * 2].val.p;
-
-      if (*pstr == "MinPosition") {
-        switch (min_position_option) {
-
-        case false : {
-          min_position_option = true;
-
-          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
-            status = false;
-            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
-                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
-          }
-          else {
-            min_position = args[nb_required + i * 2 + 1].val.i;
-          }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
-        }
-      }
-
-      else if (*pstr == "MaxPosition") {
-        switch (max_position_option) {
-
-        case false : {
-          max_position_option = true;
-
-          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
-            status = false;
-            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
-                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
-          }
-          else {
-            max_position = args[nb_required + i * 2 + 1].val.i;
-          }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
-        }
-      }
-
-      else if (*pstr == "Neighborhood") {
-        switch (neighborhood_option) {
-
-        case false : {
-          neighborhood_option = true;
-
-          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
-            status = false;
-            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
-                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
-          }
-          else {
-            neighborhood = args[nb_required + i * 2 + 1].val.i;
-          }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
-        }
-      }
-
-      else if (*pstr == "EqualProbability") {
-        switch (equal_probability_option) {
-
-        case false : {
-          equal_probability_option = true;
-
-          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
-            status = false;
-            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
-                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
-          }
-          else {
-            equal_proba = args[nb_required + i * 2 + 1].val.b;
-          }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
-        }
-      }
-
-      else {
-        status = false;
-        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Estimate" ,
-                    nb_required + i + 1 , "MinPosition or MaxPosition or Neighborhood or EqualProbability");
-      }
-    }
-  }
-
-  if (!status) {
-    return AMObj(AMObjType::ERROR);
-  }
-
-  param = ((Tops*)((STAT_model*)args[0].val.p)->pt)->estimation(error , min_position , max_position ,
-                                                                neighborhood , equal_proba);
-
-  if (param) {
-    STAT_model* model = new STAT_model(param);
-    return AMObj(AMObjType::TOP_PARAMETERS , model);
-  }
-  else {
-    AMLOUTPUT << "\n" << error;
-    genAMLError(ERRORMSG(STAT_MODULE_s) , "Estimate");
-    return AMObj(AMObjType::ERROR);
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Estimation des parametres d'un modele.
  *
  *--------------------------------------------------------------*/
@@ -5392,9 +5227,9 @@ AMObj STAT_Estimate(const AMObjVector &args)
 
   // estimation des parametres d'une cime
 
-  if (args[0].tag() == AMObjType::TOPS) {
-    return STAT_EstimateTopParameters(args);
-  }
+//  if (args[0].tag() == AMObjType::TOPS) {
+//    return STAT_EstimateTopParameters(args);
+//  }
 
   genAMLError(ERRORMSG(STAT_DATA_TYPE_sds) , "Estimate" , 1 , args[0].tag.string().data());
   return AMObj(AMObjType::ERROR);
