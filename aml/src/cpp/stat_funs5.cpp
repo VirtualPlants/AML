@@ -57,7 +57,7 @@
 #include "sequence_analysis/semi_markov.h"
 #include "sequence_analysis/hidden_semi_markov.h"
 #include "sequence_analysis/nonhomogeneous_markov.h"
-#include "sequence_analysis/tops.h"
+// #include "sequence_analysis/tops.h"
 
 #include "aml/ammodel.h"
 #include "aml/parseraml.h"
@@ -523,74 +523,6 @@ AMObj STAT_Simulate(const AMObjVector &args)
     else if (nonhomogeneous_markov_seq) {
       STAT_model* model = new STAT_model(nonhomogeneous_markov_seq);
       return AMObj(AMObjType::NONHOMOGENEOUS_MARKOV_DATA , model);
-    }
-    else {
-      AMLOUTPUT << "\n" << error;
-      genAMLError(ERRORMSG(STAT_MODULE_s) , "Simulate");
-      return AMObj(AMObjType::ERROR);
-    }
-  }
-
-  if (args[0].tag() == AMObjType::TOP_PARAMETERS) {
-    bool status = true;
-    int nb_required , nb_axillary = 1;
-    Tops *tops;
-
-
-    nb_required = 3;
-
-    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Simulate"));
-
-    // argument obligatoire
-
-    if (args[1].tag() != AMObjType::INTEGER) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Simulate" , 2 ,
-                  args[1].tag.string().data() , "INT");
-    }
-    if (args[2].tag() != AMObjType::INTEGER) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Simulate" , 3 ,
-                  args[2].tag.string().data() , "INT");
-    }
-
-    // argument optionnel
-
-    if (args.length() == nb_required + 2) {
-      if (args[nb_required].tag() != AMObjType::OPTION) {
-        status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Simulate" , nb_required + 1 ,
-                    args[nb_required].tag.string().data() , "OPTION");
-      }
-      else {
-        if (*((AMString*)args[nb_required].val.p) != "NbAxillary") {
-          status = false;
-          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Simulate" , nb_required + 1 ,
-                      "NbAxillary");
-        }
-      }
-
-      if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
-        status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Simulate" , nb_required + 1 ,
-                    args[nb_required + 1].tag.string().data() , "INT");
-      }
-      else {
-        nb_axillary = args[nb_required + 1].val.i;
-      }
-    }
-
-    if (!status) {
-      return AMObj(AMObjType::ERROR);
-    }
-
-    tops = ((TopParameters*)((STAT_model*)args[0].val.p)->pt)->simulation(error , args[1].val.i ,
-                                                                          args[2].val.i , nb_axillary);
-
-    if (tops) {
-      STAT_model* model = new STAT_model(tops);
-      return AMObj(AMObjType::TOPS , model);
     }
     else {
       AMLOUTPUT << "\n" << error;
