@@ -161,9 +161,9 @@ enum STAT_ERRORLABEL {
 
 struct STAT_model : public AMModel {
 
-    StatInterface *pt;
+    stat_tool::StatInterface *pt;
 
-    STAT_model(StatInterface *ipt) { pt = ipt; }
+    STAT_model(stat_tool::StatInterface *ipt) { pt = ipt; }
     ~STAT_model();
 
     std::ostream& displayOneLine(std::ostream &os) const;
