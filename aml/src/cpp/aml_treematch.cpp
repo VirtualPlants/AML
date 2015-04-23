@@ -36,10 +36,6 @@
 
 
 
-
-
-
-
 #include "aml/aml_treematch.h"
 
 #define  ERR_MSG_ARRAY mtg_err_msgs_aml
