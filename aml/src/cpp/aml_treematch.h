@@ -36,12 +36,6 @@
 
 
 
-
-
-
-
-
-
 #ifndef SB_AML_TREEMATCH_HEADER
 #define SB_AML_TREEMATCH_HEADER
 
@@ -58,7 +52,11 @@
 #include "aml/kernel_funs.h"
 #include "aml/kernel_err.h"
 #include "aml/amobj.h"
-//#include "STAT/vectors.h"
+
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 
 #include "tree_matching/definitions.h"
 #include "tree_matching/treematch.h"
@@ -81,7 +79,7 @@ class AML_TreeMatch : public TreeMatch, public AMModel
                  AMString matching_type,
                  AMString ordered_type,
                  int self_similarity,
-                 VectorDistance& vect_dist,
+                 stat_tool::VectorDistance& vect_dist,
                  double coeff):TreeMatch(mtg,roots,local_functions,matching_type,ordered_type,self_similarity,vect_dist,coeff) {;};
 
   virtual std::ostream& displayOneLine(std::ostream& o) const;
@@ -105,7 +103,7 @@ class AML_TreeMatch_U : public TreeMatch_U, public AMModel
                  AMString mapping_type,
                  AMString mapping,
                  AMString scale_type,
-                 VectorDistance& vect_dist,
+                 stat_tool::VectorDistance& vect_dist,
                  double coeff):TreeMatch_U(mtg,roots,local_functions,matching_type,mapping_type,mapping,scale_type,vect_dist,coeff) {;};
 
   virtual std::ostream& displayOneLine(std::ostream& o) const;
@@ -129,7 +127,7 @@ class AML_TreeMatch_O : public TreeMatch_O, public AMModel
                  AMString mapping_type,
                  AMString mapping,
                  AMString scale_type,
-                 VectorDistance& vect_dist,
+                 stat_tool::VectorDistance& vect_dist,
                  double coeff):TreeMatch_O(mtg,roots,local_functions,matching_type,mapping_type,mapping,scale_type,vect_dist,coeff) {;};
 
   virtual std::ostream& displayOneLine(std::ostream& o) const;
@@ -153,7 +151,7 @@ class AML_TreeMatch_PO : public TreeMatch_PO, public AMModel
                  AMString mapping_type,
                  AMString mapping,
                  AMString scale_type,
-                 VectorDistance& vect_dist,
+                 stat_tool::VectorDistance& vect_dist,
                  double coeff):TreeMatch_PO(mtg,roots,local_functions,matching_type,mapping_type,mapping,scale_type,vect_dist,coeff) {;};
 
   virtual std::ostream& displayOneLine(std::ostream& o) const;
