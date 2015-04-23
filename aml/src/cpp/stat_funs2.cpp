@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -39,19 +39,19 @@
 #include <iostream>
 
 #include "stat_tool/stat_tools.h"
+#include "stat_tool/regression.h"
+#include "stat_tool/curves.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/discrete_mixture.h"
 #include "stat_tool/convolution.h"
 #include "stat_tool/compound.h"
-#include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/vectors.h"
 #include "stat_tool/mixture.h"
-#include "stat_tool/regression.h"
 #include "stat_tool/distance_matrix.h"
 
-#include "sequence_analysis/renewal.h"
 #include "sequence_analysis/sequences.h"
+#include "sequence_analysis/renewal.h"
 #include "sequence_analysis/variable_order_markov.h"
 #include "sequence_analysis/hidden_variable_order_markov.h"
 #include "sequence_analysis/semi_markov.h"
@@ -67,6 +67,10 @@
 #include "aml/array.h"
 
 #include "aml/stat_module.h"
+
+
+using namespace stat_tool;
+using namespace sequence_analysis;
 
 
 #define ERR_MSG_ARRAY STAT_err_msgs_aml
@@ -1803,7 +1807,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
 
   if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
-    FrequencyDistribution *histo;
+    FrequencyDistribution *nb_event;
 
 
     CHECKCONDVA(args.length() == 2 ,
@@ -1811,16 +1815,16 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
 
     switch (args[0].tag()) {
     case AMObjType::FREQUENCY_DISTRIBUTION :
-      histo = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
+      nb_event = (FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt);
       break;
     case AMObjType::DISCRETE_MIXTURE_DATA :
-      histo = (FrequencyDistribution*)((DiscreteMixtureData*)((STAT_model*)args[0].val.p)->pt);
+      nb_event = (FrequencyDistribution*)((DiscreteMixtureData*)((STAT_model*)args[0].val.p)->pt);
       break;
     case AMObjType::CONVOLUTION_DATA :
-      histo = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
+      nb_event = (FrequencyDistribution*)((ConvolutionData*)((STAT_model*)args[0].val.p)->pt);
       break;
     case AMObjType::COMPOUND_DATA :
-      histo = (FrequencyDistribution*)((CompoundData*)((STAT_model*)args[0].val.p)->pt);
+      nb_event = (FrequencyDistribution*)((CompoundData*)((STAT_model*)args[0].val.p)->pt);
       break;
     }
 
@@ -1828,7 +1832,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
                 genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , 2 ,
                             args[1].tag.string().data() , "INT"));
 
-    timev = histo->build_time_events(error , args[1].val.i);
+    timev = build_time_events(error , *nb_event , args[1].val.i);
 
     if (timev) {
       STAT_model* model = new STAT_model(timev);
