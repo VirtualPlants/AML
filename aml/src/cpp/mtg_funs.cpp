@@ -85,6 +85,8 @@ TOOLS_USING(Vector3)
 #include "tool/dirnames.h"
 VPTOOLS_USING_NAMESPACE
 
+using namespace stat_tool;
+
 extern const char *Plot_prefix;
 
 enum Restriction {SAMEAXIS, SAMECOMPLEX, NORESTRICTION} Restriction;
