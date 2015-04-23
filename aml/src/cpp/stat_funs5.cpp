@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2014 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -39,19 +39,19 @@
 #include <iostream>
 
 #include "stat_tool/stat_tools.h"
+#include "stat_tool/regression.h"
+#include "stat_tool/curves.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/discrete_mixture.h"
 #include "stat_tool/convolution.h"
 #include "stat_tool/compound.h"
-#include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/vectors.h"
 #include "stat_tool/mixture.h"
-#include "stat_tool/regression.h"
 #include "stat_tool/distance_matrix.h"
 
-#include "sequence_analysis/renewal.h"
 #include "sequence_analysis/sequences.h"
+#include "sequence_analysis/renewal.h"
 #include "sequence_analysis/variable_order_markov.h"
 #include "sequence_analysis/hidden_variable_order_markov.h"
 #include "sequence_analysis/semi_markov.h"
@@ -66,6 +66,10 @@
 #include "aml/array.h"
 
 #include "aml/stat_module.h"
+
+
+using namespace stat_tool;
+using namespace sequence_analysis;
 
 
 #define ERR_MSG_ARRAY STAT_err_msgs_aml
