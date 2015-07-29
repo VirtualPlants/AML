@@ -162,7 +162,7 @@ const char *STAT_err_msgs_aml[] = {
   "function %s: argument %d: bad penalty type: should be %s" ,
   "function %s: argument %d: bad estimator name: should be %s" ,
   "function %s: argument %d: bad side effect management type: should be %s" ,
-  "function %s: argument %d: bad mean computation method: should be %s" ,
+  "function %s: argument %d: bad mean estimation method: should be %s" ,
   "function %s: argument %d: bad function name: should be %s" ,
   "function %s: argument %d: bad underlying Markov chain type: should be %s" ,
   "function %s: argument %d: bad structural parameter: should be %s" ,
@@ -383,14 +383,18 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 
 {
   RWCString *pstr;
-  char view_point = 'v' , format = 'c';
+  char view_point = 'v';
+  output_sequence_format format = COLUMN;
   bool status = true , view_point_option = false , detail_option = false ,
        format_option = false , segmentations_option = false , nb_segmentation_option = false ,
        state_sequences_option = false , nb_state_sequence_option = false ,
        output_option = false , exhaustive = false;
   register int i , j;
-  int nb_required , segmentation = FORWARD_DYNAMIC_PROGRAMMING , nb_segmentation = NB_SEGMENTATION ,
-      state_sequence = GENERALIZED_VITERBI , nb_state_sequence = NB_STATE_SEQUENCE , output;
+  int nb_required , nb_segmentation = NB_SEGMENTATION , nb_state_sequence = NB_STATE_SEQUENCE;
+  latent_structure_algorithm segmentation = FORWARD_DYNAMIC_PROGRAMMING;
+  latent_structure_algorithm state_sequence = GENERALIZED_VITERBI;
+  change_point_profile change_point_output;
+  state_profile state_output;
 
 
   nb_required = nb_required_computation(args);
@@ -505,10 +509,10 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "Column") {
-              format = 'c';
+              format = COLUMN;
             }
             else if (*pstr == "Line") {
-              format = 'l';
+              format = LINE;
             }
             else {
               status = false;
@@ -663,19 +667,19 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "ChangePoint") {
-              output = CHANGE_POINT;
+              change_point_output = CHANGE_POINT;
             }
             else if (*pstr == "Segment") {
-              output = SEGMENT;
+              change_point_output = SEGMENT;
             }
             else if (*pstr == "State") {
-              output = SSTATE;
+              state_output = SSTATE;
             }
             else if (*pstr == "InState") {
-              output = IN_STATE;
+              state_output = IN_STATE;
             }
             else if (*pstr == "OutState") {
-              output = OUT_STATE;
+              state_output = OUT_STATE;
             }
             else {
               status = false;
@@ -747,18 +751,18 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
   case false : {
     switch (view_point) {
     case 'q' :
-      output = SEGMENT;
+      change_point_output = SEGMENT;
       break;
     case 'p' :
-      output = SSTATE;
+      state_output = SSTATE;
       break;
     }
     break;
   }
 
   case true : {
-    if (((view_point == 'q') && (output != CHANGE_POINT) && (output != SEGMENT)) ||
-        ((view_point == 'p') && (output != STATE) && (output != IN_STATE) && (output != OUT_STATE))) {
+    if (((view_point == 'q') && (change_point_output != CHANGE_POINT) && (change_point_output != SEGMENT)) ||
+        ((view_point == 'p') && (state_output != SSTATE) && (state_output != IN_STATE) && (state_output != OUT_STATE))) {
       status = false;
       genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Display" , "ViewPoint" , "Output");
     }
@@ -941,7 +945,8 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
   }
 
   case 'q' : {
-    int nb_variable , *model_type;
+    int nb_variable;
+    segment_model *model_type;
     const Sequences *seq;
     StatError error;
 
@@ -970,7 +975,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 
     nb_variable = seq->get_nb_variable();
 
-    model_type = new int[nb_variable];
+    model_type = new segment_model[nb_variable];
 
     if (args[1].tag() != AMObjType::INTEGER) {
       status = false;
@@ -1109,7 +1114,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
     }
 
     status = seq->segment_profile_write(error , AMLOUTPUT , args[1].val.i , args[2].val.i ,
-                                        model_type , output , 'a' ,
+                                        model_type , change_point_output , ASCII ,
                                         segmentation , nb_segmentation);
     delete [] model_type;
 
@@ -1149,7 +1154,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       CHECKCONDVA(nb_required == 2 ,
                   genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
-      status = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , AMLOUTPUT , args[1].val.i , output , state_sequence , nb_state_sequence);
+      status = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , AMLOUTPUT , args[1].val.i , state_output , state_sequence , nb_state_sequence);
     }
 
     else {
@@ -1179,11 +1184,11 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       }
 
       if (args[2].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
-        status = ((HiddenVariableOrderMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_write(error , AMLOUTPUT , *seq , args[1].val.i , 'a' , state_sequence , nb_state_sequence);
+        status = ((HiddenVariableOrderMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_write(error , AMLOUTPUT , *seq , args[1].val.i , ASCII , state_sequence , nb_state_sequence);
       }
 
       else if (args[2].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
-        status = ((HiddenSemiMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_write(error , AMLOUTPUT , *seq , args[1].val.i , output , 'a' , state_sequence , nb_state_sequence);
+        status = ((HiddenSemiMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_write(error , AMLOUTPUT , *seq , args[1].val.i , state_output , ASCII , state_sequence , nb_state_sequence);
       }
 
       else {
@@ -1216,15 +1221,19 @@ AMObj STAT_model::save(const AMObjVector &args) const
 
 {
   RWCString *pstr , *format_pstr = NULL;
-  char view_point = 'v' , format;
+  char view_point = 'v';
+  output_format format;
   bool status = true , view_point_option = false , detail_option = false ,
        format_option = false , segmentations_option = false , nb_segmentation_option = false ,
        state_sequences_option = false , nb_state_sequence_option = false ,
        output_option = false , exhaustive = false;
   register int i , j;
-  int nb_required , format_index , segmentation = FORWARD_DYNAMIC_PROGRAMMING ,
-      nb_segmentation = NB_SEGMENTATION , state_sequence = GENERALIZED_VITERBI ,
-      nb_state_sequence = NB_STATE_SEQUENCE , output;
+  int nb_required , format_index ,
+      nb_segmentation = NB_SEGMENTATION , nb_state_sequence = NB_STATE_SEQUENCE;
+  latent_structure_algorithm segmentation = FORWARD_DYNAMIC_PROGRAMMING;
+  latent_structure_algorithm state_sequence = GENERALIZED_VITERBI;
+  change_point_profile change_point_output;
+  state_profile state_output;
   StatError error;
 
 
@@ -1488,19 +1497,19 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "ChangePoint") {
-              output = CHANGE_POINT;
+              change_point_output = CHANGE_POINT;
             }
             else if (*pstr == "Segment") {
-              output = SEGMENT;
+              change_point_output = SEGMENT;
             }
             else if (*pstr == "State") {
-              output = SSTATE;
+              state_output = SSTATE;
             }
             else if (*pstr == "InState") {
-              output = IN_STATE;
+              state_output = IN_STATE;
             }
             else if (*pstr == "OutState") {
-              output = OUT_STATE;
+              state_output = OUT_STATE;
             }
             else {
               status = false;
@@ -1568,18 +1577,18 @@ AMObj STAT_model::save(const AMObjVector &args) const
   case false : {
     switch (view_point) {
     case 'q' :
-      output = SEGMENT;
+      change_point_output = SEGMENT;
       break;
     case 'p' :
-      output = SSTATE;
+      state_output = SSTATE;
       break;
     }
     break;
   }
 
   case true : {
-    if (((view_point == 'q') && (output != CHANGE_POINT) && (output != SEGMENT)) ||
-        ((view_point == 'p') && (output != STATE) && (output != IN_STATE) && (output != OUT_STATE))) {
+    if (((view_point == 'q') && (change_point_output != CHANGE_POINT) && (change_point_output != SEGMENT)) ||
+        ((view_point == 'p') && (state_output != SSTATE) && (state_output != IN_STATE) && (state_output != OUT_STATE))) {
       status = false;
       genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Save" , "ViewPoint" , "Output");
     }
@@ -1601,17 +1610,17 @@ AMObj STAT_model::save(const AMObjVector &args) const
     CHECKCONDVA(nb_required == 2 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
 
-    format = 'a';
+    format = ASCII;
 
     if (format_pstr) {
       if (*format_pstr == "ASCII") {
-        format = 'a';
+        format = ASCII;
       }
       else if (*format_pstr == "SpreadSheet") {
-        format = 's';
+        format = SPREADSHEET;
       }
       else if (*format_pstr == "Gnuplot") {
-        format = 'g';
+        format = GNUPLOT;
       }
       else {
         status = false;
@@ -1620,7 +1629,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
       }
     }
 
-    if ((detail_option) && (format != 'a')) {
+    if ((detail_option) && (format != ASCII)) {
       status = false;
       genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Save");
     }
@@ -1651,13 +1660,13 @@ AMObj STAT_model::save(const AMObjVector &args) const
     }
 
     switch (format) {
-    case 'a' :
+    case ASCII :
       status = ((STAT_model*)args[0].val.p)->pt->ascii_write(error , ((AMString*)args[1].val.p)->data() , exhaustive);
       break;
-    case 's' :
+    case SPREADSHEET :
       status = ((STAT_model*)args[0].val.p)->pt->spreadsheet_write(error , ((AMString*)args[1].val.p)->data());
       break;
-    case 'g' :
+    case GNUPLOT :
       status = ((STAT_model*)args[0].val.p)->pt->plot_write(error , ((AMString*)args[1].val.p)->data());
       break;
     }
@@ -1755,26 +1764,27 @@ AMObj STAT_model::save(const AMObjVector &args) const
              (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
              (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
 //             (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA) || (args[0].tag() == AMObjType::TOPS)) {
+      output_sequence_format sequence_format;
       const Sequences *seq;
 
 
-      format = 'c';
+      sequence_format = COLUMN;
 
       if (format_pstr) {
         if (*format_pstr == "Column") {
-          format = 'c';
+          sequence_format = COLUMN;
         }
         else if (*format_pstr == "Vector") {
-          format = 'v';
+          sequence_format = VECTOR;
         }
         else if (*format_pstr == "Line") {
-          format = 'l';
+          sequence_format = LINE;
         }
         else if (*format_pstr == "Array") {
-          format = 'a';
+          sequence_format = ARRAY;
         }
         else if (*format_pstr == "PosteriorProbability") {
-          format = 'p';
+          sequence_format = POSTERIOR_PROBABILITY;
         }
         else {
           status = false;
@@ -1809,7 +1819,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
       }
 
       status = seq->ascii_data_write(error , ((AMString*)args[1].val.p)->data() ,
-                                     format , exhaustive);
+                                     sequence_format , exhaustive);
     }
 
     else {
@@ -1823,17 +1833,17 @@ AMObj STAT_model::save(const AMObjVector &args) const
     CHECKCONDVA(nb_required == 2 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
 
-    format = 'a';
+    format = ASCII;
 
     if (format_pstr) {
       if (*format_pstr == "ASCII") {
-        format = 'a';
+        format = ASCII;
       }
       else if (*format_pstr == "SpreadSheet") {
-        format = 's';
+        format = SPREADSHEET;
       }
       else if (*format_pstr == "Gnuplot") {
-        format = 'g';
+        format = GNUPLOT;
       }
       else {
         status = false;
@@ -1867,13 +1877,13 @@ AMObj STAT_model::save(const AMObjVector &args) const
       }
 
       switch (format) {
-      case 'a' :
+      case ASCII :
         status = dist->survival_ascii_write(error , ((AMString*)args[1].val.p)->data());
         break;
-      case 's' :
+      case SPREADSHEET :
         status = dist->survival_spreadsheet_write(error , ((AMString*)args[1].val.p)->data());
         break;
-      case 'g' :
+      case GNUPLOT :
         status = dist->survival_plot_write(error , ((AMString*)args[1].val.p)->data());
         break;
       }
@@ -1900,13 +1910,13 @@ AMObj STAT_model::save(const AMObjVector &args) const
       }
 
       switch (format) {
-      case 'a' :
+      case ASCII :
         status = histo->survival_ascii_write(error , ((AMString*)args[1].val.p)->data());
         break;
-      case 's' :
+      case SPREADSHEET :
         status = histo->survival_spreadsheet_write(error , ((AMString*)args[1].val.p)->data());
         break;
-      case 'g' :
+      case GNUPLOT :
         status = histo->survival_plot_write(error , ((AMString*)args[1].val.p)->data());
         break;
       }
@@ -1921,7 +1931,8 @@ AMObj STAT_model::save(const AMObjVector &args) const
   }
 
   case 'q' : {
-    int nb_variable , *model_type;
+    int nb_variable;
+    segment_model *model_type;
     const Sequences *seq;
     StatError error;
 
@@ -1950,7 +1961,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
 
     nb_variable = seq->get_nb_variable();
 
-    model_type = new int[nb_variable];
+    model_type = new segment_model[nb_variable];
 
     if (args[2].tag() != AMObjType::INTEGER) {
       status = false;
@@ -2083,14 +2094,14 @@ AMObj STAT_model::save(const AMObjVector &args) const
       }
     }
 
-    format = 'a';
+    format = ASCII;
 
     if (format_pstr) {
       if (*format_pstr == "ASCII") {
-        format = 'a';
+        format = ASCII;
       }
       else if (*format_pstr == "SpreadSheet") {
-        format = 's';
+        format = SPREADSHEET;
       }
       else {
         status = false;
@@ -2106,7 +2117,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
 
     status = seq->segment_profile_write(error , ((AMString*)args[1].val.p)->data() ,
                                         args[2].val.i , args[3].val.i , model_type ,
-                                        output , format , segmentation , nb_segmentation);
+                                        change_point_output , format , segmentation , nb_segmentation);
     delete [] model_type;
 
     if (!status) {
@@ -2127,14 +2138,14 @@ AMObj STAT_model::save(const AMObjVector &args) const
                   args[2].tag.string().data() , "INT");
     }
 
-    format = 'a';
+    format = ASCII;
 
     if (format_pstr) {
       if (*format_pstr == "ASCII") {
-        format = 'a';
+        format = ASCII;
       }
       else if (*format_pstr == "SpreadSheet") {
-        format = 's';
+        format = SPREADSHEET;
       }
       else {
         status = false;
@@ -2158,7 +2169,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
       CHECKCONDVA(nb_required == 3 ,
                   genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
 
-      status = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_write(error , ((AMString*)args[1].val.p)->data() , args[2].val.i , output , format , state_sequence , nb_state_sequence);
+      status = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_write(error , ((AMString*)args[1].val.p)->data() , args[2].val.i , state_output , format , state_sequence , nb_state_sequence);
     }
 
     else {
@@ -2192,7 +2203,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
       }
 
       else if (args[3].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
-        status = ((HiddenSemiMarkov*)((STAT_model*)args[3].val.p)->pt)->state_profile_write(error , ((AMString*)args[1].val.p)->data() , *seq , args[2].val.i , output , format , state_sequence , nb_state_sequence);
+        status = ((HiddenSemiMarkov*)((STAT_model*)args[3].val.p)->pt)->state_profile_write(error , ((AMString*)args[1].val.p)->data() , *seq , args[2].val.i , state_output , format , state_sequence , nb_state_sequence);
       }
 
       else {
@@ -2231,7 +2242,9 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
        window_option = false , mode_option = false , view_point_option = false ,
        title_option = false , output_option = false;
   register int i , j;
-  int nb_required , nb_object = 0 , variable , type , output;
+  int nb_required , nb_object = 0 , variable , type;
+  change_point_profile change_point_output;
+  state_profile state_output;
   const Distribution **pdist;
   const HiddenVariableOrderMarkov *hmarkov;
   const HiddenSemiMarkov *hsmarkov;
@@ -2681,19 +2694,19 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "ChangePoint") {
-              output = CHANGE_POINT;
+              change_point_output = CHANGE_POINT;
             }
             else if (*pstr == "Segment") {
-              output = SEGMENT;
+              change_point_output = SEGMENT;
             }
             else if (*pstr == "State") {
-              output = SSTATE;
+              state_output = SSTATE;
             }
             else if (*pstr == "InState") {
-              output = IN_STATE;
+              state_output = IN_STATE;
             }
             else if (*pstr == "OutState") {
-              output = OUT_STATE;
+              state_output = OUT_STATE;
             }
             else {
               status = false;
@@ -2745,18 +2758,18 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
   case false : {
     switch (view_point) {
     case 'q' :
-      output = SEGMENT;
+      change_point_output = SEGMENT;
       break;
     case 'p' :
-      output = SSTATE;
+      state_output = SSTATE;
       break;
     }
     break;
   }
 
   case true : {
-    if (((view_point == 'q') && (output != CHANGE_POINT) && (output != SEGMENT)) ||
-        ((view_point == 'p') && (output != STATE) && (output != IN_STATE) && (output != OUT_STATE))) {
+    if (((view_point == 'q') && (change_point_output != CHANGE_POINT) && (change_point_output != SEGMENT)) ||
+        ((view_point == 'p') && (state_output != SSTATE) && (state_output != IN_STATE) && (state_output != OUT_STATE))) {
       status = false;
       genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Plot" , "ViewPoint" , "Output");
     }
@@ -2946,7 +2959,8 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       }
 
       case 'q' : {
-        int nb_variable , *model_type;
+        int nb_variable;
+        segment_model *model_type;
         const Sequences *seq;
 
 
@@ -2971,7 +2985,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
 
         nb_variable = seq->get_nb_variable();
 
-        model_type = new int[nb_variable];
+        model_type = new segment_model[nb_variable];
 
         if (args[1].tag() != AMObjType::INTEGER) {
           status = false;
@@ -3109,8 +3123,8 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           return AMObj(AMObjType::ERROR);
         }
 
-        status = seq->segment_profile_plot_write(error , Plot_prefix , args[1].val.i ,
-                                                 args[2].val.i , model_type , output , title);
+        status = seq->segment_profile_plot_write(error , Plot_prefix , args[1].val.i , args[2].val.i ,
+                                                 model_type , change_point_output , title);
         delete [] model_type;
 
         if (status) {
@@ -3136,7 +3150,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           CHECKCONDVA(nb_required == 2 ,
                       genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot"));
 
-          status = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_plot_write(error , Plot_prefix , args[1].val.i , output , title);
+          status = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_plot_write(error , Plot_prefix , args[1].val.i , state_output , title);
         }
 
         else {
@@ -3170,7 +3184,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           }
 
           else if (args[2].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
-            status = ((HiddenSemiMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_plot_write(error , Plot_prefix , *seq , args[1].val.i , output , title);
+            status = ((HiddenSemiMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_plot_write(error , Plot_prefix , *seq , args[1].val.i , state_output , title);
           }
 
           else {
@@ -3282,7 +3296,8 @@ AMObj STAT_SaveMTG(const AMObjVector &args)
   RWCString *pstr;
   bool status = true;
   register int i;
-  int nb_variable , *type;
+  int nb_variable;
+  variable_type *type;
   const MarkovianSequences *seq;
   StatError error;
 
@@ -3325,7 +3340,7 @@ AMObj STAT_SaveMTG(const AMObjVector &args)
   CHECKCONDVA(args.length() == 2 + nb_variable ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "SaveMTG" , 2 + nb_variable));
 
-  type = new int[nb_variable];
+  type = new variable_type[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     if (args[2 + i].tag() != AMObjType::STRING) {
@@ -3336,16 +3351,16 @@ AMObj STAT_SaveMTG(const AMObjVector &args)
 
     else {
       pstr = (AMString*)args[2 + i].val.p;
-      if ((*pstr == "SYMBOLIC") || (*pstr == "S")) {
-        type[i] = SYMBOLIC;
+      if ((*pstr == "NOMINAL") || (*pstr == "No")) {
+        type[i] = NOMINAL;
       }
-      else if ((*pstr == "NUMERIC") || (*pstr == "N")) {
+      else if ((*pstr == "NUMERIC") || (*pstr == "Nu")) {
         type[i] = NUMERIC;
       }
       else {
         status = false;
         genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "SaveMTG" , 3 + i ,
-                    "SYMBOLIC(S) or NUMERIC(N)");
+                    "NOMINAL(No) or NUMERIC(Nu)");
       }
     }
   }
