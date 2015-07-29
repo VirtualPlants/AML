@@ -333,7 +333,8 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
 
   if (args[0].tag() == AMObjType::RENEWAL) {
     RWCString *pstr;
-    int ident , time;
+    renewal_distribution dist_type;
+    int time;
     DiscreteParametricModel *dist;
     StatError error;
 
@@ -348,7 +349,7 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
       CHECKCONDVA(args.length() == 3 ,
                   genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "ExtractDistribution" , 3));
 
-      ident = NB_EVENT;
+      dist_type = NB_EVENT;
 
       if (args[2].tag() != AMObjType::INTEGER) {
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ExtractDistribution" , 3 ,
@@ -365,19 +366,19 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
                   genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "ExtractDistribution" , 2));
 
       if (*pstr == "InterEvent") {
-        ident = INTER_EVENT;
+        dist_type = INTER_EVENT;
       }
       else if (*pstr == "LengthBias") {
-        ident = LENGTH_BIAS;
+        dist_type = LENGTH_BIAS;
       }
       else if (*pstr == "Backward") {
-        ident = BACKWARD_RECURRENCE_TIME;
+        dist_type = BACKWARD_RECURRENCE_TIME;
       }
       else if (*pstr == "Forward") {
-        ident = FORWARD_RECURRENCE_TIME;
+        dist_type = FORWARD_RECURRENCE_TIME;
       }
       else if (*pstr == "Mixture") {
-        ident = NB_EVENT_MIXTURE;
+        dist_type = NB_EVENT_MIXTURE;
       }
       else {
         genAMLError(ERRORMSG(DISTRIBUTION_NAME_sds) , "ExtractDistribution" , 2 ,
@@ -386,7 +387,7 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
       }
     }
 
-    dist = ((Renewal*)((STAT_model*)args[0].val.p)->pt)->extract(error , ident , time);
+    dist = ((Renewal*)((STAT_model*)args[0].val.p)->pt)->extract(error , dist_type , time);
 
     if (dist) {
       STAT_model* model = new STAT_model(dist);
@@ -405,7 +406,7 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV)) {
     RWCString *pstr;
     bool status = true;
-    int ident;
+    process_distribution dist_type;
     DiscreteParametricModel *dist;
     StatError error;
 
@@ -422,22 +423,22 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
       pstr = (AMString*)args[1].val.p;
 
       if (*pstr == "Observation") {
-        ident = OBSERVATION;
+        dist_type = OBSERVATION;
       }
       else if (*pstr == "FirstOccurrence") {
-        ident = FIRST_OCCURRENCE;
+        dist_type = FIRST_OCCURRENCE;
       }
       else if (*pstr == "Recurrence") {
-        ident = RECURRENCE_TIME;
+        dist_type = RECURRENCE_TIME;
       }
       else if (*pstr == "Sojourn") {
-        ident = SOJOURN_TIME;
+        dist_type = SOJOURN_TIME;
       }
       else if (*pstr == "NbRun") {
-        ident = NB_RUN;
+        dist_type = NB_RUN;
       }
       else if (*pstr == "NbOccurrence") {
-        ident = NB_OCCURRENCE;
+        dist_type = NB_OCCURRENCE;
       }
       else if (*pstr != "Forward") {
         status = false;
@@ -447,7 +448,8 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
     }
 
     if (*pstr == "Forward") {
-      int nb_required = 3 , frequency_distribution_type = FINAL_RUN;
+      int nb_required = 3;
+      process_distribution histo_type = FINAL_RUN;
 
 
       CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
@@ -491,10 +493,10 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
         else {
           pstr = (AMString*)args[nb_required + 1].val.p;
           if (*pstr == "InitialRun") {
-            frequency_distribution_type = INITIAL_RUN;
+            histo_type = INITIAL_RUN;
           }
           else if (*pstr == "FinalRun") {
-            frequency_distribution_type = FINAL_RUN;
+            histo_type = FINAL_RUN;
           }
           else {
             status = false;
@@ -510,10 +512,10 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
 
       switch (args[0].tag()) {
       case AMObjType::SEMI_MARKOV :
-        dist = ((SemiMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , args[2].val.i , frequency_distribution_type);
+        dist = ((SemiMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , args[2].val.i , histo_type);
         break;
       case AMObjType::HIDDEN_SEMI_MARKOV :
-        dist = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , args[2].val.i , frequency_distribution_type);
+        dist = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , args[2].val.i , histo_type);
         break;
       }
     }
@@ -525,7 +527,7 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
       CHECKCONDVA((args.length() == 3) || (args.length() == 4) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ExtractDistribution"));
 
-      if ((ident == OBSERVATION) && (args.length() != 4)) {
+      if ((dist_type == OBSERVATION) && (args.length() != 4)) {
         status = false;
         genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "ExtractDistribution" , 4);
       }
@@ -563,19 +565,19 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
 
       switch (args[0].tag()) {
       case AMObjType::VARIABLE_ORDER_MARKOV :
-        dist = ((VariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , ident , variable , value);
+        dist = ((VariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , dist_type , variable , value);
         break;
       case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV :
-        dist = ((HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , ident , variable , value);
+        dist = ((HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , dist_type , variable , value);
         break;
       case AMObjType::SEMI_MARKOV :
-        dist = ((SemiMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , ident , variable , value);
+        dist = ((SemiMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , dist_type , variable , value);
         break;
       case AMObjType::HIDDEN_SEMI_MARKOV :
-        dist = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , ident , variable , value);
+        dist = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , dist_type , variable , value);
         break;
       case AMObjType::NONHOMOGENEOUS_MARKOV :
-        dist = ((NonhomogeneousMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , ident , value);
+        dist = ((NonhomogeneousMarkov*)((STAT_model*)args[0].val.p)->pt)->extract(error , dist_type , value);
         break;
       }
     }
@@ -732,7 +734,7 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
 
   if (args[0].tag() == AMObjType::COMPOUND_DATA) {
     RWCString *pstr;
-    char type;
+    compound_distribution type;
     DiscreteDistributionData *histo;
     StatError error;
 
@@ -747,13 +749,13 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
     pstr = (AMString*)args[1].val.p;
 
     if (*pstr == "Sum") {
-      type = 's';
+      type = SUM;
     }
     else if (*pstr == "Elementary") {
-      type = 'e';
+      type = ELEMENTARY;
     }
     else if (*pstr == "Compound") {
-      type = 'c';
+      type = COMPOUND;
     }
     else {
       genAMLError(ERRORMSG(FREQUENCY_DISTRIBUTION_NAME_sds) , "ExtractFrequencyDistribution" , 2 ,
@@ -827,7 +829,7 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
 
   if ((args[0].tag() == AMObjType::TIME_EVENTS) || (args[0].tag() == AMObjType::RENEWAL_DATA)) {
     RWCString *pstr;
-    int ident;
+    renewal_distribution histo_type;
     DiscreteDistributionData *histo;
     const TimeEvents *time_events;
     const RenewalData *renewal_data;
@@ -912,19 +914,19 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
                             args[0].tag.string().data() , "RENEWAL_DATA"));
 
     if (*pstr == "InterEvent") {
-      ident = INTER_EVENT;
+      histo_type = INTER_EVENT;
     }
     else if (*pstr == "Within") {
-      ident = WITHIN_OBSERVATION_PERIOD;
+      histo_type = WITHIN_OBSERVATION_PERIOD;
     }
     else if (*pstr == "LengthBias") {
-      ident = LENGTH_BIAS;
+      histo_type = LENGTH_BIAS;
     }
     else if (*pstr == "Backward") {
-      ident = BACKWARD_RECURRENCE_TIME;
+      histo_type = BACKWARD_RECURRENCE_TIME;
     }
     else if (*pstr == "Forward") {
-      ident = FORWARD_RECURRENCE_TIME;
+      histo_type = FORWARD_RECURRENCE_TIME;
     }
     else {
       genAMLError(ERRORMSG(FREQUENCY_DISTRIBUTION_NAME_sds) , "ExtractFrequencyDistribution" , 2 ,
@@ -932,7 +934,7 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
       return AMObj(AMObjType::ERROR);
     }
 
-    histo = renewal_data->extract(error , ident);
+    histo = renewal_data->extract(error , histo_type);
 
     if (histo) {
       STAT_model* model = new STAT_model(histo);
@@ -951,7 +953,8 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     RWCString *pstr;
     bool status = true;
-    int ident , nb_variable , variable , offset , value;
+    int nb_variable , variable , offset , value;
+    process_distribution histo_type;
     DiscreteDistributionData *histo;
     const Sequences *seq;
     const MarkovianSequences *markovian_seq;
@@ -1054,28 +1057,28 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
     }
 
     if (*pstr == "Observation") {
-      ident = OBSERVATION;
+      histo_type = OBSERVATION;
     }
     else if (*pstr == "FirstOccurrence") {
-      ident = FIRST_OCCURRENCE;
+      histo_type = FIRST_OCCURRENCE;
     }
     else if (*pstr == "Recurrence") {
-      ident = RECURRENCE_TIME;
+      histo_type = RECURRENCE_TIME;
     }
     else if (*pstr == "Sojourn") {
-      ident = SOJOURN_TIME;
+      histo_type = SOJOURN_TIME;
     }
     else if (*pstr == "InitialRun") {
-      ident = INITIAL_RUN;
+      histo_type = INITIAL_RUN;
     }
     else if (*pstr == "FinalRun") {
-      ident = FINAL_RUN;
+      histo_type = FINAL_RUN;
     }
     else if (*pstr == "NbRun") {
-      ident = NB_RUN;
+      histo_type = NB_RUN;
     }
     else if (*pstr == "NbOccurrence") {
-      ident = NB_OCCURRENCE;
+      histo_type = NB_OCCURRENCE;
     }
     else {
       status = false;
@@ -1083,7 +1086,7 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
                   "Length or Observation or FirstOccurrence or Recurrence or Sojourn or InitialRun or FinalRun or NbRun or NbOccurrence");
     }
 
-    if ((ident == OBSERVATION) && (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
+    if ((histo_type == OBSERVATION) && (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
         (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
         (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
       status = false;
@@ -1129,16 +1132,16 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
 
     switch (args[0].tag()) {
     case AMObjType::MARKOVIAN_SEQUENCES :
-      histo = ((MarkovianSequences*)((STAT_model*)args[0].val.p)->pt)->extract(error , ident , variable , value);
+      histo = ((MarkovianSequences*)((STAT_model*)args[0].val.p)->pt)->extract(error , histo_type , variable , value);
       break;
     case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
-      histo = ((VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt)->extract(error , ident , variable , value);
+      histo = ((VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt)->extract(error , histo_type , variable , value);
       break;
     case AMObjType::SEMI_MARKOV_DATA :
-      histo = ((SemiMarkovData*)((STAT_model*)args[0].val.p)->pt)->extract(error , ident , variable , value);
+      histo = ((SemiMarkovData*)((STAT_model*)args[0].val.p)->pt)->extract(error , histo_type , variable , value);
       break;
     case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
-      histo = ((NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt)->extract(error , ident , value);
+      histo = ((NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt)->extract(error , histo_type , value);
       break;
     }
 
@@ -1184,7 +1187,8 @@ AMObj STAT_ExtractVectors(const AMObjVector &args)
 {
   RWCString *pstr;
   bool status = true;
-  int type , nb_variable , variable , offset , value;
+  int nb_variable , variable , offset , value;
+  sequence_pattern pattern; 
   Vectors *vec;
   const Sequences *seq;
   StatError error;
@@ -1225,7 +1229,7 @@ AMObj STAT_ExtractVectors(const AMObjVector &args)
     CHECKCONDVA(args.length() == 2 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "ExtractVectors" , 2));
 
-    vec = seq->extract_vectors(error , LENGTH);
+    vec = seq->extract_vectors(error , LENGTH_PATTERN);
 
     if (vec) {
       STAT_model* model = new STAT_model(vec);
@@ -1239,22 +1243,22 @@ AMObj STAT_ExtractVectors(const AMObjVector &args)
   }
 
   if (*pstr == "Cumul") {
-    type = SEQUENCE_CUMUL;
+    pattern = SEQUENCE_CUMUL;
   }
   else if (*pstr == "Mean") {
-    type = SEQUENCE_MEAN;
+    pattern = SEQUENCE_MEAN;
   }
   else if (*pstr == "FirstOccurrence") {
-    type = FIRST_OCCURRENCE;
+    pattern = FIRST_OCCURRENCE_PATTERN;
   }
   else if (*pstr == "Sojourn") {
-    type = SOJOURN_TIME;
+    pattern = SOJOURN_TIME_PATTERN;
   }
   else if (*pstr == "NbRun") {
-    type = NB_RUN;
+    pattern = NB_RUN_PATTERN;
   }
   else if (*pstr == "NbOccurrence") {
-    type = NB_OCCURRENCE;
+    pattern = NB_OCCURRENCE_PATTERN;
   }
   else {
     status = false;
@@ -1290,7 +1294,7 @@ AMObj STAT_ExtractVectors(const AMObjVector &args)
       return AMObj(AMObjType::ERROR);
     }
 
-    vec = seq->extract_vectors(error , type , variable);
+    vec = seq->extract_vectors(error , pattern , variable);
 
     if (vec) {
       STAT_model* model = new STAT_model(vec);
@@ -1319,7 +1323,7 @@ AMObj STAT_ExtractVectors(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  vec = seq->extract_vectors(error , type , variable , value);
+  vec = seq->extract_vectors(error , pattern , variable , value);
 
   if (vec) {
     STAT_model* model = new STAT_model(vec);
@@ -2012,7 +2016,8 @@ AMObj STAT_ThresholdingData(const AMObjVector &args)
 {
   RWCString *pstr;
   bool status = true;
-  int nb_variable , variable , offset , mode;
+  int nb_variable , variable , offset;
+  threshold_direction mode;
   const Vectors *ivec;
   const Sequences *iseq;
   StatError error;
@@ -2215,7 +2220,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
     pstr = (AMString*)args[1].val.p;
 
     if (*pstr == "Step") {
-      int mode = FLOOR;
+      rounding mode = FLOOR;
 
 
       CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
@@ -2352,8 +2357,8 @@ AMObj STAT_Cluster(const AMObjVector &args)
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     RWCString *pstr;
     bool status = true;
-    int nb_required , nb_variable , variable , offset , mode = FLOOR ,
-        nb_class = I_DEFAULT , *int_limit = NULL;
+    int nb_required , nb_variable , variable , offset , nb_class = I_DEFAULT , *int_limit = NULL;
+    rounding  mode = FLOOR;
     double *real_limit = NULL;
     const Vectors *ivec;
     const Sequences *iseq;
@@ -2790,7 +2795,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
- *  Transcodage des symboles.
+ *  Transcodage des categories.
  *
  *--------------------------------------------------------------*/
 
@@ -2803,7 +2808,7 @@ AMObj STAT_Transcode(const AMObjVector &args)
   if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
     bool status = true;
-    int nb_symbol , *symbol = NULL;
+    int nb_category , *category = NULL;
     const FrequencyDistribution *ihisto;
     DiscreteDistributionData *histo;
     StatError error;
@@ -2827,7 +2832,7 @@ AMObj STAT_Transcode(const AMObjVector &args)
       break;
     }
 
-    nb_symbol = ihisto->nb_value - ihisto->offset;
+    nb_category = ihisto->nb_value - ihisto->offset;
 
     if (args[1].tag() != AMObjType::ARRAY) {
       status = false;
@@ -2835,17 +2840,17 @@ AMObj STAT_Transcode(const AMObjVector &args)
                   args[1].tag.string().data() , "ARRAY");
     }
     else {
-      symbol = buildIntArray(args , 1 , "Transcode" , 2 , nb_symbol);
-      if (!symbol) {
+      category = buildIntArray(args , 1 , "Transcode" , 2 , nb_category);
+      if (!category) {
         status = false;
       }
     }
 
     if (status) {
-      histo = ihisto->transcode(error , symbol);
+      histo = ihisto->transcode(error , category);
     }
 
-    delete [] symbol;
+    delete [] category;
 
     if (!status) {
       return AMObj(AMObjType::ERROR);
@@ -2869,7 +2874,7 @@ AMObj STAT_Transcode(const AMObjVector &args)
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     bool status = true;
     int nb_required , nb_variable , variable = I_DEFAULT , offset ,
-        nb_symbol = I_DEFAULT , *symbol = NULL;
+        nb_category = I_DEFAULT , *category = NULL;
     const Vectors *ivec = NULL;
     const Sequences *iseq = NULL;
     const MarkovianSequences *imarkovian_seq = NULL;
@@ -2933,13 +2938,13 @@ AMObj STAT_Transcode(const AMObjVector &args)
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Transcode"));
 
     if (ivec) {
-      nb_symbol = (int)(ivec->get_max_value(variable - 1) - ivec->get_min_value(variable - 1)) + 1;
+      nb_category = (int)(ivec->get_max_value(variable - 1) - ivec->get_min_value(variable - 1)) + 1;
     }
     else if (iseq) {
-      nb_symbol = (int)(iseq->get_max_value(variable - 1) - iseq->get_min_value(variable - 1)) + 1;
+      nb_category = (int)(iseq->get_max_value(variable - 1) - iseq->get_min_value(variable - 1)) + 1;
     }
     else {
-      nb_symbol = (int)(imarkovian_seq->get_max_value(variable - 1) - imarkovian_seq->get_min_value(variable - 1)) + 1;
+      nb_category = (int)(imarkovian_seq->get_max_value(variable - 1) - imarkovian_seq->get_min_value(variable - 1)) + 1;
     }
 
     if (args[offset].tag() != AMObjType::ARRAY) {
@@ -2948,8 +2953,8 @@ AMObj STAT_Transcode(const AMObjVector &args)
                     args[offset].tag.string().data() , "ARRAY");
     }
     else {
-      symbol = buildIntArray(args , offset , "Transcode" , offset + 1 , nb_symbol);
-      if (!symbol) {
+      category = buildIntArray(args , offset , "Transcode" , offset + 1 , nb_category);
+      if (!category) {
         status = false;
       }
     }
@@ -2964,10 +2969,10 @@ AMObj STAT_Transcode(const AMObjVector &args)
       }
 
       if (status) {
-        vec = ivec->transcode(error , variable , symbol);
+        vec = ivec->transcode(error , variable , category);
       }
 
-      delete [] symbol;
+      delete [] category;
 
       if (!status) {
         return AMObj(AMObjType::ERROR);
@@ -2995,10 +3000,10 @@ AMObj STAT_Transcode(const AMObjVector &args)
       }
 
       if (status) {
-        seq = iseq->transcode(error , variable , symbol);
+        seq = iseq->transcode(error , variable , category);
       }
 
-      delete [] symbol;
+      delete [] category;
 
       if (!status) {
         return AMObj(AMObjType::ERROR);
@@ -3035,7 +3040,7 @@ AMObj STAT_Transcode(const AMObjVector &args)
 
 
       if ((args.length() != nb_required) && (args.length() != nb_required + 2)) {
-        delete [] symbol;
+        delete [] category;
         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Transcode");
         return AMObj(AMObjType::ERROR);
       }
@@ -3067,10 +3072,10 @@ AMObj STAT_Transcode(const AMObjVector &args)
       }
 
       if (status) {
-        markovian_seq = imarkovian_seq->transcode(error , variable , symbol , add_flag);
+        markovian_seq = imarkovian_seq->transcode(error , variable , category , add_flag);
       }
 
-      delete [] symbol;
+      delete [] category;
 
       if (!status) {
         return AMObj(AMObjType::ERROR);
@@ -3569,7 +3574,8 @@ AMObj STAT_Round(const AMObjVector &args)
   RWCString *pstr;
   bool status = true , variable_option = false , mode_option = false;
   register int i;
-  int nb_required , variable = I_DEFAULT , mode = ROUND;
+  int nb_required , variable = I_DEFAULT;
+  rounding mode = ROUND;
   StatError error;
 
 
@@ -5142,7 +5148,7 @@ AMObj STAT_Reverse(const AMObjVector &args)
       break;
     }
 
-    seq = new MarkovianSequences(*iseq , 'r');
+    seq = new MarkovianSequences(*iseq , REVERSE);
 
     STAT_model* model = new STAT_model(seq);
     return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
@@ -6316,8 +6322,8 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
   bool status = true , variable_option = false , begin_end_option = false , begin_end = false ,
        output_option = false;
   register int i;
-  int nb_required , nb_point = I_DEFAULT , int_sum , variable = I_DEFAULT ,
-      output = TREND , *int_filter;
+  int nb_required , nb_point = I_DEFAULT , int_sum , variable = I_DEFAULT , *int_filter;
+  sequence_type output = TREND;
   double sum , *filter;
   const Distribution *dist;
   const Sequences *iseq;
@@ -6607,12 +6613,14 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char format = 'a' , *file_name = NULL;
+  output_format format = ASCII;
+  char *file_name = NULL;
   bool status = true , circular_option = false , circular = false ,
        standard_deviation_option = false , standard_deviation = false ,
        output_option = false , file_name_option = false , format_option = false;
   register int i;
-  int nb_required , output = SEQUENCE;
+  int nb_required;
+  sequence_type output = SEQUENCE;
   const Sequences *iseq;
   Sequences *seq;
   StatError error;
@@ -6790,10 +6798,10 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "ASCII") {
-              format = 'a';
+              format = ASCII;
             }
             else if (*pstr == "SpreadSheet") {
-              format = 's';
+              format = SPREADSHEET;
             }
             else {
               status = false;
