@@ -216,7 +216,7 @@ AMObj STAT_Simulate(const AMObjVector &args)
 
   if (args[0].tag() == AMObjType::RENEWAL) {
     RWCString *pstr;
-    char type;
+    process_type type;
     bool status = true;
     RenewalData *timev;
 
@@ -232,10 +232,10 @@ AMObj STAT_Simulate(const AMObjVector &args)
     else {
       pstr = (AMString*)args[1].val.p;
       if (*pstr == "Ordinary") {
-        type = 'o';
+        type = ORDINARY;
       }
       else if (*pstr == "Equilibrium") {
-        type = 'e';
+        type = EQUILIBRIUM;
       }
       else {
         status = false;
@@ -546,10 +546,12 @@ AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = NULL , format = 'a';
+  char *file_name = NULL;
+  output_format format = ASCII;
   bool status = true , file_name_option = false , format_option = false;
   register int i;
-  int nb_required , type;
+  int nb_required;
+  variable_type var_type;
   const FrequencyDistribution **histo;
   StatError error;
 
@@ -610,9 +612,9 @@ AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
 
   else {
     pstr = (AMString*)args[nb_required - 1].val.p;
-    for (i = SYMBOLIC;i <= NUMERIC;i++) {
+    for (i = NOMINAL;i <= NUMERIC;i++) {
       if ((*pstr == STAT_variable_type_word[i]) || (*pstr == STAT_variable_type_letter[i])) {
-        type = i;
+        var_type = (variable_type)i;
         break;
       }
     }
@@ -620,7 +622,7 @@ AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
     if (i == NUMERIC + 1) {
       status = false;
       genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "Compare" , nb_required ,
-                  "SYMBOLIC(S) or ORDINAL(O) or NUMERIC(N)");
+                  "NOMINAL(No) or ORDINAL(O) or NUMERIC(Nu)");
     }
   }
 
@@ -676,10 +678,10 @@ AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
 
             if (*pstr == "ASCII") {
-              format = 'a';
+              format = ASCII;
             }
             else if (*pstr == "SpreadSheet") {
-              format = 's';
+              format = SPREADSHEET;
             }
             else {
               status = false;
@@ -716,7 +718,7 @@ AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  status = histo[0]->comparison(error , AMLOUTPUT , nb_required - 2 , histo + 1 , type ,
+  status = histo[0]->comparison(error , AMLOUTPUT , nb_required - 2 , histo + 1 , var_type ,
                                 file_name , format);
   delete [] histo;
 
@@ -813,10 +815,11 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = NULL , format = 'a' , *alignment_file_name = NULL , alignment_format = 'a';
+  char *file_name = NULL , *alignment_file_name = NULL; 
+  output_format format = ASCII;
   bool status = true , ref_sequence_option = false , test_sequence_option = false , begin_option = false ,
        begin_free = false , end_option = false , end_free = false , file_name_option = false ,
-       format_option = false , alignment_file_name_option = false , alignment_format_option = false;
+       format_option = false , alignment_file_name_option = false;
   register int i;
   int nb_required , ref_identifier = I_DEFAULT , test_identifier = I_DEFAULT;
   const Sequences *iseq;
@@ -861,8 +864,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
     CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
                 (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
                 (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
-                (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ||
-                (args.length() == nb_required + 16) ,
+                (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Compare"));
 
     // arguments optionnels
@@ -1039,10 +1041,10 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
 
               if (*pstr == "ASCII") {
-                format = 'a';
+                format = ASCII;
               }
               else if (*pstr == "SpreadSheet") {
-                format = 's';
+                format = SPREADSHEET;
               }
               else {
                 status = false;
@@ -1085,49 +1087,10 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
           }
           }
         }
-
-        else if (*pstr == "AlignmentFormat") {
-          switch (alignment_format_option) {
-
-          case false : {
-            alignment_format_option = true;
-
-            if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
-              status = false;
-              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Compare" , nb_required + i + 1 ,
-                          args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
-            }
-            else {
-              pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
-
-              if (*pstr == "ASCII") {
-                alignment_format = 'a';
-              }
-/*              else if (*pstr == "Binary") {
-                alignment_format = 'b';
-              } */
-              else {
-                status = false;
-                genAMLError(ERRORMSG(K_FILE_FORMAT_ERR_sds) , "Compare" ,
-                            nb_required + i + 1 , "ASCII");
-//                            nb_required + i + 1 , "ASCII or Binary");
-              }
-            }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
-          }
-        }
-
         else {
           status = false;
           genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Compare" , nb_required + i + 1 ,
-                      "RefSequence or TestSequence or Begin or End or FileName or Format or AlignmentFileName or AlignmentFormat");
+                      "RefSequence or TestSequence or Begin or End or FileName or Format or AlignmentFileName");
         }
       }
     }
@@ -1137,17 +1100,12 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
       genAMLError(ERRORMSG(MISSING_FILE_NAME_OPTION_s) , "Compare");
     }
 
-    if ((alignment_format_option) && (!alignment_file_name_option)) {
-      status = false;
-      genAMLError(ERRORMSG(MISSING_ALIGNMENT_FILE_NAME_OPTION_s) , "Compare");
-    }
-
     if (!status) {
       return AMObj(AMObjType::ERROR);
     }
 
     dist_matrix = iseq->alignment(error , &AMLOUTPUT , ref_identifier , test_identifier , begin_free ,
-                                  end_free , file_name , format , alignment_file_name , alignment_format);
+                                  end_free , file_name , format , alignment_file_name);
 
     if (dist_matrix) {
       STAT_model* model = new STAT_model(dist_matrix);
@@ -1166,7 +1124,8 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
     bool output_option= false , indel_cost_option = false , indel_factor_option = false ,
          transposition_option = false , transposition = false , transposition_factor_option = false ,
          algorithm_option = false;
-    int indel_cost = ADAPTATIVE , algorithm = AGGLOMERATIVE;
+    insertion_deletion_cost indel_cost = ADAPTATIVE;
+    hierarchical_strategy algorithm = AGGLOMERATIVE;
     double indel_factor , transposition_factor = TRANSPOSITION_FACTOR;
     MarkovianSequences *markovian_seq;
 
@@ -1177,7 +1136,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                 (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ||
                 (args.length() == nb_required + 16) || (args.length() == nb_required + 18) ||
                 (args.length() == nb_required + 20) || (args.length() == nb_required + 22) ||
-                (args.length() == nb_required + 24) || (args.length() == nb_required + 26) ,
+                (args.length() == nb_required + 24) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Compare"));
 
     // argument obligatoire
@@ -1520,10 +1479,10 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
 
               if (*pstr == "ASCII") {
-                format = 'a';
+                format = ASCII;
               }
               else if (*pstr == "SpreadSheet") {
-                format = 's';
+                format = SPREADSHEET;
               }
               else {
                 status = false;
@@ -1555,44 +1514,6 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
             }
             else {
               alignment_file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
-            }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
-          }
-        }
-
-        else if (*pstr == "AlignmentFormat") {
-          switch (alignment_format_option) {
-
-          case false : {
-            alignment_format_option = true;
-
-            if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
-              status = false;
-              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Compare" , nb_required + i + 1 ,
-                          args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
-            }
-            else {
-              pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
-
-              if (*pstr == "ASCII") {
-                alignment_format = 'a';
-              }
-/*              else if (*pstr == "Binary") {
-                alignment_format = 'b';
-              } */
-              else {
-                status = false;
-                genAMLError(ERRORMSG(K_FILE_FORMAT_ERR_sds) , "Compare" ,
-                            nb_required + i + 1 , "ASCII");
-//                            nb_required + i + 1 , "ASCII or Binary");
-              }
             }
             break;
           }
@@ -1647,7 +1568,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
         else {
           status = false;
           genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Compare" , nb_required + i + 1 ,
-                      "Output or RefSequence or TestSequence or Begin or End or IndelCost or IndelFactor or Transposition or FileName or Format or AlignmentFileName or AlignmentFormat");
+                      "Output or RefSequence or TestSequence or Begin or End or IndelCost or IndelFactor or Transposition or FileName or Format or AlignmentFileName");
         }
       }
     }
@@ -1668,11 +1589,6 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
       if ((!file_name_option) && (format_option)) {
         status = false;
         genAMLError(ERRORMSG(MISSING_FILE_NAME_OPTION_s) , "Compare");
-      }
-
-      if ((!alignment_file_name_option) && (alignment_format_option)) {
-        status = false;
-        genAMLError(ERRORMSG(MISSING_ALIGNMENT_FILE_NAME_OPTION_s) , "Compare");
       }
       break;
     }
@@ -1707,11 +1623,6 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
         status = false;
         genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Compare" , "AlignmentFileName");
       }
-
-      if (alignment_format_option) {
-        status = false;
-        genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Compare" , "AlignmentFormat");
-      }
       break;
     }
     }
@@ -1730,7 +1641,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
       dist_matrix = iseq->alignment(error , &AMLOUTPUT , *((VectorDistance*)((STAT_model*)args[1].val.p)->pt) ,
                                     ref_identifier , test_identifier , begin_free , end_free ,
                                     indel_cost , indel_factor , transposition , transposition_factor ,
-                                    file_name , format , alignment_file_name , alignment_format);
+                                    file_name , format , alignment_file_name);
 
       if (dist_matrix) {
         STAT_model* model = new STAT_model(dist_matrix);
@@ -1931,7 +1842,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
       (args[1].tag() == AMObjType::HIDDEN_SEMI_MARKOV)) {
     RWCString *pstr;
     bool algorithm_option = false , file_name_option = false;
-    int algorithm = FORWARD;
+    latent_structure_algorithm algorithm = FORWARD;
 
 
     CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
@@ -2828,11 +2739,13 @@ AMObj STAT_Clustering(const AMObjVector &args)
   }
 
   else if (*pstr == "Hierarchy") {
-    char *file_name = NULL , format = 'a';
+    char *file_name = NULL;
+    output_format format = ASCII;
     bool algorithm_option = false , criterion_option = false , file_name_option = false ,
          format_option = false;
     register int i;
-    int algorithm = AGGLOMERATIVE , criterion = AVERAGING;
+    hierarchical_strategy algorithm = AGGLOMERATIVE;
+    linkage criterion = AVERAGE_NEIGHBOR;
 
 
     nb_required = 2;
@@ -2912,13 +2825,13 @@ AMObj STAT_Clustering(const AMObjVector &args)
               else if (*pstr == "FarthestNeighbor") {
                 criterion = FARTHEST_NEIGHBOR;
               }
-              else if (*pstr == "Averaging") {
-                criterion = AVERAGING;
+              else if (*pstr == "AverageNeighbor") {
+                criterion = AVERAGE_NEIGHBOR;
               }
               else {
                 status = false;
                 genAMLError(ERRORMSG(CRITERION_NAME_sds) , "Clustering" ,
-                            nb_required + i + 1 , "FarthestNeighbor or Averaging");
+                            nb_required + i + 1 , "NearestNeighbor or FarthestNeighbor or AverageNeighbor");
               }
             }
             break;
@@ -2972,10 +2885,10 @@ AMObj STAT_Clustering(const AMObjVector &args)
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
 
               if (*pstr == "ASCII") {
-                format = 'a';
+                format = ASCII;
               }
               else if (*pstr == "SpreadSheet") {
-                format = 's';
+                format = SPREADSHEET;
               }
               else {
                 status = false;
@@ -3269,7 +3182,8 @@ AMObj STAT_ComputeRankCorrelation(const AMObjVector &args)
   char *file_name = NULL;
   bool status = true , type_option = false , file_name_option = false;
   register int i;
-  int nb_required , type = SPEARMAN;
+  int nb_required;
+  correlation_type type = SPEARMAN;
   StatError error;
 
 
@@ -3397,7 +3311,8 @@ AMObj STAT_ContingencyTable(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = NULL , format = 'a';
+  char *file_name = NULL;
+  output_format format = ASCII;
   bool status = true , file_name_option = false , format_option = false;
   register int i;
   int nb_required;
@@ -3481,10 +3396,10 @@ AMObj STAT_ContingencyTable(const AMObjVector &args)
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
 
             if (*pstr == "ASCII") {
-              format = 'a';
+              format = ASCII;
             }
             else if (*pstr == "SpreadSheet") {
-              format = 's';
+              format = SPREADSHEET;
             }
             else {
               status = false;
@@ -3544,7 +3459,8 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = NULL , format = 'a';
+  char *file_name = NULL;
+  output_format format = ASCII;
   bool status = true , file_name_option = false , format_option = false;
   register int i;
   int nb_required , type;
@@ -3594,7 +3510,7 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
     if (i == NUMERIC + 1) {
       status = false;
       genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "VarianceAnalysis" , 4 ,
-                  "ORDINAL(O) or NUMERIC(N)");
+                  "ORDINAL(O) or NUMERIC(Nu)");
     }
   }
 
@@ -3650,10 +3566,10 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
 
             if (*pstr == "ASCII") {
-              format = 'a';
+              format = ASCII;
             }
             else if (*pstr == "SpreadSheet") {
-              format = 's';
+              format = SPREADSHEET;
             }
             else {
               status = false;
@@ -3759,7 +3675,7 @@ AMObj STAT_Regression(const AMObjVector &args)
   }
 
   else if (*pstr == "MovingAverage") {
-    char algorithm = 'a';
+    moving_average_method algorithm = AVERAGING;
     register int i;
     int nb_required , nb_point = I_DEFAULT , int_sum , *int_filter;
     double sum , *filter;
@@ -3885,10 +3801,10 @@ AMObj STAT_Regression(const AMObjVector &args)
       else {
         pstr = (AMString*)args[nb_required + 1].val.p;
         if (*pstr == "Averaging") {
-          algorithm = 'a';
+          algorithm = AVERAGING;
         }
         else if (*pstr == "LeastSquares") {
-          algorithm = 's';
+          algorithm = LEAST_SQUARES;
         }
         else {
           status = false;
@@ -4007,8 +3923,9 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
   bool status = true , max_lag_option = false , type_option = false , normalization_option = false ,
        individual_mean_option = false , individual_mean = false;
   register int i;
-  int nb_required , nb_variable , variable1 = 0 , variable2 , max_lag = I_DEFAULT ,
-      type = PEARSON , normalization = EXACT;
+  int nb_required , nb_variable , variable1 = 0 , variable2 , max_lag = I_DEFAULT;
+  correlation_normalization normalization = EXACT;
+  correlation_type type = PEARSON;
   const Sequences *seq;
   Correlation *correl;
   StatError error;
@@ -4439,7 +4356,8 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
   RWCString *pstr;
   bool status = true , max_lag_option = false , type_option = false;
   register int i;
-  int nb_required , nb_variable , variable , max_lag = I_DEFAULT , type = PEARSON;
+  int nb_required , nb_variable , variable , max_lag = I_DEFAULT;
+  correlation_type type = PEARSON;
   const Sequences *seq;
   Correlation *correl;
   StatError error;
@@ -4613,8 +4531,9 @@ AMObj STAT_Segmentation(const AMObjVector &args)
   RWCString *pstr;
   bool status = true , sequence_option = false , output_option = false;
   register int i , j;
-  int nb_required , nb_sequence , nb_variable , identifier = I_DEFAULT , output ,
-      *model_type , *nb_segment;
+  int nb_required , nb_sequence , nb_variable , identifier = I_DEFAULT , *nb_segment;
+  sequence_type output;
+  segment_model *model_type;
   const Sequences *iseq;
   Sequences *seq;
   MarkovianSequences *markovian_seq;
@@ -4658,7 +4577,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
       status = false;
     }
 
-    model_type = new int[nb_variable];
+    model_type = new segment_model[nb_variable];
 
     for (i = 0;i < nb_variable;i++) {
       if (args[i + 2].tag() != AMObjType::STRING) {
@@ -4842,7 +4761,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
     // argument obligatoire
 
-    model_type = new int[nb_variable];
+    model_type = new segment_model[nb_variable];
 
     for (i = 0;i < nb_variable;i++) {
       if (args[i + 3].tag() != AMObjType::STRING) {
@@ -4967,7 +4886,8 @@ AMObj STAT_Segmentation(const AMObjVector &args)
     if (args[2].tag() == AMObjType::INTEGER) {
       bool criterion_option = false , penalty_shape_option = false , min_nb_segment_option = false ,
            nb_segment_option = false , nb_segment_estimation = true;
-      int criterion = LIKELIHOOD_SLOPE , penalty_shape = 2 , min_nb_segment = 0;
+      int penalty_shape = 2 , min_nb_segment = 0;
+      model_selection_criterion criterion = LIKELIHOOD_SLOPE;
 
 
       CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
@@ -5408,13 +5328,17 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = NULL , format = 'a';
+  char *file_name = NULL;
   bool status = true , begin_option = false , begin = false , estimator_option = false ,
-       file_name_option = false , format_option = false;
+       file_name_option = false;
   register int i;
-  int nb_required , estimator = MAXIMUM_LIKELIHOOD;
+  int nb_required;
+  transition_estimator estimator = MAXIMUM_LIKELIHOOD;
   const MarkovianSequences *seq;
   StatError error;
+
+//  output_format format = ASCII;
+//  bool format_option = false;
 
 
   nb_required = 2;
@@ -5573,10 +5497,10 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
 
             if (*pstr == "ASCII") {
-              format = 'a';
+              format = ASCII;
             }
             else if (*pstr == "SpreadSheet") {
-              format = 's';
+              format = SPREADSHEET;
             }
             else {
               status = false;
@@ -5825,7 +5749,7 @@ AMObj STAT_LumpabilityTest(const AMObjVector &args)
 
 {
   bool status = true;
-  int nb_required , order = 1 , nb_symbol , *symbol = NULL;
+  int nb_required , order = 1 , nb_category , *category = NULL;
   const MarkovianSequences *seq;
   StatError error;
 
@@ -5859,7 +5783,7 @@ AMObj STAT_LumpabilityTest(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  nb_symbol = seq->get_marginal_distribution(0)->nb_value;
+  nb_category = seq->get_marginal_distribution(0)->nb_value;
 
   if (args[1].tag() != AMObjType::ARRAY) {
     status = false;
@@ -5867,8 +5791,8 @@ AMObj STAT_LumpabilityTest(const AMObjVector &args)
                 args[1].tag.string().data() , "ARRAY");
   }
   else {
-    symbol = buildIntArray(args , 1 , "LumpabilityTest" , 2 , nb_symbol);
-    if (!symbol) {
+    category = buildIntArray(args , 1 , "LumpabilityTest" , 2 , nb_category);
+    if (!category) {
       status = false;
     }
   }
@@ -5900,12 +5824,12 @@ AMObj STAT_LumpabilityTest(const AMObjVector &args)
   }
 
   if (!status) {
-    delete [] symbol;
+    delete [] category;
     return AMObj(AMObjType::ERROR);
   }
 
-  status = seq->lumpability_test(error , AMLOUTPUT , symbol , order);
-  delete [] symbol;
+  status = seq->lumpability_test(error , AMLOUTPUT , category , order);
+  delete [] category;
 
   if (status) {
     return AMObj(AMObjType::VOID);
