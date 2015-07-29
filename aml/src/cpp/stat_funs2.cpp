@@ -231,7 +231,7 @@ AMObj STAT_Distribution(const AMObjVector &args)
     StatError error;
 
 
-    dist = discrete_parametric_ascii_read(error , ((AMString*)args[0].val.p)->data());
+    dist = DiscreteParametricModel::ascii_read(error , ((AMString*)args[0].val.p)->data());
 
     if (dist) {
       STAT_model* model = new STAT_model(dist);
@@ -248,7 +248,8 @@ AMObj STAT_Distribution(const AMObjVector &args)
     RWCString *pstr;
     bool status = true;
     register int i;
-    int ident , inf_bound , sup_bound;
+    discrete_parametric ident;
+    int inf_bound , sup_bound;
     double parameter , probability;
     DiscreteParametricModel *dist;
 
@@ -257,7 +258,7 @@ AMObj STAT_Distribution(const AMObjVector &args)
     for (i = BINOMIAL;i <= UNIFORM;i++) {
       if ((*pstr == STAT_discrete_distribution_word[i]) ||
           (*pstr == STAT_discrete_distribution_letter[i])) {
-        ident = i;
+        ident = (discrete_parametric)i;
         break;
       }
     }
@@ -324,7 +325,7 @@ AMObj STAT_DiscreteMixture(const AMObjVector &args)
                 genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "DiscreteMixture" ,
                             args[0].tag.string().data() , "STRING"));
 
-    mixt = discrete_mixture_ascii_read(error , ((AMString*)args[0].val.p)->data());
+    mixt = DiscreteMixture::ascii_read(error , ((AMString*)args[0].val.p)->data());
   }
 
   else {
@@ -373,7 +374,7 @@ AMObj STAT_DiscreteMixture(const AMObjVector &args)
     }
 
     if (status) {
-      mixt = discrete_mixture_building(error , nb_component , weight , component);
+      mixt = DiscreteMixture::building(error , nb_component , weight , component);
     }
 
     for (i = 0;i < nb_component;i++) {
@@ -421,7 +422,7 @@ AMObj STAT_Convolution(const AMObjVector &args)
                 genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Convolution" ,
                             args[0].tag.string().data() , "STRING"));
 
-    convol = convolution_ascii_read(error , ((AMString*)args[0].val.p)->data());
+    convol = Convolution::ascii_read(error , ((AMString*)args[0].val.p)->data());
   }
 
   else {
@@ -458,7 +459,7 @@ AMObj STAT_Convolution(const AMObjVector &args)
     }
 
     if (status) {
-      convol = convolution_building(error , nb_dist , dist);
+      convol = Convolution::building(error , nb_dist , dist);
     }
 
     for (i = 0;i < nb_dist;i++) {
@@ -506,7 +507,7 @@ AMObj STAT_Compound(const AMObjVector &args)
                 genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "Compound" ,
                             args[0].tag.string().data() , "STRING"));
 
-    cdist = compound_ascii_read(error , ((AMString*)args[0].val.p)->data());
+    cdist = Compound::ascii_read(error , ((AMString*)args[0].val.p)->data());
   }
 
   else {
@@ -645,7 +646,7 @@ AMObj STAT_FrequencyDistribution(const AMObjVector &args)
     StatError error;
 
 
-    histo = frequency_distribution_ascii_read(error , ((AMString*)args[0].val.p)->data());
+    histo = DiscreteDistributionData::ascii_read(error , ((AMString*)args[0].val.p)->data());
 
     if (histo) {
       STAT_model* model = new STAT_model(histo);
@@ -704,7 +705,7 @@ AMObj STAT_Mixture(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  mixt = mixture_ascii_read(error , ((AMString*)args[0].val.p)->data());
+  mixt = Mixture::ascii_read(error , ((AMString*)args[0].val.p)->data());
 
   if (mixt) {
     STAT_model* model = new STAT_model(mixt);
@@ -1161,7 +1162,7 @@ AMObj STAT_Vectors(const AMObjVector &args)
     CHECKCONDVA(args.length() == 1 ,
                 genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "Vectors"));
 
-    vec = vectors_ascii_read(error , ((AMString*)args[0].val.p)->data());
+    vec = Vectors::ascii_read(error , ((AMString*)args[0].val.p)->data());
 
     if (vec) {
       STAT_model* model = new STAT_model(vec);
@@ -1194,8 +1195,9 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
   RWCString *pstr;
   bool status;
   register int i , j;
-  int nb_required , scale , nb_variable , distance_type = ABSOLUTE_VALUE ,
-      variable_type[VECTOR_NB_VARIABLE];
+  int nb_required , scale , nb_variable;
+  variable_type var_type[VECTOR_NB_VARIABLE];
+  metric distance_type = ABSOLUTE_VALUE;
   double *weight;
   VectorDistance *vector_dist;
   StatError error;
@@ -1210,7 +1212,7 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
 
   if (args[0].tag() == AMObjType::STRING) {
     pstr = (AMString*)args[0].val.p;
-    for (i = SYMBOLIC;i <= NUMERIC;i++) {
+    for (i = NOMINAL;i <= NUMERIC;i++) {
       if ((*pstr == STAT_variable_type_word[i]) || (*pstr == STAT_variable_type_letter[i])) {
         break;
       }
@@ -1220,7 +1222,7 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
       CHECKCONDVA(args.length() == 1 ,
                   genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "VectorDistance"));
 
-      vector_dist = vector_distance_ascii_read(error , ((AMString*)args[0].val.p)->data());
+      vector_dist = VectorDistance::ascii_read(error , ((AMString*)args[0].val.p)->data());
 
       if (vector_dist) {
         STAT_model* model = new STAT_model(vector_dist);
@@ -1287,9 +1289,9 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
 
     else {
       pstr = (AMString*)args[(i + 1) * scale - 1].val.p;
-      for (j = SYMBOLIC;j <= NUMERIC;j++) {
+      for (j = NOMINAL;j <= NUMERIC;j++) {
         if ((*pstr == STAT_variable_type_word[j]) || (*pstr == STAT_variable_type_letter[j])) {
-          variable_type[i] = j;
+          var_type[i] = (variable_type)j;
           break;
         }
       }
@@ -1297,7 +1299,7 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
       if (j == NUMERIC + 1) {
         status = false;
         genAMLError(ERRORMSG(VARIABLE_TYPE_sds) , "VectorDistance" , (i + 1) * scale ,
-                    "SYMBOLIC(S) or ORDINAL(O) or NUMERIC(N)");
+                    "NOMINAL(No) or ORDINAL(O) or NUMERIC(Nu)");
       }
     }
   }
@@ -1327,7 +1329,7 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + 1].val.p;
       for (j = ABSOLUTE_VALUE;j <= QUADRATIC;j++) {
         if (*pstr == STAT_distance_word[j]) {
-          distance_type = j;
+          distance_type = (metric)j;
           break;
         }
       }
@@ -1345,7 +1347,7 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  vector_dist = new VectorDistance(nb_variable , variable_type , weight , distance_type);
+  vector_dist = new VectorDistance(nb_variable , var_type , weight , distance_type);
   delete [] weight;
 
   STAT_model* model = new STAT_model(vector_dist);
@@ -1365,10 +1367,11 @@ AMObj STAT_Renewal(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char type = 'e';
+  process_type type = EQUILIBRIUM;
   bool status = true , type_option = false , time_option = false , scale_option = false;
   register int i;
-  int nb_required , time = DEFAULT_TIME , ident , inf_bound , sup_bound;
+  discrete_parametric ident;
+  int nb_required , time = DEFAULT_TIME , inf_bound , sup_bound;
   double parameter , probability , scaling_coeff;
   const DiscreteParametric *inter_event , *scaled_inter_event;
   Renewal *renew;
@@ -1390,7 +1393,7 @@ AMObj STAT_Renewal(const AMObjVector &args)
       for (i = BINOMIAL;i <= NEGATIVE_BINOMIAL;i++) {
         if ((*pstr == STAT_discrete_distribution_word[i]) ||
             (*pstr == STAT_discrete_distribution_letter[i])) {
-          ident = i;
+          ident = (discrete_parametric)i;
           break;
         }
       }
@@ -1489,10 +1492,10 @@ AMObj STAT_Renewal(const AMObjVector &args)
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "Ordinary") {
-              type = 'o';
+              type = ORDINARY;
             }
             else if (*pstr == "Equilibrium") {
-              type = 'e';
+              type = EQUILIBRIUM;
             }
             else {
               status = false;
@@ -1582,7 +1585,7 @@ AMObj STAT_Renewal(const AMObjVector &args)
 
   if (args[0].tag() == AMObjType::STRING) {
     if (nb_required == 1) {
-      renew = renewal_ascii_read(error , ((AMString*)args[0].val.p)->data() , type , time);
+      renew = Renewal::ascii_read(error , ((AMString*)args[0].val.p)->data() , type , time);
     }
 
     else {
@@ -1592,19 +1595,19 @@ AMObj STAT_Renewal(const AMObjVector &args)
       if (scale_option) {
         // scaled_inter_event = new DiscreteParametric(*inter_event , scaling_coeff);
         scaled_inter_event = new DiscreteParametric((Distribution&)*inter_event , scaling_coeff);
-        renew = renewal_building(error , *scaled_inter_event , type , time);
+        renew = Renewal::building(error , *scaled_inter_event , type , time);
         delete scaled_inter_event;
       }
 
       else {
-        renew = renewal_building(error , *inter_event , type , time);
+        renew = Renewal::building(error , *inter_event , type , time);
       }
       delete inter_event;
     }
   }
 
   else {
-    renew = renewal_building(error , *inter_event , type , time);
+    renew = Renewal::building(error , *inter_event , type , time);
     delete inter_event;
   }
 
@@ -1828,7 +1831,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
                 genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , 2 ,
                             args[1].tag.string().data() , "INT"));
 
-    timev = build_time_events(error , *nb_event , args[1].val.i);
+    timev = TimeEvents::building(error , *nb_event , args[1].val.i);
 
     if (timev) {
       STAT_model* model = new STAT_model(timev);
@@ -1845,7 +1848,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
     CHECKCONDVA(args.length() == 1 ,
                 genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "TimeEvents"));
 
-    timev = time_events_ascii_read(error , ((AMString*)args[0].val.p)->data());
+    timev = TimeEvents::ascii_read(error , ((AMString*)args[0].val.p)->data());
 
     if (timev) {
       STAT_model* model = new STAT_model(timev);
@@ -2021,7 +2024,7 @@ AMObj STAT_VariableOrderMarkov(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  markov = variable_order_markov_ascii_read(error , ((AMString*)args[0].val.p)->data() , length);
+  markov = VariableOrderMarkov::ascii_read(error , ((AMString*)args[0].val.p)->data() , length);
 
   if (markov) {
     STAT_model* model = new STAT_model(markov);
@@ -2093,7 +2096,7 @@ AMObj STAT_HiddenVariableOrderMarkov(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  hmarkov = hidden_variable_order_markov_ascii_read(error , ((AMString*)args[0].val.p)->data() , length);
+  hmarkov = HiddenVariableOrderMarkov::ascii_read(error , ((AMString*)args[0].val.p)->data() , length);
 
   if (hmarkov) {
     STAT_model* model = new STAT_model(hmarkov);
@@ -2212,7 +2215,7 @@ AMObj STAT_SemiMarkov(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  smarkov = semi_markov_ascii_read(error , ((AMString*)args[0].val.p)->data() ,
+  smarkov = SemiMarkov::ascii_read(error , ((AMString*)args[0].val.p)->data() ,
                                    length , counting_flag);
 
   if (smarkov) {
@@ -2371,9 +2374,9 @@ AMObj STAT_HiddenSemiMarkov(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  hsmarkov = hidden_semi_markov_ascii_read(error , ((AMString*)args[0].val.p)->data() ,
-                                           length , counting_flag , OCCUPANCY_THRESHOLD ,
-                                           old_format);
+  hsmarkov = HiddenSemiMarkov::ascii_read(error , ((AMString*)args[0].val.p)->data() ,
+                                          length , counting_flag , OCCUPANCY_THRESHOLD ,
+                                          old_format);
 
   if (hsmarkov) {
     STAT_model* model = new STAT_model(hsmarkov);
@@ -2445,7 +2448,7 @@ AMObj STAT_NonhomogeneousMarkov(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  markov = nonhomogeneous_markov_ascii_read(error , ((AMString*)args[0].val.p)->data() , length);
+  markov = NonhomogeneousMarkov::ascii_read(error , ((AMString*)args[0].val.p)->data() , length);
 
   if (markov) {
     STAT_model* model = new STAT_model(markov);
@@ -2863,7 +2866,8 @@ AMObj STAT_Sequences(const AMObjVector &args)
     RWCString *pstr;
     bool status = true , index_parameter_option = false , identifier_option = false;
     register int i , j;
-    int nb_required , nb_sequence , index_parameter_type = IMPLICIT_TYPE , *identifier = NULL;
+    int nb_required , nb_sequence , *identifier = NULL;
+    index_parameter_type index_param_type = IMPLICIT_TYPE;
 
 
     nb_required = 1;
@@ -2939,10 +2943,10 @@ AMObj STAT_Sequences(const AMObjVector &args)
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
 
               if (*pstr == "Position") {
-                index_parameter_type = POSITION;
+                index_param_type = POSITION;
               }
               else if (*pstr == "Time") {
-                index_parameter_type = TIME;
+                index_param_type = TIME;
               }
               else {
                 status = false;
@@ -3045,7 +3049,7 @@ AMObj STAT_Sequences(const AMObjVector &args)
             type = type_determination(seq_array , "Sequences");
           }
           if (type == INT_VALUE) {
-            int_sequence[i] = buildIntArraySequence(seq_array , length[i] , index_parameter_type ,
+            int_sequence[i] = buildIntArraySequence(seq_array , length[i] , index_param_type ,
                                                     nb_variable , i , "Sequences");
           }
           else if (type == REAL_VALUE) {
@@ -3084,12 +3088,12 @@ AMObj STAT_Sequences(const AMObjVector &args)
       }
 
       if (status) {
-        if (index_parameter_type != IMPLICIT_TYPE) {
+        if (index_param_type != IMPLICIT_TYPE) {
           nb_variable--;
         }
 
         if (type == INT_VALUE) {
-          seq = new Sequences(nb_sequence , identifier , length , index_parameter_type ,
+          seq = new Sequences(nb_sequence , identifier , length , index_param_type ,
                               nb_variable , INT_VALUE , int_sequence);
         }
         else {
@@ -3215,7 +3219,7 @@ AMObj STAT_Sequences(const AMObjVector &args)
       }
     }
 
-    seq = sequences_ascii_read(error , ((AMString*)args[0].val.p)->data() , old_format);
+    seq = Sequences::ascii_read(error , ((AMString*)args[0].val.p)->data() , old_format);
 
     if (seq) {
       markovian_seq = seq->markovian_sequences(error);
