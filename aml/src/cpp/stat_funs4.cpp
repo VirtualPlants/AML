@@ -258,7 +258,8 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
        nb_component_option = false , nb_component_estimation = false , criterion_option = false ,
        estimate[DISCRETE_MIXTURE_NB_COMPONENT];
   register int i , j;
-  int nb_component , nb_required , min_inf_bound = 0 , criterion = BICc , ident[DISCRETE_MIXTURE_NB_COMPONENT];
+  int nb_component , nb_required , min_inf_bound = 0 , ident[DISCRETE_MIXTURE_NB_COMPONENT];
+  model_selection_criterion criterion = BICc;
   const DiscreteParametric *pcomponent[DISCRETE_MIXTURE_NB_COMPONENT];
   DiscreteMixture *imixt , *mixt;
   StatError error;
@@ -492,7 +493,7 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             for (j = AIC;j <= BICc;j++) {
               if (*pstr == STAT_criterion_word[j]) {
-                criterion = j;
+                criterion = (model_selection_criterion)j;
                 break;
               }
             }
@@ -585,8 +586,10 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
        min_inf_bound_option = false , nb_iteration_option = false , penalty_option = false ,
        weight_option = false , outside_option = false;
   register int i;
-  int nb_required , estimator = LIKELIHOOD , min_inf_bound = 0 , nb_iter = I_DEFAULT ,
-      penalty = SECOND_DIFFERENCE , outside = ZERO;
+  int nb_required , min_inf_bound = 0 , nb_iter = I_DEFAULT;
+  estimation_criterion estimator = LIKELIHOOD;
+  penalty_type pen_type = SECOND_DIFFERENCE;
+  side_effect outside = ZERO;
   double weight = D_DEFAULT;
   const DiscreteParametric *known_dist = NULL , *unknown_dist = NULL;
   Convolution *convol;
@@ -776,13 +779,13 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "FirstDifference") {
-              penalty = FIRST_DIFFERENCE;
+              pen_type = FIRST_DIFFERENCE;
             }
             else if (*pstr == "SecondDifference") {
-              penalty = SECOND_DIFFERENCE;
+              pen_type = SECOND_DIFFERENCE;
             }
             else if (*pstr == "Entropy") {
-              penalty = ENTROPY;
+              pen_type = ENTROPY;
             }
             else {
               status = false;
@@ -900,11 +903,11 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
   if (status) {
     if (unknown_dist) {
       convol = histo->convolution_estimation(error , AMLOUTPUT , *known_dist , *unknown_dist ,
-                                             estimator , nb_iter , weight , penalty , outside);
+                                             estimator , nb_iter , weight , pen_type , outside);
     }
     else {
       convol = histo->convolution_estimation(error , AMLOUTPUT , *known_dist , min_inf_bound ,
-                                             estimator , nb_iter , weight , penalty , outside);
+                                             estimator , nb_iter , weight , pen_type , outside);
     }
   }
 
@@ -937,13 +940,15 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
 
 {
   RWCString *pstr;
-  char type = 'v';
+  compound_distribution type;
   bool status = true , estimator_option = false , initial_distribution_option = false ,
        min_inf_bound_option = false , nb_iteration_option = false , penalty_option = false ,
        weight_option = false , outside_option = false;
   register int i;
-  int nb_required , estimator = LIKELIHOOD , min_inf_bound = 0 , nb_iter = I_DEFAULT ,
-      penalty = SECOND_DIFFERENCE , outside = ZERO;
+  int nb_required , min_inf_bound = 0 , nb_iter = I_DEFAULT;
+  estimation_criterion estimator = LIKELIHOOD;
+  penalty_type pen_type = SECOND_DIFFERENCE;
+  side_effect outside = ZERO;
   double weight = D_DEFAULT;
   const DiscreteParametric *known_dist = NULL , *unknown_dist = NULL;
   Compound *cdist;
@@ -988,10 +993,10 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
   else {
     pstr = (AMString*)args[3].val.p;
     if (*pstr == "Sum") {
-      type = 's';
+      type = SUM;
     }
     else if (*pstr == "Elementary") {
-      type = 'e';
+      type = ELEMENTARY;
     }
     else {
       status = false;
@@ -1152,13 +1157,13 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "FirstDifference") {
-              penalty = FIRST_DIFFERENCE;
+              pen_type = FIRST_DIFFERENCE;
             }
             else if (*pstr == "SecondDifference") {
-              penalty = SECOND_DIFFERENCE;
+              pen_type = SECOND_DIFFERENCE;
             }
             else if (*pstr == "Entropy") {
-              penalty = ENTROPY;
+              pen_type = ENTROPY;
             }
             else {
               status = false;
@@ -1276,20 +1281,20 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
   if (status) {
     if (unknown_dist) {
       switch (type) {
-      case 's' :
+      case SUM :
         cdist = histo->compound_estimation(error , AMLOUTPUT , *unknown_dist , *known_dist , type ,
-                                           estimator , nb_iter , weight , penalty , outside);
+                                           estimator , nb_iter , weight , pen_type , outside);
         break;
-      case 'e' :
+      case ELEMENTARY :
         cdist = histo->compound_estimation(error , AMLOUTPUT , *known_dist , *unknown_dist , type ,
-                                           estimator , nb_iter , weight , penalty , outside);
+                                           estimator , nb_iter , weight , pen_type , outside);
         break;
       }
     }
 
     else {
       cdist = histo->compound_estimation(error , AMLOUTPUT , *known_dist , type , min_inf_bound ,
-                                         estimator , nb_iter , weight , penalty , outside);
+                                         estimator , nb_iter , weight , pen_type , outside);
     }
   }
 
@@ -1621,7 +1626,8 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
 
   else if (args[2].tag() == AMObjType::INTEGER) {
     bool variance_factor_option = false , tied_location_option = false , tied_location = true;
-    int ident , variance_factor = SCALING_FACTOR;
+    int ident;
+    tying_rule variance_factor = SCALING_FACTOR;
     double mean , standard_deviation;
 
 
@@ -1997,8 +2003,11 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
        nb_iteration_option = false , inter_event_mean_option = false , penalty_option = false ,
        weight_option = false , outside_option = false;
   register int i;
-  int nb_required , estimator = LIKELIHOOD , nb_iter = I_DEFAULT ,
-      mean_computation_method = COMPUTED , penalty = SECOND_DIFFERENCE , outside = ZERO;
+  int nb_required , nb_iter = I_DEFAULT;
+  estimation_criterion estimator = LIKELIHOOD;
+  duration_distribution_mean_estimator mean_estimator = COMPUTED;
+  penalty_type pen_type = SECOND_DIFFERENCE;
+  side_effect outside = ZERO;
   double weight = D_DEFAULT;
   const DiscreteParametric *iinter_event = NULL;
   DiscreteParametricModel *inter_event = NULL;
@@ -2175,17 +2184,17 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "Computed") {
-              mean_computation_method = COMPUTED;
+              mean_estimator = COMPUTED;
             }
             else if (*pstr == "Estimated") {
-              mean_computation_method = ESTIMATED;
+              mean_estimator = ESTIMATED;
             }
             else if (*pstr == "OneStepLate") {
-              mean_computation_method = ONE_STEP_LATE;
+              mean_estimator = ONE_STEP_LATE;
             }
             else {
               status = false;
-              genAMLError(ERRORMSG(MEAN_COMPUTATION_METHOD_sds) , "Estimate" ,
+              genAMLError(ERRORMSG(MEAN_ESTIMATION_METHOD_sds) , "Estimate" ,
                           nb_required + i + 1 , "Computed or Estimated or OneStepLate");
             }
           }
@@ -2214,13 +2223,13 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "FirstDifference") {
-              penalty = FIRST_DIFFERENCE;
+              pen_type = FIRST_DIFFERENCE;
             }
             else if (*pstr == "SecondDifference") {
-              penalty = SECOND_DIFFERENCE;
+              pen_type = SECOND_DIFFERENCE;
             }
             else if (*pstr == "Entropy") {
-              penalty = ENTROPY;
+              pen_type = ENTROPY;
             }
             else {
               status = false;
@@ -2315,10 +2324,10 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
 
   if (estimator == PENALIZED_LIKELIHOOD) {
     if (!inter_event_mean_option) {
-      mean_computation_method = ONE_STEP_LATE;
+      mean_estimator = ONE_STEP_LATE;
     }
 
-    else if (mean_computation_method == COMPUTED) {
+    else if (mean_estimator == COMPUTED) {
       status = false;
       genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Estimate" , "Estimator" , "InterEventMean");
     }
@@ -2350,16 +2359,16 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
                                                                                                               *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[1].val.p)->pt)) ,
                                                                                                               *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[2].val.p)->pt)) ,
                                                                                                               histo , *iinter_event , estimator ,
-                                                                                                              nb_iter , mean_computation_method ,
-                                                                                                              weight , penalty , outside);
+                                                                                                              nb_iter , mean_estimator ,
+                                                                                                              weight , pen_type , outside);
       }
       else {
         inter_event = ((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt))->estimation(error , AMLOUTPUT ,
                                                                                                               *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[1].val.p)->pt)) ,
                                                                                                               *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[2].val.p)->pt)) ,
                                                                                                               histo , estimator ,
-                                                                                                              nb_iter , mean_computation_method ,
-                                                                                                              weight , penalty , outside);
+                                                                                                              nb_iter , mean_estimator ,
+                                                                                                              weight , pen_type , outside);
       }
       break;
     }
@@ -2368,13 +2377,13 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
       if (iinter_event) {
         renew = ((RenewalData*)((STAT_model*)args[0].val.p)->pt)->estimation(error , AMLOUTPUT ,
                                                                              *iinter_event , estimator ,
-                                                                             nb_iter , mean_computation_method ,
-                                                                             weight , penalty , outside);
+                                                                             nb_iter , mean_estimator ,
+                                                                             weight , pen_type , outside);
       }
       else {
         renew = ((RenewalData*)((STAT_model*)args[0].val.p)->pt)->estimation(error , AMLOUTPUT , estimator ,
-                                                                             nb_iter , mean_computation_method ,
-                                                                             weight , penalty , outside);
+                                                                             nb_iter , mean_estimator ,
+                                                                             weight , pen_type , outside);
       }
       break;
     }
@@ -2414,14 +2423,18 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char type = 'v';
+  process_type type = DEFAULT_TYPE;
   bool status = true , estimator_option = false , nb_iteration_option = false ,
        initial_inter_event_option = false , equilibrium_estimator_option = false ,
        inter_event_mean_option = false , penalty_option = false , weight_option = false ,
        outside_option = false;
   register int i;
-  int nb_required , estimator = LIKELIHOOD , nb_iter = I_DEFAULT , equilibrium_estimator = COMPLETE_LIKELIHOOD ,
-      mean_computation_method = COMPUTED , penalty = SECOND_DIFFERENCE , outside = ZERO;
+  int nb_required , nb_iter = I_DEFAULT;
+  estimation_criterion estimator = LIKELIHOOD;
+  censoring_estimator equilibrium_estimator = COMPLETE_LIKELIHOOD;
+  duration_distribution_mean_estimator mean_estimator = COMPUTED;
+  penalty_type pen_type = SECOND_DIFFERENCE;
+  side_effect outside = ZERO;
   double weight = D_DEFAULT;
   const DiscreteParametric *inter_event = NULL;
   Renewal *renew;
@@ -2457,10 +2470,10 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
   else {
     pstr = (AMString*)args[1].val.p;
     if (*pstr == "Ordinary") {
-      type = 'o';
+      type = ORDINARY;
     }
     else if (*pstr == "Equilibrium") {
-      type = 'e';
+      type = EQUILIBRIUM;
     }
     else {
       status = false;
@@ -2633,17 +2646,17 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "Computed") {
-              mean_computation_method = COMPUTED;
+              mean_estimator = COMPUTED;
             }
             else if (*pstr == "Estimated") {
-              mean_computation_method = ESTIMATED;
+              mean_estimator = ESTIMATED;
             }
             else if (*pstr == "OneStepLate") {
-              mean_computation_method = ONE_STEP_LATE;
+              mean_estimator = ONE_STEP_LATE;
             }
             else {
               status = false;
-              genAMLError(ERRORMSG(MEAN_COMPUTATION_METHOD_sds) , "Estimate" ,
+              genAMLError(ERRORMSG(MEAN_ESTIMATION_METHOD_sds) , "Estimate" ,
                           nb_required + i + 1 , "Computed or Estimated or OneStepLate");
             }
           }
@@ -2672,13 +2685,13 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "FirstDifference") {
-              penalty = FIRST_DIFFERENCE;
+              pen_type = FIRST_DIFFERENCE;
             }
             else if (*pstr == "SecondDifference") {
-              penalty = SECOND_DIFFERENCE;
+              pen_type = SECOND_DIFFERENCE;
             }
             else if (*pstr == "Entropy") {
-              penalty = ENTROPY;
+              pen_type = ENTROPY;
             }
             else {
               status = false;
@@ -2771,7 +2784,7 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
     }
   }
 
-  if (type != 'e') {
+  if (type != EQUILIBRIUM) {
     if (equilibrium_estimator_option) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Equilibrium_Estimator");
@@ -2785,10 +2798,10 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
 
   if (estimator == PENALIZED_LIKELIHOOD) {
     if (!inter_event_mean_option) {
-      mean_computation_method = ONE_STEP_LATE;
+      mean_estimator = ONE_STEP_LATE;
     }
 
-    else if (mean_computation_method == COMPUTED) {
+    else if (mean_estimator == COMPUTED) {
       status = false;
       genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Estimate" , "Estimator" , "InterEventMean");
     }
@@ -2814,13 +2827,13 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
   if (status) {
     if (inter_event) {
       renew = timev->estimation(error , AMLOUTPUT , type , *inter_event , estimator ,
-                                nb_iter , equilibrium_estimator , mean_computation_method ,
-                                weight , penalty , outside);
+                                nb_iter , equilibrium_estimator , mean_estimator ,
+                                weight , pen_type , outside);
     }
     else {
       renew = timev->estimation(error , AMLOUTPUT , type , estimator , nb_iter ,
-                                equilibrium_estimator , mean_computation_method , weight ,
-                                penalty , outside);
+                                equilibrium_estimator , mean_estimator , weight ,
+                                pen_type , outside);
     }
   }
 
@@ -2868,11 +2881,13 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
   switch (args[2].tag()) {
 
   case AMObjType::STRING : {
-    char type = 'v';
+    process_type type = DEFAULT_TYPE;
     bool algorithm_option = false , estimator_option = false , global_sample_option = false ,
          global_sample = true , min_order_option = false , max_order_option = false ,
          order_estimation = true , threshold_option = false;
-    int algorithm = LOCAL_BIC , estimator = LAPLACE , min_order = 0 , max_order = ORDER;
+    int min_order = 0 , max_order = ORDER;
+    memory_tree_selection algorithm = LOCAL_BIC;
+    transition_estimator estimator = LAPLACE;
     double threshold = LOCAL_BIC_THRESHOLD;
 
 
@@ -2887,10 +2902,10 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
 
     pstr = (AMString*)args[2].val.p;
     if (*pstr == "Ordinary") {
-      type = 'o';
+      type = ORDINARY;
     }
     else if (*pstr == "Equilibrium") {
-      type = 'e';
+      type = EQUILIBRIUM;
     }
     else {
       status = false;
@@ -3206,7 +3221,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
       }
     }
 
-    if ((type == 'e') && (global_initial_transition_option)) {
+    if ((type == EQUILIBRIUM) && (global_initial_transition_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "GlobalInitialTransition");
     }
@@ -3310,7 +3325,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
       }
     }
 
-    if ((((Chain*)imarkov)->type == 'e') && (global_initial_transition_option)) {
+    if ((((Chain*)imarkov)->type == EQUILIBRIUM) && (global_initial_transition_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "GlobalInitialTransition");
     }
@@ -3327,8 +3342,8 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
   case AMObjType::ARRAY : {
     register int j;
     bool order_option = false , criterion_option = false;
-    int nb_symbol = seq->get_marginal_distribution(0)->nb_value , order = 1 ,
-        criterion = BIC , *symbol = NULL;
+    int nb_category = seq->get_marginal_distribution(0)->nb_value , order = 1 , *category = NULL;
+    model_selection_criterion criterion = BIC;
 
 
     CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
@@ -3337,8 +3352,8 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
 
     // argument obligatoire
 
-    symbol = buildIntArray(args , 2 , "Estimate" , 3 , nb_symbol);
-    if (!symbol) {
+    category = buildIntArray(args , 2 , "Estimate" , 3 , nb_category);
+    if (!category) {
       status = false;
     }
 
@@ -3419,7 +3434,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
               for (j = AIC;j <= BIC;j++) {
                 if (*pstr == STAT_criterion_word[j]) {
-                  criterion = j;
+                  criterion = (model_selection_criterion)j;
                   break;
                 }
               }
@@ -3449,13 +3464,13 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
     }
 
     if (!status) {
-      delete [] symbol;
+      delete [] category;
       return AMObj(AMObjType::ERROR);
     }
 
-    markov = seq->lumpability_estimation(error , AMLOUTPUT , symbol , criterion ,
+    markov = seq->lumpability_estimation(error , AMLOUTPUT , category , criterion ,
                                          order , counting_flag);
-    delete [] symbol;
+    delete [] category;
     break;
   }
 
@@ -3488,12 +3503,13 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
 
 {
   RWCString *pstr;
-  char type = 'v';
+  process_type type = DEFAULT_TYPE;
   bool status = true , counting_option = false , counting_flag = true , estimator_option = false ,
        nb_iteration_option = false , occupancy_mean_option = false;
   register int i;
-  int nb_required , estimator = COMPLETE_LIKELIHOOD , nb_iter = I_DEFAULT ,
-      mean_computation_method = COMPUTED;
+  int nb_required , nb_iter = I_DEFAULT;
+  censoring_estimator estimator = COMPLETE_LIKELIHOOD;
+  duration_distribution_mean_estimator mean_estimator = COMPUTED;
   SemiMarkov *smarkov;
   StatError error;
 
@@ -3515,10 +3531,10 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
   else {
     pstr = (AMString*)args[2].val.p;
     if (*pstr == "Ordinary") {
-      type = 'o';
+      type = ORDINARY;
     }
     else if (*pstr == "Equilibrium") {
-      type = 'e';
+      type = EQUILIBRIUM;
     }
     else {
       status = false;
@@ -3642,14 +3658,14 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
           else {
             pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             if (*pstr == "Computed") {
-              mean_computation_method = COMPUTED;
+              mean_estimator = COMPUTED;
             }
             else if (*pstr == "OneStepLate") {
-              mean_computation_method = ONE_STEP_LATE;
+              mean_estimator = ONE_STEP_LATE;
             }
             else {
               status = false;
-              genAMLError(ERRORMSG(MEAN_COMPUTATION_METHOD_sds) , "Estimate" ,
+              genAMLError(ERRORMSG(MEAN_ESTIMATION_METHOD_sds) , "Estimate" ,
                           nb_required + i + 1 , "Computed or OneStepLate");
             }
           }
@@ -3672,7 +3688,7 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
     }
   }
 
-  if ((type != 'e') || (estimator == PARTIAL_LIKELIHOOD)) {
+  if ((type != EQUILIBRIUM) || (estimator == PARTIAL_LIKELIHOOD)) {
     if (nb_iteration_option) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "NbIteration");
@@ -3689,7 +3705,7 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
   }
 
   smarkov = seq->semi_markov_estimation(error , AMLOUTPUT , type , estimator , counting_flag ,
-                                        nb_iter , mean_computation_method);
+                                        nb_iter , mean_estimator);
 
   if (smarkov) {
     STAT_model* model = new STAT_model(smarkov);
@@ -4009,7 +4025,7 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
     }
   }
 
-  if ((ihmarkov) && (((Chain*)ihmarkov)->type == 'e') && (global_initial_transition_option)) {
+  if ((ihmarkov) && (((Chain*)ihmarkov)->type == EQUILIBRIUM) && (global_initial_transition_option)) {
     status = false;
     genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "GlobalInitialTransition");
   }
@@ -4075,9 +4091,10 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
        max_nb_state_sequence_option = false , parameter_option = false , occupancy_mean_option = false ,
        state_sequences_option = false , state_sequence = true;
   register int i;
-  int nb_required , algorithm = EM , estimator = COMPLETE_LIKELIHOOD , nb_iter = I_DEFAULT ,
-      min_nb_state_sequence = MIN_NB_STATE_SEQUENCE , max_nb_state_sequence = MAX_NB_STATE_SEQUENCE ,
-      mean_computation_method = COMPUTED;
+  int nb_required , algorithm = EM , nb_iter = I_DEFAULT , min_nb_state_sequence = MIN_NB_STATE_SEQUENCE ,
+      max_nb_state_sequence = MAX_NB_STATE_SEQUENCE;
+  censoring_estimator estimator = COMPLETE_LIKELIHOOD;
+  duration_distribution_mean_estimator mean_estimator = COMPUTED;
   double parameter = NB_STATE_SEQUENCE_PARAMETER;
   HiddenSemiMarkov *hsmarkov;
   StatError error;
@@ -4087,7 +4104,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
   if ((args[2].tag() == AMObjType::STRING) || (args[2].tag() == AMObjType::INTEGER)) {
-    char type = 'v';
+    process_type type = DEFAULT_TYPE;
     bool left_right , initial_occupancy_mean_option = false;
     int nb_state;
     double occupancy_mean = D_DEFAULT;
@@ -4389,14 +4406,14 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
               if (*pstr == "Computed") {
-                mean_computation_method = COMPUTED;
+                mean_estimator = COMPUTED;
               }
               else if (*pstr == "OneStepLate") {
-                mean_computation_method = ONE_STEP_LATE;
+                mean_estimator = ONE_STEP_LATE;
               }
               else {
                 status = false;
-                genAMLError(ERRORMSG(MEAN_COMPUTATION_METHOD_sds) , "Estimate" ,
+                genAMLError(ERRORMSG(MEAN_ESTIMATION_METHOD_sds) , "Estimate" ,
                             nb_required + i + 1 , "Computed or OneStepLate");
               }
             }
@@ -4473,10 +4490,10 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
     else {
       pstr = (AMString*)args[2].val.p;
       if (*pstr == "Ordinary") {
-        type = 'o';
+        type = ORDINARY;
       }
       else if (*pstr == "Equilibrium") {
-        type = 'e';
+        type = EQUILIBRIUM;
       }
       else {
         status = false;
@@ -4494,13 +4511,13 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
       nb_state = args[3].val.i;
     }
 
-    CHECKCONDVA(((type == 'o') && (nb_required == 5)) ||
-                ((type == 'e') && (nb_required == 4)) ,
+    CHECKCONDVA(((type == ORDINARY) && (nb_required == 5)) ||
+                ((type == EQUILIBRIUM) && (nb_required == 4)) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
     switch (type) {
 
-    case 'o' : {
+    case ORDINARY : {
       if (args[4].tag() != AMObjType::STRING) {
         status = false;
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , 5 ,
@@ -4523,13 +4540,13 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
       break;
     }
 
-    case 'e' : {
+    case EQUILIBRIUM : {
       left_right = false;
       break;
     }
     }
 
-    if (((type != 'e') || (estimator == PARTIAL_LIKELIHOOD) || (algorithm != EM)) &&
+    if (((type != EQUILIBRIUM) || (estimator == PARTIAL_LIKELIHOOD) || (algorithm != EM)) &&
         (occupancy_mean_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "OccupancyMean");
@@ -4544,7 +4561,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
       hsmarkov = seq->hidden_semi_markov_estimation(error , AMLOUTPUT , type , nb_state ,
                                                     left_right , occupancy_mean , common_dispersion ,
                                                     estimator , counting_flag , state_sequence ,
-                                                    nb_iter , mean_computation_method);
+                                                    nb_iter , mean_estimator);
       break;
     case MCEM :
       hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , AMLOUTPUT , type , nb_state ,
@@ -4827,14 +4844,14 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
               if (*pstr == "Computed") {
-                mean_computation_method = COMPUTED;
+                mean_estimator = COMPUTED;
               }
               else if (*pstr == "OneStepLate") {
-                mean_computation_method = ONE_STEP_LATE;
+                mean_estimator = ONE_STEP_LATE;
               }
               else {
                 status = false;
-                genAMLError(ERRORMSG(MEAN_COMPUTATION_METHOD_sds) , "Estimate" ,
+                genAMLError(ERRORMSG(MEAN_ESTIMATION_METHOD_sds) , "Estimate" ,
                             nb_required + i + 1 , "Computed or OneStepLate");
               }
             }
@@ -4897,7 +4914,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Parameter");
     }
-    if ((((ihsmarkov) && (((Chain*)ihsmarkov)->type == 'o')) || (estimator == PARTIAL_LIKELIHOOD) ||
+    if ((((ihsmarkov) && (((Chain*)ihsmarkov)->type == ORDINARY)) || (estimator == PARTIAL_LIKELIHOOD) ||
          (algorithm != EM)) && (occupancy_mean_option)) {
       status = false;
       genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "OccupancyMean");
@@ -4911,7 +4928,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
     case EM :
       hsmarkov = seq->hidden_semi_markov_estimation(error , AMLOUTPUT , *ihsmarkov , common_dispersion ,
                                                     estimator , counting_flag , state_sequence ,
-                                                    nb_iter , mean_computation_method);
+                                                    nb_iter , mean_estimator);
       break;
     case MCEM :
       hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , AMLOUTPUT , *ihsmarkov ,
@@ -4951,7 +4968,8 @@ static AMObj STAT_EstimateNonhomogeneousMarkov(const MarkovianSequences *seq , c
 {
   bool status = true , counting_flag = true;
   register int i , j;
-  int nb_required , nb_state = seq->get_marginal_distribution(0)->nb_value , *ident;
+  int nb_required , nb_state = seq->get_marginal_distribution(0)->nb_value;
+  parametric_function *ident;
   NonhomogeneousMarkov *markov;
   RWCString *pstr;
   StatError error;
@@ -4964,7 +4982,7 @@ static AMObj STAT_EstimateNonhomogeneousMarkov(const MarkovianSequences *seq , c
 
   // arguments obligatoires
 
-  ident = new int[nb_state];
+  ident = new parametric_function[nb_state];
 
   for (i = 0;i < nb_state;i++) {
     if (args[2 + i].tag() != AMObjType::STRING) {
@@ -4976,17 +4994,17 @@ static AMObj STAT_EstimateNonhomogeneousMarkov(const MarkovianSequences *seq , c
     else {
       pstr = (AMString*)args[2 + i].val.p;
       if (*pstr == "VOID") {
-        ident[i] = I_DEFAULT;
+        ident[i] = CONSTANT_FUNCTION;
       }
       else {
-        for (j = 1;j < 3;j++) {
+        for (j = LOGISTIC;j <= MONOMOLECULAR;j++) {
           if (*pstr == STAT_function_word[j]) {
-            ident[i] = j;
+            ident[i] = (parametric_function)j;
             break;
           }
         }
 
-        if (j == 3) {
+        if (j == MONOMOLECULAR + 1) {
           status = false;
           genAMLError(ERRORMSG(FUNCTION_NAME_sds) , "Estimate" , 3 + i ,
                       "VOID or MONOMOLECULAR or LOGISTIC");
