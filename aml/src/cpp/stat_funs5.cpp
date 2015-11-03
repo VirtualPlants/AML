@@ -5120,46 +5120,44 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         }
       }
 
-      if (output_option) {
-        switch (nb_segment_estimation) {
+      switch (nb_segment_estimation) {
 
-        case false : {
-          if ((output == SEGMENTATION_ENTROPY) || (output == SEGMENTATION_DIVERGENCE) ||
-              (output == LOG_LIKELIHOOD_SLOPE)) {
-            status = false;
-            genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
-                        "Sequence or Residual");
-          }
-
-          if (criterion_option) {
-            status = false;
-            genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "Crierion");
-          }
-          if (min_nb_segment_option) {
-            status = false;
-            genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "MinNbSegment");
-          }
-          if (penalty_shape_option) {
-            status = false;
-            genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "PenaltyShape");
-          }
-          break;
+      case false : {
+        if ((output == SEGMENTATION_ENTROPY) || (output == SEGMENTATION_DIVERGENCE) ||
+            (output == LOG_LIKELIHOOD_SLOPE)) {
+          status = false;
+          genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
+                      "Sequence or Residual");
         }
 
-        case true : {
-          if ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL)) {
-            status = false;
-            genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
-                        "Sequence or Entropy or Divergence or LogLikelihoodSlope");
-          }
+        if (criterion_option) {
+          status = false;
+          genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "Crierion");
+        }
+        if (min_nb_segment_option) {
+          status = false;
+          genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "MinNbSegment");
+        }
+        if (penalty_shape_option) {
+          status = false;
+          genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "PenaltyShape");
+        }
+        break;
+      }
 
-          if (continuity_option) {
-            status = false;
-            genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "Continuity");
-          }
-          break;
+      case true : {
+        if ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL)) {
+          status = false;
+          genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
+                      "Sequence or Entropy or Divergence or LogLikelihoodSlope");
         }
+
+        if (continuity_option) {
+          status = false;
+          genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "Continuity");
         }
+        break;
+      }
       }
 
       if (!status) {
