@@ -112,7 +112,7 @@ enum {
  *--------------------------------------------------------------*/
 
 static AMObj STAT_EstimateDistribution(const FrequencyDistribution *histo ,
-                                       int ident , const AMObjVector &args)
+                                       discrete_parametric ident , const AMObjVector &args)
 
 {
   if (ident == CATEGORICAL) {
@@ -258,7 +258,8 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
        nb_component_option = false , nb_component_estimation = false , criterion_option = false ,
        estimate[DISCRETE_MIXTURE_NB_COMPONENT];
   register int i , j;
-  int nb_component , nb_required , min_inf_bound = 0 , ident[DISCRETE_MIXTURE_NB_COMPONENT];
+  int nb_component , nb_required , min_inf_bound = 0;
+  discrete_parametric ident[DISCRETE_MIXTURE_NB_COMPONENT];
   model_selection_criterion criterion = BICc;
   const DiscreteParametric *pcomponent[DISCRETE_MIXTURE_NB_COMPONENT];
   DiscreteMixture *imixt , *mixt;
@@ -290,8 +291,8 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
         if ((*pstr == STAT_discrete_distribution_word[j]) ||
             (*pstr == STAT_discrete_distribution_letter[j])) {
           estimate[i] = true;
-          ident[i] = j;
-          pcomponent[i] = new DiscreteParametric(0 , j);
+          ident[i] = (discrete_parametric)j;
+          pcomponent[i] = new DiscreteParametric(0 , ident[i]);
           break;
         }
       }
@@ -5089,7 +5090,8 @@ AMObj STAT_Estimate(const AMObjVector &args)
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
     RWCString *pstr;
     register int i;
-    int model = I_DEFAULT , ident;
+    int model = I_DEFAULT;
+    discrete_parametric ident;
     const FrequencyDistribution *histo;
 
 
@@ -5121,7 +5123,7 @@ AMObj STAT_Estimate(const AMObjVector &args)
     for (i = CATEGORICAL;i <= NEGATIVE_BINOMIAL;i++) {
       if ((*pstr == STAT_discrete_distribution_word[i]) ||
           (*pstr == STAT_discrete_distribution_letter[i])) {
-        ident = i;
+        ident = (discrete_parametric)i;
         model = STATM_DISTRIBUTION;
         break;
       }
