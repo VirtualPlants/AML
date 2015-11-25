@@ -4948,7 +4948,6 @@ AMObj STAT_Segmentation(const AMObjVector &args)
               }
               else {
                 pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
-
                 if (*pstr == STAT_criterion_word[ICL]) {
                   criterion = ICL;
                 }
@@ -5268,6 +5267,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                             args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
               }
               else {
+                pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
                 if (*pstr == "Sequence") {
                   output = SEQUENCE;
                 }
@@ -5279,7 +5279,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                 }
                 else {
                   status = false;
-                  genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + 1 ,
+                  genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + i + 1 ,
                               "Sequence or Residual");
                 }
               }
