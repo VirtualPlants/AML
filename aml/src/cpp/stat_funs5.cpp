@@ -64,6 +64,7 @@
 #include "aml/stat_module.h"
 
 
+using namespace std;
 using namespace stat_tool;
 using namespace sequence_analysis;
 
@@ -546,7 +547,7 @@ AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = NULL;
+  string file_name = "";
   output_format format = ASCII;
   bool status = true , file_name_option = false , format_option = false;
   register int i;
@@ -650,7 +651,7 @@ AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
                         args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
           }
           else {
-            file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
+            file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
           }
           break;
         }
@@ -815,7 +816,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = NULL , *alignment_file_name = NULL; 
+  string file_name = "" , alignment_file_name = ""; 
   output_format format = ASCII;
   bool status = true , ref_sequence_option = false , test_sequence_option = false , begin_option = false ,
        begin_free = false , end_option = false , end_free = false , file_name_option = false ,
@@ -1013,7 +1014,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                           args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
             }
             else {
-              file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
+              file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
             break;
           }
@@ -1075,7 +1076,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                           args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
             }
             else {
-              alignment_file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
+              alignment_file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
             break;
           }
@@ -1451,7 +1452,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                           args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
             }
             else {
-              file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
+              file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
             break;
           }
@@ -1513,7 +1514,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                           args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
             }
             else {
-              alignment_file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
+              alignment_file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
             break;
           }
@@ -1702,7 +1703,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
 AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
 
 {
-  char *file_name = NULL;
+  string file_name = "";
   bool status = true;
   register int i;
   int nb_required , nb_model;
@@ -1757,7 +1758,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
                     args[nb_required + 1].tag.string().data() , "STRING");
       }
       else {
-        file_name = (char*)((AMString*)args[nb_required + 1].val.p)->data();
+        file_name = (string)((AMString*)args[nb_required + 1].val.p)->data();
       }
     }
 
@@ -1909,7 +1910,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
                           args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
             }
             else {
-              file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
+              file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
             break;
           }
@@ -2022,7 +2023,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
 AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
 
 {
-  char *file_name = NULL;
+  string file_name = "";
   bool status = true;
   register int i;
   int nb_required , nb_model , step , nb_sequence , length;
@@ -2058,7 +2059,7 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
                   args[nb_required + 1].tag.string().data() , "STRING");
     }
     else {
-      file_name = (char*)((AMString*)args[nb_required + 1].val.p)->data();
+      file_name = (string)((AMString*)args[nb_required + 1].val.p)->data();
     }
   }
 
@@ -2739,7 +2740,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
   }
 
   else if (*pstr == "Hierarchy") {
-    char *file_name = NULL;
+    string file_name = "";
     output_format format = ASCII;
     bool algorithm_option = false , criterion_option = false , file_name_option = false ,
          format_option = false;
@@ -2857,7 +2858,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
                           args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
             }
             else {
-              file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
+              file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
             break;
           }
@@ -3179,7 +3180,7 @@ AMObj STAT_ComputeRankCorrelation(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = NULL;
+  string file_name = "";
   bool status = true , type_option = false , file_name_option = false;
   register int i;
   int nb_required;
@@ -3262,7 +3263,7 @@ AMObj STAT_ComputeRankCorrelation(const AMObjVector &args)
                         args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
           }
           else {
-            file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
+            file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
           }
           break;
         }
@@ -3311,7 +3312,7 @@ AMObj STAT_ContingencyTable(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = NULL;
+  string file_name = "";
   output_format format = ASCII;
   bool status = true , file_name_option = false , format_option = false;
   register int i;
@@ -3368,7 +3369,7 @@ AMObj STAT_ContingencyTable(const AMObjVector &args)
                         args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
           }
           else {
-            file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
+            file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
           }
           break;
         }
@@ -3459,7 +3460,7 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = NULL;
+  string file_name = "";
   output_format format = ASCII;
   bool status = true , file_name_option = false , format_option = false;
   register int i;
@@ -3538,7 +3539,7 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
                         args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
           }
           else {
-            file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
+            file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
           }
           break;
         }
@@ -5401,7 +5402,7 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char *file_name = NULL;
+  string file_name = "";
   bool status = true , begin_option = false , begin = false , estimator_option = false ,
        file_name_option = false;
   register int i;
@@ -5542,7 +5543,7 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
                         args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
           }
           else {
-            file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
+            file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
           }
           break;
         }
