@@ -298,6 +298,7 @@ extern AMObj STAT_Thresholding(const AMObjVector &args);
 extern AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args);
 extern AMObj STAT_ComputeStateSequences(const AMObjVector &args);
 extern AMObj STAT_BuildAuxiliaryVariable(const AMObjVector &args);
+extern AMObj STAT_ResidualSequences(const AMObjVector &args);
 
 
 
@@ -385,12 +386,15 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
   RWCString *pstr;
   char view_point = 'v';
   output_sequence_format format = COLUMN;
-  bool status = true , view_point_option = false , detail_option = false ,
-       format_option = false , segmentations_option = false , nb_segmentation_option = false ,
+  bool status = true , view_point_option = false , detail_option = false , format_option = false ,
+       common_contrast_option = false , common_contrast = true , sequence_option = false ,
+       shape_parameter_option = false , segmentations_option = false , nb_segmentation_option = false ,
        state_sequences_option = false , nb_state_sequence_option = false ,
        output_option = false , exhaustive = false;
   register int i , j;
-  int nb_required , nb_segmentation = NB_SEGMENTATION , nb_state_sequence = NB_STATE_SEQUENCE;
+  int nb_required , identifier = I_DEFAULT , nb_segmentation = NB_SEGMENTATION ,
+      nb_state_sequence = NB_STATE_SEQUENCE;
+  double ishape_parameter = 1 , *shape_parameter;
   latent_structure_algorithm segmentation = FORWARD_DYNAMIC_PROGRAMMING;
   latent_structure_algorithm state_sequence = GENERALIZED_VITERBI;
   change_point_profile change_point_output;
@@ -401,7 +405,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
               (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
-              (args.length() == nb_required + 8) ,
+              (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
   // arguments optionnels
@@ -520,6 +524,86 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
                           nb_required + i + 1 , "Column or Line");
             }
           }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "CommonContrast") {
+        switch (common_contrast_option) {
+
+        case false : {
+          common_contrast_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            common_contrast = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "Sequence") {
+        switch (sequence_option) {
+
+        case false : {
+          sequence_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+          }
+          else {
+            identifier = args[nb_required + i * 2 + 1].val.i;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "ShapeParameter") {
+        switch (shape_parameter_option) {
+
+        case false : {
+          shape_parameter_option = true;
+
+          switch (args[nb_required + i * 2 + 1].tag()) {
+          case AMObjType::INTEGER :
+            ishape_parameter = args[nb_required + i * 2 + 1].val.i;
+            break;
+          case AMObjType::REAL :
+            ishape_parameter = args[nb_required + i * 2 + 1].val.r;
+            break;
+          default :
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
+            break;
+          }          
           break;
         }
 
@@ -701,7 +785,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       else {
         status = false;
         genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Display" ,
-                    nb_required + i + 1 , "ViewPoint or Detail or Format or Segmentations or NbSegmentation or StateSequences or NbStateSequence or Output");
+                    nb_required + i + 1 , "ViewPoint or Detail or Format or CommonContrast or Sequence or ShapeParameter or Segmentations or NbSegmentation or StateSequences or NbStateSequence or Output");
       }
     }
   }
@@ -714,7 +798,8 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
     status = false;
     genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Display");
   }
-  if (((segmentations_option) || (nb_segmentation_option)) && ((view_point != 'q') ||
+  if (((common_contrast_option) || (sequence_option) || (shape_parameter_option) ||
+       (segmentations_option) || (nb_segmentation_option)) && ((view_point != 'q') ||
        ((args[0].tag() != AMObjType::SEQUENCES) && (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
         (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
         (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
@@ -945,13 +1030,13 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
   }
 
   case 'q' : {
-    int nb_variable;
+    int nb_sequence , nb_variable;
     segment_model *model_type;
     const Sequences *seq;
     StatError error;
 
 
-    CHECKCONDVA(nb_required >= 4 ,
+    CHECKCONDVA(nb_required >= 3 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
     switch (args[0].tag()) {
@@ -973,6 +1058,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       return AMObj(AMObjType::ERROR);
     }
 
+    nb_sequence = seq->get_nb_sequence();
     nb_variable = seq->get_nb_variable();
 
     model_type = new segment_model[nb_variable];
@@ -982,43 +1068,29 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , 2 ,
                   args[1].tag.string().data() , "INT");
     }
-    if (args[2].tag() != AMObjType::INTEGER) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , 3 ,
-                  args[2].tag.string().data() , "INT");
-    }
 
     for (i = 0;i < nb_variable;i++) {
-      if (args[i + 3].tag() != AMObjType::STRING) {
+      if (args[i + 2].tag() != AMObjType::STRING) {
         status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , i + 4 ,
-                    args[i + 3].tag.string().data() , "STRING");
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Display" , i + 3 ,
+                    args[i + 2].tag.string().data() , "STRING");
       }
 
       else {
-        pstr = (AMString*)args[i + 3].val.p;
+        pstr = (AMString*)args[i + 2].val.p;
 
         if (i == 0) {
           if (*pstr == "Categorical") {
             model_type[i] = CATEGORICAL_CHANGE;
           }
-          else if (*pstr == "MultivariateCategorical") {
-            model_type[i] = MULTIVARIATE_CATEGORICAL_CHANGE;
-          }
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
           }
-          else if (*pstr == "MultivariatePoisson") {
-            model_type[i] = MULTIVARIATE_POISSON_CHANGE;
+          else if (*pstr == "NegativeBinomial") {
+            model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE;
           }
-          else if (*pstr == "Geometric") {
-            model_type[i] = GEOMETRIC_0_CHANGE;
-          }
-          else if (*pstr == "ShiftedGeometric") {
-            model_type[i] = GEOMETRIC_1_CHANGE;
-          }
-          else if (*pstr == "MultivariateGeometric") {
-            model_type[i] = MULTIVARIATE_GEOMETRIC_0_CHANGE;
+          else if (*pstr == "ShiftedNegativeBinomial") {
+            model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE;
           }
           else if (*pstr == "Ordinal") {
             model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
@@ -1031,9 +1103,6 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           }
           else if (*pstr == "Variance") {
             model_type[i] = VARIANCE_CHANGE;
-          }
-          else if (*pstr == "MeanVariance") {
-            model_type[i] = MEAN_VARIANCE_CHANGE;
           }
           else if (*pstr == "LinearModel") {
             model_type[i] = LINEAR_MODEL_CHANGE;
@@ -1049,24 +1118,17 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           }
           else {
             status = false;
-            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 4 ,
-                        "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance or LinearModel or InterceptSlope");
+            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 3 ,
+                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope");
           }
 
-          if ((model_type[i] == MULTIVARIATE_CATEGORICAL_CHANGE) || (model_type[i] == MULTIVARIATE_POISSON_CHANGE) ||
-              (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i] == MEAN_CHANGE) ||
-              (model_type[i] == MEAN_VARIANCE_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
-            CHECKCONDVA(nb_required == 4 ,
+          if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
+            CHECKCONDVA(nb_required == 3 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
-
-            for (j = 1;j < nb_variable;j++) {
-              model_type[j] = model_type[i];
-            }
             break;
           }
-
           else {
-            CHECKCONDVA(nb_required == nb_variable + 3 ,
+            CHECKCONDVA(nb_required == nb_variable + 2 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
           }
         }
@@ -1078,11 +1140,11 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
           }
-          else if (*pstr == "Geometric") {
-            model_type[i] = GEOMETRIC_0_CHANGE;
+          else if (*pstr == "NegativeBinomial") {
+            model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE;
           }
-          else if (*pstr == "ShiftedGeometric") {
-            model_type[i] = GEOMETRIC_1_CHANGE;
+          else if (*pstr == "ShiftedNegativeBinomial") {
+            model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE;
           }
           else if (*pstr == "Ordinal") {
             model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
@@ -1101,10 +1163,39 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           }
           else {
             status = false;
-            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 4 ,
-                        "Categorical or Poisson or Geometric or ShiftedGeometric Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
+            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 3 ,
+                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
           }
         }
+      }
+    }
+
+    if ((!sequence_option) && (nb_sequence > 1)) {
+      for (i = 0;i < nb_variable;i++) {
+        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == VARIANCE_CHANGE) ||
+            (model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+          status = false;
+          genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 3 ,
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or LinearModel or InterceptSlope");
+        }
+      }
+    }
+
+    if ((sequence_option) && (common_contrast_option)) {
+      status = false;
+      genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Display" , "CommonContrast" , "Sequence");
+    }
+
+    if (shape_parameter_option) {
+      for (i = 0;i < nb_variable;i++) {
+        if ((model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE)) {
+          break;
+        }
+      }
+
+      if (i == nb_variable) {
+        status = false;
+        genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Display" , "ShapeParameter");
       }
     }
 
@@ -1113,10 +1204,17 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       return AMObj(AMObjType::ERROR);
     }
 
-    status = seq->segment_profile_write(error , AMLOUTPUT , args[1].val.i , args[2].val.i ,
-                                        model_type , change_point_output , ASCII ,
-                                        segmentation , nb_segmentation);
+    shape_parameter = new double[nb_variable];
+    for (i = 0;i < nb_variable;i++) {
+      shape_parameter[i] = ishape_parameter;
+    }
+
+    status = seq->segment_profile_write(error , AMLOUTPUT , identifier , args[1].val.i ,
+                                        model_type , common_contrast , shape_parameter ,
+                                        change_point_output , ASCII , segmentation ,
+                                        nb_segmentation);
     delete [] model_type;
+    delete [] shape_parameter;
 
     if (!status) {
       AMLOUTPUT << "\n" << error;
@@ -1223,13 +1321,15 @@ AMObj STAT_model::save(const AMObjVector &args) const
   RWCString *pstr , *format_pstr = NULL;
   char view_point = 'v';
   output_format format;
-  bool status = true , view_point_option = false , detail_option = false ,
-       format_option = false , segmentations_option = false , nb_segmentation_option = false ,
+  bool status = true , view_point_option = false , detail_option = false , format_option = false ,
+       common_contrast_option = false , common_contrast = true , sequence_option = false ,
+       shape_parameter_option = false , segmentations_option = false , nb_segmentation_option = false ,
        state_sequences_option = false , nb_state_sequence_option = false ,
        output_option = false , exhaustive = false;
   register int i , j;
-  int nb_required , format_index ,
-      nb_segmentation = NB_SEGMENTATION , nb_state_sequence = NB_STATE_SEQUENCE;
+  int nb_required , identifier = I_DEFAULT , format_index , nb_segmentation = NB_SEGMENTATION ,
+      nb_state_sequence = NB_STATE_SEQUENCE;
+  double ishape_parameter = 1 , *shape_parameter;
   latent_structure_algorithm segmentation = FORWARD_DYNAMIC_PROGRAMMING;
   latent_structure_algorithm state_sequence = GENERALIZED_VITERBI;
   change_point_profile change_point_output;
@@ -1241,7 +1341,8 @@ AMObj STAT_model::save(const AMObjVector &args) const
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
               (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
-              (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ,
+              (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
+              (args.length() == nb_required + 12) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
 
   // arguments optionnels
@@ -1350,6 +1451,86 @@ AMObj STAT_model::save(const AMObjVector &args) const
             format_pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             format_index = nb_required + i + 1;
           }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "CommonContrast") {
+        switch (common_contrast_option) {
+
+        case false : {
+          common_contrast_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            common_contrast = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "Sequence") {
+        switch (sequence_option) {
+
+        case false : {
+          sequence_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+          }
+          else {
+            identifier = args[nb_required + i * 2 + 1].val.i;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "ShapeParameter") {
+        switch (shape_parameter_option) {
+
+        case false : {
+          shape_parameter_option = true;
+
+          switch (args[nb_required + i * 2 + 1].tag()) {
+          case AMObjType::INTEGER :
+            ishape_parameter = args[nb_required + i * 2 + 1].val.i;
+            break;
+          case AMObjType::REAL :
+            ishape_parameter = args[nb_required + i * 2 + 1].val.r;
+            break;
+          default :
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
+            break;
+          }          
           break;
         }
 
@@ -1531,7 +1712,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
       else {
         status = false;
         genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Save" ,
-                    nb_required + i + 1 , "ViewPoint or Detail or Format or Segmentations or NbSegmentation or StateSequences or NbStateSequence or Output");
+                    nb_required + i + 1 , "ViewPoint or Detail or Format or CommonContrast or Sequence or ShapeParameter or Segmentations or NbSegmentation or StateSequences or NbStateSequence or Output");
       }
     }
   }
@@ -1540,7 +1721,8 @@ AMObj STAT_model::save(const AMObjVector &args) const
     status = false;
     genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Save");
   }
-  if (((segmentations_option) || (nb_segmentation_option)) && ((view_point != 'q') ||
+  if (((common_contrast_option) || (sequence_option) || (shape_parameter_option) ||
+       (segmentations_option) || (nb_segmentation_option)) && ((view_point != 'q') ||
        ((args[0].tag() != AMObjType::SEQUENCES) && (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
         (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
         (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
@@ -1931,13 +2113,13 @@ AMObj STAT_model::save(const AMObjVector &args) const
   }
 
   case 'q' : {
-    int nb_variable;
+    int nb_sequence , nb_variable;
     segment_model *model_type;
     const Sequences *seq;
     StatError error;
 
 
-    CHECKCONDVA(nb_required >= 5 ,
+    CHECKCONDVA(nb_required >= 4 ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
 
     switch (args[0].tag()) {
@@ -1959,6 +2141,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
       return AMObj(AMObjType::ERROR);
     }
 
+    nb_sequence = seq->get_nb_sequence();
     nb_variable = seq->get_nb_variable();
 
     model_type = new segment_model[nb_variable];
@@ -1968,43 +2151,29 @@ AMObj STAT_model::save(const AMObjVector &args) const
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , 3 ,
                   args[2].tag.string().data() , "INT");
     }
-    if (args[3].tag() != AMObjType::INTEGER) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , 4 ,
-                  args[3].tag.string().data() , "INT");
-    }
 
     for (i = 0;i < nb_variable;i++) {
-      if (args[i + 4].tag() != AMObjType::STRING) {
+      if (args[i + 3].tag() != AMObjType::STRING) {
         status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , i + 5 ,
-                    args[i + 4].tag.string().data() , "STRING");
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Save" , i + 4 ,
+                    args[i + 3].tag.string().data() , "STRING");
       }
 
       else {
-        pstr = (AMString*)args[i + 4].val.p;
+        pstr = (AMString*)args[i + 3].val.p;
 
         if (i == 0) {
           if (*pstr == "Categorical") {
             model_type[i] = CATEGORICAL_CHANGE;
           }
-          else if (*pstr == "MultivariateCategorical") {
-            model_type[i] = MULTIVARIATE_CATEGORICAL_CHANGE;
-          }
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
           }
-          else if (*pstr == "MultivariatePoisson") {
-            model_type[i] = MULTIVARIATE_POISSON_CHANGE;
+          else if (*pstr == "NegativeBinomial") {
+            model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE;
           }
-          else if (*pstr == "Geometric") {
-            model_type[i] = GEOMETRIC_0_CHANGE;
-          }
-          else if (*pstr == "ShiftedGeometric") {
-            model_type[i] = GEOMETRIC_1_CHANGE;
-          }
-          else if (*pstr == "MultivariateGeometric") {
-            model_type[i] = MULTIVARIATE_GEOMETRIC_0_CHANGE;
+          else if (*pstr == "ShiftedNegativeBinomial") {
+            model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE;
           }
           else if (*pstr == "Ordinal") {
             model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
@@ -2017,9 +2186,6 @@ AMObj STAT_model::save(const AMObjVector &args) const
           }
           else if (*pstr == "Variance") {
             model_type[i] = VARIANCE_CHANGE;
-          }
-          else if (*pstr == "MeanVariance") {
-            model_type[i] = MEAN_VARIANCE_CHANGE;
           }
           else if (*pstr == "LinearModel") {
             model_type[i] = LINEAR_MODEL_CHANGE;
@@ -2035,24 +2201,17 @@ AMObj STAT_model::save(const AMObjVector &args) const
           }
           else {
             status = false;
-            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 5 ,
-                        "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance or LinearModel or InterceptSlope");
+            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 4 ,
+                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope");
           }
 
-          if ((model_type[i] == MULTIVARIATE_CATEGORICAL_CHANGE) || (model_type[i] == MULTIVARIATE_POISSON_CHANGE) ||
-              (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i] == MEAN_CHANGE) ||
-              (model_type[i] == MEAN_VARIANCE_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
-            CHECKCONDVA(nb_required == 5 ,
+          if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
+            CHECKCONDVA(nb_required == 4 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
-
-            for (j = 1;j < nb_variable;j++) {
-              model_type[j] = model_type[i];
-            }
             break;
           }
-
           else {
-            CHECKCONDVA(nb_required == nb_variable + 4 ,
+            CHECKCONDVA(nb_required == nb_variable + 3 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
           }
         }
@@ -2064,11 +2223,11 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else if (*pstr == "Poisson") {
             model_type[i] = POISSON_CHANGE;
           }
-          else if (*pstr == "Geometric") {
-            model_type[i] = GEOMETRIC_0_CHANGE;
+          else if (*pstr == "NegativeBinomial") {
+            model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE;
           }
-          else if (*pstr == "ShiftedGeometric") {
-            model_type[i] = GEOMETRIC_1_CHANGE;
+          else if (*pstr == "ShiftedNegativeBinomial") {
+            model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE;
           }
           else if (*pstr == "Ordinal") {
             model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
@@ -2087,8 +2246,8 @@ AMObj STAT_model::save(const AMObjVector &args) const
           }
           else {
             status = false;
-            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 5 ,
-                        "Categorical or Poisson or Geometric or ShiftedGeometric or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
+            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 4 ,
+                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
           }
         }
       }
@@ -2110,15 +2269,51 @@ AMObj STAT_model::save(const AMObjVector &args) const
       }
     }
 
+    if ((!sequence_option) && (nb_sequence > 1)) {
+      for (i = 0;i < nb_variable;i++) {
+        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == VARIANCE_CHANGE) ||
+            (model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+          status = false;
+          genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 4 ,
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or LinearModel or InterceptSlope");
+        }
+      }
+    }
+
+    if ((sequence_option) && (common_contrast_option)) {
+      status = false;
+      genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Save" , "CommonContrast" , "Sequence");
+    }
+
+    if (shape_parameter_option) {
+      for (i = 0;i < nb_variable;i++) {
+        if ((model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE)) {
+          break;
+        }
+      }
+
+      if (i == nb_variable) {
+        status = false;
+        genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Save" , "ShapeParameter");
+      }
+    }
+
     if (!status) {
       delete [] model_type;
       return AMObj(AMObjType::ERROR);
     }
 
+    shape_parameter = new double[nb_variable];
+    for (i = 0;i < nb_variable;i++) {
+      shape_parameter[i] = ishape_parameter;
+    }
+
     status = seq->segment_profile_write(error , ((AMString*)args[1].val.p)->data() ,
-                                        args[2].val.i , args[3].val.i , model_type ,
-                                        change_point_output , format , segmentation , nb_segmentation);
+                                        identifier , args[2].val.i , model_type , common_contrast ,
+                                        shape_parameter , change_point_output , format ,
+                                        segmentation , nb_segmentation);
     delete [] model_type;
+    delete [] shape_parameter;
 
     if (!status) {
       AMLOUTPUT << "\n" << error;
@@ -2240,9 +2435,11 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
   char view_point = 'v' , *title = NULL;
   bool status = true , data = false , survival = false , config = false , mode = false ,
        window_option = false , mode_option = false , view_point_option = false ,
-       title_option = false , output_option = false;
+       title_option = false , common_contrast_option = false , common_contrast = true ,
+       sequence_option = false , shape_parameter_option = false , output_option = false;
   register int i , j;
-  int nb_required , nb_object = 0 , variable , type;
+  int nb_required , identifier = I_DEFAULT , nb_object = 0 , variable , type;
+  double ishape_parameter = 1 , *shape_parameter;
   change_point_profile change_point_output;
   state_profile state_output;
   const Distribution **pdist;
@@ -2377,11 +2574,6 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       }
     }
 
-    else if ((args[0].tag() == AMObjType::SEQUENCES) && (nb_required == 1)) {
-      nb_object = 1;
-      data = true;
-    }
-
     else if ((args[0].tag() == AMObjType::MIXTURE) || (args[0].tag() == AMObjType::VECTORS) ||
              (args[0].tag() == AMObjType::MIXTURE_DATA)) {
       if (nb_required > 2) {
@@ -2393,9 +2585,20 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       }
     }
 
-    else if (((args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
-              (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) || (args[0].tag() == AMObjType::SEMI_MARKOV_DATA)) && (nb_required >= 4)) {
-      nb_object = 1;
+    else if (args[0].tag() == AMObjType::SEQUENCES) {
+      if (nb_required == 2) {
+        status = false;
+        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot");
+      }
+      else {
+        nb_object = 1;
+        if (nb_required == 1) {
+          data = true;
+        }
+        else {
+          config = true;
+        }
+      }
     }
 
     else if ((args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV) ||
@@ -2406,33 +2609,32 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
              (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
              (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
              (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
-      if (nb_required > 3) {
+      nb_object = 1;
+
+      if ((nb_required == nb_object) && ((args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
+           (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
+           (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
+           (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA))) {
+        data = true;
+      }
+
+      else if ((nb_required >= nb_object + 1) && ((args[0].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) ||
+                (args[0].tag() == AMObjType::HIDDEN_SEMI_MARKOV) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
+                (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
+                (args[0].tag() == AMObjType::SEMI_MARKOV_DATA)) && (args[1].tag() == AMObjType::INTEGER)) {
+        config = true;
+      }
+
+      else if (nb_required > 3) {
         status = false;
         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot");
       }
-
-      else {
-        nb_object = 1;
-        if ((nb_required == nb_object) && ((args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
-             (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
-             (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
-             (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA))) {
-          data = true;
-        }
-
-        if ((nb_required >= nb_object + 1) && ((args[0].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) ||
-             (args[0].tag() == AMObjType::HIDDEN_SEMI_MARKOV) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
-             (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
-             (args[0].tag() == AMObjType::SEMI_MARKOV_DATA)) && (args[1].tag() == AMObjType::INTEGER)) {
-          config = true;
-        }
-      }
     }
 
-    else if (nb_required > 2) {
+/*    else if (nb_required > 2) {
       status = false;
       genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot");
-    }
+    } */
 
     if (((nb_required == nb_object + 1) || (nb_required == nb_object + 2)) && (!config)) {
       if (args[nb_object].tag() == AMObjType::STRING) {
@@ -2680,6 +2882,86 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
         }
       }
 
+      else if (*pstr == "CommonContrast") {
+        switch (common_contrast_option) {
+
+        case false : {
+          common_contrast_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            common_contrast = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "Sequence") {
+        switch (sequence_option) {
+
+        case false : {
+          sequence_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+          }
+          else {
+            identifier = args[nb_required + i * 2 + 1].val.i;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "ShapeParameter") {
+        switch (shape_parameter_option) {
+
+        case false : {
+          shape_parameter_option = true;
+
+          switch (args[nb_required + i * 2 + 1].tag()) {
+          case AMObjType::INTEGER :
+            ishape_parameter = args[nb_required + i * 2 + 1].val.i;
+            break;
+          case AMObjType::REAL :
+            ishape_parameter = args[nb_required + i * 2 + 1].val.r;
+            break;
+          default :
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
+            break;
+          }          
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
       else if (*pstr == "Output") {
         switch (output_option) {
 
@@ -2733,12 +3015,20 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
         }
         else {
           genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Plot" ,
-                      nb_required + i + 1 , "Window or Mode or ViewPoint or Title or Output");
+                      nb_required + i + 1 , "Window or Mode or ViewPoint or Title or CommonContrast or Sequence or ShapeParameter or Output");
         }
       }
     }
   }
 
+  if (((common_contrast_option) || (sequence_option) || (shape_parameter_option)) && ((view_point != 'q') ||
+       ((args[0].tag() != AMObjType::SEQUENCES) && (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
+        (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA)))) {
+    status = false;
+    genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Plot");
+  }       
   if ((output_option) && ((view_point != 'q') ||
        ((args[0].tag() != AMObjType::SEQUENCES) && (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
         (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
@@ -2959,7 +3249,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       }
 
       case 'q' : {
-        int nb_variable;
+        int nb_sequence , nb_variable;
         segment_model *model_type;
         const Sequences *seq;
 
@@ -2983,6 +3273,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           return AMObj(AMObjType::ERROR);
         }
 
+        nb_sequence = seq->get_nb_sequence();
         nb_variable = seq->get_nb_variable();
 
         model_type = new segment_model[nb_variable];
@@ -2992,43 +3283,29 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , 2 ,
                       args[1].tag.string().data() , "INT");
         }
-        if (args[2].tag() != AMObjType::INTEGER) {
-          status = false;
-          genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , 3 ,
-                      args[2].tag.string().data() , "INT");
-        }
 
         for (i = 0;i < nb_variable;i++) {
-          if (args[i + 3].tag() != AMObjType::STRING) {
+          if (args[i + 2].tag() != AMObjType::STRING) {
             status = false;
-            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , i + 4 ,
-                        args[i + 3].tag.string().data() , "STRING");
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Plot" , i + 3 ,
+                        args[i + 2].tag.string().data() , "STRING");
           }
 
           else {
-            pstr = (AMString*)args[i + 3].val.p;
+            pstr = (AMString*)args[i + 2].val.p;
 
             if (i == 0) {
               if (*pstr == "Categorical") {
                 model_type[i] = CATEGORICAL_CHANGE;
               }
-              else if (*pstr == "MultivariateCategorical") {
-                model_type[i] = MULTIVARIATE_CATEGORICAL_CHANGE;
-              }
               else if (*pstr == "Poisson") {
                 model_type[i] = POISSON_CHANGE;
               }
-              else if (*pstr == "MultivariatePoisson") {
-                model_type[i] = MULTIVARIATE_POISSON_CHANGE;
+              else if (*pstr == "NegativeBinomial") {
+                model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE;
               }
-              else if (*pstr == "Geometric") {
-                model_type[i] = GEOMETRIC_0_CHANGE;
-              }
-              else if (*pstr == "ShiftedGeometric") {
-                model_type[i] = GEOMETRIC_1_CHANGE;
-              }
-              else if (*pstr == "MultivariateGeometric") {
-                model_type[i] = MULTIVARIATE_GEOMETRIC_0_CHANGE;
+              else if (*pstr == "ShiftedNegativeBinomial") {
+                model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE;
               }
               else if (*pstr == "Ordinal") {
                 model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
@@ -3041,9 +3318,6 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               }
               else if (*pstr == "Variance") {
                 model_type[i] = VARIANCE_CHANGE;
-              }
-              else if (*pstr == "MeanVariance") {
-                model_type[i] = MEAN_VARIANCE_CHANGE;
               }
               else if (*pstr == "LinearModel") {
                 model_type[i] = LINEAR_MODEL_CHANGE;
@@ -3059,24 +3333,17 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               }
               else {
                 status = false;
-                genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 4 ,
-                            "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance or LinearModel or InterceptSlope");
+                genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 3 ,
+                            "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope");
               }
 
-              if ((model_type[i] == MULTIVARIATE_CATEGORICAL_CHANGE) || (model_type[i] == MULTIVARIATE_POISSON_CHANGE) ||
-                  (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i] == MEAN_CHANGE) ||
-                  (model_type[i] == MEAN_VARIANCE_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
-                CHECKCONDVA(nb_required == 4 ,
+              if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
+                CHECKCONDVA(nb_required == 3 ,
                             genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot"));
-
-                for (j = 1;j < nb_variable;j++) {
-                  model_type[j] = model_type[i];
-                }
                 break;
               }
-
               else {
-                CHECKCONDVA(nb_required == nb_variable + 3 ,
+                CHECKCONDVA(nb_required == nb_variable + 2 ,
                             genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot"));
               }
             }
@@ -3088,11 +3355,11 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               else if (*pstr == "Poisson") {
                 model_type[i] = POISSON_CHANGE;
               }
-              else if (*pstr == "Geometric") {
-                model_type[i] = GEOMETRIC_0_CHANGE;
+              else if (*pstr == "NegativeBinomial") {
+                model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE;
               }
-              else if (*pstr == "ShiftedGeometric") {
-                model_type[i] = GEOMETRIC_1_CHANGE;
+              else if (*pstr == "ShiftedNegativeBinomial") {
+                model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE;
               }
               else if (*pstr == "Ordinal") {
                 model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
@@ -3111,10 +3378,39 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               }
               else {
                 status = false;
-                genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 4 ,
-                            "Categorical or Poisson or Geometric or ShiftedGeometric or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
+                genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 3 ,
+                            "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
               }
             }
+          }
+        }
+
+        if ((!sequence_option) && (nb_sequence > 1)) {
+          for (i = 0;i < nb_variable;i++) {
+            if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == VARIANCE_CHANGE) ||
+                (model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+              status = false;
+              genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 3 ,
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or LinearModel or InterceptSlope");
+            }
+          }
+        }
+
+        if ((sequence_option) && (common_contrast_option)) {
+          status = false;
+          genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Plot" , "CommonContrast" , "Sequence");
+        }
+
+        if (shape_parameter_option) {
+          for (i = 0;i < nb_variable;i++) {
+            if ((model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE)) {
+              break;
+            }
+          }
+
+          if (i == nb_variable) {
+            status = false;
+            genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Plot" , "ShapeParameter");
           }
         }
 
@@ -3123,9 +3419,16 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           return AMObj(AMObjType::ERROR);
         }
 
-        status = seq->segment_profile_plot_write(error , Plot_prefix , args[1].val.i , args[2].val.i ,
-                                                 model_type , change_point_output , title);
+        shape_parameter = new double[nb_variable];
+        for (i = 0;i < nb_variable;i++) {
+          shape_parameter[i] = ishape_parameter;
+        }
+
+        status = seq->segment_profile_plot_write(error , Plot_prefix , identifier , args[1].val.i ,
+                                                 model_type , common_contrast , shape_parameter ,
+                                                 change_point_output , title);
         delete [] model_type;
+        delete [] shape_parameter;
 
         if (status) {
           nb_object = nb_required;
@@ -3736,4 +4039,7 @@ void installSTATModule()
 
   type[0] = AMObjType::ANY;
   installFNode("BuildAuxiliaryVariable" , STAT_BuildAuxiliaryVariable , 1 , type , AMObjType::MARKOVIAN_SEQUENCES);
+
+  type[0] = AMObjType::ANY;
+  installFNode("ResidualSequences" , STAT_ResidualSequences , 1 , type , AMObjType::MARKOVIAN_SEQUENCES);
 }
