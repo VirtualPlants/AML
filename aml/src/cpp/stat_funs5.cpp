@@ -4530,13 +4530,15 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  bool status = true , sequence_option = false , output_option = false ,
-       continuity_option = false , continuity = false;
+  bool status = true , output_option = false , common_contrast_option = false , common_contrast = true ,
+       continuity_option = false , continuity = false , sequence_option = false ,
+       shape_parameter_option = false;
   register int i , j;
-  int nb_required , nb_sequence , nb_variable , identifier = I_DEFAULT , *nb_segment;
-  sequence_type output;
+  int nb_required , nb_sequence , nb_variable , identifier = I_DEFAULT;
+  double ishape_parameter = 1 , *shape_parameter;
+  sequence_type output = SEQUENCE;
   segment_model *model_type;
-  const Sequences *iseq;
+  Sequences *iseq;
   Sequences *seq;
   MarkovianSequences *markovian_seq;
   StatError error;
@@ -4567,759 +4569,791 @@ AMObj STAT_Segmentation(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
+  nb_sequence = iseq->get_nb_sequence();
   nb_variable = iseq->get_nb_variable();
 
-  if (args[1].tag() == AMObjType::ARRAY) {
+  // argument obligatoire
 
-    // arguments obligatoires
+  model_type = new segment_model[nb_variable];
 
-    nb_sequence = iseq->get_nb_sequence();
-    nb_segment = buildIntArray(args , 1 , "Segmentation" , 2 , nb_sequence);
-    if (!nb_segment) {
+  for (i = 0;i < nb_variable;i++) {
+    if (args[i + 2].tag() != AMObjType::STRING) {
       status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , i + 3 ,
+                  args[i + 2].tag.string().data() , "STRING");
     }
 
-    model_type = new segment_model[nb_variable];
+    else {
+      pstr = (AMString*)args[i + 2].val.p;
 
-    for (i = 0;i < nb_variable;i++) {
-      if (args[i + 2].tag() != AMObjType::STRING) {
-        status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , i + 3 ,
-                    args[i + 2].tag.string().data() , "STRING");
+      if (i == 0) {
+        if (*pstr == "Categorical") {
+          model_type[i] = CATEGORICAL_CHANGE;
+        }
+        else if (*pstr == "Poisson") {
+          model_type[i] = POISSON_CHANGE;
+        }
+        else if (*pstr == "NegativeBinomial") {
+          model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE;
+        }
+        else if (*pstr == "ShiftedNegativeBinomial") {
+          model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE;
+        }
+        else if (*pstr == "Ordinal") {
+          model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
+        }
+        else if (*pstr == "Gaussian") {
+          model_type[i] = GAUSSIAN_CHANGE;
+        }
+        else if (*pstr == "Mean") {
+           model_type[i] = MEAN_CHANGE;
+        }
+        else if (*pstr == "Variance") {
+          model_type[i] = VARIANCE_CHANGE;
+        }
+        else if (*pstr == "LinearModel") {
+          model_type[i] = LINEAR_MODEL_CHANGE;
+        }
+        else if (*pstr == "InterceptSlope") {
+          model_type[i] = INTERCEPT_SLOPE_CHANGE;
+        }
+        else if (*pstr == "BayesianPoisson") {
+          model_type[i] = BAYESIAN_POISSON_CHANGE;
+        }
+        else if (*pstr == "BayesianGaussian") {
+          model_type[i] = BAYESIAN_GAUSSIAN_CHANGE;
+        }
+        else {
+          status = false;
+          genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope");
+        }
+
+        if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
+          CHECKCONDVA(nb_required == 3 ,
+                      genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
+          break;
+        }
+        else {
+          CHECKCONDVA(nb_required == nb_variable + 2 ,
+                      genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
+        }
       }
 
       else {
-        pstr = (AMString*)args[i + 2].val.p;
+        if (*pstr == "Categorical") {
+          model_type[i] = CATEGORICAL_CHANGE;
+        }
+        else if (*pstr == "Poisson") {
+          model_type[i] = POISSON_CHANGE;
+        }
+        else if (*pstr == "NegativeBinomial") {
+          model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE;
+        }
+        else if (*pstr == "ShiftedNegativeBinomial") {
+          model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE;
+        }
+        else if (*pstr == "Ordinal") {
+          model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
+        }
+        else if (*pstr == "Gaussian") {
+          model_type[i] = GAUSSIAN_CHANGE;
+        }
+        else if (*pstr == "Variance") {
+          model_type[i] = VARIANCE_CHANGE;
+        }
+        else if (*pstr == "LinearModel") {
+          model_type[i] = LINEAR_MODEL_CHANGE;
+        }
+        else if (*pstr == "InterceptSlope") {
+          model_type[i] = INTERCEPT_SLOPE_CHANGE;
+        }
+        else {
+          status = false;
+          genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
+        }
+      }
+    }
+  }
 
-        if (i == 0) {
-          if (*pstr == "Categorical") {
-            model_type[i] = CATEGORICAL_CHANGE;
-          }
-          else if (*pstr == "MultivariateCategorical") {
-            model_type[i] = MULTIVARIATE_CATEGORICAL_CHANGE;
-          }
-          else if (*pstr == "Poisson") {
-            model_type[i] = POISSON_CHANGE;
-          }
-          else if (*pstr == "MultivariatePoisson") {
-            model_type[i] = MULTIVARIATE_POISSON_CHANGE;
-          }
-          else if (*pstr == "Geometric") {
-            model_type[i] = GEOMETRIC_0_CHANGE;
-          }
-          else if (*pstr == "ShiftedGeometric") {
-            model_type[i] = GEOMETRIC_1_CHANGE;
-          }
-          else if (*pstr == "MultivariateGeometric") {
-            model_type[i] = MULTIVARIATE_GEOMETRIC_0_CHANGE;
-          }
-          else if (*pstr == "Ordinal") {
-            model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
-          }
-          else if (*pstr == "Gaussian") {
-            model_type[i] = GAUSSIAN_CHANGE;
-          }
-          else if (*pstr == "Mean") {
-            model_type[i] = MEAN_CHANGE;
-          }
-          else if (*pstr == "Variance") {
-            model_type[i] = VARIANCE_CHANGE;
-          }
-          else if (*pstr == "MeanVariance") {
-            model_type[i] = MEAN_VARIANCE_CHANGE;
-          }
-          else if (*pstr == "LinearModel") {
-            model_type[i] = LINEAR_MODEL_CHANGE;
-          }
-          else if (*pstr == "InterceptSlope") {
-            model_type[i] = INTERCEPT_SLOPE_CHANGE;
-          }
-          else if (*pstr == "BayesianPoisson") {
-            model_type[i] = BAYESIAN_POISSON_CHANGE;
-          }
-          else if (*pstr == "BayesianGaussian") {
-            model_type[i] = BAYESIAN_GAUSSIAN_CHANGE;
-          }
-          else {
-            status = false;
-            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
-                        "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance or LinearModel or InterceptSlope");
-          }
+  if (args[1].tag() == AMObjType::INTEGER) {
+    bool criterion_option = false , penalty_shape_option = false , min_nb_segment_option = false ,
+         nb_segment_option = false , nb_segment_estimation = true;
+    int penalty_shape = 2 , min_nb_segment = 0;
+    model_selection_criterion criterion = LIKELIHOOD_SLOPE;
 
-          if ((model_type[i] == MULTIVARIATE_CATEGORICAL_CHANGE) || (model_type[i] == MULTIVARIATE_POISSON_CHANGE) ||
-              (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i] == MEAN_CHANGE) ||
-              (model_type[i] == MEAN_VARIANCE_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
-            CHECKCONDVA(nb_required == 3 ,
-                        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
 
-            for (j = 1;j < nb_variable;j++) {
-              model_type[j] = model_type[i];
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+                (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
+                (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
+                (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Segmentation" , nb_required));
+
+    // arguments optionnels
+
+    for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+      if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                    args[nb_required + i * 2].tag.string().data() , "OPTION");
+      }
+
+      else {
+        pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+        if (*pstr == "CommonContrast") {
+          switch (common_contrast_option) {
+
+          case false : {
+            common_contrast_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              common_contrast = args[nb_required + i * 2 + 1].val.b;
             }
             break;
           }
 
-          else {
-            CHECKCONDVA(nb_required == nb_variable + 2 ,
-                        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "Continuity") {
+          switch (continuity_option) {
+
+          case false : {
+            continuity_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              continuity = args[nb_required + i * 2 + 1].val.b;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "Criterion") {
+          switch (criterion_option) {
+
+          case false : {
+            criterion_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+            }
+            else {
+              pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+              if (*pstr == STAT_criterion_word[ICL]) {
+                criterion = ICL;
+              }
+              else if (*pstr == "LogLikelihoodSlope") {
+                criterion = LIKELIHOOD_SLOPE;
+              }
+              else if (*pstr == STAT_criterion_word[mBIC]) {
+                criterion = mBIC;
+              }
+              else if (*pstr == "SegmentationLogLikelihoodSlope") {
+                criterion = SEGMENTATION_LIKELIHOOD_SLOPE;
+              }
+              else {
+                status = false;
+                genAMLError(ERRORMSG(MODEL_SELECTION_CRITERION_sds) , "Segmentation" ,
+                            nb_required + i + 1 , "ICL or LogLikelihoodSlope or mBIC or SegmentationLogLikelihoodSlope");
+              }
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "MinNbSegment") {
+          switch (min_nb_segment_option) {
+
+          case false : {
+            min_nb_segment_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+            }
+            else {
+              min_nb_segment = args[nb_required + i * 2 + 1].val.i;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "NbSegment") {
+          switch (nb_segment_option) {
+
+          case false : {
+            nb_segment_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+            }
+            else {
+              pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+              if (*pstr == "Fixed") {
+                nb_segment_estimation = false;
+              }
+              else if (*pstr == "Estimated") {
+                nb_segment_estimation = true;
+              }
+              else {
+                status = false;
+                genAMLError(ERRORMSG(NB_SEGMENT_ESTIMATION_sds) , "Segmentation" ,
+                            nb_required + i + 1 , "Fixed or Estimated");
+              }
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "Output") {
+          switch (output_option) {
+
+          case false : {
+            output_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+            }
+            else {
+              pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+              if (*pstr == "Sequence") {
+                output = SEQUENCE;
+              }
+              else if ((*pstr == "SubtractionResidual") || (*pstr == "Residual")) {
+                output = SUBTRACTION_RESIDUAL;
+              }
+              else if (*pstr == "DivisionResidual") {
+                output = DIVISION_RESIDUAL;
+              }
+              else if (*pstr == "Entropy") {
+                output = SEGMENTATION_ENTROPY;
+              }
+              else if (*pstr == "Divergence") {
+                output = SEGMENTATION_DIVERGENCE;
+              }
+              else if (*pstr == "LogLikelihoodSlope") {
+                output = LOG_LIKELIHOOD_SLOPE;
+              }
+              else {
+                status = false;
+                genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + i + 1 ,
+                            "Sequence or Residual or Entropy or Divergence or LogLikelihoodSlope");
+              }
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "PenaltyShape") {
+          switch (penalty_shape_option) {
+
+          case false : {
+            penalty_shape_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+            }
+            else {
+              penalty_shape = args[nb_required + i * 2 + 1].val.i;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "Sequence") {
+          switch (sequence_option) {
+
+          case false : {
+            sequence_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+            }
+            else {
+              identifier = args[nb_required + i * 2 + 1].val.i;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "ShapeParameter") {
+          switch (shape_parameter_option) {
+
+          case false : {
+            shape_parameter_option = true;
+
+            switch (args[nb_required + i * 2 + 1].tag()) {
+            case AMObjType::INTEGER :
+              ishape_parameter = args[nb_required + i * 2 + 1].val.i;
+              break;
+            case AMObjType::REAL :
+              ishape_parameter = args[nb_required + i * 2 + 1].val.r;
+              break;
+            default :
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
+              break;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
           }
         }
 
         else {
-          if (*pstr == "Categorical") {
-            model_type[i] = CATEGORICAL_CHANGE;
-          }
-          else if (*pstr == "Poisson") {
-            model_type[i] = POISSON_CHANGE;
-          }
-          else if (*pstr == "Geometric") {
-            model_type[i] = GEOMETRIC_0_CHANGE;
-          }
-          else if (*pstr == "ShiftedGeometric") {
-            model_type[i] = GEOMETRIC_1_CHANGE;
-          }
-          else if (*pstr == "Ordinal") {
-            model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
-          }
-          else if (*pstr == "Gaussian") {
-            model_type[i] = GAUSSIAN_CHANGE;
-          }
-          else if (*pstr == "Variance") {
-            model_type[i] = VARIANCE_CHANGE;
-          }
-          else if (*pstr == "LinearModel") {
-            model_type[i] = LINEAR_MODEL_CHANGE;
-          }
-          else if (*pstr == "InterceptSlope") {
-            model_type[i] = INTERCEPT_SLOPE_CHANGE;
-          }
-          else {
-            status = false;
-            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
-                        "Categorical or Poisson or Geometric or ShiftedGeometric or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
-          }
+          status = false;
+          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Segmentation" , nb_required + i + 1 ,
+                      "CommonContrast or Continuity or Criterion or MinNbSegment or NbSegment or Output or PenaltyShape or Sequence or ShapeParameter");
         }
       }
     }
 
-    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
-
-    // argument optionnel
-
-    output = SEQUENCE;
-
-    if (args.length() == nb_required + 2) {
-      if (args[nb_required].tag() != AMObjType::OPTION) {
-        status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + 1 ,
-                    args[nb_required].tag.string().data() , "OPTION");
-      }
-      else {
-        if (*((AMString*)args[nb_required].val.p) != "Output") {
+    if ((!sequence_option) && (nb_sequence > 1)) {
+      for (i = 0;i < nb_variable;i++) {
+        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == VARIANCE_CHANGE) ||
+            (model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
           status = false;
-          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Segmentation" , nb_required + 1 ,
-                      "Output");
+          genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or LinearModel or InterceptSlope");
+        }
+      }
+    }
+
+    if ((sequence_option) && (common_contrast_option)) {
+      status = false;
+      genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "CommonContrast" , "Sequence");
+    }
+
+    if (shape_parameter_option) {
+      for (i = 0;i < nb_variable;i++) {
+        if ((model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE)) {
+          break;
         }
       }
 
-      if (args[nb_required + 1].tag() != AMObjType::STRING) {
+      if (i == nb_variable) {
         status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + 1 ,
-                    args[nb_required + 1].tag.string().data() , "STRING");
+        genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Segmentation" , "ShapeParameter");
       }
+    }
+
+    switch (nb_segment_estimation) {
+
+    case false : {
+      if (continuity_option) {
+        for (i = 0;i < nb_variable;i++) {
+          if ((model_type[i] = LINEAR_MODEL_CHANGE) || (model_type[0] = INTERCEPT_SLOPE_CHANGE)) {
+            break;
+          }
+        }
+
+        if ((i == nb_variable) || (nb_variable > 1)) {
+          status = false;
+          genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Segmentation" , "Continuity");
+        }
+      }
+
+      if ((output == SEGMENTATION_ENTROPY) || (output == SEGMENTATION_DIVERGENCE) ||
+          (output == LOG_LIKELIHOOD_SLOPE)) {
+        status = false;
+        genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
+                    "Sequence or Residual");
+      }
+
+      if (criterion_option) {
+        status = false;
+        genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "Crierion");
+      }
+      if (min_nb_segment_option) {
+        status = false;
+        genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "MinNbSegment");
+      }
+      if (penalty_shape_option) {
+        status = false;
+        genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "PenaltyShape");
+      }
+      break;
+    }
+
+    case true : {
+      if ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL)) {
+        status = false;
+        genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
+                    "Sequence or Entropy or Divergence or LogLikelihoodSlope");
+      }
+
+      if (continuity_option) {
+        status = false;
+        genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "Continuity");
+      }
+      break;
+    }
+    }
+
+    if (!status) {
+      delete [] model_type;
+      return AMObj(AMObjType::ERROR);
+    }
+
+    shape_parameter = new double[nb_variable];
+    for (i = 0;i < nb_variable;i++) {
+      shape_parameter[i] = ishape_parameter;
+    }
+
+    switch (nb_segment_estimation) {
+
+    case false : {
+      if (args[1].val.i == 1) {
+        seq = iseq->segmentation(error , AMLOUTPUT , identifier , args[1].val.i ,
+                                 NULL , model_type , common_contrast ,
+                                 shape_parameter , output);
+      }
+
       else {
-        pstr = (AMString*)args[nb_required + 1].val.p;
-        if (*pstr == "Sequence") {
-          output = SEQUENCE;
+        seq = iseq->segmentation(error , AMLOUTPUT , identifier , args[1].val.i ,
+                                 model_type , common_contrast , shape_parameter ,
+                                 output , continuity);
+      }
+      break;
+    }
+
+    case true : {
+      seq = iseq->segmentation(error , AMLOUTPUT , identifier , args[1].val.i ,
+                               model_type , common_contrast , shape_parameter ,
+                               criterion , min_nb_segment , penalty_shape , output);
+      break;
+    }
+    }
+
+    delete [] model_type;
+    delete [] shape_parameter;
+  }
+
+  else if (args[1].tag() == AMObjType::ARRAY) {
+    int nb_segment = I_DEFAULT , *change_point;
+
+
+    CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+                (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
+                (args.length() == nb_required + 8) ,
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Segmentation" , nb_required));
+
+    // argument obligaoire
+
+    change_point = buildIntArray(args , 1 , "Segmentation" , 2 , nb_segment);
+    if (!change_point) {
+      status = false;
+    }
+    else {
+      nb_segment++;
+    }
+
+    // arguments optionnels
+
+    for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+      if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
+        status = false;
+        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                    args[nb_required + i * 2].tag.string().data() , "OPTION");
+      }
+
+      else {
+        pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+        if (*pstr == "CommonContrast") {
+          switch (common_contrast_option) {
+
+          case false : {
+            common_contrast_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              common_contrast = args[nb_required + i * 2 + 1].val.b;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
         }
-        else if ((*pstr == "SubtractionResidual") || (*pstr == "Residual")) {
-          output = SUBTRACTION_RESIDUAL;
+
+        else if (*pstr == "Continuity") {
+          switch (continuity_option) {
+
+          case false : {
+            continuity_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              continuity = args[nb_required + i * 2 + 1].val.b;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
         }
-        else if (*pstr == "DivisionResidual") {
-          output = DIVISION_RESIDUAL;
+
+        else if (*pstr == "Output") {
+          switch (output_option) {
+
+          case false : {
+            output_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
+            }
+            else {
+              pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
+              if (*pstr == "Sequence") {
+                output = SEQUENCE;
+              }
+              else if ((*pstr == "SubtractionResidual") || (*pstr == "Residual")) {
+                output = SUBTRACTION_RESIDUAL;
+              }
+              else if (*pstr == "DivisionResidual") {
+                output = DIVISION_RESIDUAL;
+              }
+              else {
+                status = false;
+                genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + i + 1 ,
+                            "Sequence or Residual");
+              }
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
         }
+
+        else if (*pstr == "Sequence") {
+          switch (sequence_option) {
+
+          case false : {
+            sequence_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+            }
+            else {
+              identifier = args[nb_required + i * 2 + 1].val.i;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
+        else if (*pstr == "ShapeParameter") {
+          switch (shape_parameter_option) {
+
+          case false : {
+            shape_parameter_option = true;
+
+            switch (args[nb_required + i * 2 + 1].tag()) {
+            case AMObjType::INTEGER :
+              ishape_parameter = args[nb_required + i * 2 + 1].val.i;
+              break;
+            case AMObjType::REAL :
+              ishape_parameter = args[nb_required + i * 2 + 1].val.r;
+              break;
+            default :
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
+              break;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
         else {
           status = false;
-          genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + 1 ,
-                      "Sequence or Residual");
+          genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Segmentation" , nb_required + i + 1 ,
+                      "CommonContrast or Continuity or Output or Sequence or ShapeParameter");
         }
+      }
+    }
+
+    if ((!sequence_option) && (nb_sequence > 1)) {
+      for (i = 0;i < nb_variable;i++) {
+        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == VARIANCE_CHANGE) ||
+            (model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+          status = false;
+          genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or LinearModel or InterceptSlope");
+        }
+      }
+    }
+
+    if ((sequence_option) && (common_contrast_option)) {
+      status = false;
+      genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "CommonContrast" , "Sequence");
+    }
+
+    if (shape_parameter_option) {
+      for (i = 0;i < nb_variable;i++) {
+        if ((model_type[i] = NEGATIVE_BINOMIAL_0_CHANGE) || (model_type[i] = NEGATIVE_BINOMIAL_1_CHANGE)) {
+          break;
+        }
+      }
+
+      if (i == nb_variable) {
+        status = false;
+        genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Segmentation" , "ShapeParameter");
+      }
+    }
+
+    if (continuity_option) {
+      for (i = 0;i < nb_variable;i++) {
+        if ((model_type[i] = LINEAR_MODEL_CHANGE) || (model_type[0] = INTERCEPT_SLOPE_CHANGE)) {
+          break;
+        }
+      }
+
+      if ((i == nb_variable) || (nb_variable > 1)) {
+        status = false;
+        genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Segmentation" , "Continuity");
       }
     }
 
     if (!status) {
-      delete [] nb_segment;
-      delete [] model_type;
-      return AMObj(AMObjType::ERROR);
-    }
-
-    seq = iseq->segmentation(error , AMLOUTPUT , nb_segment , model_type ,
-                             identifier , output);
-    delete [] nb_segment;
-    delete [] model_type;
-  }
-
-  else if (args[1].tag() == AMObjType::INTEGER) {
-    CHECKCONDVA(nb_required >= 4 , genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
-
-    // argument obligatoire
-
-    model_type = new segment_model[nb_variable];
-
-    for (i = 0;i < nb_variable;i++) {
-      if (args[i + 3].tag() != AMObjType::STRING) {
-        status = false;
-        genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , i + 4 ,
-                    args[i + 3].tag.string().data() , "STRING");
-      }
-
-      else {
-        pstr = (AMString*)args[i + 3].val.p;
-
-        if (i == 0) {
-          if (*pstr == "Categorical") {
-            model_type[i] = CATEGORICAL_CHANGE;
-          }
-          else if (*pstr == "MultivariateCategorical") {
-            model_type[i] = MULTIVARIATE_CATEGORICAL_CHANGE;
-          }
-          else if (*pstr == "Poisson") {
-            model_type[i] = POISSON_CHANGE;
-          }
-          else if (*pstr == "MultivariatePoisson") {
-            model_type[i] = MULTIVARIATE_POISSON_CHANGE;
-          }
-          else if (*pstr == "Geometric") {
-            model_type[i] = GEOMETRIC_0_CHANGE;
-          }
-          else if (*pstr == "ShiftedGeometric") {
-            model_type[i] = GEOMETRIC_1_CHANGE;
-          }
-          else if (*pstr == "MultivariateGeometric") {
-            model_type[i] = MULTIVARIATE_GEOMETRIC_0_CHANGE;
-          }
-          else if (*pstr == "Ordinal") {
-            model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
-          }
-          else if (*pstr == "Gaussian") {
-            model_type[i] = GAUSSIAN_CHANGE;
-          }
-          else if (*pstr == "Mean") {
-             model_type[i] = MEAN_CHANGE;
-          }
-          else if (*pstr == "Variance") {
-            model_type[i] = VARIANCE_CHANGE;
-          }
-          else if (*pstr == "MeanVariance") {
-            model_type[i] = MEAN_VARIANCE_CHANGE;
-          }
-          else if (*pstr == "LinearModel") {
-            model_type[i] = LINEAR_MODEL_CHANGE;
-          }
-          else if (*pstr == "InterceptSlope") {
-            model_type[i] = INTERCEPT_SLOPE_CHANGE;
-          }
-          else if (*pstr == "BayesianPoisson") {
-            model_type[i] = BAYESIAN_POISSON_CHANGE;
-          }
-          else if (*pstr == "BayesianGaussian") {
-            model_type[i] = BAYESIAN_GAUSSIAN_CHANGE;
-          }
-          else {
-            status = false;
-            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 4 ,
-                        "Categorical or Poisson or MultivariatePoisson or Geometric or ShiftedGeometric or MultivariateGeometric or Ordinal or Gaussian or Mean or Variance or MeanVariance or LinearModel or InterceptSlope");
-          }
-
-          if ((model_type[i] == MULTIVARIATE_CATEGORICAL_CHANGE) || (model_type[i] == MULTIVARIATE_POISSON_CHANGE) ||
-              (model_type[i] == MULTIVARIATE_GEOMETRIC_0_CHANGE) || (model_type[i] == MEAN_CHANGE) ||
-              (model_type[i] == MEAN_VARIANCE_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
-            CHECKCONDVA(nb_required == 4 ,
-                        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
-
-            for (j = 1;j < nb_variable;j++) {
-              model_type[j] = model_type[i];
-            }
-            break;
-          }
-
-          else {
-            CHECKCONDVA(nb_required == nb_variable + 3 ,
-                        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
-          }
-        }
-
-        else {
-          if (*pstr == "Categorical") {
-            model_type[i] = CATEGORICAL_CHANGE;
-          }
-          else if (*pstr == "Poisson") {
-            model_type[i] = POISSON_CHANGE;
-          }
-          else if (*pstr == "Geometric") {
-            model_type[i] = GEOMETRIC_0_CHANGE;
-          }
-          else if (*pstr == "ShiftedGeometric") {
-            model_type[i] = GEOMETRIC_1_CHANGE;
-          }
-          else if (*pstr == "Ordinal") {
-            model_type[i] = ORDINAL_GAUSSIAN_CHANGE;
-          }
-          else if (*pstr == "Gaussian") {
-            model_type[i] = GAUSSIAN_CHANGE;
-          }
-          else if (*pstr == "Variance") {
-            model_type[i] = VARIANCE_CHANGE;
-          }
-          else if (*pstr == "LinearModel") {
-            model_type[i] = LINEAR_MODEL_CHANGE;
-          }
-          else if (*pstr == "InterceptSlope") {
-            model_type[i] = INTERCEPT_SLOPE_CHANGE;
-          }
-          else {
-            status = false;
-            genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 4 ,
-                        "Categorical or Poisson or Geometric or ShiftedGeometric or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
-          }
-        }
-      }
-    }
-
-    if (args[2].tag() == AMObjType::INTEGER) {
-      bool criterion_option = false , penalty_shape_option = false , min_nb_segment_option = false ,
-           nb_segment_option = false , nb_segment_estimation = true;
-      int penalty_shape = 2 , min_nb_segment = 0;
-      model_selection_criterion criterion = LIKELIHOOD_SLOPE;
-
-
-      CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
-                  (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
-                  (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ,
-                  genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Segmentation" , nb_required));
-
-      // arguments optionnels
-
-      output = SEQUENCE;
-
-      for (i = 0;i < (args.length() - nb_required) / 2;i++) {
-        if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
-          status = false;
-          genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
-                      args[nb_required + i * 2].tag.string().data() , "OPTION");
-        }
-
-        else {
-          pstr = (AMString*)args[nb_required + i * 2].val.p;
-
-          if (*pstr == "Continuity") {
-            switch (continuity_option) {
-
-            case false : {
-              continuity_option = true;
-
-              if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
-                status = false;
-                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
-                            args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
-              }
-              else {
-                continuity = args[nb_required + i * 2 + 1].val.b;
-              }
-              break;
-            }
-
-            case true : {
-              status = false;
-              genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-              break;
-            }
-            }
-          }
-
-          else if (*pstr == "Criterion") {
-            switch (criterion_option) {
-
-            case false : {
-              criterion_option = true;
-
-              if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
-                status = false;
-                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
-                            args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
-              }
-              else {
-                pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
-                if (*pstr == STAT_criterion_word[ICL]) {
-                  criterion = ICL;
-                }
-                else if (*pstr == "LogLikelihoodSlope") {
-                  criterion = LIKELIHOOD_SLOPE;
-                }
-                else if (*pstr == STAT_criterion_word[mBIC]) {
-                  criterion = mBIC;
-                }
-                else if (*pstr == "SegmentationLogLikelihoodSlope") {
-                  criterion = SEGMENTATION_LIKELIHOOD_SLOPE;
-                }
-                else {
-                  status = false;
-                  genAMLError(ERRORMSG(MODEL_SELECTION_CRITERION_sds) , "Segmentation" ,
-                              nb_required + i + 1 , "ICL or LogLikelihoodSlope or mBIC or SegmentationLogLikelihoodSlope");
-                }
-              }
-              break;
-            }
-
-            case true : {
-              status = false;
-              genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-              break;
-            }
-            }
-          }
-
-          else if (*pstr == "MinNbSegment") {
-            switch (min_nb_segment_option) {
-
-            case false : {
-              min_nb_segment_option = true;
-
-              if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
-                status = false;
-                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
-                            args[nb_required + i * 2 + 1].tag.string().data() , "INT");
-              }
-              else {
-                min_nb_segment = args[nb_required + i * 2 + 1].val.i;
-              }
-              break;
-            }
-
-            case true : {
-              status = false;
-              genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-              break;
-            }
-            }
-          }
-
-          else if (*pstr == "NbSegment") {
-            switch (nb_segment_option) {
-
-            case false : {
-              nb_segment_option = true;
-
-              if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
-                status = false;
-                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
-                            args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
-              }
-              else {
-                pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
-                if (*pstr == "Fixed") {
-                  nb_segment_estimation = false;
-                }
-                else if (*pstr == "Estimated") {
-                  nb_segment_estimation = true;
-                }
-                else {
-                  status = false;
-                  genAMLError(ERRORMSG(NB_SEGMENT_ESTIMATION_sds) , "Segmentation" ,
-                              nb_required + i + 1 , "Fixed or Estimated");
-                }
-              }
-              break;
-            }
-
-            case true : {
-              status = false;
-              genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-              break;
-            }
-            }
-          }
-
-          else if (*pstr == "Output") {
-            switch (output_option) {
-
-            case false : {
-              output_option = true;
-
-              if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
-                status = false;
-                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
-                            args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
-              }
-              else {
-                pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
-                if (*pstr == "Sequence") {
-                  output = SEQUENCE;
-                }
-                else if ((*pstr == "SubtractionResidual") || (*pstr == "Residual")) {
-                  output = SUBTRACTION_RESIDUAL;
-                }
-                else if (*pstr == "DivisionResidual") {
-                  output = DIVISION_RESIDUAL;
-                }
-                else if (*pstr == "Entropy") {
-                  output = SEGMENTATION_ENTROPY;
-                }
-                else if (*pstr == "Divergence") {
-                  output = SEGMENTATION_DIVERGENCE;
-                }
-                else if (*pstr == "LogLikelihoodSlope") {
-                  output = LOG_LIKELIHOOD_SLOPE;
-                }
-                else {
-                  status = false;
-                  genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + i + 1 ,
-                              "Sequence or Residual or Entropy or Divergence or LogLikelihoodSlope");
-                }
-              }
-              break;
-            }
-
-            case true : {
-              status = false;
-              genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-              break;
-            }
-            }
-          }
-
-          else if (*pstr == "PenaltyShape") {
-            switch (penalty_shape_option) {
-
-            case false : {
-              penalty_shape_option = true;
-
-              if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
-                status = false;
-                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
-                            args[nb_required + i * 2 + 1].tag.string().data() , "INT");
-              }
-              else {
-                penalty_shape = args[nb_required + i * 2 + 1].val.i;
-              }
-              break;
-            }
-
-            case true : {
-              status = false;
-              genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-              break;
-            }
-            }
-          }
-
-          else {
-            status = false;
-            genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Segmentation" , nb_required + i + 1 ,
-                        "Continuity or Criterion or MinNbSegment or NbSegment or Output or PenaltyShape");
-          }
-        }
-      }
-
-      switch (nb_segment_estimation) {
-
-      case false : {
-        if ((output == SEGMENTATION_ENTROPY) || (output == SEGMENTATION_DIVERGENCE) ||
-            (output == LOG_LIKELIHOOD_SLOPE)) {
-          status = false;
-          genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
-                      "Sequence or Residual");
-        }
-
-        if (criterion_option) {
-          status = false;
-          genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "Crierion");
-        }
-        if (min_nb_segment_option) {
-          status = false;
-          genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "MinNbSegment");
-        }
-        if (penalty_shape_option) {
-          status = false;
-          genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "PenaltyShape");
-        }
-        break;
-      }
-
-      case true : {
-        if ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL)) {
-          status = false;
-          genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
-                      "Sequence or Entropy or Divergence or LogLikelihoodSlope");
-        }
-
-        if (continuity_option) {
-          status = false;
-          genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "Continuity");
-        }
-        break;
-      }
-      }
-
-      if (!status) {
-        delete [] model_type;
-        return AMObj(AMObjType::ERROR);
-      }
-
-      switch (nb_segment_estimation) {
-
-      case false : {
-        if (args[2].val.i == 1) {
-          seq = iseq->segmentation(error , AMLOUTPUT , args[1].val.i , args[2].val.i ,
-                                   0 , model_type , output);
-        }
-
-        else {
-          nb_sequence = iseq->get_nb_sequence();
-          nb_segment = new int[nb_sequence];
-
-          for (i = 0;i < nb_sequence;i++) {
-            nb_segment[i] = args[2].val.i;
-          }
-
-          seq = iseq->segmentation(error , AMLOUTPUT , nb_segment , model_type ,
-                                   args[1].val.i , output , continuity);
-          delete [] nb_segment;
-        }
-        break;
-      }
-
-      case true : {
-        seq = iseq->segmentation(error , AMLOUTPUT , args[1].val.i , args[2].val.i ,
-                                 model_type , criterion , min_nb_segment ,
-                                 penalty_shape , output);
-        break;
-      }
-      }
-
-      delete [] model_type;
-    }
-
-    else if (args[2].tag() == AMObjType::ARRAY) {
-      int nb_segment = I_DEFAULT , *change_point;
-
-
-      CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
-                  (args.length() == nb_required + 4) ,
-                  genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Segmentation" , nb_required));
-
-      // argument obligaoire
-
-      change_point = buildIntArray(args , 2 , "Segmentation" , 3 , nb_segment);
-      if (!change_point) {
-        status = false;
-      }
-      else {
-        nb_segment++;
-      }
-
-      // arguments optionnels
-
-      output = SEQUENCE;
-
-      for (i = 0;i < (args.length() - nb_required) / 2;i++) {
-        if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
-          status = false;
-          genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
-                      args[nb_required + i * 2].tag.string().data() , "OPTION");
-        }
-
-        else {
-          pstr = (AMString*)args[nb_required + i * 2].val.p;
-
-          if (*pstr == "Continuity") {
-            switch (continuity_option) {
-
-            case false : {
-              continuity_option = true;
-
-              if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
-                status = false;
-                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
-                            args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
-              }
-              else {
-                continuity = args[nb_required + i * 2 + 1].val.b;
-              }
-              break;
-            }
-
-            case true : {
-              status = false;
-              genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-              break;
-            }
-            }
-          }
-
-          else if (*pstr == "Output") {
-            switch (output_option) {
-
-            case false : {
-              output_option = true;
-
-              if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
-                status = false;
-                genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , nb_required + i + 1 ,
-                            args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
-              }
-              else {
-                pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
-                if (*pstr == "Sequence") {
-                  output = SEQUENCE;
-                }
-                else if ((*pstr == "SubtractionResidual") || (*pstr == "Residual")) {
-                  output = SUBTRACTION_RESIDUAL;
-                }
-                else if (*pstr == "DivisionResidual") {
-                  output = DIVISION_RESIDUAL;
-                }
-                else {
-                  status = false;
-                  genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + i + 1 ,
-                              "Sequence or Residual");
-                }
-              }
-              break;
-            }
-
-            case true : {
-              status = false;
-              genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-              break;
-            }
-            }
-          }
-
-          else {
-            status = false;
-            genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Segmentation" , nb_required + i + 1 ,
-                        "Continuity or Output");
-          }
-        }
-      }
-
-      if (!status) {
-        delete [] change_point;
-        delete [] model_type;
-        return AMObj(AMObjType::ERROR);
-      }
-
-      seq = iseq->segmentation(error , AMLOUTPUT , args[1].val.i , nb_segment ,
-                               change_point , model_type , output , continuity);
       delete [] change_point;
       delete [] model_type;
-    }
-
-    else {
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , 3 ,
-                  args[2].tag.string().data() , "INT or ARRAY");
       return AMObj(AMObjType::ERROR);
     }
+
+    shape_parameter = new double[nb_variable];
+    for (i = 0;i < nb_variable;i++) {
+      shape_parameter[i] = ishape_parameter;
+    }
+
+    seq = iseq->segmentation(error , AMLOUTPUT , identifier , nb_segment ,
+                             change_point , model_type , common_contrast ,
+                             shape_parameter , output , continuity);
+    delete [] change_point;
+    delete [] model_type;
+    delete [] shape_parameter;
   }
 
   else {
@@ -5327,6 +5361,13 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                 args[1].tag.string().data() , "INT or ARRAY");
     return AMObj(AMObjType::ERROR);
   }
+/*  }
+
+  else {
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Segmentation" , 2 ,
+                args[1].tag.string().data() , "INT or ARRAY");
+    return AMObj(AMObjType::ERROR);
+  } */
 
   if (seq) {
     markovian_seq = seq->markovian_sequences(error);
@@ -6309,7 +6350,6 @@ AMObj STAT_BuildAuxiliaryVariable(const AMObjVector &args)
               genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "BuildAuxiliaryVariable"));
 
   switch (args[0].tag()) {
-
   case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
     seq = ((VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt)->build_auxiliary_variable(error);
     break;
@@ -6329,6 +6369,48 @@ AMObj STAT_BuildAuxiliaryVariable(const AMObjVector &args)
   else {
     AMLOUTPUT << "\n" << error;
     genAMLError(ERRORMSG(STAT_MODULE_s) , "BuildAuxiliaryVariable");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction de sequences residuelles correspondant a la restauration
+ *  des sequences d'etats optimales pour des modeles markoviens caches.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_ResidualSequences(const AMObjVector &args)
+
+{
+  MarkovianSequences *seq;
+  StatError error;
+
+
+  CHECKCONDVA(args.length() == 1 ,
+              genAMLError(ERRORMSG(K_SINGLE_ARG_ERR_s) , "ResidualSequences"));
+
+  switch (args[0].tag()) {
+  case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+    seq = ((VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt)->residual_sequences(error);
+    break;
+  case AMObjType::SEMI_MARKOV_DATA :
+    seq = ((SemiMarkovData*)((STAT_model*)args[0].val.p)->pt)->residual_sequences(error);
+    break;
+  default :
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ResidualSequences" , 1 , args[0].tag.string().data() ,
+                "VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA");
+    return AMObj(AMObjType::ERROR);
+  }
+
+  if (seq) {
+    STAT_model* model = new STAT_model(seq);
+    return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "ResidualSequences");
     return AMObj(AMObjType::ERROR);
   }
 }
