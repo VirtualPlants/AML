@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -1654,6 +1654,10 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
           (*pstr == STAT_continuous_distribution_letter[GAMMA])) {
         ident = GAMMA;
       }
+      else if ((*pstr == STAT_continuous_distribution_word[INVERSE_GAUSSIAN]) ||
+               (*pstr == STAT_continuous_distribution_letter[INVERSE_GAUSSIAN])) {
+        ident = INVERSE_GAUSSIAN;
+      }
       else if ((*pstr == STAT_continuous_distribution_word[GAUSSIAN]) ||
                (*pstr == STAT_continuous_distribution_letter[GAUSSIAN])) {
         ident = GAUSSIAN;
@@ -1661,7 +1665,7 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
       else {
         status = false;
         genAMLError(ERRORMSG(DISTRIBUTION_NAME_sds) , "Estimate" , 4 ,
-                    "GAMMA(Ga) or GAUSSIAN(G)");
+                    "GAMMA(Ga) or INVERSE_GAUSSIAN(IG) or GAUSSIAN(G)");
       }
     }
 
