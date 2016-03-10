@@ -333,8 +333,8 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
 
   if (args[0].tag() == AMObjType::RENEWAL) {
     RWCString *pstr;
-    renewal_distribution dist_type;
     int time;
+    renewal_distribution dist_type;
     DiscreteParametricModel *dist;
     StatError error;
 
@@ -2660,7 +2660,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
         (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
         (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
         (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
-      bool add_flag = false;
+      bool add_variable = false;
       MarkovianSequences *markovian_seq;
 
 
@@ -2746,7 +2746,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
                         args[nb_required + 1].tag.string().data() , "BOOL");
           }
           else {
-            add_flag = args[nb_required + 1].val.b;
+            add_variable = args[nb_required + 1].val.b;
           }
 
           if (real_limit) {
@@ -2758,7 +2758,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
         if (status) {
           if (int_limit) {
             markovian_seq = imarkovian_seq->cluster(error , variable , nb_class + 1 ,
-                                                    int_limit , add_flag);
+                                                    int_limit , add_variable);
           }
           else if (real_limit) {
             markovian_seq = imarkovian_seq->cluster(error , variable , nb_class + 1 ,
@@ -3035,7 +3035,7 @@ AMObj STAT_Transcode(const AMObjVector &args)
         (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
         (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
         (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
-      bool add_flag = false;
+      bool add_variable = false;
       MarkovianSequences *markovian_seq;
 
 
@@ -3067,12 +3067,12 @@ AMObj STAT_Transcode(const AMObjVector &args)
                       args[nb_required + 1].tag.string().data() , "BOOL");
         }
         else {
-          add_flag = args[nb_required + 1].val.b;
+          add_variable = args[nb_required + 1].val.b;
         }
       }
 
       if (status) {
-        markovian_seq = imarkovian_seq->transcode(error , variable , category , add_flag);
+        markovian_seq = imarkovian_seq->transcode(error , variable , category , add_variable);
       }
 
       delete [] category;
@@ -4952,9 +4952,9 @@ AMObj STAT_RemoveRun(const AMObjVector &args)
 
 {
   RWCString *pstr;
-  char position;
   bool status = true;
   int nb_required , nb_variable , variable , offset , value , max_run_length = I_DEFAULT;
+  run_position position;
   const Sequences *iseq;
   Sequences *seq;
   MarkovianSequences *markovian_seq;
@@ -5030,10 +5030,10 @@ AMObj STAT_RemoveRun(const AMObjVector &args)
   else {
     pstr = (AMString*)args[offset + 1].val.p;
     if (*pstr == "Begin") {
-      position = 'b';
+      position = BEGIN_RUN;
     }
     else if (*pstr == "End") {
-      position = 'e';
+      position = END_RUN;
     }
     else {
       status = false;
@@ -6614,7 +6614,8 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
 {
   RWCString *pstr;
   output_format format = ASCII;
-  char *file_name = NULL;
+//  char *file_name = NULL;
+  string file_name = "";
   bool status = true , circular_option = false , circular = false ,
        standard_deviation_option = false , standard_deviation = false ,
        output_option = false , file_name_option = false , format_option = false;
@@ -6771,7 +6772,7 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
                         args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
           }
           else {
-            file_name = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
+            file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
           }
           break;
         }
@@ -7244,8 +7245,11 @@ AMObj STAT_ComputeInitialRun(const AMObjVector &args)
 AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
 
 {
-  bool status = true;
-  int nb_required , sequence_length = I_DEFAULT , run_length = I_DEFAULT;
+  RWCString *pstr;
+  bool status = true , add_variable_option = false , add_variable = false ,
+       run_length_option = false , sequence_length_option = false;
+  register int i;
+  int nb_required , run_length = I_DEFAULT , sequence_length = I_DEFAULT;
   const MarkovianSequences *iseq;
   MarkovianSequences *seq;
   StatError error;
@@ -7277,51 +7281,115 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
 
   nb_required = 1;
 
-  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+              (args.length() == nb_required + 4) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "AddAbsorbingRun"));
 
-  // argument optionnel
+  // arguments optionnels
 
-  if (args.length() == nb_required + 2) {
-    if (args[nb_required].tag() != AMObjType::OPTION) {
+  for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+    if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "AddAbsorbingRun" , nb_required + 1 ,
-                  args[nb_required].tag.string().data() , "OPTION");
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "AddAbsorbingRun" , nb_required + i + 1 ,
+                  args[nb_required + i * 2].tag.string().data() , "OPTION");
     }
+
     else {
-      if (*((AMString*)args[nb_required].val.p) == "SequenceLength") {
-        sequence_length = 0;
+      pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+      if (*pstr == "AddVariable") {
+        switch (add_variable_option) {
+
+        case false : {
+          add_variable_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "AddAbsorbingRun" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            add_variable = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "AddAbsorbingRun" , nb_required + i + 1);
+          break;
+        }
+        }
       }
-      else if (*((AMString*)args[nb_required].val.p) == "RunLength") {
-        run_length = 0;
+
+      else if (*pstr == "RunLength") {
+        switch (run_length_option) {
+
+        case false : {
+          run_length_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "AddAbsorbingRun" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+          }
+          else {
+            run_length = args[nb_required + i * 2 + 1].val.i;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "AddAbsorbingRun" , nb_required + i + 1);
+          break;
+        }
+        }
       }
+
+      else if (*pstr == "SequenceLength") {
+        switch (sequence_length_option) {
+
+        case false : {
+          sequence_length_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "AddAbsorbingRun" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+          }
+          else {
+            sequence_length = args[nb_required + i * 2 + 1].val.i;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "AddAbsorbingRun" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
       else {
         status = false;
-        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "AddAbsorbingRun" , nb_required + 1 ,
-                    "SequenceLength or RunLength");
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "AddAbsorbingRun" , nb_required + i + 1 ,
+                    "AddVariable or RunLength or SequenceLength");
       }
     }
+  }
 
-    if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
-      status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "AddAbsorbingRun" , nb_required + 1 ,
-                  args[nb_required + 1].tag.string().data() , "INT");
-    }
-    else {
-      if (sequence_length == 0) {
-        sequence_length = args[nb_required + 1].val.i;
-      }
-      else if (run_length == 0){
-        run_length = args[nb_required + 1].val.i;
-      }
-    }
+  if ((run_length_option) && (sequence_length_option)) {
+    status = false;
+    genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "AddAbsorbingRun" , "RunLength" , "SequenceLength");
   }
 
   if (!status) {
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->add_absorbing_run(error , sequence_length , run_length);
+  seq = iseq->add_absorbing_run(error , run_length , sequence_length , add_variable);
 
   if (seq) {
     STAT_model* model = new STAT_model(seq);
@@ -7344,7 +7412,7 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
 AMObj STAT_ConsecutiveValues(const AMObjVector &args)
 
 {
-  bool status = true , add_flag = false;
+  bool status = true , add_variable = false;
   int nb_required , nb_variable , variable , offset;
   const MarkovianSequences *iseq;
   MarkovianSequences *seq;
@@ -7421,7 +7489,7 @@ AMObj STAT_ConsecutiveValues(const AMObjVector &args)
                   args[nb_required + 1].tag.string().data() , "BOOL");
     }
     else {
-      add_flag = args[nb_required + 1].val.b;
+      add_variable = args[nb_required + 1].val.b;
     }
   }
 
@@ -7429,7 +7497,7 @@ AMObj STAT_ConsecutiveValues(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->consecutive_values(error , AMLOUTPUT , variable , add_flag);
+  seq = iseq->consecutive_values(error , AMLOUTPUT , variable , add_variable);
 
   if (seq) {
     STAT_model* model = new STAT_model(seq);
