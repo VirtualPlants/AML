@@ -69,8 +69,10 @@
 #include "mtg/lsystemToMTG_scanner.h"
 #include "tool/gparser.h"
 
+#ifndef WITHOUT_TREEMATCH
 #include "tree_matching/treematch.h"
 #include "aml/aml_treematch.h"
+#endif
 
 #include "stat_tool/distance_matrix.h"
 #include "aml/stat_module.h"
@@ -246,7 +248,7 @@ static AMObj MTG_MTG(const AMObjVector& args) {
 
   CHECKCONDVA(args[0].tag() ==AMObjType::STRING,
               genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss), "MTG", args[0].tag.string().data(), "STRING"));
- 
+
   input_file = ((AMString*)(args[0].val.p))->data();
 
   while (argth < args.length()) { // treatment of options
@@ -379,7 +381,7 @@ static AMObj MTG_MTG(const AMObjVector& args) {
 	else cerr << "File " << output_file << " opened for writing ..." << endl;
 
 	// Building the lexer
-	LsystemToMTGLexer l_system_lexer(&is, &cerr); 
+	LsystemToMTGLexer l_system_lexer(&is, &cerr);
 
 	// Building the L-SystemToMTG parser
     GenericParser<float> l_system_parser(lsystemToMTG_yyparse);
@@ -389,7 +391,7 @@ static AMObj MTG_MTG(const AMObjVector& args) {
 	if (!hs) {
 		cerr << "Error in reading file " << header_file << endl;
 		return AMObj(AMObjType::ERROR);
-	}	
+	}
 
 	// tranferring the header data into the MTG file
     string tmp_s;
@@ -418,7 +420,7 @@ static AMObj MTG_MTG(const AMObjVector& args) {
 	  delete pnext;
 	}
 
-	// builds the feature map 
+	// builds the feature map
 	int nb_symbols = 0;
 	char symbol;
 	if (feature_map) {
@@ -462,7 +464,7 @@ static AMObj MTG_MTG(const AMObjVector& args) {
 	// creates the first line of the MTG code
 	os << endl;
 	os << "MTG:" << endl;
-    os << "TOPO"; 
+    os << "TOPO";
 	for (int j=0; j<sd.nbTopoColumns; j++) os << "\t";
 	for (list<string>::iterator pp=feature_names.begin();
 	     pp!= feature_names.end();
@@ -474,14 +476,14 @@ static AMObj MTG_MTG(const AMObjVector& args) {
 
 	// Parsing the l-system string and generating the MTG
 	  bool ret = l_system_parser.parse(&l_system_lexer, os, (void*)(&sd));
-    
+
 	is.close();
 	os.close();
 
-	// The parser returns true if succeed 
+	// The parser returns true if succeed
 	// In this case, the output file contains the corresponding MTG
 	input_file = output_file;
- 
+
   }
 
 
@@ -672,12 +674,12 @@ static AMObj MTG_ClassScale(const AMObjVector& args) {
   char classname;
   if (args[0].tag() ==AMObjType::CHAR)
     classname = args[0].val.c;
-  else 
+  else
     {
     RWCString optionval(*(AMString*)args[0].val.p);
     if (optionval.size() != 1)
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss), "ClassScale", 1, args[0].tag.string().data(), "CHAR");
-    else 
+    else
       classname= optionval(0);
     }
   VClass classid = active_mtg->classId(classname);
@@ -3843,6 +3845,8 @@ static AMObj MTG_EulerAngles(const AMObjVector& args) {
 
 }
 
+#ifndef WITHOUT_TREEMATCH
+
 static AMObj MTG_TreeMatching(const AMObjVector& args) {
   MTG* active_mtg = (AML_MTG*)activeMTG().val.p;
 
@@ -3947,16 +3951,16 @@ static AMObj MTG_TreeMatching(const AMObjVector& args) {
 		  // Nouvelles options de TreeMatching
 		  matching_type == "Edition"     || matching_type == "Alignment" ||
                   matching_type == "SmallestCommonSuperTree"  || matching_type == "LargestCommonSubTree",
-                  genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "TreeMatching", (argth+1)/2+1, 
+                  genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "TreeMatching", (argth+1)/2+1,
 			      "one of Edition, Alignment, SmallestCommonSuperTree, LargestCommonSubTree \n ordered, by_inclusion ,by_weights, by_topology, by_component, by_complex, test, sequence, selkow, endSpaceFree,fractal "));
     }
     else  if (*(AMString*)(args[argth].val.p) == "OrderType") {
 
       CHECKCONDVA(args[argth+1].tag() == AMObjType::STRING,
 		  genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "TreeMatching", (argth+1)/2+1, "a STRING"));
-      
+
       ordered_type = *(AMString*)(args[argth+1].val.p);
-      CHECKCONDVA(ordered_type == "JiangWangZhang"     || ordered_type == "TichitFerraro" || ordered_type == "TichitFerraro1" 
+      CHECKCONDVA(ordered_type == "JiangWangZhang"     || ordered_type == "TichitFerraro" || ordered_type == "TichitFerraro1"
 		  || ordered_type == "FerraroOuangraoua"|| ordered_type == "FerraroOuangraoua1"|| ordered_type == "FerraroOuangraoua2"||
 		  // Nouvelles options de TreeMatching
 		  ordered_type == "Ordered" || ordered_type == "Unordered" || ordered_type == "PartiallyOrdered",
@@ -3966,24 +3970,24 @@ static AMObj MTG_TreeMatching(const AMObjVector& args) {
 
       CHECKCONDVA(args[argth+1].tag() == AMObjType::STRING,
 		  genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "TreeMatching_U", (argth+1)/2+1, "a STRING"));
-      
+
       mapping_type = *(AMString*)(args[argth+1].val.p);
       CHECKCONDVA(mapping_type == "Global"     || mapping_type == "Local" ,
                   genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "TreeMatching_U", (argth+1)/2+1, "one of Global or Local"));
     }
     else  if (*(AMString*)(args[argth].val.p) == "InDelFactor") {
-      
+
       CHECKCONDVA(args[argth+1].tag() == AMObjType::REAL,
 		  genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "TreeMatching", (argth+1)/2+1, "a REAL"));
-      
+
       coeff = args[argth+1].val.r;
-      
+
     }
     else  if (*(AMString*)(args[argth].val.p) == "Mapping") {
-      
+
       CHECKCONDVA(args[argth+1].tag() == AMObjType::STRING,
 		  genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "TreeMatching", (argth+1)/2+1, "a STRING"));
-      
+
       mapping = *(AMString*)(args[argth+1].val.p);
       CHECKCONDVA(mapping == "global"     || mapping == "local"|| mapping == "self_similarity"||
 		  // Nouvelles options de TreeMatching
@@ -3994,31 +3998,31 @@ static AMObj MTG_TreeMatching(const AMObjVector& args) {
       else  if (!strcmp(mapping.data(),"self_similarity"))
 	self_similarity = 1;
       else self_similarity = 0;
-      
+
     }
     else  if (*(AMString*)(args[argth].val.p) == "ScaleType") {
-      
+
       CHECKCONDVA(args[argth+1].tag() == AMObjType::STRING,
 		  genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "TreeMatching_U", (argth+1)/2+1, "a STRING"));
-      
+
       scale_type = *(AMString*)(args[argth+1].val.p);
       CHECKCONDVA(scale_type == "SingleScale"     || scale_type == "MultiScale" || scale_type == "Quotiented" ,
                   genAMLError(ERRORMSG(K_OPTION_VALUE_ERR_sds), "TreeMatching_U", (argth+1)/2+1, "one of SingleScale, MultiScale, Quotiented"));
     }
     else {
-      
+
       CHECKCONDVA(FALSE,
 		  genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sd), "TreeMatching", (argth+1)/2+1, "one of MatchingType, MappingType, Mapping, ScaleType, VectorDistance, InDelFactor, FuncList"));
-      
+
     }
 
     argth += 2;
-    
+
   }
 
   // Check array coherence
-  
-  
+
+
 
   AML_TreeMatch* treematch;
 
@@ -4029,10 +4033,10 @@ static AMObj MTG_TreeMatching(const AMObjVector& args) {
 
 
        treematch = new AML_TreeMatch(*active_mtg,array, fnode_array,matching_type.data(),ordered_type.data(),self_similarity,vect_dist,coeff);
-  
+
     return AMObj(AMObjType::TREEMATCHING, treematch);
   }
-  
+
 
   if (!strcmp(ordered_type.data(),"Unordered")){
 
@@ -4041,22 +4045,22 @@ static AMObj MTG_TreeMatching(const AMObjVector& args) {
 
 
     treematch = new AML_TreeMatch_U(*active_mtg,array, fnode_array,matching_type.data(),mapping_type.data(),mapping.data(),scale_type.data(),vect_dist,coeff);
-  
+
     return AMObj(AMObjType::TREEMATCHING, treematch);
   }
   else if (!strcmp(ordered_type.data(),"Ordered")){
     AML_TreeMatch_O* treematch;
-    
-    
+
+
     treematch = new AML_TreeMatch_O(*active_mtg,array, fnode_array,matching_type.data(),mapping_type.data(),mapping.data(),scale_type.data(),vect_dist,coeff);
-    
+
     return AMObj(AMObjType::TREEMATCHING, treematch);
   }
   else if (!strcmp(ordered_type.data(),"PartiallyOrdered")){
     AML_TreeMatch_PO* treematch;
-    
+
     treematch = new AML_TreeMatch_PO(*active_mtg,array, fnode_array,matching_type.data(),mapping_type.data(),mapping.data(),scale_type.data(),vect_dist,coeff);
-    
+
     return AMObj(AMObjType::TREEMATCHING, treematch);
   }
   else{
@@ -4066,12 +4070,12 @@ static AMObj MTG_TreeMatching(const AMObjVector& args) {
 		     genAMLError(ERRORMSG(K_OPTION_VALUES_ERR_ss), "TreeMatching",
 				 "The function list array must be defined if you want to use a weigthed local distance"))
 	  }
-    
+
     treematch = new AML_TreeMatch(*active_mtg,array, fnode_array,matching_type.data(),ordered_type.data(),self_similarity,vect_dist,coeff);
-    
+
     return AMObj(AMObjType::TREEMATCHING, treematch);
   }
-  
+
 }
 
 
@@ -4315,7 +4319,7 @@ static AMObj MTG_MatchingExtract(const AMObjVector& args) {
           if(VPTOOLS(exists)( string(Plot_prefix) + string(".plot") ) )
       {
           string buf= string("ERASE /F /Q ")+string(Plot_prefix)+string("*");
-		  system(buf.c_str()); 
+		  system(buf.c_str());
 	    }
 #else
 #ifndef STL_EXTENSION
@@ -4372,7 +4376,7 @@ static AMObj MTG_MatchingExtract(const AMObjVector& args) {
 
 }
 
-
+#endif
 
 
 
@@ -4604,6 +4608,7 @@ void installMTGModule() {
 
   installFNode("Active", MTG_Active, 0, type, AMObjType::VOID);
 
+#ifndef WITHOUT_TREEMATCH
   type[0] = AMObjType::ANY;
   installFNode("TreeMatching", MTG_TreeMatching, 1, type, AMObjType::TREEMATCHING);
 
@@ -4618,6 +4623,7 @@ void installMTGModule() {
 
   type[0] = AMObjType::ANY;
   installFNode("TreeMatchingLoad", MTG_TreeMatchingLoad, 1, type, AMObjType::TREEMATCHING);
+#endif
 
   type[0] = AMObjType::VTX;
   installFNode("PlantFrame", MTG_PlantFrame, 1, type, AMObjType::PLANTFRAME);
