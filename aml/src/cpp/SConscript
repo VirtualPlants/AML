@@ -21,8 +21,8 @@ if env_aml['compiler'] == 'mingw':
                "-s"]
     env_aml.AppendUnique(LINKFLAGS=LINKFLAGS)
 
-sources = Split(""" 
-install.cpp 
+sources = Split("""
+install.cpp
 kernel_funs.cpp
 file_funs.cpp
 """)
@@ -67,9 +67,10 @@ mtg_src= ["mtg_funs.cpp"]
 sources.extend(mtg_src)
 
 # TreeMatching module
-LIBS += ["vptree_matching"]
-tm_src= ["aml_treematch.cpp"]
-sources.extend(tm_src)
+#LIBS += ["vptree_matching"]
+#tm_src= ["aml_treematch.cpp"]
+#sources.extend(tm_src)
+env_aml.AppendUnique(CPPDEFINES=['WITHOUT_TREEMATCH'])
 
 # MSVOXEL module
 # LIBS += ["vpoctree"]
