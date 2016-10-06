@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: stat_module.h 18551 2015-07-29 13:38:34Z guedon $
  *
  *       Forum for V-Plants developers:
  *

@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: stat_funs4.cpp 18819 2016-09-09 12:17:47Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,6 +37,7 @@
 
 
 #include <iostream>
+#include <vector>
 
 #include "stat_tool/distribution.h"
 #include "stat_tool/compound.h"
@@ -260,6 +261,7 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
   register int i , j;
   int nb_component , nb_required , min_inf_bound = 0;
   discrete_parametric ident[DISCRETE_MIXTURE_NB_COMPONENT];
+  vector<discrete_parametric> vec_ident(DISCRETE_MIXTURE_NB_COMPONENT);
   model_selection_criterion criterion = BICc;
   const DiscreteParametric *pcomponent[DISCRETE_MIXTURE_NB_COMPONENT];
   DiscreteMixture *imixt , *mixt;
@@ -292,6 +294,7 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
             (*pstr == STAT_discrete_distribution_letter[j])) {
           estimate[i] = true;
           ident[i] = (discrete_parametric)j;
+          vec_ident[i] = ident[i];
           pcomponent[i] = new DiscreteParametric(0 , ident[i]);
           break;
         }
@@ -548,7 +551,9 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
     }
 
     else {
-      mixt = histo->discrete_mixture_estimation(error , AMLOUTPUT , 1 , nb_component , ident ,
+//      mixt = histo->discrete_mixture_estimation(error , AMLOUTPUT , 1 , nb_component , ident ,
+//                                                min_inf_bound , flag , component_flag , criterion);
+      mixt = histo->discrete_mixture_estimation(error , AMLOUTPUT , 1 , nb_component , vec_ident ,
                                                 min_inf_bound , flag , component_flag , criterion);
     }
   }

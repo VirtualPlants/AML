@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr) 
  *
  *       $Source$
- *       $Id$
+ *       $Id: stat_funs.h 16025 2014-03-07 16:07:18Z guedon $
  *
  *       Forum for V-Plants developers:
  *               

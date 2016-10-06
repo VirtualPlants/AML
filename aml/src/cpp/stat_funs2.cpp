@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: stat_funs2.cpp 18818 2016-09-09 12:17:16Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,6 +37,7 @@
 
 
 #include <iostream>
+#include <vector>
 
 #include "stat_tool/distribution.h"
 #include "stat_tool/compound.h"
@@ -64,6 +65,8 @@
 
 #include "aml/stat_module.h"
 
+
+using namespace std;
 
 using namespace stat_tool;
 using namespace sequence_analysis;
@@ -333,7 +336,9 @@ AMObj STAT_DiscreteMixture(const AMObjVector &args)
     register int i;
     int nb_component = args.length() / 2;
     double weight[DISCRETE_MIXTURE_NB_COMPONENT];
+    vector<double> vec_weight(DISCRETE_MIXTURE_NB_COMPONENT);
     const DiscreteParametric *component[DISCRETE_MIXTURE_NB_COMPONENT];
+    vector<DiscreteParametric> vec_component(DISCRETE_MIXTURE_NB_COMPONENT);
 
 
     CHECKCONDVA(args.length() % 2 == 0 ,
@@ -349,6 +354,7 @@ AMObj STAT_DiscreteMixture(const AMObjVector &args)
       }
       else {
         weight[i] = args[i * 2].val.r;
+        vec_weight[i] = args[i * 2].val.r;
       }
 
       switch (args[i * 2 + 1].tag()) {
@@ -371,10 +377,15 @@ AMObj STAT_DiscreteMixture(const AMObjVector &args)
                     "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
         break;
       }
+
+      if (component[i]) {
+        vec_component[i] = *component[i];
+      }
     }
 
     if (status) {
-      mixt = DiscreteMixture::building(error , nb_component , weight , component);
+//      mixt = DiscreteMixture::building(error , nb_component , weight , component);
+      mixt = DiscreteMixture::building(error , nb_component , vec_weight , vec_component);
     }
 
     for (i = 0;i < nb_component;i++) {
@@ -430,6 +441,7 @@ AMObj STAT_Convolution(const AMObjVector &args)
     register int i;
     int nb_dist = args.length();
     const DiscreteParametric *dist[CONVOLUTION_NB_DISTRIBUTION];
+    vector<DiscreteParametric> vec_dist(CONVOLUTION_NB_DISTRIBUTION);
 
 
     CHECKCONDVA((nb_dist >= 2) && (nb_dist <= CONVOLUTION_NB_DISTRIBUTION) ,
@@ -456,10 +468,15 @@ AMObj STAT_Convolution(const AMObjVector &args)
                     "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
         break;
       }
+
+      if (dist[i]) {
+        vec_dist[i] = *dist[i];
+      }
     }
 
     if (status) {
-      convol = Convolution::building(error , nb_dist , dist);
+//      convol = Convolution::building(error , nb_dist , dist);
+      convol = Convolution::building(error , nb_dist , vec_dist);
     }
 
     for (i = 0;i < nb_dist;i++) {
