@@ -1,7 +1,7 @@
 # -*-python-*-
 
 Import( "env" )
-import os 
+import os
 pj = os.path.join
 
 sources = env.ALEAGlob('*.cpp')
@@ -30,7 +30,7 @@ pglsg""")
 # MTG module
 LIBS += ["vpmtg"]
 # TreeMatching module
-LIBS += ["vptree_matching"]
+#LIBS += ["vptree_matching"]
 # # MSVOXEL module
 # LIBS += ["vpoctree"]
 # #  FLUX module
