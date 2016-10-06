@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: stat_funs5.cpp 18817 2016-09-09 12:16:56Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,6 +37,7 @@
 
 
 #include <iostream>
+#include <vector>
 
 #include "stat_tool/distribution.h"
 #include "stat_tool/compound.h"
@@ -3304,6 +3305,53 @@ AMObj STAT_ComputeRankCorrelation(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
+ *  Computation of sup-norm distance between two empirical continuous distributions.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_SupNormDistance(const AMObjVector &args)
+
+{
+  bool status = true;
+  StatError error;
+
+
+  CHECKCONDVA((args.length() == 2) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "SupNormDistance" , 2));
+
+  // arguments obligatoires
+
+  if (args[0].tag() != AMObjType::VECTORS) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SupNormDistance" , 1 ,
+                args[0].tag.string().data() , "VECTORS");
+  }
+  if (args[1].tag() != AMObjType::VECTORS) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SupNormDistance" , 2 ,
+                args[1].tag.string().data() , "VECTORS");
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  status = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->sup_norm_distance(error , AMLOUTPUT ,
+                                                                           *((Vectors*)((STAT_model*)args[1].val.p)->pt));
+
+  if (status) {
+    return AMObj(AMObjType::VOID);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "SupNormDistance");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Tableau de contingence.
  *
  *--------------------------------------------------------------*/
@@ -4536,8 +4584,10 @@ AMObj STAT_Segmentation(const AMObjVector &args)
   register int i , j;
   int nb_required , nb_sequence , nb_variable , identifier = I_DEFAULT;
   double ishape_parameter = 1 , *shape_parameter;
+  vector<double> vec_shape_parameter;
   sequence_type output = SEQUENCE;
   segment_model *model_type;
+  vector<segment_model> vec_model_type;
   Sequences *iseq;
   Sequences *seq;
   MarkovianSequences *markovian_seq;
@@ -4617,6 +4667,12 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         else if (*pstr == "InterceptSlope") {
           model_type[i] = INTERCEPT_SLOPE_CHANGE;
         }
+        else if (*pstr == "AutoregressiveModel") {
+          model_type[i] = AUTOREGRESSIVE_MODEL_CHANGE;
+        }
+        else if (*pstr == "StationaryAutoregressiveModel") {
+          model_type[i] = STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE;
+        }
         else if (*pstr == "BayesianPoisson") {
           model_type[i] = BAYESIAN_POISSON_CHANGE;
         }
@@ -4626,7 +4682,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         else {
           status = false;
           genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
         }
 
         if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
@@ -4668,12 +4724,20 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         else if (*pstr == "InterceptSlope") {
           model_type[i] = INTERCEPT_SLOPE_CHANGE;
         }
+        else if (*pstr == "AutoregressiveModel") {
+          model_type[i] = AUTOREGRESSIVE_MODEL_CHANGE;
+        }
+        else if (*pstr == "StationaryAutoregressiveModel") {
+          model_type[i] = STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE;
+        }
         else {
           status = false;
           genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
         }
       }
+
+      vec_model_type.push_back(model_type[i]);
     }
   }
 
@@ -4765,22 +4829,28 @@ AMObj STAT_Segmentation(const AMObjVector &args)
             }
             else {
               pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
-              if (*pstr == STAT_criterion_word[ICL]) {
-                criterion = ICL;
-              }
-              else if (*pstr == "LogLikelihoodSlope") {
+              if (*pstr == "LogLikelihoodSlope") {
                 criterion = LIKELIHOOD_SLOPE;
               }
-              else if (*pstr == STAT_criterion_word[mBIC]) {
-                criterion = mBIC;
+              else if (*pstr == "DimensionJump") {
+                criterion = DIMENSION_JUMP;
+              }
+              else if (*pstr == STAT_criterion_word[ICL]) {
+                criterion = ICL;
               }
               else if (*pstr == "SegmentationLogLikelihoodSlope") {
                 criterion = SEGMENTATION_LIKELIHOOD_SLOPE;
               }
+              else if (*pstr == "SegmentationDimensionJump") {
+                criterion = SEGMENTATION_DIMENSION_JUMP;
+              }
+              else if (*pstr == STAT_criterion_word[mBIC]) {
+                criterion = mBIC;
+              }
               else {
                 status = false;
                 genAMLError(ERRORMSG(MODEL_SELECTION_CRITERION_sds) , "Segmentation" ,
-                            nb_required + i + 1 , "ICL or LogLikelihoodSlope or mBIC or SegmentationLogLikelihoodSlope");
+                            nb_required + i + 1 , "LogLikelihoodSlope or DimensionJump or ICL or SegmentationLogLikelihoodSlope or SegmentationDimensionJump or mBIC");
               }
             }
             break;
@@ -4993,11 +5063,11 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
     if ((!sequence_option) && (nb_sequence > 1)) {
       for (i = 0;i < nb_variable;i++) {
-        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == VARIANCE_CHANGE) ||
-            (model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE) ||
+            (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
           status = false;
           genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or LinearModel or InterceptSlope");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
         }
       }
     }
@@ -5081,18 +5151,27 @@ AMObj STAT_Segmentation(const AMObjVector &args)
     shape_parameter = new double[nb_variable];
     for (i = 0;i < nb_variable;i++) {
       shape_parameter[i] = ishape_parameter;
+      vec_shape_parameter.push_back(ishape_parameter);
     }
 
     switch (nb_segment_estimation) {
 
     case false : {
       if (args[1].val.i == 1) {
+//        seq = iseq->segmentation(error , AMLOUTPUT , identifier , args[1].val.i ,
+//                                 NULL , model_type , common_contrast ,
+//                                 shape_parameter , output);
+        vector<int> vec_change_point;
+
         seq = iseq->segmentation(error , AMLOUTPUT , identifier , args[1].val.i ,
-                                 NULL , model_type , common_contrast ,
-                                 shape_parameter , output);
+                                 vec_change_point , vec_model_type , common_contrast ,
+                                 vec_shape_parameter , output);
       }
 
       else {
+//        seq = iseq->segmentation(error , AMLOUTPUT , identifier , args[1].val.i ,
+//                                 vec_model_type , common_contrast , vec_shape_parameter ,
+//                                 output , continuity);
         seq = iseq->segmentation(error , AMLOUTPUT , identifier , args[1].val.i ,
                                  model_type , common_contrast , shape_parameter ,
                                  output , continuity);
@@ -5101,8 +5180,11 @@ AMObj STAT_Segmentation(const AMObjVector &args)
     }
 
     case true : {
+//      seq = iseq->segmentation(error , AMLOUTPUT , identifier , args[1].val.i ,
+//                               model_type , common_contrast , shape_parameter ,
+//                               criterion , min_nb_segment , penalty_shape , output);
       seq = iseq->segmentation(error , AMLOUTPUT , identifier , args[1].val.i ,
-                               model_type , common_contrast , shape_parameter ,
+                               vec_model_type , common_contrast , vec_shape_parameter ,
                                criterion , min_nb_segment , penalty_shape , output);
       break;
     }
@@ -5114,6 +5196,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
   else if (args[1].tag() == AMObjType::ARRAY) {
     int nb_segment = I_DEFAULT , *change_point;
+    vector<int> vec_change_point;
 
 
     CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
@@ -5128,6 +5211,9 @@ AMObj STAT_Segmentation(const AMObjVector &args)
       status = false;
     }
     else {
+      for (i = 0;i < nb_segment;i++) {
+        vec_change_point.push_back(change_point[i]);
+      }
       nb_segment++;
     }
 
@@ -5297,11 +5383,11 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
     if ((!sequence_option) && (nb_sequence > 1)) {
       for (i = 0;i < nb_variable;i++) {
-        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == VARIANCE_CHANGE) ||
-            (model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE) ||
+            (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
           status = false;
           genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or LinearModel or InterceptSlope");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
         }
       }
     }
@@ -5346,11 +5432,15 @@ AMObj STAT_Segmentation(const AMObjVector &args)
     shape_parameter = new double[nb_variable];
     for (i = 0;i < nb_variable;i++) {
       shape_parameter[i] = ishape_parameter;
+      vec_shape_parameter.push_back(ishape_parameter);
     }
 
+//    seq = iseq->segmentation(error , AMLOUTPUT , identifier , nb_segment ,
+//                             change_point , model_type , common_contrast ,
+//                             shape_parameter , output , continuity);
     seq = iseq->segmentation(error , AMLOUTPUT , identifier , nb_segment ,
-                             change_point , model_type , common_contrast ,
-                             shape_parameter , output , continuity);
+                             vec_change_point , vec_model_type , common_contrast ,
+                             vec_shape_parameter , output , continuity);
     delete [] change_point;
     delete [] model_type;
     delete [] shape_parameter;

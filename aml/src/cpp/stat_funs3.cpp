@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: stat_funs3.cpp 18820 2016-09-09 12:18:22Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,6 +37,7 @@
 
 
 #include <iostream>
+#include <vector>
 
 #include "stat_tool/distribution.h"
 #include "stat_tool/compound.h"
@@ -1488,10 +1489,14 @@ AMObj STAT_Merge(const AMObjVector &args)
   if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
     const FrequencyDistribution **phisto;
+    vector<FrequencyDistribution> ihisto;
     DiscreteDistributionData *histo;
 
 
     phisto = new const FrequencyDistribution*[nb_sample];
+    for (i = 1;i < nb_sample;i++) {
+      phisto[i] = NULL;
+    }
 
     for (i = 0;i < nb_sample;i++) {
       switch (args[i].tag()) {
@@ -1513,10 +1518,15 @@ AMObj STAT_Merge(const AMObjVector &args)
                     "FREQUENCY_DISTRIBUTION or DISCRETE_MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA");
         break;
       }
+
+      if ((i > 0) && (phisto[i])) {
+        ihisto.push_back(*phisto[i]);
+      }
     }
 
     if (status) {
-      histo = new DiscreteDistributionData(nb_sample , phisto);
+//      histo = new DiscreteDistributionData(nb_sample , phisto);
+      histo = phisto[0]->merge(nb_sample - 1 , ihisto);
     }
 
     delete [] phisto;
@@ -1531,11 +1541,15 @@ AMObj STAT_Merge(const AMObjVector &args)
 
   if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
     const Vectors **pvec;
+    vector<Vectors> ivec;
     Vectors *vec;
     StatError error;
 
 
     pvec = new const Vectors*[nb_sample];
+    for (i = 1;i < nb_sample;i++) {
+      pvec[i] = NULL;
+    }
 
     for (i = 0;i < nb_sample;i++) {
       switch (args[i].tag()) {
@@ -1550,10 +1564,15 @@ AMObj STAT_Merge(const AMObjVector &args)
         genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Merge" , i + 1 ,
                     args[i].tag.string().data() , "VECTORS or MIXTURE_DATA");
       }
+
+      if ((i > 0) && (pvec[i])) {
+        ivec.push_back(*pvec[i]);
+      }
     }
 
     if (status) {
-      vec = pvec[0]->merge(error , nb_sample - 1 , pvec + 1);
+//      vec = pvec[0]->merge(error , nb_sample - 1 , pvec + 1);
+      vec = pvec[0]->merge(error , nb_sample - 1 , ivec);
     }
 
     delete [] pvec;
@@ -1575,10 +1594,14 @@ AMObj STAT_Merge(const AMObjVector &args)
 
   if (args[0].tag() == AMObjType::TIME_EVENTS) {
     const TimeEvents **ptimev;
+    vector<TimeEvents> itimev;
     TimeEvents *timev;
 
 
     ptimev = new const TimeEvents*[nb_sample];
+    for (i = 1;i < nb_sample;i++) {
+      ptimev[i] = NULL;
+    }
 
     for (i = 0;i < nb_sample;i++) {
       switch (args[i].tag()) {
@@ -1594,10 +1617,15 @@ AMObj STAT_Merge(const AMObjVector &args)
                     args[i].tag.string().data() , "TIME_EVENTS or RENEWAL_DATA");
         break;
       }
+
+      if ((i > 0) && (ptimev[i])) {
+        itimev.push_back(*ptimev[i]);
+      }
     }
 
     if (status) {
-      timev = new TimeEvents(nb_sample , ptimev);
+//      timev = new TimeEvents(nb_sample , ptimev);
+      timev = ptimev[0]->merge(nb_sample - 1 , itimev);
     }
 
     delete [] ptimev;
@@ -1613,10 +1641,14 @@ AMObj STAT_Merge(const AMObjVector &args)
   if (args[0].tag() == AMObjType::RENEWAL_DATA) {
     const RenewalData **ptimev;
     RenewalData *timev;
+    vector<RenewalData> itimev;
     StatError error;
 
 
     ptimev = new const RenewalData*[nb_sample];
+    for (i = 1;i < nb_sample;i++) {
+      ptimev[i] = NULL;
+    }
 
     for (i = 0;i < nb_sample;i++) {
       if (args[i].tag() != AMObjType::RENEWAL_DATA) {
@@ -1627,10 +1659,15 @@ AMObj STAT_Merge(const AMObjVector &args)
       else {
         ptimev[i] = (RenewalData*)((STAT_model*)args[i].val.p)->pt;
       }
+
+      if ((i > 0) && (ptimev[i])) {
+        itimev.push_back(*ptimev[i]);
+      }
     }
 
     if (status) {
-      timev = ptimev[0]->merge(error , nb_sample - 1 , ptimev + 1);
+//      timev = ptimev[0]->merge(error , nb_sample - 1 , ptimev + 1);
+      timev = ptimev[0]->merge(error , nb_sample - 1 , itimev);
     }
 
     delete [] ptimev;
@@ -1655,13 +1692,18 @@ AMObj STAT_Merge(const AMObjVector &args)
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     const Sequences **pseq;
+    vector<Sequences> iseq;
     Sequences *seq;
     const MarkovianSequences **pmarkovian_seq;
+    vector<MarkovianSequences> imarkovian_seq;
     MarkovianSequences *markovian_seq;
     StatError error;
 
 
     pseq = new const Sequences*[nb_sample];
+    for (i = 1;i < nb_sample;i++) {
+      pseq[i] = NULL;
+    }
 
     pmarkovian_seq = new const MarkovianSequences*[nb_sample];
     for (i = 0;i < nb_sample;i++) {
@@ -1695,6 +1737,15 @@ AMObj STAT_Merge(const AMObjVector &args)
                     "SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
         break;
       }
+
+      if (i > 0) {
+        if (pseq[i]) {
+          iseq.push_back(*pseq[i]);
+        }
+        if (pmarkovian_seq[i]) {
+          imarkovian_seq.push_back(*pmarkovian_seq[i]);
+        }
+      }
     }
 
     if (!status) {
@@ -1710,7 +1761,8 @@ AMObj STAT_Merge(const AMObjVector &args)
     }
 
     if (i < nb_sample) {
-      seq = pseq[0]->merge(error , nb_sample - 1 , pseq + 1);
+//      seq = pseq[0]->merge(error , nb_sample - 1 , pseq + 1);
+      seq = pseq[0]->merge(error , nb_sample - 1 , iseq);
       delete [] pseq;
       delete [] pmarkovian_seq;
 
@@ -1737,7 +1789,8 @@ AMObj STAT_Merge(const AMObjVector &args)
     }
 
     else {
-      markovian_seq = pmarkovian_seq[0]->merge(error , nb_sample - 1 , pmarkovian_seq + 1);
+//      markovian_seq = pmarkovian_seq[0]->merge(error , nb_sample - 1 , pmarkovian_seq + 1);
+      markovian_seq = pmarkovian_seq[0]->merge(error , nb_sample - 1 , imarkovian_seq);
       delete [] pseq;
       delete [] pmarkovian_seq;
 
@@ -2304,7 +2357,9 @@ AMObj STAT_Cluster(const AMObjVector &args)
     }
 
     else if (*pstr == "Limit") {
+      register int i;
       int nb_class = I_DEFAULT , *limit = NULL;
+      vector<int> vec_limit;
 
 
       CHECKCONDVA(args.length() == nb_required ,
@@ -2320,10 +2375,16 @@ AMObj STAT_Cluster(const AMObjVector &args)
         if (!limit) {
           status = false;
         }
+        else {
+          for (i = 0;i < nb_class;i++) {
+            vec_limit.push_back(limit[i]);
+          }
+        }
       }
 
       if (status) {
-        histo = ihisto->cluster(error , nb_class + 1 , limit);
+//        histo = ihisto->cluster(error , nb_class + 1 , limit);
+        histo = ihisto->cluster(error , nb_class + 1 , vec_limit);
       }
 
       delete [] limit;
@@ -2357,9 +2418,12 @@ AMObj STAT_Cluster(const AMObjVector &args)
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     RWCString *pstr;
     bool status = true;
+    register int i;
     int nb_required , nb_variable , variable , offset , nb_class = I_DEFAULT , *int_limit = NULL;
+    vector<int> vec_int_limit;
     rounding  mode = FLOOR;
     double *real_limit = NULL;
+    vector<double> vec_real_limit;
     const Vectors *ivec;
     const Sequences *iseq;
     const MarkovianSequences *imarkovian_seq;
@@ -2441,13 +2505,25 @@ AMObj STAT_Cluster(const AMObjVector &args)
           if (!int_limit) {
             status = false;
           }
+          else {
+            for (i = 0;i < nb_class;i++) {
+              vec_int_limit.push_back(int_limit[i]);
+            }
+          }
         }
+
         else if (parray->surfaceType() == AMObjType::REAL) {
           real_limit = buildRealArray(args , offset , "Cluster" , offset + 1 , nb_class , false);
           if (!real_limit) {
             status = false;
           }
+          else {
+            for (i = 0;i < nb_class;i++) {
+              vec_real_limit.push_back(real_limit[i]);
+            }
+          }
         }
+
         else {
           status = false;
           genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_1_sdss) , "Cluster" , offset + 1 ,
@@ -2530,10 +2606,12 @@ AMObj STAT_Cluster(const AMObjVector &args)
         
         if (status) {
           if (int_limit) {
-            vec = ivec->cluster(error , variable , nb_class + 1 , int_limit);
+//            vec = ivec->cluster(error , variable , nb_class + 1 , int_limit);
+            vec = ivec->cluster(error , variable , nb_class + 1 , vec_int_limit);
           }
           else if (real_limit) {
-            vec = ivec->cluster(error , variable , nb_class + 1 , real_limit);
+//            vec = ivec->cluster(error , variable , nb_class + 1 , real_limit);
+            vec = ivec->cluster(error , variable , nb_class + 1 , vec_real_limit);
           }
         }
 
@@ -2619,10 +2697,12 @@ AMObj STAT_Cluster(const AMObjVector &args)
 
         if (status) {
           if (int_limit) {
-            seq = iseq->cluster(error , variable , nb_class + 1 , int_limit);
+//            seq = iseq->cluster(error , variable , nb_class + 1 , int_limit);
+            seq = iseq->cluster(error , variable , nb_class + 1 , vec_int_limit);
           }
           else if (real_limit) {
-            seq = iseq->cluster(error , variable , nb_class + 1 , real_limit);
+//            seq = iseq->cluster(error , variable , nb_class + 1 , real_limit);
+            seq = iseq->cluster(error , variable , nb_class + 1 , vec_real_limit);
           }
         }
 
@@ -2757,12 +2837,16 @@ AMObj STAT_Cluster(const AMObjVector &args)
 
         if (status) {
           if (int_limit) {
+//            markovian_seq = imarkovian_seq->cluster(error , variable , nb_class + 1 ,
+//                                                    int_limit , add_variable);
             markovian_seq = imarkovian_seq->cluster(error , variable , nb_class + 1 ,
-                                                    int_limit , add_variable);
+                                                    vec_int_limit , add_variable);
           }
           else if (real_limit) {
+//            markovian_seq = imarkovian_seq->cluster(error , variable , nb_class + 1 ,
+//                                                    real_limit);
             markovian_seq = imarkovian_seq->cluster(error , variable , nb_class + 1 ,
-                                                    real_limit);
+                                                    vec_real_limit);
           }
         }
 
@@ -2808,7 +2892,9 @@ AMObj STAT_Transcode(const AMObjVector &args)
   if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
     bool status = true;
+    register int i;
     int nb_category , *category = NULL;
+    vector<int> vec_category;
     const FrequencyDistribution *ihisto;
     DiscreteDistributionData *histo;
     StatError error;
@@ -2844,10 +2930,16 @@ AMObj STAT_Transcode(const AMObjVector &args)
       if (!category) {
         status = false;
       }
+      else {
+        for (i = 0;i < nb_category;i++) {
+          vec_category.push_back(category[i]);
+        }
+      }
     }
 
     if (status) {
-      histo = ihisto->transcode(error , category);
+//      histo = ihisto->transcode(error , category);
+      histo = ihisto->transcode(error , vec_category);
     }
 
     delete [] category;
@@ -2873,8 +2965,10 @@ AMObj STAT_Transcode(const AMObjVector &args)
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     bool status = true;
+    register int i;
     int nb_required , nb_variable , variable = I_DEFAULT , offset ,
         nb_category = I_DEFAULT , *category = NULL;
+    vector<int> vec_category;
     const Vectors *ivec = NULL;
     const Sequences *iseq = NULL;
     const MarkovianSequences *imarkovian_seq = NULL;
@@ -2950,12 +3044,17 @@ AMObj STAT_Transcode(const AMObjVector &args)
     if (args[offset].tag() != AMObjType::ARRAY) {
       status = false;
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Transcode" , offset + 1 ,
-                    args[offset].tag.string().data() , "ARRAY");
+                  args[offset].tag.string().data() , "ARRAY");
     }
     else {
       category = buildIntArray(args , offset , "Transcode" , offset + 1 , nb_category);
       if (!category) {
         status = false;
+      }
+      else {
+        for (i = 0;i < nb_category;i++) {
+          vec_category.push_back(category[i]);
+        }
       }
     }
 
@@ -2969,7 +3068,8 @@ AMObj STAT_Transcode(const AMObjVector &args)
       }
 
       if (status) {
-        vec = ivec->transcode(error , variable , category);
+//        vec = ivec->transcode(error , variable , category);
+        vec = ivec->transcode(error , variable , vec_category);
       }
 
       delete [] category;
@@ -3000,7 +3100,8 @@ AMObj STAT_Transcode(const AMObjVector &args)
       }
 
       if (status) {
-        seq = iseq->transcode(error , variable , category);
+//        seq = iseq->transcode(error , variable , category);
+        seq = iseq->transcode(error , variable , vec_category);
       }
 
       delete [] category;
@@ -3072,7 +3173,8 @@ AMObj STAT_Transcode(const AMObjVector &args)
       }
 
       if (status) {
-        markovian_seq = imarkovian_seq->transcode(error , variable , category , add_variable);
+//        markovian_seq = imarkovian_seq->transcode(error , variable , category , add_variable);
+        markovian_seq = imarkovian_seq->transcode(error , variable , vec_category , add_variable);
       }
 
       delete [] category;
@@ -3764,7 +3866,7 @@ AMObj STAT_Round(const AMObjVector &args)
  *
  *--------------------------------------------------------------*/
 
-AMObj STAT_SelectStep(const AMObjVector &args)
+AMObj STAT_SelectBinWidth(const AMObjVector &args)
 
 {
   bool status = true;
@@ -3777,7 +3879,7 @@ AMObj STAT_SelectStep(const AMObjVector &args)
 
 
   CHECKCONDVA(args.length() >= 2 ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "SelectStep"));
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "SelectBinWidth"));
 
   switch (args[0].tag()) {
   case AMObjType::VECTORS :
@@ -3809,7 +3911,7 @@ AMObj STAT_SelectStep(const AMObjVector &args)
     nb_variable = markovian_seq->get_nb_variable();
     break;
   default :
-    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectStep" , 1 , args[0].tag.string().data() ,
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectBinWidth" , 1 , args[0].tag.string().data() ,
                 "VECTORS or MIXTURE_DATA or SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
     return AMObj(AMObjType::ERROR);
   }
@@ -3824,7 +3926,7 @@ AMObj STAT_SelectStep(const AMObjVector &args)
 
     if (args[1].tag() != AMObjType::INTEGER) {
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectStep" , 2 ,
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectBinWidth" , 2 ,
                   args[1].tag.string().data() , "INT");
     }
     else {
@@ -3833,7 +3935,7 @@ AMObj STAT_SelectStep(const AMObjVector &args)
   }
 
   CHECKCONDVA((args.length() == offset + 1) || (args.length() == offset + 3) ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "SelectStep"));
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "SelectBinWidth"));
 
   // argument obligatoire
 
@@ -3846,7 +3948,7 @@ AMObj STAT_SelectStep(const AMObjVector &args)
     break;
   default :
     status = false;
-    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectStep" , offset + 1 ,
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectBinWidth" , offset + 1 ,
                 args[offset].tag.string().data() , "INT or REAL");
   }
 
@@ -3855,13 +3957,13 @@ AMObj STAT_SelectStep(const AMObjVector &args)
   if (args.length() == offset + 3) {
     if (args[offset + 1].tag() != AMObjType::OPTION) {
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectStep" , offset + 2 ,
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectBinWidth" , offset + 2 ,
                   args[offset + 1].tag.string().data() , "OPTION");
     }
     else {
       if (*((AMString*)args[offset + 1].val.p) != "MinValue") {
         status = false;
-        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "SelectStep" , offset + 2 ,
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "SelectBinWidth" , offset + 2 ,
                     "MinValue");
       }
     }
@@ -3875,7 +3977,7 @@ AMObj STAT_SelectStep(const AMObjVector &args)
       break;
     default :
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectStep" , offset + 2 ,
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "SelectBinWidth" , offset + 2 ,
                   args[offset + 2].tag.string().data() , "INT or REAL");
     }
   }
@@ -3885,27 +3987,27 @@ AMObj STAT_SelectStep(const AMObjVector &args)
   }
 
   if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
-    status = vec->select_step(error , variable , step , min_value);
+    status = vec->select_bin_width(error , variable , step , min_value);
 
     if (status) {
       return AMObj(AMObjType::VOID);
     }
     else {
       AMLOUTPUT << "\n" << error;
-      genAMLError(ERRORMSG(STAT_MODULE_s) , "SelectStep");
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "SelectBinWidth");
       return AMObj(AMObjType::ERROR);
     }
   }
 
   if (args[0].tag() == AMObjType::SEQUENCES) {
-    status = seq->select_step(error , variable , step , min_value);
+    status = seq->select_bin_width(error , variable , step , min_value);
 
     if (status) {
       return AMObj(AMObjType::VOID);
     }
     else {
       AMLOUTPUT << "\n" << error;
-      genAMLError(ERRORMSG(STAT_MODULE_s) , "SelectStep");
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "SelectBinWidth");
       return AMObj(AMObjType::ERROR);
     }
   }
@@ -3914,14 +4016,14 @@ AMObj STAT_SelectStep(const AMObjVector &args)
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
-    status = markovian_seq->select_step(error , variable , step , min_value);
+    status = markovian_seq->select_bin_width(error , variable , step , min_value);
 
     if (status) {
       return AMObj(AMObjType::VOID);
     }
     else {
       AMLOUTPUT << "\n" << error;
-      genAMLError(ERRORMSG(STAT_MODULE_s) , "SelectStep");
+      genAMLError(ERRORMSG(STAT_MODULE_s) , "SelectBinWidth");
       return AMObj(AMObjType::ERROR);
     }
   }
@@ -3939,7 +4041,9 @@ AMObj STAT_SelectIndividual(const AMObjVector &args)
 {
   RWCString *pstr;
   bool status = true , keep = true;
+  register int i;
   int nb_required , nb_pattern = I_DEFAULT , *identifier = NULL;
+  vector<int> vec_identifier;
   StatError error;
 
 
@@ -3959,6 +4063,11 @@ AMObj STAT_SelectIndividual(const AMObjVector &args)
     identifier = buildIntArray(args , 1 , "SelectIndividual" , 2 , nb_pattern);
     if (!identifier) {
       status = false;
+    }
+    else {
+      for (i = 0;i < nb_pattern;i++) {
+        vec_identifier.push_back(identifier[i]);
+      }
     }
   }
 
@@ -4016,7 +4125,8 @@ AMObj STAT_SelectIndividual(const AMObjVector &args)
       break;
     }
 
-    vec = ivec->select_individual(error , nb_pattern , identifier , keep);
+//    vec = ivec->select_individual(error , nb_pattern , identifier , keep);
+    vec = ivec->select_individual(error , nb_pattern , vec_identifier , keep);
     delete [] identifier;
 
     if (vec) {
@@ -4057,7 +4167,8 @@ AMObj STAT_SelectIndividual(const AMObjVector &args)
       break;
     }
 
-    seq = iseq->select_individual(error , nb_pattern , identifier , keep);
+//    seq = iseq->select_individual(error , nb_pattern , identifier , keep);
+    seq = iseq->select_individual(error , nb_pattern , vec_identifier , keep);
     delete [] identifier;
 
     if (seq) {
@@ -4086,8 +4197,10 @@ AMObj STAT_SelectIndividual(const AMObjVector &args)
     DistanceMatrix *dist_matrix;
 
 
+//    dist_matrix = ((DistanceMatrix*)((STAT_model*)args[0].val.p)->pt)->select_individual(error , nb_pattern ,
+//                                                                                         identifier , keep);
     dist_matrix = ((DistanceMatrix*)((STAT_model*)args[0].val.p)->pt)->select_individual(error , nb_pattern ,
-                                                                                         identifier , keep);
+                                                                                         vec_identifier , keep);
     delete [] identifier;
 
     if (dist_matrix) {
@@ -4121,7 +4234,9 @@ AMObj STAT_SelectVariable(const AMObjVector &args)
 {
   RWCString *pstr;
   bool status = true , keep = true;
+  register int i;
   int nb_required , nb_variable = I_DEFAULT , *variable = NULL;
+  vector<int> vec_variable;
   StatError error;
 
 
@@ -4138,6 +4253,7 @@ AMObj STAT_SelectVariable(const AMObjVector &args)
     nb_variable = 1;
     variable = new int[nb_variable];
     variable[0] = args[1].val.i;
+    vec_variable.push_back(variable[0]);
     break;
   }
 
@@ -4145,6 +4261,11 @@ AMObj STAT_SelectVariable(const AMObjVector &args)
     variable = buildIntArray(args , 1 , "SelectVariable" , 2 , nb_variable);
     if (!variable) {
       status = false;
+    }
+    else {
+      for (i = 0;i < nb_variable;i++) {
+        vec_variable.push_back(variable[i]);
+      }
     }
     break;
   }
@@ -4211,7 +4332,8 @@ AMObj STAT_SelectVariable(const AMObjVector &args)
       break;
     }
 
-    vec = ivec->select_variable(error , nb_variable , variable , keep);
+//    vec = ivec->select_variable(error , nb_variable , variable , keep);
+    vec = ivec->select_variable(error , nb_variable , vec_variable , keep);
     delete [] variable;
 
     if (vec) {
@@ -4230,8 +4352,10 @@ AMObj STAT_SelectVariable(const AMObjVector &args)
     MarkovianSequences *markovian_seq;
 
 
+//    seq = ((Sequences*)((STAT_model*)args[0].val.p)->pt)->select_variable(error , nb_variable ,
+//                                                                          variable , keep);
     seq = ((Sequences*)((STAT_model*)args[0].val.p)->pt)->select_variable(error , nb_variable ,
-                                                                          variable , keep);
+                                                                          vec_variable , keep);
     delete [] variable;
 
     if (seq) {
@@ -4279,7 +4403,8 @@ AMObj STAT_SelectVariable(const AMObjVector &args)
       break;
     }
 
-    seq = iseq->select_variable(error , nb_variable , variable , keep);
+//    seq = iseq->select_variable(error , nb_variable , variable , keep);
+    seq = iseq->select_variable(error , nb_variable , vec_variable , keep);
     delete [] variable;
 
     if (seq) {
@@ -4351,11 +4476,15 @@ AMObj STAT_MergeVariable(const AMObjVector &args)
 
   if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
     const Vectors **pvec;
+    vector<Vectors> ivec;
     Vectors *vec;
     StatError error;
 
 
     pvec = new const Vectors*[nb_required];
+    for (i = 1;i < nb_required;i++) {
+      pvec[i] = NULL;
+    }
 
     for (i = 0;i < nb_required;i++) {
       switch (args[i].tag()) {
@@ -4371,10 +4500,15 @@ AMObj STAT_MergeVariable(const AMObjVector &args)
                     args[i].tag.string().data() , "VECTORS or MIXTURE_DATA");
         break;
       }
+
+      if ((i > 0) && (pvec[i])) {
+        ivec.push_back(*pvec[i]);
+      }
     }
 
     if (status) {
-      vec = pvec[0]->merge_variable(error , nb_required - 1 , pvec + 1 , ref_sample);
+//      vec = pvec[0]->merge_variable(error , nb_required - 1 , pvec + 1 , ref_sample);
+      vec = pvec[0]->merge_variable(error , nb_required - 1 , ivec , ref_sample);
     }
 
     delete [] pvec;
@@ -4399,12 +4533,17 @@ AMObj STAT_MergeVariable(const AMObjVector &args)
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     const Sequences **pseq;
+    vector<Sequences> iseq;
     Sequences *seq;
     const MarkovianSequences **pmarkovian_seq;
+    vector<MarkovianSequences> imarkovian_seq;
     MarkovianSequences *markovian_seq;
 
 
     pseq = new const Sequences*[nb_required];
+    for (i = 1;i < nb_required;i++) {
+      pseq[i] = NULL;
+    }
 
     pmarkovian_seq = new const MarkovianSequences*[nb_required];
     for (i = 0;i < nb_required;i++) {
@@ -4438,6 +4577,15 @@ AMObj STAT_MergeVariable(const AMObjVector &args)
                     "SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
         break;
       }
+
+      if (i > 0) {
+        if (pseq[i]) {
+          iseq.push_back(*pseq[i]);
+        }
+        if (pmarkovian_seq[i]) {
+          imarkovian_seq.push_back(*pmarkovian_seq[i]);
+        }
+      }
     }
 
     if (!status) {
@@ -4453,7 +4601,8 @@ AMObj STAT_MergeVariable(const AMObjVector &args)
     }
 
     if (i < nb_required) {
-      seq = pseq[0]->merge_variable(error , nb_required - 1 , pseq + 1 , ref_sample);
+//      seq = pseq[0]->merge_variable(error , nb_required - 1 , pseq + 1 , ref_sample);
+      seq = pseq[0]->merge_variable(error , nb_required - 1 , iseq , ref_sample);
       delete [] pseq;
       delete [] pmarkovian_seq;
 
@@ -4469,8 +4618,10 @@ AMObj STAT_MergeVariable(const AMObjVector &args)
     }
 
     else {
+//      markovian_seq = pmarkovian_seq[0]->merge_variable(error , nb_required - 1 ,
+//                                                        pmarkovian_seq + 1 , ref_sample);
       markovian_seq = pmarkovian_seq[0]->merge_variable(error , nb_required - 1 ,
-                                                        pmarkovian_seq + 1 , ref_sample);
+                                                        imarkovian_seq , ref_sample);
       delete [] pseq;
       delete [] pmarkovian_seq;
 
@@ -6325,6 +6476,7 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
   int nb_required , nb_point = I_DEFAULT , int_sum , variable = I_DEFAULT , *int_filter;
   sequence_type output = TREND;
   double sum , *filter;
+  vector<double> vec_filter;
   const Distribution *dist;
   const Sequences *iseq;
   Sequences *seq;
@@ -6427,6 +6579,12 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
       status = false;
       genAMLError(ERRORMSG(ARRAY_ELEMENT_TYPE_1_sdss) , "MovingAverage" , 2 ,
                   (parray->surfaceType()).string().data() , "INT or REAL");
+    }
+
+    if (filter) {
+      for (i = 0;i < 2 * nb_point + 1;i++) {
+        vec_filter.push_back(filter[i]);
+      }
     }
   }
 
@@ -6566,7 +6724,8 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
 
   if (status) {
     if (!dist) {
-      seq = iseq->moving_average(error , nb_point , filter , variable , begin_end , output);
+//      seq = iseq->moving_average(error , nb_point , filter , variable , begin_end , output);
+      seq = iseq->moving_average(error , nb_point , vec_filter , variable , begin_end , output);
     }
     else {
       seq = iseq->moving_average(error , *dist , variable , begin_end , output);
@@ -6616,9 +6775,9 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
   output_format format = ASCII;
 //  char *file_name = NULL;
   string file_name = "";
-  bool status = true , circular_option = false , circular = false ,
-       standard_deviation_option = false , standard_deviation = false ,
-       output_option = false , file_name_option = false , format_option = false;
+  bool status = true , circular_option = false , circular = false , robust_option = false , robust = false ,
+       dispersion_option = false , dispersion = false , frequency_correction_option = false ,
+       frequency_correction = false , output_option = false , file_name_option = false , format_option = false;
   register int i;
   int nb_required;
   sequence_type output = SEQUENCE;
@@ -6631,7 +6790,8 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
               (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
-              (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ,
+              (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
+              (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "PointwiseAverage"));
 
   // argument obligatoire
@@ -6696,11 +6856,11 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
         }
       }
 
-      else if (*pstr == "StandardDeviation") {
-        switch (standard_deviation_option) {
+      else if (*pstr == "Robust") {
+        switch (robust_option) {
 
         case false : {
-          standard_deviation_option = true;
+          robust_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
             status = false;
@@ -6708,7 +6868,57 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
                         args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
           }
           else {
-            standard_deviation = args[nb_required + i * 2 + 1].val.b;
+            robust = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "FrequencyCorrection") {
+        switch (frequency_correction_option) {
+
+        case false : {
+          frequency_correction_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "PointwiseAverage" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            frequency_correction = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
+      else if (*pstr == "Dispersion") {
+        switch (dispersion_option) {
+
+        case false : {
+          dispersion_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "PointwiseAverage" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            dispersion = args[nb_required + i * 2 + 1].val.b;
           }
           break;
         }
@@ -6824,7 +7034,7 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
       else {
         status = false;
         genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "PointwiseAverage" , nb_required + i + 1 ,
-                    "Circular or StandardDeviation or Output or FileName or Format");
+                    "Circular or Robust or FrequencyCorrection or Dispersion or Output or FileName or Format");
       }
     }
   }
@@ -6832,6 +7042,16 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
   if ((circular) && (output == STANDARDIZED_RESIDUAL)) {
     status = false;
     genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "PointwiseAverage" , "Circular" , "Output");
+  }
+
+  if ((circular_option) && (robust_option)) {
+    status = false;
+    genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "PointwiseAverage" , "Circular" , "Robust");
+  }
+
+  if ((frequency_correction_option) && (!robust)) {
+    status = false;
+    genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "PointwiseAverage" , "FrequencyCorrection");
   }
 
   if ((format_option) && (!file_name_option)) {
@@ -6843,8 +7063,8 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->pointwise_average(error , circular , standard_deviation ,
-                                output , file_name , format);
+  seq = iseq->pointwise_average(error , circular , robust , dispersion ,
+                                frequency_correction , output , file_name , format);
 
   if (seq) {
     STAT_model* model = new STAT_model(seq);

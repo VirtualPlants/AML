@@ -8,7 +8,7 @@
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: stat_funs1.cpp 18816 2016-09-09 12:15:40Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -41,6 +41,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 #include "tool/dirnames.h"
 
@@ -226,7 +227,7 @@ extern AMObj STAT_ValueSelect(const AMObjVector &args);
 
 extern AMObj STAT_VariableScaling(const AMObjVector &args);
 extern AMObj STAT_Round(const AMObjVector &args);
-extern AMObj STAT_SelectStep(const AMObjVector &args);
+extern AMObj STAT_SelectBinWidth(const AMObjVector &args);
 extern AMObj STAT_SelectIndividual(const AMObjVector &args);
 extern AMObj STAT_SelectVariable(const AMObjVector &args);
 extern AMObj STAT_MergeVariable(const AMObjVector &args);
@@ -279,6 +280,7 @@ extern AMObj STAT_Fit(const AMObjVector &args);
 extern AMObj STAT_TruncateDistribution(const AMObjVector &args);
 
 extern AMObj STAT_ComputeRankCorrelation(const AMObjVector &args);
+extern AMObj STAT_SupNormDistance(const AMObjVector &args);
 extern AMObj STAT_ContingencyTable(const AMObjVector &args);
 extern AMObj STAT_VarianceAnalysis(const AMObjVector &args);
 extern AMObj STAT_Regression(const AMObjVector &args);
@@ -395,6 +397,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
   int nb_required , identifier = I_DEFAULT , nb_segmentation = NB_SEGMENTATION ,
       nb_state_sequence = NB_STATE_SEQUENCE;
   double ishape_parameter = 1 , *shape_parameter;
+  vector<double> vec_shape_parameter;
   latent_structure_algorithm segmentation = FORWARD_DYNAMIC_PROGRAMMING;
   latent_structure_algorithm state_sequence = GENERALIZED_VITERBI;
   change_point_profile change_point_output;
@@ -1032,6 +1035,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
   case 'q' : {
     int nb_sequence , nb_variable;
     segment_model *model_type;
+    vector<segment_model> vec_model_type;
     const Sequences *seq;
     StatError error;
 
@@ -1110,6 +1114,12 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else if (*pstr == "InterceptSlope") {
             model_type[i] = INTERCEPT_SLOPE_CHANGE;
           }
+          else if (*pstr == "AutoregressiveModel") {
+            model_type[i] = AUTOREGRESSIVE_MODEL_CHANGE;
+          }
+          else if (*pstr == "StationaryAutoregressiveModel") {
+            model_type[i] = STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE;
+          }
           else if (*pstr == "BayesianPoisson") {
             model_type[i] = BAYESIAN_POISSON_CHANGE;
           }
@@ -1119,7 +1129,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 3 ,
-                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope");
+                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
           }
 
           if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
@@ -1161,22 +1171,30 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else if (*pstr == "InterceptSlope") {
             model_type[i] = INTERCEPT_SLOPE_CHANGE;
           }
+          else if (*pstr == "AutoregressiveModel") {
+            model_type[i] = AUTOREGRESSIVE_MODEL_CHANGE;
+          }
+          else if (*pstr == "StationaryAutoregressiveModel") {
+            model_type[i] = STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE;
+          }
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 3 ,
-                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
+                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
           }
         }
+
+        vec_model_type.push_back(model_type[i]);
       }
     }
 
     if ((!sequence_option) && (nb_sequence > 1)) {
       for (i = 0;i < nb_variable;i++) {
-        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == VARIANCE_CHANGE) ||
-            (model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE) ||
+            (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
           status = false;
           genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 3 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or LinearModel or InterceptSlope");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
         }
       }
     }
@@ -1207,10 +1225,15 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
     shape_parameter = new double[nb_variable];
     for (i = 0;i < nb_variable;i++) {
       shape_parameter[i] = ishape_parameter;
+      vec_shape_parameter.push_back(ishape_parameter);
     }
 
+//    status = seq->segment_profile_write(error , AMLOUTPUT , identifier , args[1].val.i ,
+//                                        model_type , common_contrast , shape_parameter ,
+//                                        change_point_output , ASCII , segmentation ,
+//                                        nb_segmentation);
     status = seq->segment_profile_write(error , AMLOUTPUT , identifier , args[1].val.i ,
-                                        model_type , common_contrast , shape_parameter ,
+                                        vec_model_type , common_contrast , vec_shape_parameter ,
                                         change_point_output , ASCII , segmentation ,
                                         nb_segmentation);
     delete [] model_type;
@@ -1330,6 +1353,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
   int nb_required , identifier = I_DEFAULT , format_index , nb_segmentation = NB_SEGMENTATION ,
       nb_state_sequence = NB_STATE_SEQUENCE;
   double ishape_parameter = 1 , *shape_parameter;
+  vector<double> vec_shape_parameter;
   latent_structure_algorithm segmentation = FORWARD_DYNAMIC_PROGRAMMING;
   latent_structure_algorithm state_sequence = GENERALIZED_VITERBI;
   change_point_profile change_point_output;
@@ -2115,6 +2139,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
   case 'q' : {
     int nb_sequence , nb_variable;
     segment_model *model_type;
+    vector<segment_model> vec_model_type;
     const Sequences *seq;
     StatError error;
 
@@ -2193,6 +2218,12 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else if (*pstr == "InterceptSlope") {
             model_type[i] = INTERCEPT_SLOPE_CHANGE;
           }
+          else if (*pstr == "AutoregressiveModel") {
+            model_type[i] = AUTOREGRESSIVE_MODEL_CHANGE;
+          }
+          else if (*pstr == "StationaryAutoregressiveModel") {
+            model_type[i] = STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE;
+          }
           else if (*pstr == "BayesianPoisson") {
             model_type[i] = BAYESIAN_POISSON_CHANGE;
           }
@@ -2202,7 +2233,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 4 ,
-                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope");
+                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
           }
 
           if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
@@ -2244,12 +2275,20 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else if (*pstr == "InterceptSlope") {
             model_type[i] = INTERCEPT_SLOPE_CHANGE;
           }
+          else if (*pstr == "AutoregressiveModel") {
+            model_type[i] = AUTOREGRESSIVE_MODEL_CHANGE;
+          }
+          else if (*pstr == "StationaryAutoregressiveModel") {
+            model_type[i] = STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE;
+          }
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 4 ,
-                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
+                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
           }
         }
+
+        vec_model_type.push_back(model_type[i]);
       }
     }
 
@@ -2271,11 +2310,11 @@ AMObj STAT_model::save(const AMObjVector &args) const
 
     if ((!sequence_option) && (nb_sequence > 1)) {
       for (i = 0;i < nb_variable;i++) {
-        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == VARIANCE_CHANGE) ||
-            (model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE) ||
+            (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
           status = false;
           genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 4 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or LinearModel or InterceptSlope");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
         }
       }
     }
@@ -2306,11 +2345,16 @@ AMObj STAT_model::save(const AMObjVector &args) const
     shape_parameter = new double[nb_variable];
     for (i = 0;i < nb_variable;i++) {
       shape_parameter[i] = ishape_parameter;
+      vec_shape_parameter.push_back(ishape_parameter);
     }
 
+//    status = seq->segment_profile_write(error , ((AMString*)args[1].val.p)->data() ,
+//                                        identifier , args[2].val.i , model_type , common_contrast ,
+//                                        shape_parameter , change_point_output , format ,
+//                                        segmentation , nb_segmentation);
     status = seq->segment_profile_write(error , ((AMString*)args[1].val.p)->data() ,
-                                        identifier , args[2].val.i , model_type , common_contrast ,
-                                        shape_parameter , change_point_output , format ,
+                                        identifier , args[2].val.i , vec_model_type , common_contrast ,
+                                        vec_shape_parameter , change_point_output , format ,
                                         segmentation , nb_segmentation);
     delete [] model_type;
     delete [] shape_parameter;
@@ -3325,6 +3369,12 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               else if (*pstr == "InterceptSlope") {
                 model_type[i] = INTERCEPT_SLOPE_CHANGE;
               }
+              else if (*pstr == "AutoregressiveModel") {
+                model_type[i] = AUTOREGRESSIVE_MODEL_CHANGE;
+              }
+              else if (*pstr == "StationaryAutoregressiveModel") {
+                model_type[i] = STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE;
+              }
               else if (*pstr == "BayesianPoisson") {
                 model_type[i] = BAYESIAN_POISSON_CHANGE;
               }
@@ -3334,7 +3384,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               else {
                 status = false;
                 genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 3 ,
-                            "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope");
+                            "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
               }
 
               if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
@@ -3376,10 +3426,16 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               else if (*pstr == "InterceptSlope") {
                 model_type[i] = INTERCEPT_SLOPE_CHANGE;
               }
+              else if (*pstr == "AutoregressiveModel") {
+                model_type[i] = AUTOREGRESSIVE_MODEL_CHANGE;
+              }
+              else if (*pstr == "StationaryAutoregressiveModel") {
+                model_type[i] = STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE;
+              }
               else {
                 status = false;
                 genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 3 ,
-                            "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope");
+                            "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
               }
             }
           }
@@ -3387,11 +3443,11 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
 
         if ((!sequence_option) && (nb_sequence > 1)) {
           for (i = 0;i < nb_variable;i++) {
-            if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == VARIANCE_CHANGE) ||
-                (model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+            if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE) ||
+                (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
               status = false;
               genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 3 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or LinearModel or InterceptSlope");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
             }
           }
         }
@@ -3826,7 +3882,7 @@ void installSTATModule()
   installFNode("Round" , STAT_Round , 1 , type , AMObjType::VECTORS);
 
   type[0] = AMObjType::ANY;
-  installFNode("SelectStep" , STAT_SelectStep , 1 , type , AMObjType::VECTORS);
+  installFNode("SelectBinWidth" , STAT_SelectBinWidth , 1 , type , AMObjType::VECTORS);
 
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::INTEGER;
@@ -3980,6 +4036,10 @@ void installSTATModule()
 
   type[0] = AMObjType::VECTORS;
   installFNode("ComputeRankCorrelation" , STAT_ComputeRankCorrelation , 1 , type , AMObjType::VOID);
+
+  type[0] = AMObjType::VECTORS;
+  type[1] = AMObjType::VECTORS;
+  installFNode("SupNormDistance" , STAT_SupNormDistance , 2 , type , AMObjType::VOID);
 
   type[0] = AMObjType::VECTORS;
   type[1] = AMObjType::INTEGER;
