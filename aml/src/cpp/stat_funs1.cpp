@@ -1190,11 +1190,10 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 
     if ((!sequence_option) && (nb_sequence > 1)) {
       for (i = 0;i < nb_variable;i++) {
-        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE) ||
-            (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        if ((model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
           status = false;
           genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 3 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
         }
       }
     }
@@ -2310,11 +2309,10 @@ AMObj STAT_model::save(const AMObjVector &args) const
 
     if ((!sequence_option) && (nb_sequence > 1)) {
       for (i = 0;i < nb_variable;i++) {
-        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE) ||
-            (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        if ((model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
           status = false;
           genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 4 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
         }
       }
     }
@@ -3443,11 +3441,10 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
 
         if ((!sequence_option) && (nb_sequence > 1)) {
           for (i = 0;i < nb_variable;i++) {
-            if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE) ||
-                (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+            if ((model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
               status = false;
               genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 3 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
             }
           }
         }
