@@ -1,0 +1,6 @@
+*.pyc
+*.dblite
+*~
+build-scons
+*egg-info
+*.so

@@ -5063,11 +5063,10 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
     if ((!sequence_option) && (nb_sequence > 1)) {
       for (i = 0;i < nb_variable;i++) {
-        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE) ||
-            (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        if ((model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
           status = false;
           genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
         }
       }
     }
@@ -5383,11 +5382,10 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
     if ((!sequence_option) && (nb_sequence > 1)) {
       for (i = 0;i < nb_variable;i++) {
-        if ((model_type[i] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i] == BAYESIAN_POISSON_CHANGE) ||
-            (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
+        if ((model_type[i] == BAYESIAN_POISSON_CHANGE) || (model_type[i] == BAYESIAN_GAUSSIAN_CHANGE)) {
           status = false;
           genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Mean or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
         }
       }
     }
