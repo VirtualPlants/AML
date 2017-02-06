@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2016 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -4098,7 +4098,8 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
   bool status = true , algorithm_option = false , common_dispersion_option = false ,
        common_dispersion = false , counting_option = false , counting_flag = true ,
        estimator_option = false , nb_iteration_option = false , min_nb_state_sequence_option = false ,
-       max_nb_state_sequence_option = false , parameter_option = false , occupancy_mean_option = false ,
+       max_nb_state_sequence_option = false , parameter_option = false ,
+       poisson_geometric_option = false , poisson_geometric = false , occupancy_mean_option = false ,
        state_sequences_option = false , state_sequence = true;
   register int i;
   int nb_required , algorithm = EM , nb_iter = I_DEFAULT , min_nb_state_sequence = MIN_NB_STATE_SEQUENCE ,
@@ -4127,7 +4128,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                 (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
                 (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ||
                 (args.length() == nb_required + 16) || (args.length() == nb_required + 18) ||
-                (args.length() == nb_required + 20) ,
+                (args.length() == nb_required + 20) || (args.length() == nb_required + 22) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
     // arguments optionnels
@@ -4402,6 +4403,31 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
           }
         }
 
+        else if (*pstr == "PoissonGeometric") {
+          switch (poisson_geometric_option) {
+
+          case false : {
+            poisson_geometric_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              poisson_geometric = args[nb_required + i * 2 + 1].val.b;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
         else if (*pstr == "OccupancyMean") {
           switch (occupancy_mean_option) {
 
@@ -4466,7 +4492,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
         else {
           status = false;
           genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Estimate" , nb_required + i + 1 ,
-                      "Algorithm or CommonDispersion or Counting or InitialOccupancyMean or Estimator or NbIteration or MinNbStateSequence or MaxNbStateSequence or Parameter or OccupancyMean or StateSequences");
+                      "Algorithm or PoissonGeometric or CommonDispersion or Counting or InitialOccupancyMean or Estimator or NbIteration or MinNbStateSequence or MaxNbStateSequence or Parameter or OccupancyMean or StateSequences");
         }
       }
     }
@@ -4569,16 +4595,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
     switch (algorithm) {
     case EM :
       hsmarkov = seq->hidden_semi_markov_estimation(error , AMLOUTPUT , type , nb_state ,
-                                                    left_right , occupancy_mean , common_dispersion ,
-                                                    estimator , counting_flag , state_sequence ,
-                                                    nb_iter , mean_estimator);
+                                                    left_right , occupancy_mean , poisson_geometric ,
+                                                    common_dispersion , estimator , counting_flag ,
+                                                    state_sequence , nb_iter , mean_estimator);
       break;
     case MCEM :
       hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , AMLOUTPUT , type , nb_state ,
-                                                               left_right , occupancy_mean , common_dispersion ,
-                                                               min_nb_state_sequence , max_nb_state_sequence ,
-                                                               parameter , estimator , counting_flag ,
-                                                               state_sequence , nb_iter);
+                                                               left_right , occupancy_mean , poisson_geometric ,
+                                                               common_dispersion , min_nb_state_sequence ,
+                                                               max_nb_state_sequence , parameter , estimator ,
+                                                               counting_flag , state_sequence , nb_iter);
       break;
     }
   }
@@ -4593,7 +4619,8 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                 (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
                 (args.length() == nb_required + 8) || (args.length() == nb_required + 10) ||
                 (args.length() == nb_required + 12) || (args.length() == nb_required + 14) ||
-                (args.length() == nb_required + 16) || (args.length() == nb_required + 18) ,
+                (args.length() == nb_required + 16) || (args.length() == nb_required + 18) ||
+                (args.length() == nb_required + 20) ,
                 genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Estimate"));
 
     ihsmarkov = (HiddenSemiMarkov*)((STAT_model*)args[2].val.p)->pt;
@@ -4840,6 +4867,31 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
           }
         }
 
+        else if (*pstr == "PoissonGeometric") {
+          switch (poisson_geometric_option) {
+
+          case false : {
+            poisson_geometric_option = true;
+
+            if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+              status = false;
+              genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Estimate" , nb_required + i + 1 ,
+                          args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+            }
+            else {
+              poisson_geometric = args[nb_required + i * 2 + 1].val.b;
+            }
+            break;
+          }
+
+          case true : {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+            break;
+          }
+          }
+        }
+
         else if (*pstr == "OccupancyMean") {
           switch (occupancy_mean_option) {
 
@@ -4904,7 +4956,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
         else {
           status = false;
           genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Estimate" , nb_required + i + 1 ,
-                      "Algorithm or CommonDispersion or Counting or Estimator or NbIteration or MinNbStateSequence or MaxNbStateSequence or Parameter or OccupancyMean or StateSequences");
+                      "Algorithm or PoissonGeometric or CommonDispersion or Counting or Estimator or NbIteration or MinNbStateSequence or MaxNbStateSequence or Parameter or OccupancyMean or StateSequences");
         }
       }
     }
@@ -4936,12 +4988,12 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
 
     switch (algorithm) {
     case EM :
-      hsmarkov = seq->hidden_semi_markov_estimation(error , AMLOUTPUT , *ihsmarkov , common_dispersion ,
-                                                    estimator , counting_flag , state_sequence ,
-                                                    nb_iter , mean_estimator);
+      hsmarkov = seq->hidden_semi_markov_estimation(error , AMLOUTPUT , *ihsmarkov , poisson_geometric ,
+                                                    common_dispersion , estimator , counting_flag ,
+                                                    state_sequence , nb_iter , mean_estimator);
       break;
     case MCEM :
-      hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , AMLOUTPUT , *ihsmarkov ,
+      hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , AMLOUTPUT , *ihsmarkov , poisson_geometric ,
                                                                common_dispersion , min_nb_state_sequence ,
                                                                max_nb_state_sequence , parameter , estimator ,
                                                                counting_flag , state_sequence , nb_iter);

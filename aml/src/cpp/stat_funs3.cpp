@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -4982,6 +4982,93 @@ AMObj STAT_LengthSelect(const AMObjVector &args)
   else {
     AMLOUTPUT << "\n" << error;
     genAMLError(ERRORMSG(STAT_MODULE_s) , "LengthSelect");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Differences entre donnees et residus.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_DifferenceVariable(const AMObjVector &args)
+
+{
+  bool status = true;
+  const Sequences *iseq , *residual;
+  Sequences *seq;
+  MarkovianSequences *markovian_seq;
+  StatError error;
+
+
+  CHECKCONDVA(args.length() == 2 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "DifferenceVariable" , 2));
+
+  // arguments obligatoires
+
+  switch (args[0].tag()) {
+  case AMObjType::SEQUENCES :
+    iseq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::MARKOVIAN_SEQUENCES :
+    iseq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+    iseq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::SEMI_MARKOV_DATA :
+    iseq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+    iseq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  default :
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "DifferenceVariable" , 1 , args[0].tag.string().data() ,
+                "SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+    break;
+  }
+
+  switch (args[1].tag()) {
+  case AMObjType::SEQUENCES :
+    residual = (Sequences*)((STAT_model*)args[1].val.p)->pt;
+    break;
+  case AMObjType::MARKOVIAN_SEQUENCES :
+    residual = (MarkovianSequences*)((STAT_model*)args[1].val.p)->pt;
+    break;
+  default :
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "DifferenceVariable" , 2 , args[1].tag.string().data() ,
+                "SEQUENCES or MARKOVIAN_SEQUENCES");
+    break;
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  seq = iseq->difference_variable(error , *residual);
+
+  if (seq) {
+    markovian_seq = seq->markovian_sequences(error);
+    if (markovian_seq) {
+      delete seq;
+      STAT_model* model = new STAT_model(markovian_seq);
+      return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
+    }
+    else {
+      AMLOUTPUT << "\n";
+      error.ascii_write(AMLOUTPUT , WARNING);
+      STAT_model* model = new STAT_model(seq);
+      return AMObj(AMObjType::SEQUENCES , model);
+    }
+  }
+
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "DifferenceVariable");
     return AMObj(AMObjType::ERROR);
   }
 }

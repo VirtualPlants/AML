@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -4246,8 +4246,50 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la fonction de correlation theorique d'un bruit blanc
- *  pour une filtre donne.
+ *  Calcul de la fonction d'autocorrelation theorique d'un modele autoregressif d'ordre 1.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_ComputeAutoregressiveAutocorrelation(const AMObjVector &args)
+
+{
+  bool status = true;
+  StatError error;
+
+
+  CHECKCONDVA(args.length() == 2 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "ComputeAutoregressiveAutocorrelation" , 2));
+
+  if (args[0].tag() != AMObjType::CORRELATION) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeAutoregressiveAutocorrelation" , 1 ,
+                args[0].tag.string().data() , "CORRELATION");
+  }
+  if (args[1].tag() != AMObjType::REAL) {
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeAutoregressiveAutocorrelation" , 2 ,
+                args[1].tag.string().data() , "REAL");
+  }
+
+  if (status) {
+    status = ((Correlation*)((STAT_model*)args[0].val.p)->pt)->autoregressive_model_autocorrelation(error , args[1].val.r);
+  }
+
+  if (status) {
+    return AMObj(AMObjType::VOID);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "ComputeAutoregressiveAutocorrelation");
+    return AMObj(AMObjType::ERROR);
+  }    
+}
+
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la fonction de correlation theorique d'un bruit blanc pour un filtre donne.
  *
  *--------------------------------------------------------------*/
 
@@ -4399,7 +4441,7 @@ AMObj STAT_ComputeWhiteNoiseCorrelation(const AMObjVector &args)
  *
  *--------------------------------------------------------------*/
 
-AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
+AMObj STAT_ComputePartialAutocorrelation(const AMObjVector &args)
 
 {
   RWCString *pstr;
@@ -4415,11 +4457,11 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
   nb_required = nb_required_computation(args);
 
   CHECKCONDVA(nb_required >= 1 ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputePartialAutoCorrelation"));
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputePartialAutocorrelation"));
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
               (args.length() == nb_required + 4) ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputePartialAutoCorrelation"));
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputePartialAutocorrelation"));
 
   // arguments obligatoires
 
@@ -4440,7 +4482,7 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
     seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
     break;
   default :
-    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputePartialAutoCorrelation" , 1 , args[0].tag.string().data() ,
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputePartialAutocorrelation" , 1 , args[0].tag.string().data() ,
                 "SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
     return AMObj(AMObjType::ERROR);
   }
@@ -4449,18 +4491,18 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
 
   if (nb_variable == 1) {
     CHECKCONDVA(nb_required == 1 ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputePartialAutoCorrelation"));
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputePartialAutocorrelation"));
 
     variable = 1;
   }
 
   else {
     CHECKCONDVA(nb_required == 2 ,
-                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputePartialAutoCorrelation"));
+                genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputePartialAutocorrelation"));
 
     if (args[1].tag() != AMObjType::INTEGER) {
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputePartialAutoCorrelation" , 2 ,
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputePartialAutocorrelation" , 2 ,
                   args[1].tag.string().data() , "INT");
     }
     else {
@@ -4473,7 +4515,7 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
   for (i = 0;i < (args.length() - nb_required) / 2;i++) {
     if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputePartialAutoCorrelation" , nb_required + i + 1 ,
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputePartialAutocorrelation" , nb_required + i + 1 ,
                   args[nb_required + i * 2].tag.string().data() , "OPTION");
     }
 
@@ -4488,7 +4530,7 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
             status = false;
-            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputePartialAutoCorrelation" , nb_required + i + 1 ,
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputePartialAutocorrelation" , nb_required + i + 1 ,
                         args[nb_required + i * 2 + 1].tag.string().data() , "INT");
           }
           else {
@@ -4499,7 +4541,7 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
 
         case true : {
           status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputePartialAutoCorrelation" , nb_required + i + 1);
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputePartialAutocorrelation" , nb_required + i + 1);
           break;
         }
         }
@@ -4513,7 +4555,7 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
             status = false;
-            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputePartialAutoCorrelation" , nb_required + i + 1 ,
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputePartialAutocorrelation" , nb_required + i + 1 ,
                         args[nb_required + i * 2 + 1].tag.string().data() , "STRING");
           }
           else {
@@ -4527,7 +4569,7 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
             }
             else {
               status = false;
-              genAMLError(ERRORMSG(CORRELATION_COEFF_TYPE_sds) , "ComputePartialAutoCorrelation" ,
+              genAMLError(ERRORMSG(CORRELATION_COEFF_TYPE_sds) , "ComputePartialAutocorrelation" ,
                           nb_required + i + 1 , "Pearson or Kendall");
             }
           }
@@ -4536,7 +4578,7 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
 
         case true : {
           status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputePartialAutoCorrelation" , nb_required + i + 1);
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputePartialAutocorrelation" , nb_required + i + 1);
           break;
         }
         }
@@ -4544,7 +4586,7 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
 
       else {
         status = false;
-        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "ComputePartialAutoCorrelation" ,
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "ComputePartialAutocorrelation" ,
                     nb_required + i + 1 , "MaxLag or Type");
       }
     }
@@ -4562,7 +4604,7 @@ AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args)
   }
   else {
     AMLOUTPUT << "\n" << error;
-    genAMLError(ERRORMSG(STAT_MODULE_s) , "ComputePartialAutoCorrelation");
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "ComputePartialAutocorrelation");
     return AMObj(AMObjType::ERROR);
   }
 }
@@ -6165,7 +6207,7 @@ AMObj STAT_Thresholding(const AMObjVector &args)
  *
  *--------------------------------------------------------------*/
 
-AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args)
+AMObj STAT_ComputeAutocorrelation(const AMObjVector &args)
 
 {
   bool status = true;
@@ -6178,10 +6220,10 @@ AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args)
   nb_required = nb_required_computation(args);
 
   CHECKCONDVA((nb_required == 2) || (nb_required == 3) ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputeAutoCorrelation"));
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputeAutocorrelation"));
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
-              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputeAutoCorrelation"));
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputeAutocorrelation"));
 
   // arguments obligatoires
 
@@ -6200,7 +6242,7 @@ AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args)
   default : {
     if (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) {
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeAutoCorrelation" , 1 , args[0].tag.string().data() ,
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeAutocorrelation" , 1 , args[0].tag.string().data() ,
                   "VARIABLE_ORDER_MARKOV or HIDDEN_VARIABLE_ORDER_MARKOV or VARIABLE_ORDER_MARKOV_DATA");
     }
     break;
@@ -6218,7 +6260,7 @@ AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args)
     offset = 2;
     if (args[1].tag() != AMObjType::INTEGER) {
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeAutoCorrelation" , 2 ,
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeAutocorrelation" , 2 ,
                   args[1].tag.string().data() , "INT");
     }
     else {
@@ -6230,7 +6272,7 @@ AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args)
 
   if (args[offset].tag() != AMObjType::INTEGER) {
     status = false;
-    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeAutoCorrelation" , offset + 1 ,
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeAutocorrelation" , offset + 1 ,
                 args[offset].tag.string().data() , "INT");
   }
   else {
@@ -6242,20 +6284,20 @@ AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args)
   if (args.length() == nb_required + 2) {
     if (args[nb_required].tag() != AMObjType::OPTION) {
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeAutoCorrelation" , nb_required + 1 ,
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeAutocorrelation" , nb_required + 1 ,
                   args[nb_required].tag.string().data() , "OPTION");
     }
     else {
       if (*((AMString*)args[nb_required].val.p) != "MaxLag") {
         status = false;
-        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "ComputeAutoCorrelation" , nb_required + 1 ,
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "ComputeAutocorrelation" , nb_required + 1 ,
                     "MaxLag");
       }
     }
 
     if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
       status = false;
-      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeAutoCorrelation" , nb_required + 1 ,
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeAutocorrelation" , nb_required + 1 ,
                   args[nb_required + 1].tag.string().data() , "INT");
     }
     else {
@@ -6298,7 +6340,7 @@ AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args)
   }
   else {
     AMLOUTPUT << "\n" << error;
-    genAMLError(ERRORMSG(STAT_MODULE_s) , "ComputeAutoCorrelation");
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "ComputeAutocorrelation");
     return AMObj(AMObjType::ERROR);
   }
 }

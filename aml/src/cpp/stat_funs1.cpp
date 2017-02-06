@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -236,6 +236,7 @@ extern AMObj STAT_NbEventSelect(const AMObjVector &args);
 extern AMObj STAT_TimeScaling(const AMObjVector &args);
 extern AMObj STAT_TimeSelect(const AMObjVector &args);
 
+extern AMObj STAT_DifferenceVariable(const AMObjVector &args);
 extern AMObj STAT_ShiftVariable(const AMObjVector &args);
 extern AMObj STAT_LengthSelect(const AMObjVector &args);
 extern AMObj STAT_RemoveRun(const AMObjVector &args);
@@ -286,8 +287,9 @@ extern AMObj STAT_VarianceAnalysis(const AMObjVector &args);
 extern AMObj STAT_Regression(const AMObjVector &args);
 
 extern AMObj STAT_ComputeCorrelation(const AMObjVector &args);
+extern AMObj STAT_ComputeAutoregressiveAutocorrelation(const AMObjVector &args);
 extern AMObj STAT_ComputeWhiteNoiseCorrelation(const AMObjVector &args);
-extern AMObj STAT_ComputePartialAutoCorrelation(const AMObjVector &args);
+extern AMObj STAT_ComputePartialAutocorrelation(const AMObjVector &args);
 
 extern AMObj STAT_Segmentation(const AMObjVector &args);
 
@@ -297,7 +299,7 @@ extern AMObj STAT_WordCount(const AMObjVector &args);
 extern AMObj STAT_LumpabilityTest(const AMObjVector &args);
 
 extern AMObj STAT_Thresholding(const AMObjVector &args);
-extern AMObj STAT_ComputeAutoCorrelation(const AMObjVector &args);
+extern AMObj STAT_ComputeAutocorrelation(const AMObjVector &args);
 extern AMObj STAT_ComputeStateSequences(const AMObjVector &args);
 extern AMObj STAT_BuildAuxiliaryVariable(const AMObjVector &args);
 extern AMObj STAT_ResidualSequences(const AMObjVector &args);
@@ -3908,6 +3910,10 @@ void installSTATModule()
   installFNode("TimeSelect" , STAT_TimeSelect , 3 , type , AMObjType::TIME_EVENTS);
 
   type[0] = AMObjType::ANY;
+  type[1] = AMObjType::ANY;
+  installFNode("DifferenceVariable" , STAT_DifferenceVariable , 2 , type , AMObjType::SEQUENCES);
+
+  type[0] = AMObjType::ANY;
   type[1] = AMObjType::INTEGER;
   type[2] = AMObjType::INTEGER;
   installFNode("ShiftVariable" , STAT_ShiftVariable , 3 , type , AMObjType::SEQUENCES);
@@ -4056,11 +4062,15 @@ void installSTATModule()
   installFNode("ComputeCorrelation" , STAT_ComputeCorrelation , 1 , type , AMObjType::CORRELATION);
 
   type[0] = AMObjType::CORRELATION;
+  type[1] = AMObjType::REAL;
+  installFNode("ComputeAutoregressiveAutocorrelation" , STAT_ComputeAutoregressiveAutocorrelation , 2 , type , AMObjType::VOID);
+
+  type[0] = AMObjType::CORRELATION;
   type[1] = AMObjType::ANY;
   installFNode("ComputeWhiteNoiseCorrelation" , STAT_ComputeWhiteNoiseCorrelation , 2 , type , AMObjType::VOID);
 
   type[0] = AMObjType::ANY;
-  installFNode("ComputePartialAutoCorrelation" , STAT_ComputePartialAutoCorrelation , 1 , type , AMObjType::CORRELATION);
+  installFNode("ComputePartialAutocorrelation" , STAT_ComputePartialAutocorrelation , 1 , type , AMObjType::CORRELATION);
 
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::INTEGER;
@@ -4088,7 +4098,7 @@ void installSTATModule()
 
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::INTEGER;
-  installFNode("ComputeAutoCorrelation" , STAT_ComputeAutoCorrelation , 2 , type , AMObjType::CORRELATION);
+  installFNode("ComputeAutocorrelation" , STAT_ComputeAutocorrelation , 2 , type , AMObjType::CORRELATION);
 
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::ANY;
