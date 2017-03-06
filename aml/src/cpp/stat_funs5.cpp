@@ -4986,6 +4986,9 @@ AMObj STAT_Segmentation(const AMObjVector &args)
               else if ((*pstr == "SubtractionResidual") || (*pstr == "Residual")) {
                 output = SUBTRACTION_RESIDUAL;
               }
+              else if (*pstr == "AbsoluteResidual") {
+                output = ABSOLUTE_RESIDUAL;
+              }
               else if (*pstr == "DivisionResidual") {
                 output = DIVISION_RESIDUAL;
               }
@@ -5001,7 +5004,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
               else {
                 status = false;
                 genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + i + 1 ,
-                            "Sequence or Residual or Entropy or Divergence or LogLikelihoodSlope");
+                            "Sequence or Residual or AbsoluteResidual or Entropy or Divergence or LogLikelihoodSlope");
               }
             }
             break;
@@ -5339,13 +5342,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
               else if ((*pstr == "SubtractionResidual") || (*pstr == "Residual")) {
                 output = SUBTRACTION_RESIDUAL;
               }
+              else if (*pstr == "AbsoluteResidual") {
+                output = ABSOLUTE_RESIDUAL;
+              }
               else if (*pstr == "DivisionResidual") {
                 output = DIVISION_RESIDUAL;
               }
               else {
                 status = false;
                 genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + i + 1 ,
-                            "Sequence or Residual");
+                            "Sequence or Residual or AbsoluteResidual");
               }
             }
             break;

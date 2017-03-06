@@ -2158,7 +2158,7 @@ AMObj STAT_ThresholdingData(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA))  {
+  if ((args[0].tag() == AMObjType::VECTORS) || (args[0].tag() == AMObjType::MIXTURE_DATA)) {
     Vectors *vec;
 
 
@@ -6558,14 +6558,14 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
 {
   RWCString *pstr;
   bool status = true , variable_option = false , begin_end_option = false , begin_end = false ,
-       output_option = false;
+       segmentation_option = false , segmentation = false , output_option = false;
   register int i;
   int nb_required , nb_point = I_DEFAULT , int_sum , variable = I_DEFAULT , *int_filter;
   sequence_type output = TREND;
   double sum , *filter;
   vector<double> vec_filter;
   const Distribution *dist;
-  const Sequences *iseq;
+  const Sequences *iseq = NULL;
   Sequences *seq;
   MarkovianSequences *markovian_seq;
   StatError error;
@@ -6574,7 +6574,8 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
   nb_required = 2;
 
   CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
-              (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ,
+              (args.length() == nb_required + 4) || (args.length() == nb_required + 6) ||
+              (args.length() == nb_required + 8) ,
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "MovingAverage"));
 
   // arguments obligatoires
@@ -6759,6 +6760,31 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
         }
       }
 
+      else if (*pstr == "Segmentation") {
+        switch (segmentation_option) {
+
+        case false : {
+          segmentation_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "MovingAverage" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            segmentation = args[nb_required + i * 2 + 1].val.b;
+          }
+          break;
+        }
+
+        case true : {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "MovingAverage" , nb_required + i + 1);
+          break;
+        }
+        }
+      }
+
       else if (*pstr == "Output") {
         switch (output_option) {
 
@@ -6804,18 +6830,27 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
       else {
         status = false;
         genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "MovingAverage" , nb_required + i + 1 ,
-                    "Variable or BeginEnd or Output");
+                    "Variable or BeginEnd or Segmentation or Output");
       }
     }
   }
 
+  if ((segmentation_option) && (iseq) && (iseq->get_type(0) != STATE)) {
+    status = false;
+    genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "MovingAverage" , "Segmentation");
+  }
+  if ((!begin_end) && (segmentation_option)) {
+    status = false;
+    genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "MovingAverage" , "BeginEnd" , "Segmentation");
+  }
+
   if (status) {
     if (!dist) {
-//      seq = iseq->moving_average(error , nb_point , filter , variable , begin_end , output);
-      seq = iseq->moving_average(error , nb_point , vec_filter , variable , begin_end , output);
+//      seq = iseq->moving_average(error , nb_point , filter , variable , begin_end , segmentation , output);
+      seq = iseq->moving_average(error , nb_point , vec_filter , variable , begin_end , segmentation , output);
     }
     else {
-      seq = iseq->moving_average(error , *dist , variable , begin_end , output);
+      seq = iseq->moving_average(error , *dist , variable , begin_end , segmentation , output);
     }
   }
 
