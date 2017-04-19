@@ -155,7 +155,8 @@ const char *STAT_err_msgs_aml[] = {
   "function %s: bad number of distributions: should be between 2 and %d" ,
   "function %s: bad number of mixture components: should be between 2 and %d" ,
   "function %s: argument %d: bad distribution name: should be %s" ,
-  "function %s: argument %d: bad histogram name: should be %s" ,
+  "function %s: argument %d: bad frequency distribution name: should be %s" ,
+  "function %s: frequency distribution not built" ,
   "function %s: argument %d: bad inferior bound status: should be %s" ,
   "function %s: argument %d: bad variance factor: should be %s" ,
   "function %s: argument %d: bad algorithm name: should be %s" ,
@@ -1233,10 +1234,9 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 //                                        model_type , common_contrast , shape_parameter ,
 //                                        change_point_output , ASCII , segmentation ,
 //                                        nb_segmentation);
-    status = seq->segment_profile_write(error , AMLOUTPUT , identifier , args[1].val.i ,
-                                        vec_model_type , common_contrast , vec_shape_parameter ,
-                                        change_point_output , ASCII , segmentation ,
-                                        nb_segmentation);
+    status = seq->segment_profile_ascii_write(error , identifier , args[1].val.i ,
+                                              vec_model_type , common_contrast , vec_shape_parameter ,
+                                              change_point_output , segmentation , nb_segmentation);
     delete [] model_type;
     delete [] shape_parameter;
 
@@ -1269,14 +1269,14 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       CHECKCONDVA(nb_required == 2 ,
                   genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
-      status = ((HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , AMLOUTPUT , args[1].val.i , state_sequence , nb_state_sequence);
+      status = ((HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , args[1].val.i , state_sequence , nb_state_sequence);
     }
 
     else if (args[0].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
       CHECKCONDVA(nb_required == 2 ,
                   genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
-      status = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , AMLOUTPUT , args[1].val.i , state_output , state_sequence , nb_state_sequence);
+      status = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , args[1].val.i , state_output , state_sequence , nb_state_sequence);
     }
 
     else {
@@ -1306,11 +1306,11 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       }
 
       if (args[2].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
-        status = ((HiddenVariableOrderMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_write(error , AMLOUTPUT , *seq , args[1].val.i , ASCII , state_sequence , nb_state_sequence);
+        status = ((HiddenVariableOrderMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_ascii_write(error , *seq , args[1].val.i , state_sequence , nb_state_sequence);
       }
 
       else if (args[2].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
-        status = ((HiddenSemiMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_write(error , AMLOUTPUT , *seq , args[1].val.i , state_output , ASCII , state_sequence , nb_state_sequence);
+        status = ((HiddenSemiMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_ascii_write(error , *seq , args[1].val.i , state_output , state_sequence , nb_state_sequence);
       }
 
       else {
