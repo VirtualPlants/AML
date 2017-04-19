@@ -999,6 +999,23 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
       return AMObj(AMObjType::FREQUENCY_DISTRIBUTION , model);
     }
 
+    if (*pstr == "IndexParameter") {
+      CHECKCONDVA(args.length() == 2 ,
+                  genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "ExtractFrequencyDistribution" , 2));
+
+//      if (seq->get_index_parameter_type() == IMPLICIT_TYPE) {
+      if (!seq->get_index_parameter_distribution()) {
+        genAMLError(ERRORMSG(FREQUENCY_DISTRIBUTION_NOT_BUILT_s) , "ExtractFrequencyDistribution");
+        return AMObj(AMObjType::ERROR);
+      }
+
+      else {
+        histo = new DiscreteDistributionData(*(seq->get_index_parameter_distribution()));
+        STAT_model* model = new STAT_model(histo);
+        return AMObj(AMObjType::FREQUENCY_DISTRIBUTION , model);
+      }
+    }
+
     if (*pstr == "Value") {
       nb_variable = seq->get_nb_variable();
 
@@ -2353,7 +2370,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
         return AMObj(AMObjType::ERROR);
       }
 
-      histo = ihisto->cluster(error , ratio , AMLOUTPUT);
+      histo = ihisto->cluster(error , ratio , true);
     }
 
     else if (*pstr == "Limit") {
@@ -3448,11 +3465,11 @@ AMObj STAT_ValueSelect(const AMObjVector &args)
 
 
       if (args[offset].tag() == AMObjType::INTEGER) {
-        vec = ivec->value_select(error , AMLOUTPUT , variable ,
+        vec = ivec->value_select(error , true , variable ,
                                  int_min_value , int_max_value , keep);
       }
       else if (args[offset].tag() == AMObjType::REAL) {
-        vec = ivec->value_select(error , AMLOUTPUT , variable ,
+        vec = ivec->value_select(error , true , variable ,
                                  real_min_value , real_max_value , keep);
       }
 
@@ -3476,11 +3493,11 @@ AMObj STAT_ValueSelect(const AMObjVector &args)
 
 
       if (args[offset].tag() == AMObjType::INTEGER) {
-        seq = iseq->value_select(error , AMLOUTPUT , variable ,
+        seq = iseq->value_select(error , true , variable ,
                                  int_min_value , int_max_value , keep);
       }
       else if (args[offset].tag() == AMObjType::REAL) {
-        seq = iseq->value_select(error , AMLOUTPUT , variable ,
+        seq = iseq->value_select(error , true , variable ,
                                  real_min_value , real_max_value , keep);
       }
 
@@ -4962,7 +4979,7 @@ AMObj STAT_LengthSelect(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->length_select(error , AMLOUTPUT , min_length , max_length , keep);
+  seq = iseq->length_select(error , true , min_length , max_length , keep);
 
   if (seq) {
     markovian_seq = seq->markovian_sequences(error);
@@ -5758,7 +5775,7 @@ AMObj STAT_IndexParameterSelect(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->index_parameter_select(error , AMLOUTPUT , min_index_parameter ,
+  seq = iseq->index_parameter_select(error , true , min_index_parameter ,
                                      max_index_parameter , keep);
 
   if (seq) {
@@ -7809,7 +7826,7 @@ AMObj STAT_ConsecutiveValues(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->consecutive_values(error , AMLOUTPUT , variable , add_variable);
+  seq = iseq->consecutive_values(error , true , variable , add_variable);
 
   if (seq) {
     STAT_model* model = new STAT_model(seq);
