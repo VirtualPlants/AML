@@ -37,6 +37,7 @@
 
 
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "stat_tool/distribution.h"
@@ -130,7 +131,7 @@ static AMObj STAT_EstimateDistribution(const FrequencyDistribution *histo ,
   }
 
   else {
-    RWCString *pstr;
+    string *pstr;
     bool status = true , min_inf_bound_option = false , inf_bound_status_option = false , flag = true;
     register int i;
     int nb_required , min_inf_bound = 0;
@@ -253,7 +254,7 @@ static AMObj STAT_EstimateDistribution(const FrequencyDistribution *histo ,
 static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , min_inf_bound_option = false , inf_bound_status_option = false ,
        dist_inf_bound_status_option = false , flag = true , component_flag = true ,
        nb_component_option = false , nb_component_estimation = false , criterion_option = false ,
@@ -587,7 +588,7 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
 static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , estimator_option = false , initial_distribution_option = false ,
        min_inf_bound_option = false , nb_iteration_option = false , penalty_option = false ,
        weight_option = false , outside_option = false;
@@ -945,7 +946,7 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
 static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   compound_distribution type;
   bool status = true , estimator_option = false , initial_distribution_option = false ,
        min_inf_bound_option = false , nb_iteration_option = false , penalty_option = false ,
@@ -1332,7 +1333,7 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
 static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , algorithm_option = false , nb_iteration_option = false ,
        min_nb_assignment_option = false , max_nb_assignment_option = false , parameter_option = false ,
        assignment_option = false , assignment = true;
@@ -2008,7 +2009,7 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
 static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , estimator_option = false , initial_inter_event_option = false ,
        nb_iteration_option = false , inter_event_mean_option = false , penalty_option = false ,
        weight_option = false , outside_option = false;
@@ -2432,7 +2433,7 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
 static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   process_type type = DEFAULT_TYPE;
   bool status = true , estimator_option = false , nb_iteration_option = false ,
        initial_inter_event_option = false , equilibrium_estimator_option = false ,
@@ -2874,7 +2875,7 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
 static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , counting_option = false , counting_flag = true ,
        global_initial_transition_option = false , global_initial_transition = true;
   register int i;
@@ -3512,7 +3513,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
 static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   process_type type = DEFAULT_TYPE;
   bool status = true , counting_option = false , counting_flag = true , estimator_option = false ,
        nb_iteration_option = false , occupancy_mean_option = false;
@@ -3739,7 +3740,7 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
                                                     const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , algorithm_option = false , common_dispersion_option = false ,
        common_dispersion = false , counting_option = false , counting_flag = true ,
        global_initial_transition_option = false , global_initial_transition = true ,
@@ -4094,7 +4095,7 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
 static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , algorithm_option = false , common_dispersion_option = false ,
        common_dispersion = false , counting_option = false , counting_flag = true ,
        estimator_option = false , nb_iteration_option = false , min_nb_state_sequence_option = false ,
@@ -5033,7 +5034,7 @@ static AMObj STAT_EstimateNonhomogeneousMarkov(const MarkovianSequences *seq , c
   int nb_required , nb_state = seq->get_marginal_distribution(0)->nb_value;
   parametric_function *ident;
   NonhomogeneousMarkov *markov;
-  RWCString *pstr;
+  string *pstr;
   StatError error;
 
 
@@ -5149,7 +5150,7 @@ AMObj STAT_Estimate(const AMObjVector &args)
 
   if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
-    RWCString *pstr;
+    string *pstr;
     register int i;
     int model = I_DEFAULT;
     discrete_parametric ident;
@@ -5243,7 +5244,7 @@ AMObj STAT_Estimate(const AMObjVector &args)
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
-    RWCString *pstr;
+    string *pstr;
     int model = I_DEFAULT;
     const MarkovianSequences *seq;
 

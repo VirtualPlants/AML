@@ -37,6 +37,7 @@
 
 
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "stat_tool/distribution.h"
@@ -217,7 +218,7 @@ AMObj STAT_Simulate(const AMObjVector &args)
   }
 
   if (args[0].tag() == AMObjType::RENEWAL) {
-    RWCString *pstr;
+    string *pstr;
     process_type type;
     bool status = true;
     RenewalData *timev;
@@ -547,7 +548,7 @@ AMObj STAT_Simulate(const AMObjVector &args)
 AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   string file_name = "";
   output_format format = ASCII;
   bool status = true , file_name_option = false , format_option = false;
@@ -823,7 +824,7 @@ AMObj STAT_CompareVectors(const AMObjVector &args)
 AMObj STAT_CompareSequences(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   string file_name = "" , alignment_file_name = ""; 
   output_format format = ASCII;
   bool status = true , ref_sequence_option = false , test_sequence_option = false , begin_option = false ,
@@ -1849,7 +1850,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
 
   if ((args[1].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) ||
       (args[1].tag() == AMObjType::HIDDEN_SEMI_MARKOV)) {
-    RWCString *pstr;
+    string *pstr;
     bool algorithm_option = false , file_name_option = false;
     latent_structure_algorithm algorithm = FORWARD;
 
@@ -2462,7 +2463,7 @@ AMObj STAT_Compare(const AMObjVector &args)
 AMObj STAT_Clustering(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true;
   int nb_required;
   StatError error;
@@ -2497,7 +2498,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
     switch (args[2].tag()) {
 
     case AMObjType::INTEGER : {
-      RWCString *pstr;
+      string *pstr;
       bool prototype_option = false , initialization_option = false , algorithm_option = false;
       register int i;
       int nb_cluster , *prototype = NULL , initialization = 1 , algorithm = 1;
@@ -2969,7 +2970,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
 AMObj STAT_ComparisonTest(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true;
   const FrequencyDistribution *histo1 , *histo2;
   StatError error;
@@ -3187,7 +3188,7 @@ AMObj STAT_TruncateDistribution(const AMObjVector &args)
 AMObj STAT_ComputeRankCorrelation(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   string file_name = "";
   bool status = true , type_option = false , file_name_option = false;
   register int i;
@@ -3366,7 +3367,7 @@ AMObj STAT_SupNormDistance(const AMObjVector &args)
 AMObj STAT_ContingencyTable(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   string file_name = "";
   output_format format = ASCII;
   bool status = true , file_name_option = false , format_option = false;
@@ -3514,7 +3515,7 @@ AMObj STAT_ContingencyTable(const AMObjVector &args)
 AMObj STAT_VarianceAnalysis(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   string file_name = "";
   output_format format = ASCII;
   bool status = true , file_name_option = false , format_option = false;
@@ -3684,7 +3685,7 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
 AMObj STAT_Regression(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true;
   StatError error;
   Regression *regression;
@@ -3975,7 +3976,7 @@ AMObj STAT_Regression(const AMObjVector &args)
 AMObj STAT_ComputeCorrelation(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , max_lag_option = false , type_option = false , normalization_option = false ,
        individual_mean_option = false , individual_mean = false;
   register int i;
@@ -4451,7 +4452,7 @@ AMObj STAT_ComputeWhiteNoiseCorrelation(const AMObjVector &args)
 AMObj STAT_ComputePartialAutocorrelation(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , max_lag_option = false , type_option = false;
   register int i;
   int nb_required , nb_variable , variable , max_lag = I_DEFAULT;
@@ -4626,7 +4627,7 @@ AMObj STAT_ComputePartialAutocorrelation(const AMObjVector &args)
 AMObj STAT_Segmentation(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , output_option = false , common_contrast_option = false , common_contrast = true ,
        continuity_option = false , continuity = false , sequence_option = false ,
        shape_parameter_option = false;
@@ -4737,7 +4738,6 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
           CHECKCONDVA(nb_required == 3 ,
                       genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Segmentation"));
-          break;
         }
         else {
           CHECKCONDVA(nb_required == nb_variable + 2 ,
@@ -5221,10 +5221,10 @@ AMObj STAT_Segmentation(const AMObjVector &args)
 
       else {
 //        seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
-//                                 vec_model_type , common_contrast , vec_shape_parameter ,
+//                                 model_type , common_contrast , shape_parameter ,
 //                                 output , continuity);
         seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
-                                 model_type , common_contrast , shape_parameter ,
+                                 vec_model_type , common_contrast , vec_shape_parameter ,
                                  output , continuity);
       }
       break;
@@ -5585,7 +5585,7 @@ AMObj STAT_ComputeSelfTransition(const AMObjVector &args)
 AMObj STAT_TransitionCount(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   string file_name = "";
   bool status = true , begin_option = false , begin = false , estimator_option = false ,
        file_name_option = false;
@@ -5818,7 +5818,7 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
 AMObj STAT_WordCount(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , begin_state_option = false , end_state_option = false ,
        min_frequency_option = false;
   register int i;
