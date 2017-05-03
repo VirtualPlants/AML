@@ -37,6 +37,7 @@
 
 
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "stat_tool/distribution.h"
@@ -108,13 +109,20 @@ static int parameter_input(const AMObjVector &args , int ident , int &inf_bound 
   }
   else {
     inf_bound = args[1].val.i;
-    if ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND)) {
+
+    if (((ident == BINOMIAL) || (ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC) ||
+         (ident == UNIFORM)) && ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND))) {
+      status = false;
+      genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 2);
+    }
+
+    if ((ident == PRIOR_SEGMENT_LENGTH) && (inf_bound < 2)) {
       status = false;
       genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 2);
     }
   }
 
-  if ((ident == BINOMIAL) || (ident == UNIFORM)) {
+  if ((ident == BINOMIAL) || (ident == UNIFORM) || (ident == PRIOR_SEGMENT_LENGTH)) {
     if (args[2].tag() != AMObjType::INTEGER) {
       status = false;
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , function , 3 ,
@@ -124,23 +132,33 @@ static int parameter_input(const AMObjVector &args , int ident , int &inf_bound 
     else {
       sup_bound = args[2].val.i;
 
-      switch (ident) {
+      if (status) {
+        switch (ident) {
 
-      case BINOMIAL : {
-        if ((sup_bound <= inf_bound) || (sup_bound - inf_bound > MAX_DIFF_BOUND)) {
-          status = false;
-          genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 3);
+        case BINOMIAL : {
+          if ((sup_bound <= inf_bound) || (sup_bound - inf_bound > MAX_DIFF_BOUND)) {
+            status = false;
+            genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 3);
+          }
+          break;
         }
-        break;
-      }
 
-      case UNIFORM : {
-        if ((sup_bound < inf_bound) || (sup_bound - inf_bound > MAX_DIFF_BOUND)) {
-          status = false;
-          genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 3);
+        case UNIFORM : {
+          if ((sup_bound < inf_bound) || (sup_bound - inf_bound > MAX_DIFF_BOUND)) {
+            status = false;
+            genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 3);
+          }
+          break;
         }
-        break;
-      }
+
+        case PRIOR_SEGMENT_LENGTH : {
+          if (sup_bound <= inf_bound) {
+            status = false;
+            genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 3);
+          }
+          break;
+        }
+        }
       }
     }
   }
@@ -166,7 +184,7 @@ static int parameter_input(const AMObjVector &args , int ident , int &inf_bound 
     }
   }
 
-  if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL)) {
+  if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
     switch (args[3].tag()) {
     case AMObjType::INTEGER :
       probability = args[3].val.i;
@@ -196,7 +214,17 @@ static int parameter_input(const AMObjVector &args , int ident , int &inf_bound 
       if ((probability <= 0.) || (probability >= 1.)) {
         lstatus = false;
       }
-      else if (parameter * (1. - probability) / probability > MAX_MEAN) {
+      else if ((status) && (parameter * (1. - probability) / probability > MAX_MEAN)) {
+        lstatus = false;
+      }
+      break;
+    }
+
+    case POISSON_GEOMETRIC : {
+      if ((probability <= 0.) || (probability >= 1.)) {
+        lstatus = false;
+      }
+      else if ((status) && ((inf_bound + parameter) / probability > MAX_MEAN)) {
         lstatus = false;
       }
       break;
@@ -248,7 +276,7 @@ AMObj STAT_Distribution(const AMObjVector &args)
   }
 
   else {
-    RWCString *pstr;
+    string *pstr;
     bool status = true;
     register int i;
     discrete_parametric ident;
@@ -258,7 +286,7 @@ AMObj STAT_Distribution(const AMObjVector &args)
 
 
     pstr = (AMString*)args[0].val.p;
-    for (i = BINOMIAL;i <= UNIFORM;i++) {
+    for (i = BINOMIAL;i <= PRIOR_SEGMENT_LENGTH;i++) {
       if ((*pstr == STAT_discrete_distribution_word[i]) ||
           (*pstr == STAT_discrete_distribution_letter[i])) {
         ident = (discrete_parametric)i;
@@ -266,20 +294,20 @@ AMObj STAT_Distribution(const AMObjVector &args)
       }
     }
 
-    if (i == UNIFORM + 1) {
+    if (i == PRIOR_SEGMENT_LENGTH + 1) {
       status = false;
       genAMLError(ERRORMSG(DISTRIBUTION_NAME_sds) , "Distribution" , 1 ,
                   "BINOMIAL(B) or POISSON(P) or NEGATIVE_BINOMIAL(NB) or UNIFORM(U)");
     }
 
     else {
-      if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL)) {
+      if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
         if (args.length() != 4) {
           status = false;
           genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Distribution" , 4);
         }
       }
-      else if ((ident == POISSON) || (ident == UNIFORM)) {
+      else if ((ident == POISSON) || (ident == UNIFORM) || (ident == PRIOR_SEGMENT_LENGTH)) {
         if (args.length() != 3) {
           status = false;
           genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Distribution" , 3);
@@ -708,7 +736,7 @@ AMObj STAT_Histogram(const AMObjVector &args)
 AMObj STAT_Mixture(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   Mixture *mixt;
   StatError error;
 
@@ -1209,7 +1237,7 @@ AMObj STAT_Vectors(const AMObjVector &args)
 AMObj STAT_VectorDistance(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status;
   register int i , j;
   int nb_required , scale , nb_variable;
@@ -1383,7 +1411,7 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
 AMObj STAT_Renewal(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   process_type type = EQUILIBRIUM;
   bool status = true , type_option = false , time_option = false , scale_option = false;
   register int i;
@@ -1660,7 +1688,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
   if ((args[0].tag() == AMObjType::SEQUENCES) || (args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) || (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
-    RWCString *pstr;
+    string *pstr;
     bool status = true , previous_date_option = false , next_date_option = false;
     register int i;
     int nb_required , nb_variable , variable , offset , begin_date , end_date ,
@@ -2136,7 +2164,7 @@ AMObj STAT_HiddenVariableOrderMarkov(const AMObjVector &args)
 AMObj STAT_SemiMarkov(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , length_option = false , counting_option = false , counting_flag = true;
   register int i;
   int nb_required , length = DEFAULT_LENGTH;
@@ -2256,7 +2284,7 @@ AMObj STAT_SemiMarkov(const AMObjVector &args)
 AMObj STAT_HiddenSemiMarkov(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , length_option = false , counting_option = false ,
        counting_flag = true , format_option = false , old_format = false;
   register int i;
@@ -2880,7 +2908,7 @@ AMObj STAT_Sequences(const AMObjVector &args)
   switch (args[0].tag()) {
 
   case AMObjType::ARRAY : {
-    RWCString *pstr;
+    string *pstr;
     bool status = true , index_parameter_option = false , identifier_option = false;
     register int i , j;
     int nb_required , nb_sequence , *identifier = NULL;

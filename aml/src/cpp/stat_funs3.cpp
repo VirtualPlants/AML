@@ -37,6 +37,7 @@
 
 
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "stat_tool/distribution.h"
@@ -176,7 +177,7 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ExtractDistribution"));
 
   if (args[0].tag() == AMObjType::DISCRETE_MIXTURE) {
-    RWCString *pstr;
+    string *pstr;
     DiscreteParametricModel *dist;
     const DiscreteMixture *mixture;
     const DiscreteMixtureData *mixture_data;
@@ -240,7 +241,7 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
   }
 
   if (args[0].tag() == AMObjType::CONVOLUTION) {
-    RWCString *pstr;
+    string *pstr;
     DiscreteParametricModel *dist;
     const Convolution *convolution;
     const ConvolutionData *convolution_data;
@@ -293,7 +294,7 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
   }
 
   if (args[0].tag() == AMObjType::COMPOUND) {
-    RWCString *pstr;
+    string *pstr;
     DiscreteParametricModel *dist;
     const Compound *compound;
     const CompoundData *compound_data;
@@ -333,7 +334,7 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
   }
 
   if (args[0].tag() == AMObjType::RENEWAL) {
-    RWCString *pstr;
+    string *pstr;
     int time;
     renewal_distribution dist_type;
     DiscreteParametricModel *dist;
@@ -405,7 +406,7 @@ AMObj STAT_ExtractDistribution(const AMObjVector &args)
       (args[0].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV) || (args[0].tag() == AMObjType::HIDDEN_SEMI_MARKOV) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV)) {
-    RWCString *pstr;
+    string *pstr;
     bool status = true;
     process_distribution dist_type;
     DiscreteParametricModel *dist;
@@ -613,7 +614,7 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
               genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ExtractFrequencyDistribution"));
 
   if (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) {
-    RWCString *pstr;
+    string *pstr;
     DiscreteDistributionData *histo;
     const DiscreteMixtureData *mixture_data;
     StatError error;
@@ -679,7 +680,7 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
   }
 
   if (args[0].tag() == AMObjType::CONVOLUTION_DATA) {
-    RWCString *pstr;
+    string *pstr;
     DiscreteDistributionData *histo;
     const ConvolutionData *convolution_data;
     StatError error;
@@ -734,7 +735,7 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
   }
 
   if (args[0].tag() == AMObjType::COMPOUND_DATA) {
-    RWCString *pstr;
+    string *pstr;
     compound_distribution type;
     DiscreteDistributionData *histo;
     StatError error;
@@ -829,7 +830,7 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
   }
 
   if ((args[0].tag() == AMObjType::TIME_EVENTS) || (args[0].tag() == AMObjType::RENEWAL_DATA)) {
-    RWCString *pstr;
+    string *pstr;
     renewal_distribution histo_type;
     DiscreteDistributionData *histo;
     const TimeEvents *time_events;
@@ -952,7 +953,7 @@ AMObj STAT_ExtractFrequencyDistribution(const AMObjVector &args)
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
-    RWCString *pstr;
+    string *pstr;
     bool status = true;
     int nb_variable , variable , offset , value;
     process_distribution histo_type;
@@ -1203,7 +1204,7 @@ AMObj STAT_ExtractHistogram(const AMObjVector &args)
 AMObj STAT_ExtractVectors(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true;
   int nb_variable , variable , offset , value;
   sequence_pattern pattern; 
@@ -2084,7 +2085,7 @@ AMObj STAT_Shift(const AMObjVector &args)
 AMObj STAT_ThresholdingData(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true;
   int nb_variable , variable , offset;
   threshold_direction mode;
@@ -2264,7 +2265,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
 
   if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
-    RWCString *pstr;
+    string *pstr;
     bool status = true;
     int nb_required = 3;
     const FrequencyDistribution *ihisto;
@@ -2433,7 +2434,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
-    RWCString *pstr;
+    string *pstr;
     bool status = true;
     register int i;
     int nb_required , nb_variable , variable , offset , nb_class = I_DEFAULT , *int_limit = NULL;
@@ -3228,7 +3229,7 @@ AMObj STAT_Transcode(const AMObjVector &args)
 AMObj STAT_ValueSelect(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , keep = true;
   int nb_required , int_min_value , int_max_value;
   StatError error;
@@ -3690,7 +3691,7 @@ AMObj STAT_VariableScaling(const AMObjVector &args)
 AMObj STAT_Round(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , variable_option = false , mode_option = false;
   register int i;
   int nb_required , variable = I_DEFAULT;
@@ -4056,7 +4057,7 @@ AMObj STAT_SelectBinWidth(const AMObjVector &args)
 AMObj STAT_SelectIndividual(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , keep = true;
   register int i;
   int nb_required , nb_pattern = I_DEFAULT , *identifier = NULL;
@@ -4249,7 +4250,7 @@ AMObj STAT_SelectIndividual(const AMObjVector &args)
 AMObj STAT_SelectVariable(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , keep = true;
   register int i;
   int nb_required , nb_variable = I_DEFAULT , *variable = NULL;
@@ -4869,7 +4870,7 @@ AMObj STAT_TimeSelect(const AMObjVector &args)
 AMObj STAT_LengthSelect(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , keep = true;
   int nb_required , min_length , max_length;
   const Sequences *iseq;
@@ -5206,7 +5207,7 @@ AMObj STAT_ShiftVariable(const AMObjVector &args)
 AMObj STAT_RemoveRun(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true;
   int nb_required , nb_variable , variable , offset , value , max_run_length = I_DEFAULT;
   run_position position;
@@ -5666,7 +5667,7 @@ AMObj STAT_ExplicitIndexParameter(const AMObjVector &args)
 AMObj STAT_IndexParameterSelect(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , keep = true;
   int nb_required , min_index_parameter , max_index_parameter;
   const Sequences *iseq;
@@ -5918,7 +5919,7 @@ AMObj STAT_IndexParameterExtract(const AMObjVector &args)
 AMObj STAT_SegmentationExtract(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , mode_option = false , keep = true , concatenation_option = false ,
        concatenation = false;
   register int i;
@@ -6217,7 +6218,7 @@ AMObj STAT_Cumulate(const AMObjVector &args)
 AMObj STAT_Difference(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , variable_option = false , first_element_option = false , first_element = false;
   register int i;
   int nb_required , variable = I_DEFAULT;
@@ -6359,6 +6360,107 @@ AMObj STAT_Difference(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
+ *  Log-transform of values of sequences.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_LogTransform(const AMObjVector &args)
+
+{
+  bool status = true;
+  int nb_required , variable = I_DEFAULT;
+  const Sequences *iseq;
+  Sequences *seq;
+  MarkovianSequences *markovian_seq;
+  StatError error;
+
+
+  nb_required = 1;
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "LogTransform"));
+
+  // argument obligatoire
+
+  switch (args[0].tag()) {
+  case AMObjType::SEQUENCES :
+    iseq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::MARKOVIAN_SEQUENCES :
+    iseq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+    iseq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::SEMI_MARKOV_DATA :
+    iseq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+    iseq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  default :
+    status = false;
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sss) , "LogTransform" , args[0].tag.string().data() ,
+                "SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+    break;
+  }
+
+  // argument optionnel
+
+  if (args.length() == nb_required + 2) {
+    if (args[nb_required].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "LogTransform" , nb_required + 1 ,
+                  args[nb_required].tag.string().data() , "OPTION");
+    }
+    else {
+      if (*((AMString*)args[nb_required].val.p) != "Variable") {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "LogTransform" , nb_required + 1 , "Variable");
+      }
+    }
+
+    if (args[nb_required + 1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "LogTransform" , nb_required + 1 ,
+                  args[nb_required + 1].tag.string().data() , "INT");
+    }
+    else {
+      variable = args[nb_required + 1].val.i;
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  seq = iseq->log_transform(error , variable);
+
+  if (seq) {
+    markovian_seq = seq->markovian_sequences(error);
+    if (markovian_seq) {
+      delete seq;
+      STAT_model* model = new STAT_model(markovian_seq);
+      return AMObj(AMObjType::MARKOVIAN_SEQUENCES , model);
+    }
+    else {
+      AMLOUTPUT << "\n";
+      error.ascii_write(AMLOUTPUT , WARNING);
+      STAT_model* model = new STAT_model(seq);
+      return AMObj(AMObjType::SEQUENCES , model);
+    }
+  }
+
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "LogTransform");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Computation of relative growth rates on the basis of cumulative dimensions.
  *
  *--------------------------------------------------------------*/
@@ -6366,7 +6468,7 @@ AMObj STAT_Difference(const AMObjVector &args)
 AMObj STAT_RelativeGrowthRate(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true;
   int nb_required;
   double growth_factor = GROWTH_FACTOR;
@@ -6573,7 +6675,7 @@ AMObj STAT_SequenceNormalization(const AMObjVector &args)
 AMObj STAT_MovingAverage(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , variable_option = false , begin_end_option = false , begin_end = false ,
        segmentation_option = false , segmentation = false , output_option = false;
   register int i;
@@ -6910,7 +7012,7 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
 AMObj STAT_PointwiseAverage(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   output_format format = ASCII;
 //  char *file_name = NULL;
   string file_name = "";
@@ -7574,7 +7676,7 @@ AMObj STAT_ComputeInitialRun(const AMObjVector &args)
 AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true , add_variable_option = false , add_variable = false ,
        run_length_option = false , sequence_length_option = false;
   register int i;

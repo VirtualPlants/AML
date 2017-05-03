@@ -41,6 +41,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include "tool/dirnames.h"
@@ -249,6 +250,7 @@ extern AMObj STAT_IndexParameterExtract(const AMObjVector &args);
 extern AMObj STAT_SegmentationExtract(const AMObjVector &args);
 extern AMObj STAT_Cumulate(const AMObjVector &args);
 extern AMObj STAT_Difference(const AMObjVector &args);
+extern AMObj STAT_LogTransform(const AMObjVector &args);
 extern AMObj STAT_RelativeGrowthRate(const AMObjVector &args);
 extern AMObj STAT_SequenceNormalization(const AMObjVector &args);
 extern AMObj STAT_MovingAverage(const AMObjVector &args);
@@ -388,7 +390,7 @@ ostream& STAT_model::displayOneLine(ostream &os) const
 AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 
 {
-  RWCString *pstr;
+  string *pstr;
   char view_point = 'v';
   output_sequence_format format = COLUMN;
   bool status = true , view_point_option = false , detail_option = false , format_option = false ,
@@ -1342,7 +1344,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
 AMObj STAT_model::save(const AMObjVector &args) const
 
 {
-  RWCString *pstr , *format_pstr = NULL;
+  string *pstr , *format_pstr = NULL;
   char view_point = 'v';
   output_format format;
   bool status = true , view_point_option = false , detail_option = false , format_option = false ,
@@ -2475,7 +2477,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
 AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
 
 {
-  RWCString *pstr;
+  string *pstr;
   char view_point = 'v' , *title = NULL;
   bool status = true , data = false , survival = false , config = false , mode = false ,
        window_option = false , mode_option = false , view_point_option = false ,
@@ -3651,7 +3653,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
 AMObj STAT_SaveMTG(const AMObjVector &args)
 
 {
-  RWCString *pstr;
+  string *pstr;
   bool status = true;
   register int i;
   int nb_variable;
@@ -3956,6 +3958,9 @@ void installSTATModule()
 
   type[0] = AMObjType::ANY;
   installFNode("Difference" , STAT_Difference , 1 , type , AMObjType::SEQUENCES);
+
+  type[0] = AMObjType::ANY;
+  installFNode("LogTransform" , STAT_LogTransform , 1 , type , AMObjType::SEQUENCES);
 
   type[0] = AMObjType::ANY;
   installFNode("RelativeGrowthRate" , STAT_RelativeGrowthRate , 1 , type , AMObjType::SEQUENCES);
