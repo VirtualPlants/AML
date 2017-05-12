@@ -552,7 +552,7 @@ AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
   string file_name = "";
   output_format format = ASCII;
   bool status = true , file_name_option = false , format_option = false;
-  register int i;
+  int i;
   int nb_required;
   variable_type var_type;
   const FrequencyDistribution **phisto;
@@ -830,7 +830,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
   bool status = true , ref_sequence_option = false , test_sequence_option = false , begin_option = false ,
        begin_free = false , end_option = false , end_free = false , file_name_option = false ,
        format_option = false , alignment_file_name_option = false;
-  register int i;
+  int i;
   int nb_required , ref_identifier = I_DEFAULT , test_identifier = I_DEFAULT;
   const Sequences *iseq;
   Sequences *seq;
@@ -1714,7 +1714,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
 {
   string file_name = "";
   bool status = true;
-  register int i;
+  int i;
   int nb_required , nb_model;
   MarkovianSequences *seq;
   StatError error;
@@ -2034,7 +2034,7 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
 {
   string file_name = "";
   bool status = true;
-  register int i;
+  int i;
   int nb_required , nb_model , step , nb_sequence , length;
   FrequencyDistribution **hlength = NULL;
   const MarkovianSequences **seq = NULL;
@@ -2500,7 +2500,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
     case AMObjType::INTEGER : {
       string *pstr;
       bool prototype_option = false , initialization_option = false , algorithm_option = false;
-      register int i;
+      int i;
       int nb_cluster , *prototype = NULL , initialization = 1 , algorithm = 1;
 
 
@@ -2628,7 +2628,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
     }
 
     case AMObjType::ARRAY : {
-      register int i , j;
+      int i , j;
       int nb_cluster , *cluster_nb_pattern = NULL , **cluster_pattern = NULL;
       const Array *parray , *pcluster;
 
@@ -2753,7 +2753,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
     output_format format = ASCII;
     bool algorithm_option = false , criterion_option = false , file_name_option = false ,
          format_option = false;
-    register int i;
+    int i;
     hierarchical_strategy algorithm = AGGLOMERATIVE;
     linkage criterion = AVERAGE_NEIGHBOR;
 
@@ -3191,7 +3191,7 @@ AMObj STAT_ComputeRankCorrelation(const AMObjVector &args)
   string *pstr;
   string file_name = "";
   bool status = true , type_option = false , file_name_option = false;
-  register int i;
+  int i;
   int nb_required;
   correlation_type type = SPEARMAN;
   StatError error;
@@ -3371,7 +3371,7 @@ AMObj STAT_ContingencyTable(const AMObjVector &args)
   string file_name = "";
   output_format format = ASCII;
   bool status = true , file_name_option = false , format_option = false;
-  register int i;
+  int i;
   int nb_required;
   StatError error;
 
@@ -3519,7 +3519,7 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
   string file_name = "";
   output_format format = ASCII;
   bool status = true , file_name_option = false , format_option = false;
-  register int i;
+  int i;
   int nb_required , type;
   StatError error;
 
@@ -3733,7 +3733,7 @@ AMObj STAT_Regression(const AMObjVector &args)
 
   else if (*pstr == "MovingAverage") {
     moving_average_method algorithm = AVERAGING;
-    register int i;
+    int i;
     int nb_required , nb_point = I_DEFAULT , int_sum , *int_filter;
     double sum , *filter;
     const Distribution *dist;
@@ -3979,7 +3979,7 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
   string *pstr;
   bool status = true , max_lag_option = false , type_option = false , normalization_option = false ,
        individual_mean_option = false , individual_mean = false;
-  register int i;
+  int i;
   int nb_required , nb_variable , variable1 = 0 , variable2 , max_lag = I_DEFAULT;
   correlation_normalization normalization = EXACT;
   correlation_type type = PEARSON;
@@ -4304,7 +4304,7 @@ AMObj STAT_ComputeAutoregressiveAutocorrelation(const AMObjVector &args)
 AMObj STAT_ComputeWhiteNoiseCorrelation(const AMObjVector &args)
 
 {
-  register int i;
+  int i;
   bool status = true;
   int nb_point = I_DEFAULT , int_sum , *int_filter;
   double sum , *filter;
@@ -4454,7 +4454,7 @@ AMObj STAT_ComputePartialAutocorrelation(const AMObjVector &args)
 {
   string *pstr;
   bool status = true , max_lag_option = false , type_option = false;
-  register int i;
+  int i;
   int nb_required , nb_variable , variable , max_lag = I_DEFAULT;
   correlation_type type = PEARSON;
   const Sequences *seq;
@@ -4631,7 +4631,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
   bool status = true , output_option = false , common_contrast_option = false , common_contrast = true ,
        continuity_option = false , continuity = false , sequence_option = false ,
        shape_parameter_option = false;
-  register int i , j;
+  int i , j;
   int nb_required , nb_sequence , nb_variable , identifier = I_DEFAULT;
   double ishape_parameter = 1 , *shape_parameter;
   vector<double> vec_shape_parameter;
@@ -5589,7 +5589,7 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
   string file_name = "";
   bool status = true , begin_option = false , begin = false , estimator_option = false ,
        file_name_option = false;
-  register int i;
+  int i;
   int nb_required;
   transition_estimator estimator = MAXIMUM_LIKELIHOOD;
   const MarkovianSequences *seq;
@@ -5821,7 +5821,7 @@ AMObj STAT_WordCount(const AMObjVector &args)
   string *pstr;
   bool status = true , begin_state_option = false , end_state_option = false ,
        min_frequency_option = false;
-  register int i;
+  int i;
   int nb_required , nb_variable , variable , offset , begin_state = I_DEFAULT ,
       end_state = I_DEFAULT , min_frequency = 1;
   MarkovianSequences *seq;

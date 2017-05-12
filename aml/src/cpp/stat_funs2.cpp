@@ -278,7 +278,7 @@ AMObj STAT_Distribution(const AMObjVector &args)
   else {
     string *pstr;
     bool status = true;
-    register int i;
+    int i;
     discrete_parametric ident;
     int inf_bound , sup_bound;
     double parameter , probability;
@@ -361,7 +361,7 @@ AMObj STAT_DiscreteMixture(const AMObjVector &args)
 
   else {
     bool status = true;
-    register int i;
+    int i;
     int nb_component = args.length() / 2;
     double weight[DISCRETE_MIXTURE_NB_COMPONENT];
     vector<double> vec_weight(DISCRETE_MIXTURE_NB_COMPONENT);
@@ -466,7 +466,7 @@ AMObj STAT_Convolution(const AMObjVector &args)
 
   else {
     bool status = true;
-    register int i;
+    int i;
     int nb_dist = args.length();
     const DiscreteParametric *dist[CONVOLUTION_NB_DISTRIBUTION];
     vector<DiscreteParametric> vec_dist(CONVOLUTION_NB_DISTRIBUTION);
@@ -557,7 +557,7 @@ AMObj STAT_Compound(const AMObjVector &args)
 
   else {
     bool status = true;
-    register int i;
+    int i;
     DiscreteParametric *dist[2];
 
 
@@ -632,7 +632,7 @@ AMObj STAT_FrequencyDistribution(const AMObjVector &args)
 
   case AMObjType::ARRAY : {
     bool status = true;
-    register int i;
+    int i;
     int nb_element , *element;
     Array* parray = (Array*)args[0].val.p;
 
@@ -775,7 +775,7 @@ int* buildIntArray(const AMObjVector &args , int arg_index , const char *functio
 
 {
   bool status = true;
-  register int i;
+  int i;
   int *element = NULL;
 
 
@@ -839,7 +839,7 @@ double* buildRealArray(const AMObjVector &args , int arg_index , const char *fun
                        int output_index , int &nb_element , bool filter)
 
 {
-  register int i;
+  int i;
   bool status = true;
   double *element = NULL;
 
@@ -911,7 +911,7 @@ AMObj STAT_Vectors(const AMObjVector &args)
 
   if (args[0].tag() == AMObjType::ARRAY) {
     bool status = true;
-    register int i , j;
+    int i , j;
     int nb_required , nb_variable = 0 , dim , nb_vector , type , *identifier = NULL ,
         **int_vector = NULL;
     double **real_vector = NULL;
@@ -1239,7 +1239,7 @@ AMObj STAT_VectorDistance(const AMObjVector &args)
 {
   string *pstr;
   bool status;
-  register int i , j;
+  int i , j;
   int nb_required , scale , nb_variable;
   variable_type var_type[VECTOR_NB_VARIABLE];
   metric distance_type = ABSOLUTE_VALUE;
@@ -1414,7 +1414,7 @@ AMObj STAT_Renewal(const AMObjVector &args)
   string *pstr;
   process_type type = EQUILIBRIUM;
   bool status = true , type_option = false , time_option = false , scale_option = false;
-  register int i;
+  int i;
   discrete_parametric ident;
   int nb_required , time = DEFAULT_TIME , inf_bound , sup_bound;
   double parameter , probability , scaling_coeff;
@@ -1690,7 +1690,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     string *pstr;
     bool status = true , previous_date_option = false , next_date_option = false;
-    register int i;
+    int i;
     int nb_required , nb_variable , variable , offset , begin_date , end_date ,
         previous_date = I_DEFAULT , next_date = I_DEFAULT;
     Sequences *seq;
@@ -2166,7 +2166,7 @@ AMObj STAT_SemiMarkov(const AMObjVector &args)
 {
   string *pstr;
   bool status = true , length_option = false , counting_option = false , counting_flag = true;
-  register int i;
+  int i;
   int nb_required , length = DEFAULT_LENGTH;
   SemiMarkov *smarkov;
   StatError error;
@@ -2287,7 +2287,7 @@ AMObj STAT_HiddenSemiMarkov(const AMObjVector &args)
   string *pstr;
   bool status = true , length_option = false , counting_option = false ,
        counting_flag = true , format_option = false , old_format = false;
-  register int i;
+  int i;
   int nb_required , length = DEFAULT_LENGTH;
   HiddenSemiMarkov *hsmarkov;
   StatError error;
@@ -2518,7 +2518,7 @@ static int** buildIntSequence(const Array *parray , int &length ,
 
 {
   bool status;
-  register int i;
+  int i;
   int **int_sequence = NULL;
 
 
@@ -2574,7 +2574,7 @@ static double** buildRealSequence(const Array *parray , int &length ,
 
 {
   bool status;
-  register int i;
+  int i;
   double **real_sequence = NULL;
 
 
@@ -2667,7 +2667,7 @@ static int** buildIntArraySequence(const Array *parray , int &length , int index
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int dim , **int_sequence = NULL;
   const Array *pvector;
 
@@ -2793,7 +2793,7 @@ static double** buildRealArraySequence(const Array *parray , int &length , int &
 
 {
   bool status = true;
-  register int i , j;
+  int i , j;
   int dim;
   double **real_sequence = NULL;
   const Array *pvector;
@@ -2910,7 +2910,7 @@ AMObj STAT_Sequences(const AMObjVector &args)
   case AMObjType::ARRAY : {
     string *pstr;
     bool status = true , index_parameter_option = false , identifier_option = false;
-    register int i , j;
+    int i , j;
     int nb_required , nb_sequence , *identifier = NULL;
     index_parameter_type index_param_type = IMPLICIT_TYPE;
 
@@ -3029,7 +3029,7 @@ AMObj STAT_Sequences(const AMObjVector &args)
     }
 
     else {
-      register int j;
+      int j;
       int nb_variable = 0 , type , *length , ***int_sequence;
       double ***real_sequence;
       const Array *seq_array;
