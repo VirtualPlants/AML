@@ -340,7 +340,7 @@ ostream& GP_window::displayOneLine(ostream &os) const
 int nb_required_computation(const AMObjVector &args)
 
 {
-  register int i;
+  int i;
   int nb_required = args.length();
 
 
@@ -398,7 +398,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
        shape_parameter_option = false , segmentations_option = false , nb_segmentation_option = false ,
        state_sequences_option = false , nb_state_sequence_option = false ,
        output_option = false , exhaustive = false;
-  register int i , j;
+  int i , j;
   int nb_required , identifier = I_DEFAULT , nb_segmentation = NB_SEGMENTATION ,
       nb_state_sequence = NB_STATE_SEQUENCE;
   double ishape_parameter = 1 , *shape_parameter;
@@ -1352,7 +1352,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
        shape_parameter_option = false , segmentations_option = false , nb_segmentation_option = false ,
        state_sequences_option = false , nb_state_sequence_option = false ,
        output_option = false , exhaustive = false;
-  register int i , j;
+  int i , j;
   int nb_required , identifier = I_DEFAULT , format_index , nb_segmentation = NB_SEGMENTATION ,
       nb_state_sequence = NB_STATE_SEQUENCE;
   double ishape_parameter = 1 , *shape_parameter;
@@ -2483,7 +2483,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
        window_option = false , mode_option = false , view_point_option = false ,
        title_option = false , common_contrast_option = false , common_contrast = true ,
        sequence_option = false , shape_parameter_option = false , output_option = false;
-  register int i , j;
+  int i , j;
   int nb_required , identifier = I_DEFAULT , nb_object = 0 , variable , type;
   double ishape_parameter = 1 , *shape_parameter;
   change_point_profile change_point_output;
@@ -3655,7 +3655,7 @@ AMObj STAT_SaveMTG(const AMObjVector &args)
 {
   string *pstr;
   bool status = true;
-  register int i;
+  int i;
   int nb_variable;
   variable_type *type;
   const MarkovianSequences *seq;

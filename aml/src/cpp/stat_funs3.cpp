@@ -1497,7 +1497,7 @@ AMObj STAT_Merge(const AMObjVector &args)
 
 {
   bool status = true;
-  register int i;
+  int i;
   int nb_sample = args.length();
 
 
@@ -2375,7 +2375,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
     }
 
     else if (*pstr == "Limit") {
-      register int i;
+      int i;
       int nb_class = I_DEFAULT , *limit = NULL;
       vector<int> vec_limit;
 
@@ -2436,7 +2436,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     string *pstr;
     bool status = true;
-    register int i;
+    int i;
     int nb_required , nb_variable , variable , offset , nb_class = I_DEFAULT , *int_limit = NULL;
     vector<int> vec_int_limit;
     rounding  mode = FLOOR;
@@ -2910,7 +2910,7 @@ AMObj STAT_Transcode(const AMObjVector &args)
   if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
     bool status = true;
-    register int i;
+    int i;
     int nb_category , *category = NULL;
     vector<int> vec_category;
     const FrequencyDistribution *ihisto;
@@ -2983,7 +2983,7 @@ AMObj STAT_Transcode(const AMObjVector &args)
       (args[0].tag() == AMObjType::SEMI_MARKOV_DATA) ||
       (args[0].tag() == AMObjType::NONHOMOGENEOUS_MARKOV_DATA)) {
     bool status = true;
-    register int i;
+    int i;
     int nb_required , nb_variable , variable = I_DEFAULT , offset ,
         nb_category = I_DEFAULT , *category = NULL;
     vector<int> vec_category;
@@ -3693,7 +3693,7 @@ AMObj STAT_Round(const AMObjVector &args)
 {
   string *pstr;
   bool status = true , variable_option = false , mode_option = false;
-  register int i;
+  int i;
   int nb_required , variable = I_DEFAULT;
   rounding mode = ROUND;
   StatError error;
@@ -4059,7 +4059,7 @@ AMObj STAT_SelectIndividual(const AMObjVector &args)
 {
   string *pstr;
   bool status = true , keep = true;
-  register int i;
+  int i;
   int nb_required , nb_pattern = I_DEFAULT , *identifier = NULL;
   vector<int> vec_identifier;
   StatError error;
@@ -4252,7 +4252,7 @@ AMObj STAT_SelectVariable(const AMObjVector &args)
 {
   string *pstr;
   bool status = true , keep = true;
-  register int i;
+  int i;
   int nb_required , nb_variable = I_DEFAULT , *variable = NULL;
   vector<int> vec_variable;
   StatError error;
@@ -4452,7 +4452,7 @@ AMObj STAT_SelectVariable(const AMObjVector &args)
 AMObj STAT_MergeVariable(const AMObjVector &args)
 
 {
-  register int i;
+  int i;
   bool status = true;
   int nb_required , ref_sample = I_DEFAULT;
   StatError error;
@@ -5922,7 +5922,7 @@ AMObj STAT_SegmentationExtract(const AMObjVector &args)
   string *pstr;
   bool status = true , mode_option = false , keep = true , concatenation_option = false ,
        concatenation = false;
-  register int i;
+  int i;
   int nb_required , nb_value = I_DEFAULT , *value = NULL;
   const Sequences *iseq;
   Sequences *seq;
@@ -6220,7 +6220,7 @@ AMObj STAT_Difference(const AMObjVector &args)
 {
   string *pstr;
   bool status = true , variable_option = false , first_element_option = false , first_element = false;
-  register int i;
+  int i;
   int nb_required , variable = I_DEFAULT;
   const Sequences *iseq;
   Sequences *seq;
@@ -6678,7 +6678,7 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
   string *pstr;
   bool status = true , variable_option = false , begin_end_option = false , begin_end = false ,
        segmentation_option = false , segmentation = false , output_option = false;
-  register int i;
+  int i;
   int nb_required , nb_point = I_DEFAULT , int_sum , variable = I_DEFAULT , *int_filter;
   sequence_type output = TREND;
   double sum , *filter;
@@ -7019,7 +7019,7 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
   bool status = true , circular_option = false , circular = false , robust_option = false ,
        robust = false , dispersion_option = false , dispersion = false , output_option = false ,
        file_name_option = false , format_option = false;
-  register int i;
+  int i;
   int nb_required;
   sequence_type output = SEQUENCE;
   const Sequences *iseq;
@@ -7679,7 +7679,7 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
   string *pstr;
   bool status = true , add_variable_option = false , add_variable = false ,
        run_length_option = false , sequence_length_option = false;
-  register int i;
+  int i;
   int nb_required , run_length = I_DEFAULT , sequence_length = I_DEFAULT;
   const MarkovianSequences *iseq;
   MarkovianSequences *seq;

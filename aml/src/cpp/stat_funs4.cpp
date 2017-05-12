@@ -133,7 +133,7 @@ static AMObj STAT_EstimateDistribution(const FrequencyDistribution *histo ,
   else {
     string *pstr;
     bool status = true , min_inf_bound_option = false , inf_bound_status_option = false , flag = true;
-    register int i;
+    int i;
     int nb_required , min_inf_bound = 0;
     DiscreteParametricModel *dist;
     StatError error;
@@ -259,7 +259,7 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
        dist_inf_bound_status_option = false , flag = true , component_flag = true ,
        nb_component_option = false , nb_component_estimation = false , criterion_option = false ,
        estimate[DISCRETE_MIXTURE_NB_COMPONENT];
-  register int i , j;
+  int i , j;
   int nb_component , nb_required , min_inf_bound = 0;
   discrete_parametric ident[DISCRETE_MIXTURE_NB_COMPONENT];
   vector<discrete_parametric> vec_ident(DISCRETE_MIXTURE_NB_COMPONENT);
@@ -592,7 +592,7 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
   bool status = true , estimator_option = false , initial_distribution_option = false ,
        min_inf_bound_option = false , nb_iteration_option = false , penalty_option = false ,
        weight_option = false , outside_option = false;
-  register int i;
+  int i;
   int nb_required , min_inf_bound = 0 , nb_iter = I_DEFAULT;
   estimation_criterion estimator = LIKELIHOOD;
   penalty_type pen_type = SECOND_DIFFERENCE;
@@ -951,7 +951,7 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
   bool status = true , estimator_option = false , initial_distribution_option = false ,
        min_inf_bound_option = false , nb_iteration_option = false , penalty_option = false ,
        weight_option = false , outside_option = false;
-  register int i;
+  int i;
   int nb_required , min_inf_bound = 0 , nb_iter = I_DEFAULT;
   estimation_criterion estimator = LIKELIHOOD;
   penalty_type pen_type = SECOND_DIFFERENCE;
@@ -1337,7 +1337,7 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
   bool status = true , algorithm_option = false , nb_iteration_option = false ,
        min_nb_assignment_option = false , max_nb_assignment_option = false , parameter_option = false ,
        assignment_option = false , assignment = true;
-  register int i;
+  int i;
   int nb_required , algorithm = EM , nb_iter = I_DEFAULT ,
       min_nb_assignment = MIN_NB_ASSIGNMENT , max_nb_assignment = MAX_NB_ASSIGNMENT;
   double parameter = NB_ASSIGNMENT_PARAMETER;
@@ -2013,7 +2013,7 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
   bool status = true , estimator_option = false , initial_inter_event_option = false ,
        nb_iteration_option = false , inter_event_mean_option = false , penalty_option = false ,
        weight_option = false , outside_option = false;
-  register int i;
+  int i;
   int nb_required , nb_iter = I_DEFAULT;
   estimation_criterion estimator = LIKELIHOOD;
   duration_distribution_mean_estimator mean_estimator = COMPUTED;
@@ -2439,7 +2439,7 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
        initial_inter_event_option = false , equilibrium_estimator_option = false ,
        inter_event_mean_option = false , penalty_option = false , weight_option = false ,
        outside_option = false;
-  register int i;
+  int i;
   int nb_required , nb_iter = I_DEFAULT;
   estimation_criterion estimator = LIKELIHOOD;
   censoring_estimator equilibrium_estimator = COMPLETE_LIKELIHOOD;
@@ -2878,7 +2878,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
   string *pstr;
   bool status = true , counting_option = false , counting_flag = true ,
        global_initial_transition_option = false , global_initial_transition = true;
-  register int i;
+  int i;
   int nb_required;
   VariableOrderMarkov *markov;
   StatError error;
@@ -3351,7 +3351,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
   }
 
   case AMObjType::ARRAY : {
-    register int j;
+    int j;
     bool order_option = false , criterion_option = false;
     int nb_category = seq->get_marginal_distribution(0)->nb_value , order = 1 , *category = NULL;
     model_selection_criterion criterion = BIC;
@@ -3517,7 +3517,7 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
   process_type type = DEFAULT_TYPE;
   bool status = true , counting_option = false , counting_flag = true , estimator_option = false ,
        nb_iteration_option = false , occupancy_mean_option = false;
-  register int i;
+  int i;
   int nb_required , nb_iter = I_DEFAULT;
   censoring_estimator estimator = COMPLETE_LIKELIHOOD;
   duration_distribution_mean_estimator mean_estimator = COMPUTED;
@@ -3747,7 +3747,7 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
        nb_iteration_option = false , min_nb_state_sequence_option = false ,
        max_nb_state_sequence_option = false , parameter_option = false ,
        state_sequences_option = false , state_sequence = true;
-  register int i;
+  int i;
   int nb_required , algorithm = EM , nb_iter = I_DEFAULT ,
       min_nb_state_sequence = MIN_NB_STATE_SEQUENCE , max_nb_state_sequence = MAX_NB_STATE_SEQUENCE;
   double parameter = NB_STATE_SEQUENCE_PARAMETER;
@@ -4102,7 +4102,7 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
        max_nb_state_sequence_option = false , parameter_option = false ,
        poisson_geometric_option = false , poisson_geometric = false , occupancy_mean_option = false ,
        state_sequences_option = false , state_sequence = true;
-  register int i;
+  int i;
   int nb_required , algorithm = EM , nb_iter = I_DEFAULT , min_nb_state_sequence = MIN_NB_STATE_SEQUENCE ,
       max_nb_state_sequence = MAX_NB_STATE_SEQUENCE;
   censoring_estimator estimator = COMPLETE_LIKELIHOOD;
@@ -5030,7 +5030,7 @@ static AMObj STAT_EstimateNonhomogeneousMarkov(const MarkovianSequences *seq , c
 
 {
   bool status = true , counting_flag = true;
-  register int i , j;
+  int i , j;
   int nb_required , nb_state = seq->get_marginal_distribution(0)->nb_value;
   parametric_function *ident;
   NonhomogeneousMarkov *markov;
@@ -5151,7 +5151,7 @@ AMObj STAT_Estimate(const AMObjVector &args)
   if ((args[0].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[0].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
       (args[0].tag() == AMObjType::CONVOLUTION_DATA) || (args[0].tag() == AMObjType::COMPOUND_DATA)) {
     string *pstr;
-    register int i;
+    int i;
     int model = I_DEFAULT;
     discrete_parametric ident;
     const FrequencyDistribution *histo;
