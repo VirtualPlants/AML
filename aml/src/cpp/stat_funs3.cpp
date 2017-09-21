@@ -3718,9 +3718,12 @@ AMObj STAT_Round(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Variable") {
-        switch (variable_option) {
+        if (variable_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Round" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           variable_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -3731,21 +3734,16 @@ AMObj STAT_Round(const AMObjVector &args)
           else {
             variable = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Round" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Mode") {
-        switch (mode_option) {
+        if (mode_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Round" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           mode_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3770,14 +3768,6 @@ AMObj STAT_Round(const AMObjVector &args)
                           "Floor or Round or Ceil");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Round" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -6005,9 +5995,12 @@ AMObj STAT_SegmentationExtract(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Mode") {
-        switch (mode_option) {
+        if (mode_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "SegmentationExtract" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           mode_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -6030,21 +6023,16 @@ AMObj STAT_SegmentationExtract(const AMObjVector &args)
                           nb_required + i + 1 , "Keep or Reject");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "SegmentationExtract" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Concatenation") {
-        switch (concatenation_option) {
+        if (concatenation_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "SegmentationExtract" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           concatenation_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -6055,14 +6043,6 @@ AMObj STAT_SegmentationExtract(const AMObjVector &args)
           else {
             concatenation = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "SegmentationExtract" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -6272,9 +6252,12 @@ AMObj STAT_Difference(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Variable") {
-        switch (variable_option) {
+        if (variable_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Difference" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           variable_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -6285,21 +6268,16 @@ AMObj STAT_Difference(const AMObjVector &args)
           else {
             variable = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Difference" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "FirstElement") {
-        switch (first_element_option) {
+        if (first_element_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Difference" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           first_element_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -6310,14 +6288,6 @@ AMObj STAT_Difference(const AMObjVector &args)
           else {
             first_element = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Difference" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -6830,9 +6800,12 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Variable") {
-        switch (variable_option) {
+        if (variable_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "MovingAverage" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           variable_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -6843,21 +6816,16 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
           else {
             variable = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "MovingAverage" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "BeginEnd") {
-        switch (begin_end_option) {
+        if (begin_end_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "MovingAverage" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           begin_end_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -6868,21 +6836,16 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
           else {
             begin_end = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "MovingAverage" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Segmentation") {
-        switch (segmentation_option) {
+        if (segmentation_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "MovingAverage" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           segmentation_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -6893,21 +6856,16 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
           else {
             segmentation = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "MovingAverage" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Output") {
-        switch (output_option) {
+        if (output_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "MovingAverage" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           output_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -6935,14 +6893,6 @@ AMObj STAT_MovingAverage(const AMObjVector &args)
                           "Sequence or Trend or (Subtraction)Residual or DivisionResidual");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "MovingAverage" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -7073,9 +7023,12 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Circular") {
-        switch (circular_option) {
+        if (circular_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           circular_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -7086,21 +7039,16 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
           else {
             circular = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Robust") {
-        switch (robust_option) {
+        if (robust_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           robust_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -7111,21 +7059,16 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
           else {
             robust = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Dispersion") {
-        switch (dispersion_option) {
+        if (dispersion_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           dispersion_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -7136,21 +7079,16 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
           else {
             dispersion = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Output") {
-        switch (output_option) {
+        if (output_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           output_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -7175,21 +7113,16 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
                           "Sequence or (Subtraction)Residual or StandardizedResidual");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "FileName") {
-        switch (file_name_option) {
+        if (file_name_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           file_name_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -7200,21 +7133,16 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
           else {
             file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Format") {
-        switch (format_option) {
+        if (format_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           format_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -7236,14 +7164,6 @@ AMObj STAT_PointwiseAverage(const AMObjVector &args)
                           nb_required + i + 1 , "ASCII or SpreadSheet");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "PointwiseAverage" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -7729,9 +7649,12 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "AddVariable") {
-        switch (add_variable_option) {
+        if (add_variable_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "AddAbsorbingRun" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           add_variable_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -7742,21 +7665,16 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
           else {
             add_variable = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "AddAbsorbingRun" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "RunLength") {
-        switch (run_length_option) {
+        if (run_length_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "AddAbsorbingRun" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           run_length_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -7767,21 +7685,16 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
           else {
             run_length = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "AddAbsorbingRun" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "SequenceLength") {
-        switch (sequence_length_option) {
+        if (sequence_length_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "AddAbsorbingRun" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           sequence_length_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -7792,14 +7705,6 @@ AMObj STAT_AddAbsorbingRun(const AMObjVector &args)
           else {
             sequence_length = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "AddAbsorbingRun" , nb_required + i + 1);
-          break;
-        }
         }
       }
 

@@ -647,9 +647,12 @@ AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "FileName") {
-        switch (file_name_option) {
+        if (file_name_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           file_name_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -660,21 +663,16 @@ AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
           else {
             file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Format") {
-        switch (format_option) {
+        if (format_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           format_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -697,14 +695,6 @@ AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
                           nb_required + i + 1 , "ASCII or SpreadSheet");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -890,9 +880,12 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "RefSequence") {
-          switch (ref_sequence_option) {
+          if (ref_sequence_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             ref_sequence_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -903,21 +896,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
             else {
               ref_identifier = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "TestSequence") {
-          switch (test_sequence_option) {
+          if (test_sequence_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             test_sequence_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -928,21 +916,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
             else {
               test_identifier = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Begin") {
-          switch (begin_option) {
+          if (begin_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             begin_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -964,21 +947,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                             nb_required + i + 1 , "Aligned or Free");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "End") {
-          switch (end_option) {
+          if (end_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             end_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1000,21 +978,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                             nb_required + i + 1 , "Aligned or Free");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "FileName") {
-          switch (file_name_option) {
+          if (file_name_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             file_name_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1025,21 +998,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
             else {
               file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Format") {
-          switch (format_option) {
+          if (format_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             format_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1062,21 +1030,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                             nb_required + i + 1 , "ASCII or SpreadSheet");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "AlignmentFileName") {
-          switch (alignment_file_name_option) {
+          if (alignment_file_name_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             alignment_file_name_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1087,16 +1050,9 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
             else {
               alignment_file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
+
         else {
           status = false;
           genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "Compare" , nb_required + i + 1 ,
@@ -1170,9 +1126,12 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "Output") {
-          switch (output_option) {
+          if (output_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             output_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1195,21 +1154,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                             nb_required + i + 1 , "DistanceMatrix or Sequences");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "RefSequence") {
-          switch (ref_sequence_option) {
+          if (ref_sequence_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             ref_sequence_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1220,21 +1174,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
             else {
               ref_identifier = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "TestSequence") {
-          switch (test_sequence_option) {
+          if (test_sequence_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             test_sequence_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1245,21 +1194,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
             else {
               test_identifier = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Begin") {
-          switch (begin_option) {
+          if (begin_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             begin_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1281,21 +1225,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                             nb_required + i + 1 , "Aligned or Free");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "End") {
-          switch (end_option) {
+          if (end_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             end_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1317,21 +1256,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                             nb_required + i + 1 , "Aligned or Free");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "IndelCost") {
-          switch (indel_cost_option) {
+          if (indel_cost_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             indel_cost_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1353,21 +1287,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                             nb_required + i + 1 , "Adaptative or Fixed");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "IndelFactor") {
-          switch (indel_factor_option) {
+          if (indel_factor_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             indel_factor_option = true;
 
             switch (args[nb_required + i * 2 + 1].tag()) {
@@ -1383,21 +1312,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                           args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
               break;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Transposition") {
-          switch (transposition_option) {
+          if (transposition_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             transposition_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -1408,21 +1332,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
             else {
               transposition = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "TranspositionFactor") {
-          switch (transposition_factor_option) {
+          if (transposition_factor_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             transposition_factor_option = true;
 
             switch (args[nb_required + i * 2 + 1].tag()) {
@@ -1438,21 +1357,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                           args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
               break;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "FileName") {
-          switch (file_name_option) {
+          if (file_name_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             file_name_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1463,21 +1377,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
             else {
               file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Format") {
-          switch (format_option) {
+          if (format_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             format_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1500,21 +1409,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                             nb_required + i + 1 , "ASCII or SpreadSheet");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "AlignmentFileName") {
-          switch (alignment_file_name_option) {
+          if (alignment_file_name_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             alignment_file_name_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1525,21 +1429,16 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
             else {
               alignment_file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Algorithm") {
-          switch (algorithm_option) {
+          if (algorithm_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             algorithm_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1564,14 +1463,6 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
                             nb_required + i + 1 , "Agglomerative or Divisive");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -1872,9 +1763,12 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "Algorithm") {
-          switch (algorithm_option) {
+          if (algorithm_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             algorithm_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1896,21 +1790,16 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
                             nb_required + i + 1 , "Forward or Viterbi");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "FileName") {
-          switch (file_name_option) {
+          if (file_name_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             file_name_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1921,14 +1810,6 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
             else {
               file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Compare" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -2523,9 +2404,12 @@ AMObj STAT_Clustering(const AMObjVector &args)
           pstr = (AMString*)args[nb_required + i * 2].val.p;
 
           if (*pstr == "Prototypes") {
-            switch (prototype_option) {
+            if (prototype_option) {
+              status = false;
+              genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
+            }
 
-            case false : {
+            else {
               prototype_option = true;
 
               if (args[nb_required + i * 2 + 1].tag() != AMObjType::ARRAY) {
@@ -2540,21 +2424,16 @@ AMObj STAT_Clustering(const AMObjVector &args)
                   status = false;
                 }
               }
-              break;
-            }
-
-            case true : {
-              status = false;
-              genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
-              break;
-            }
             }
           }
 
           else if (*pstr == "Initialization") {
-            switch (initialization_option) {
+            if (initialization_option) {
+              status = false;
+              genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
+            }
 
-            case false : {
+            else {
               initialization_option = true;
 
               if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -2565,21 +2444,16 @@ AMObj STAT_Clustering(const AMObjVector &args)
               else {
                 initialization = args[nb_required + i * 2 + 1].val.i;
               }
-              break;
-            }
-
-            case true : {
-              status = false;
-              genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
-              break;
-            }
             }
           }
 
           else if (*pstr == "Algorithm") {
-            switch (algorithm_option) {
+            if (algorithm_option) {
+              status = false;
+              genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
+            }
 
-            case false : {
+            else {
               algorithm_option = true;
 
               if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -2590,14 +2464,6 @@ AMObj STAT_Clustering(const AMObjVector &args)
               else {
                 algorithm = args[nb_required + i * 2 + 1].val.i;
               }
-              break;
-            }
-
-            case true : {
-              status = false;
-              genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
-              break;
-            }
             }
           }
 
@@ -2778,9 +2644,12 @@ AMObj STAT_Clustering(const AMObjVector &args)
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "Algorithm") {
-          switch (algorithm_option) {
+          if (algorithm_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             algorithm_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2805,21 +2674,16 @@ AMObj STAT_Clustering(const AMObjVector &args)
                             nb_required + i + 1 , "Agglomerative or Divisive");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Criterion") {
-          switch (criterion_option) {
+          if (criterion_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             criterion_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2844,21 +2708,16 @@ AMObj STAT_Clustering(const AMObjVector &args)
                             nb_required + i + 1 , "NearestNeighbor or FarthestNeighbor or AverageNeighbor");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
-       else if (*pstr == "FileName") {
-          switch (file_name_option) {
+        else if (*pstr == "FileName") {
+          if (file_name_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             file_name_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2869,21 +2728,16 @@ AMObj STAT_Clustering(const AMObjVector &args)
             else {
               file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Format") {
-          switch (format_option) {
+          if (format_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             format_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2906,14 +2760,6 @@ AMObj STAT_Clustering(const AMObjVector &args)
                             nb_required + i + 1 , "ASCII or SpreadSheet");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Clustering" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -3224,9 +3070,12 @@ AMObj STAT_ComputeRankCorrelation(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Type") {
-        switch (type_option) {
+        if (type_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeRankCorrelation" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           type_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3249,21 +3098,16 @@ AMObj STAT_ComputeRankCorrelation(const AMObjVector &args)
                           nb_required + i + 1 , "Spearman or Kendall");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeRankCorrelation" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "FileName") {
-        switch (file_name_option) {
+        if (file_name_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeRankCorrelation" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           file_name_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3274,14 +3118,6 @@ AMObj STAT_ComputeRankCorrelation(const AMObjVector &args)
           else {
             file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeRankCorrelation" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -3414,9 +3250,12 @@ AMObj STAT_ContingencyTable(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "FileName") {
-        switch (file_name_option) {
+        if (file_name_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ContingencyTable" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           file_name_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3427,21 +3266,16 @@ AMObj STAT_ContingencyTable(const AMObjVector &args)
           else {
             file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "ContingencyTable" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Format") {
-        switch (format_option) {
+        if (format_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ContingencyTable" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           format_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3464,14 +3298,6 @@ AMObj STAT_ContingencyTable(const AMObjVector &args)
                           nb_required + i + 1 , "ASCII or SpreadSheet");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "ContingencyTable" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -3584,9 +3410,12 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "FileName") {
-        switch (file_name_option) {
+        if (file_name_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "VarianceAnalysis" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           file_name_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3597,21 +3426,16 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
           else {
             file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "VarianceAnalysis" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Format") {
-        switch (format_option) {
+        if (format_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "VarianceAnalysis" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           format_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3634,14 +3458,6 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
                           nb_required + i + 1 , "ASCII or SpreadSheet");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "VarianceAnalysis" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -3969,6 +3785,156 @@ AMObj STAT_Regression(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
+ *  Computation of the root mean square error or the mean absolute error for a variable.
+ *
+ *--------------------------------------------------------------*/
+
+AMObj STAT_ComputeMeanError(const AMObjVector &args)
+
+{
+  string *pstr;
+  bool status = true , sequence_option = false , robust_option = false , robust = false;
+  int i;
+  int nb_required , nb_variable , variable , identifier = I_DEFAULT;
+  const Sequences *seq;
+  StatError error;
+
+
+  CHECKCONDVA(args.length() >= 1 ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputeMeanError"));
+
+  // arguments obligatoires
+
+  switch (args[0].tag()) {
+  case AMObjType::SEQUENCES :
+    seq = (Sequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::MARKOVIAN_SEQUENCES :
+    seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::VARIABLE_ORDER_MARKOV_DATA :
+    seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::SEMI_MARKOV_DATA :
+    seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  case AMObjType::NONHOMOGENEOUS_MARKOV_DATA :
+    seq = (NonhomogeneousMarkovData*)((STAT_model*)args[0].val.p)->pt;
+    break;
+  default :
+    genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeMeanError" , 1 , args[0].tag.string().data() ,
+                "MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA or NONHOMOGENEOUS_MARKOV_DATA");
+    return AMObj(AMObjType::ERROR);
+  }
+
+  nb_variable = seq->get_nb_variable();
+
+  if (nb_variable == 2) {
+    nb_required = 1;
+    variable = 1;
+  }
+  else if ((seq->get_type(0) == STATE) && (nb_variable == 3)) {
+    nb_required = 1;
+    variable = 2;
+  }
+  else {
+    nb_required = 2;
+  }
+
+  CHECKCONDVA((args.length() == nb_required) || (args.length() == nb_required + 2) ||
+              (args.length() == nb_required + 4) ,
+              genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "ComputeMeanError"));
+
+  if (nb_required == 2) {
+    if (args[1].tag() != AMObjType::INTEGER) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeMeanError" , 2 ,
+                  args[1].tag.string().data() , "INT");
+    }
+    else {
+      variable = args[1].val.i;
+    }
+  }
+
+  // arguments optionnels
+
+  for (i = 0;i < (args.length() - nb_required) / 2;i++) {
+    if (args[nb_required + i * 2].tag() != AMObjType::OPTION) {
+      status = false;
+      genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeMeanError" , nb_required + i + 1 ,
+                  args[nb_required + i * 2].tag.string().data() , "OPTION");
+    }
+
+    else {
+      pstr = (AMString*)args[nb_required + i * 2].val.p;
+
+      if (*pstr == "Sequence") {
+        if (sequence_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeMeanError" , nb_required + i + 1);
+        }
+
+        else {
+          sequence_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeMeanError" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "INT");
+          }
+          else {
+            identifier = args[nb_required + i * 2 + 1].val.i;
+          }
+        }
+      }
+
+      else if (*pstr == "Robust") {
+        if (robust_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeMeanError" , nb_required + i + 1);
+        }
+
+        else {
+          robust_option = true;
+
+          if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
+            status = false;
+            genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "ComputeMeanError" , nb_required + i + 1 ,
+                        args[nb_required + i * 2 + 1].tag.string().data() , "BOOL");
+          }
+          else {
+            robust = args[nb_required + i * 2 + 1].val.b;
+          }
+        }
+      }
+
+      else {
+        status = false;
+        genAMLError(ERRORMSG(K_OPTION_NAME_ERR_sds) , "ComputeMeanError" , nb_required + i + 1 ,
+                    "Sequence or Robust");
+      }
+    }
+  }
+
+  if (!status) {
+    return AMObj(AMObjType::ERROR);
+  }
+
+  status = seq->mean_error_computation(error , true , variable , identifier , robust);
+
+  if (status) {
+    return AMObj(AMObjType::VOID);
+  }
+  else {
+    AMLOUTPUT << "\n" << error;
+    genAMLError(ERRORMSG(STAT_MODULE_s) , "ComputeMeanError");
+    return AMObj(AMObjType::ERROR);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Calcul d'une fonction de correlation d'un echantillon de sequences.
  *
  *--------------------------------------------------------------*/
@@ -4087,9 +4053,12 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "MaxLag") {
-        switch (max_lag_option) {
+        if (max_lag_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeCorrelation" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           max_lag_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -4100,21 +4069,16 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
           else {
             max_lag = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeCorrelation" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Type") {
-        switch (type_option) {
+        if (type_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeCorrelation" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           type_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -4143,21 +4107,16 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
                           nb_required + i + 1 , "Pearson or Spearman or Kendall");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeCorrelation" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Normalization") {
-        switch (normalization_option) {
+        if (normalization_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeCorrelation" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           normalization_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -4180,21 +4139,16 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
                           nb_required + i + 1 , "Approximated or Exact");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeCorrelation" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "IndividualMean") {
-        switch (individual_mean_option) {
+        if (individual_mean_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeCorrelation" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           individual_mean_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -4205,14 +4159,6 @@ AMObj STAT_ComputeCorrelation(const AMObjVector &args)
           else {
             individual_mean = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputeCorrelation" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -4531,9 +4477,12 @@ AMObj STAT_ComputePartialAutocorrelation(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "MaxLag") {
-        switch (max_lag_option) {
+        if (max_lag_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputePartialAutocorrelation" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           max_lag_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -4544,21 +4493,16 @@ AMObj STAT_ComputePartialAutocorrelation(const AMObjVector &args)
           else {
             max_lag = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputePartialAutocorrelation" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Type") {
-        switch (type_option) {
+        if (type_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputePartialAutocorrelation" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           type_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -4581,14 +4525,6 @@ AMObj STAT_ComputePartialAutocorrelation(const AMObjVector &args)
                           nb_required + i + 1 , "Pearson or Kendall");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "ComputePartialAutocorrelation" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -4816,9 +4752,12 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "CommonContrast") {
-          switch (common_contrast_option) {
+          if (common_contrast_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             common_contrast_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -4829,21 +4768,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
             else {
               common_contrast = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Continuity") {
-          switch (continuity_option) {
+          if (continuity_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             continuity_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -4854,21 +4788,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
             else {
               continuity = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Criterion") {
-          switch (criterion_option) {
+          if (criterion_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             criterion_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -4902,21 +4831,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                             nb_required + i + 1 , "LogLikelihoodSlope or DimensionJump or ICL or SegmentationLogLikelihoodSlope or SegmentationDimensionJump or mBIC");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "MinNbSegment") {
-          switch (min_nb_segment_option) {
+          if (min_nb_segment_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             min_nb_segment_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -4927,21 +4851,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
             else {
               min_nb_segment = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "NbSegment") {
-          switch (nb_segment_option) {
+          if (nb_segment_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             nb_segment_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -4963,21 +4882,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                             nb_required + i + 1 , "Fixed or Estimated");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Output") {
-          switch (output_option) {
+          if (output_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             output_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -5014,21 +4928,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                             "Sequence or Residual or AbsoluteResidual or Entropy or Divergence or LogLikelihoodSlope");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "PenaltyShape") {
-          switch (penalty_shape_option) {
+          if (penalty_shape_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             penalty_shape_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -5039,21 +4948,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
             else {
               penalty_shape = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Sequence") {
-          switch (sequence_option) {
+          if (sequence_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             sequence_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -5064,21 +4968,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
             else {
               identifier = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "ShapeParameter") {
-          switch (shape_parameter_option) {
+          if (shape_parameter_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             shape_parameter_option = true;
 
             switch (args[nb_required + i * 2 + 1].tag()) {
@@ -5094,14 +4993,6 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                           args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
               break;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -5141,9 +5032,20 @@ AMObj STAT_Segmentation(const AMObjVector &args)
       }
     }
 
-    switch (nb_segment_estimation) {
+    if (nb_segment_estimation) {
+      if ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL)) {
+        status = false;
+        genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
+                    "Sequence or Entropy or Divergence or LogLikelihoodSlope");
+      }
 
-    case false : {
+      if (continuity_option) {
+        status = false;
+        genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "Continuity");
+      }
+    }
+
+    else {
       if (continuity_option) {
         for (i = 0;i < nb_variable;i++) {
           if ((model_type[i] = LINEAR_MODEL_CHANGE) || (model_type[0] = INTERCEPT_SLOPE_CHANGE)) {
@@ -5176,22 +5078,6 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         status = false;
         genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "PenaltyShape");
       }
-      break;
-    }
-
-    case true : {
-      if ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL)) {
-        status = false;
-        genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
-                    "Sequence or Entropy or Divergence or LogLikelihoodSlope");
-      }
-
-      if (continuity_option) {
-        status = false;
-        genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Segmentation" , "NbSegment" , "Continuity");
-      }
-      break;
-    }
     }
 
     if (!status) {
@@ -5205,9 +5091,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
       vec_shape_parameter.push_back(ishape_parameter);
     }
 
-    switch (nb_segment_estimation) {
+    if (nb_segment_estimation) {
+//      seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
+//                               model_type , common_contrast , shape_parameter ,
+//                               criterion , min_nb_segment , penalty_shape , output);
+      seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
+                               vec_model_type , common_contrast , vec_shape_parameter ,
+                               criterion , min_nb_segment , penalty_shape , output);
+    }
 
-    case false : {
+    else {
       if (args[1].val.i == 1) {
 //        seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
 //                                 NULL , model_type , common_contrast ,
@@ -5227,18 +5120,6 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                                  vec_model_type , common_contrast , vec_shape_parameter ,
                                  output , continuity);
       }
-      break;
-    }
-
-    case true : {
-//      seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
-//                               model_type , common_contrast , shape_parameter ,
-//                               criterion , min_nb_segment , penalty_shape , output);
-      seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
-                               vec_model_type , common_contrast , vec_shape_parameter ,
-                               criterion , min_nb_segment , penalty_shape , output);
-      break;
-    }
     }
 
     delete [] model_type;
@@ -5281,9 +5162,12 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "CommonContrast") {
-          switch (common_contrast_option) {
+          if (common_contrast_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             common_contrast_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -5294,21 +5178,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
             else {
               common_contrast = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Continuity") {
-          switch (continuity_option) {
+          if (continuity_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             continuity_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -5319,21 +5198,17 @@ AMObj STAT_Segmentation(const AMObjVector &args)
             else {
               continuity = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Output") {
-          switch (output_option) {
+          if (output_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+            break;
+          }
 
-          case false : {
+          else {
             output_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -5361,21 +5236,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                             "Sequence or Residual or AbsoluteResidual");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Sequence") {
-          switch (sequence_option) {
+          if (sequence_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             sequence_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -5386,21 +5256,16 @@ AMObj STAT_Segmentation(const AMObjVector &args)
             else {
               identifier = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "ShapeParameter") {
-          switch (shape_parameter_option) {
+          if (shape_parameter_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             shape_parameter_option = true;
 
             switch (args[nb_required + i * 2 + 1].tag()) {
@@ -5416,14 +5281,6 @@ AMObj STAT_Segmentation(const AMObjVector &args)
                           args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
               break;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Segmentation" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -5578,7 +5435,7 @@ AMObj STAT_ComputeSelfTransition(const AMObjVector &args)
 
 /*--------------------------------------------------------------*
  *
- *  Comptage des transitions pour differents ordres.
+ *  Count of transitions for different dependence order (or memory length).
  *
  *--------------------------------------------------------------*/
 
@@ -5646,9 +5503,12 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Begin") {
-        switch (begin_option) {
+        if (begin_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "TransitionCount" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           begin_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -5659,21 +5519,16 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
           else {
             begin = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "TransitionCount" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Estimator") {
-        switch (estimator_option) {
+        if (estimator_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "TransitionCount" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           estimator_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -5704,21 +5559,16 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
                           nb_required + i + 1 , "MaximumLikelihood or Laplace or AdaptativeLaplace or UniformSubset or UniformCardinality");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "TransitionCount" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "FileName") {
-        switch (file_name_option) {
+        if (file_name_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "TransitionCount" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           file_name_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -5729,21 +5579,16 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
           else {
             file_name = (string)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "TransitionCount" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
 /*      else if (*pstr == "Format") {
-        switch (format_option) {
+        if (format_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "TransitionCount" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           format_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -5766,14 +5611,6 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
                           nb_required + i + 1 , "ASCII or SpreadSheet");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "TransitionCount" , nb_required + i + 1);
-          break;
-        }
         }
       } */
 
@@ -5897,9 +5734,12 @@ AMObj STAT_WordCount(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "BeginState") {
-        switch (begin_state_option) {
+        if (begin_state_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "WordCount" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           begin_state_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -5910,21 +5750,16 @@ AMObj STAT_WordCount(const AMObjVector &args)
           else {
             begin_state = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "WordCount" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "EndState") {
-        switch (end_state_option) {
+        if (end_state_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "WordCount" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           end_state_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -5935,21 +5770,16 @@ AMObj STAT_WordCount(const AMObjVector &args)
           else {
             end_state = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "WordCount" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "MinFrequency") {
-        switch (min_frequency_option) {
+        if (min_frequency_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "WordCount" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           min_frequency_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -5960,14 +5790,6 @@ AMObj STAT_WordCount(const AMObjVector &args)
           else {
             min_frequency = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "WordCount" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -6292,7 +6114,7 @@ AMObj STAT_ComputeAutocorrelation(const AMObjVector &args)
     value = args[offset].val.i;
   }
 
-  // arguments optionnel
+  // argument optionnel
 
   if (args.length() == nb_required + 2) {
     if (args[nb_required].tag() != AMObjType::OPTION) {

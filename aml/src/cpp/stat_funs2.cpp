@@ -846,22 +846,16 @@ double* buildRealArray(const AMObjVector &args , int arg_index , const char *fun
 
   Array* parray = (Array*)args[arg_index].val.p;
 
-  switch (filter) {
-
-  case false : {
-    nb_element = parray->entries();
-    element = new double[nb_element];
-    break;
-  }
-
   // allocation du filtre complet alors que seules les valeurs correspondant
   // a la demi-largeur + valeur centrale sont lues
 
-  case true : {
+  if (filter) {
     nb_element = parray->entries() - 1;
     element = new double[2 * nb_element + 1];
-    break;
   }
+  else {
+    nb_element = parray->entries();
+    element = new double[nb_element];
   }
 
   ArrayIter* pnext = parray->iterator();
@@ -1523,9 +1517,12 @@ AMObj STAT_Renewal(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Type") {
-        switch (type_option) {
+        if (type_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Renewal" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           type_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1548,21 +1545,16 @@ AMObj STAT_Renewal(const AMObjVector &args)
                           nb_required + i + 1 , "Ordinary or Equilibrium");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Renewal" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "ObservationTime") {
-        switch (time_option) {
+        if (time_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Renewal" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           time_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1574,21 +1566,16 @@ AMObj STAT_Renewal(const AMObjVector &args)
           else {
             time = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Renewal" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Scale") {
-        switch (scale_option) {
+        if (scale_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Renewal" , nb_required + i + 1);
+         }
 
-        case false : {
+        else {
           scale_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -1604,14 +1591,6 @@ AMObj STAT_Renewal(const AMObjVector &args)
                         args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
             break;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Renewal" , nb_required + i + 1);
-          break;
-         }
         }
       }
 
@@ -1774,9 +1753,12 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "PreviousDate") {
-          switch (previous_date_option) {
+          if (previous_date_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "TimeEvents" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             previous_date_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1787,21 +1769,16 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
             else {
               previous_date = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "TimeEvents" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "NextDate") {
-          switch (next_date_option) {
+          if (next_date_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "TimeEvents" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             next_date_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1812,14 +1789,6 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
             else {
               next_date = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "TimeEvents" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -2199,9 +2168,12 @@ AMObj STAT_SemiMarkov(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Length") {
-        switch (length_option) {
+        if (length_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "SemiMarkov" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           length_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -2212,21 +2184,16 @@ AMObj STAT_SemiMarkov(const AMObjVector &args)
           else {
             length = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "SemiMarkov" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Counting") {
-        switch (counting_option) {
+        if (counting_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "SemiMarkov" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           counting_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -2237,14 +2204,6 @@ AMObj STAT_SemiMarkov(const AMObjVector &args)
           else {
             counting_flag = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "SemiMarkov" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -2320,9 +2279,12 @@ AMObj STAT_HiddenSemiMarkov(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Length") {
-        switch (length_option) {
+        if (length_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenSemiMarkov" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           length_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -2333,21 +2295,16 @@ AMObj STAT_HiddenSemiMarkov(const AMObjVector &args)
           else {
             length = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenSemiMarkov" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Counting") {
-        switch (counting_option) {
+        if (counting_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenSemiMarkov" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           counting_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -2358,22 +2315,17 @@ AMObj STAT_HiddenSemiMarkov(const AMObjVector &args)
           else {
             counting_flag = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenSemiMarkov" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
 
       else if (*pstr == "Format") {
-        switch (format_option) {
+        if (format_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenSemiMarkov" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           format_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2396,14 +2348,6 @@ AMObj STAT_HiddenSemiMarkov(const AMObjVector &args)
                           nb_required + i + 1 , "Current or Old");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "HiddenSemiMarkov" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -2936,9 +2880,12 @@ AMObj STAT_Sequences(const AMObjVector &args)
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "Identifiers") {
-          switch (identifier_option) {
+          if (identifier_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Sequences" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             identifier_option = true;
 
             if (args[nb_required + 1].tag() != AMObjType::ARRAY) {
@@ -2962,21 +2909,16 @@ AMObj STAT_Sequences(const AMObjVector &args)
                 }
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Sequences" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "IndexParameter") {
-          switch (index_parameter_option) {
+          if (index_parameter_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Sequences" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             index_parameter_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2999,14 +2941,6 @@ AMObj STAT_Sequences(const AMObjVector &args)
                             nb_required + i + 1 , "Position or Time");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Sequences" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
