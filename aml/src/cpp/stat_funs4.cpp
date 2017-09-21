@@ -158,9 +158,12 @@ static AMObj STAT_EstimateDistribution(const FrequencyDistribution *histo ,
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "MinInfBound") {
-          switch (min_inf_bound_option) {
+          if (min_inf_bound_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             min_inf_bound_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -171,21 +174,16 @@ static AMObj STAT_EstimateDistribution(const FrequencyDistribution *histo ,
             else {
               min_inf_bound = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "InfBoundStatus") {
-          switch (inf_bound_status_option) {
+          if (inf_bound_status_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             inf_bound_status_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -207,14 +205,6 @@ static AMObj STAT_EstimateDistribution(const FrequencyDistribution *histo ,
                             nb_required + i + 1 , "Fixed or Free");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -351,9 +341,12 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "MinInfBound") {
-        switch (min_inf_bound_option) {
+        if (min_inf_bound_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           min_inf_bound_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -364,21 +357,16 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
           else {
             min_inf_bound = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "InfBoundStatus") {
-        switch (inf_bound_status_option) {
+        if (inf_bound_status_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           inf_bound_status_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -400,21 +388,16 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
                           nb_required + i + 1 , "Fixed or Free");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "DistInfBoundStatus") {
-        switch (dist_inf_bound_status_option) {
+        if (dist_inf_bound_status_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           dist_inf_bound_status_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -436,21 +419,16 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
                           nb_required + i + 1 , "Fixed or Free");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "NbComponent") {
-        switch (nb_component_option) {
+        if (nb_component_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           nb_component_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -472,21 +450,16 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
                           nb_required + i + 1 , "Fixed or Estimated");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Criterion") {
-        switch (criterion_option) {
+        if (criterion_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           criterion_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -508,14 +481,6 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
                           nb_required + i + 1 , "AIC or AICc or BIC or BICc");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -646,9 +611,12 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Estimator") {
-        switch (estimator_option) {
+        if (estimator_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           estimator_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -673,21 +641,16 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
                           nb_required + i + 1 , "Likelihood or PenalizedLikelihood or Parametric");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "InitialDistribution") {
-        switch (initial_distribution_option) {
+        if (initial_distribution_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           initial_distribution_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -710,22 +673,16 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
                         "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
             break;
           }
-
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "MinInfBound") {
-        switch (min_inf_bound_option) {
+        if (min_inf_bound_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           min_inf_bound_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -736,21 +693,16 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
           else {
             min_inf_bound = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "NbIteration") {
-        switch (nb_iteration_option) {
+        if (nb_iteration_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           nb_iteration_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -761,21 +713,16 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
           else {
             nb_iter = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Penalty") {
-        switch (penalty_option) {
+        if (penalty_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           penalty_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -800,21 +747,16 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
                           nb_required + i + 1 , "FirstDifference or SecondDifference or Entropy");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Weight") {
-        switch (weight_option) {
+        if (weight_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           weight_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -830,21 +772,16 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
                         args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
             break;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Outside") {
-        switch (outside_option) {
+        if (outside_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           outside_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -866,14 +803,6 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
                           nb_required + i + 1 , "Zero or Continuation");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -1024,9 +953,12 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Estimator") {
-        switch (estimator_option) {
+        if (estimator_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           estimator_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1051,21 +983,16 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
                           nb_required + i + 1 , "Likelihood or PenalizedLikelihood or Parametric");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "InitialDistribution") {
-        switch (initial_distribution_option) {
+        if (initial_distribution_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           initial_distribution_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -1088,22 +1015,16 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
                         "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
             break;
           }
-
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "MinInfBound") {
-        switch (min_inf_bound_option) {
+        if (min_inf_bound_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           min_inf_bound_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1114,21 +1035,16 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
           else {
             min_inf_bound = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "NbIteration") {
-        switch (nb_iteration_option) {
+        if (nb_iteration_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           nb_iteration_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1139,21 +1055,16 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
           else {
             nb_iter = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Penalty") {
-        switch (penalty_option) {
+        if (penalty_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           penalty_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1178,21 +1089,16 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
                           nb_required + i + 1 , "FirstDifference or SecondDifference or Entropy");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Weight") {
-        switch (weight_option) {
+        if (weight_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           weight_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -1208,21 +1114,16 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
                         args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
             break;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Outside") {
-        switch (outside_option) {
+        if (outside_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           outside_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1244,14 +1145,6 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
                           nb_required + i + 1 , "Zero or Continuation");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -1375,9 +1268,12 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "Algorithm") {
-          switch (algorithm_option) {
+          if (algorithm_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             algorithm_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1399,21 +1295,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
                             nb_required + i + 1 , "EM or MCEM");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "KnownComponent") {
-          switch (known_component_option) {
+          if (known_component_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             known_component_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -1424,21 +1315,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
             else {
               known_component = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "CommonDispersion") {
-          switch (common_dispersion_option) {
+          if (common_dispersion_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             common_dispersion_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -1449,21 +1335,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
             else {
               common_dispersion = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "NbIteration") {
-          switch (nb_iteration_option) {
+          if (nb_iteration_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             nb_iteration_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1474,21 +1355,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
             else {
               nb_iter = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "MinNbAssignment") {
-          switch (min_nb_assignment_option) {
+          if (min_nb_assignment_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             min_nb_assignment_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1499,21 +1375,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
             else {
               min_nb_assignment = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "MaxNbAssignment") {
-          switch (max_nb_assignment_option) {
+          if (max_nb_assignment_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             max_nb_assignment_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1524,21 +1395,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
             else {
               max_nb_assignment = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
           }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
-        }
         }
 
         else if (*pstr == "Parameter") {
-          switch (parameter_option) {
+          if (parameter_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             parameter_option = true;
 
             switch (args[nb_required + i * 2 + 1].tag()) {
@@ -1554,21 +1420,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
                           args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
               break;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Assignment") {
-          switch (assignment_option) {
+          if (assignment_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             assignment_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -1579,14 +1440,6 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
             else {
               assignment = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -1714,9 +1567,12 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "Algorithm") {
-          switch (algorithm_option) {
+          if (algorithm_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             algorithm_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1738,21 +1594,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
                             nb_required + i + 1 , "EM or MCEM");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "TiedLocation") {
-          switch (tied_location_option) {
+          if (tied_location_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             tied_location_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -1763,21 +1614,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
             else {
               tied_location = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "VarianceFactor") {
-          switch (variance_factor_option) {
+          if (variance_factor_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             variance_factor_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1799,21 +1645,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
                             nb_required + i + 1 , "Convolution or Scaling");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "NbIteration") {
-          switch (nb_iteration_option) {
+          if (nb_iteration_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             nb_iteration_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1824,21 +1665,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
             else {
               nb_iter = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "MinNbAssignment") {
-          switch (min_nb_assignment_option) {
+          if (min_nb_assignment_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             min_nb_assignment_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1849,21 +1685,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
             else {
               min_nb_assignment = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "MaxNbAssignment") {
-          switch (max_nb_assignment_option) {
+          if (max_nb_assignment_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             max_nb_assignment_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1874,21 +1705,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
             else {
               max_nb_assignment = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
           }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
-        }
         }
 
         else if (*pstr == "Parameter") {
-          switch (parameter_option) {
+          if (parameter_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             parameter_option = true;
 
             switch (args[nb_required + i * 2 + 1].tag()) {
@@ -1904,21 +1730,16 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
                           args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
               break;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Assignment") {
-          switch (assignment_option) {
+          if (assignment_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             assignment_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -1929,14 +1750,6 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
             else {
               assignment = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -2083,9 +1896,12 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Estimator") {
-        switch (estimator_option) {
+        if (estimator_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           estimator_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2107,21 +1923,16 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
                           nb_required + i + 1 , "Likelihood or PenalizedLikelihood");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "InitialInterEvent") {
-        switch (initial_inter_event_option) {
+        if (initial_inter_event_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           initial_inter_event_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -2144,22 +1955,16 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
                         "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
             break;
           }
-
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "NbIteration") {
-        switch (nb_iteration_option) {
+        if (nb_iteration_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           nb_iteration_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -2170,21 +1975,16 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
           else {
             nb_iter = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "InterEventMean") {
-        switch (inter_event_mean_option) {
+        if (inter_event_mean_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           inter_event_mean_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2209,21 +2009,16 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
                           nb_required + i + 1 , "Computed or Estimated or OneStepLate");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Penalty") {
-        switch (penalty_option) {
+        if (penalty_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           penalty_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2248,21 +2043,16 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
                           nb_required + i + 1 , "FirstDifference or SecondDifference or Entropy");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Weight") {
-        switch (weight_option) {
+        if (weight_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           weight_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -2278,21 +2068,16 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
                         args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
             break;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Outside") {
-        switch (outside_option) {
+        if (outside_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           outside_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2314,14 +2099,6 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
                           nb_required + i + 1 , "Zero or Continuation");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -2506,9 +2283,12 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Estimator") {
-        switch (estimator_option) {
+        if (estimator_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           estimator_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2533,21 +2313,16 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
                           nb_required + i + 1 , "Likelihood or PenalizedLikelihood or Parametric");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "NbIteration") {
-        switch (nb_iteration_option) {
+        if (nb_iteration_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           nb_iteration_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -2558,21 +2333,16 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
           else {
             nb_iter = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "InitialInterEvent") {
-        switch (initial_inter_event_option) {
+        if (initial_inter_event_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           initial_inter_event_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -2595,22 +2365,16 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
                         "DISTRIBUTION or DISCRETE_MIXTURE or CONVOLUTION or COMPOUND");
             break;
           }
-
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "EquilibriumEstimator") {
-        switch (equilibrium_estimator_option) {
+        if (equilibrium_estimator_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           equilibrium_estimator_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2632,21 +2396,16 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
                           nb_required + i + 1 , "CompleteLikelihood or PartialLikelihood");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "InterEventMean") {
-        switch (inter_event_mean_option) {
+        if (inter_event_mean_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           inter_event_mean_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2671,21 +2430,16 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
                           nb_required + i + 1 , "Computed or Estimated or OneStepLate");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Penalty") {
-        switch (penalty_option) {
+        if (penalty_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           penalty_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2710,21 +2464,16 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
                           nb_required + i + 1 , "FirstDifference or SecondDifference or Entropy");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Weight") {
-        switch (weight_option) {
+        if (weight_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           weight_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -2740,21 +2489,16 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
                         args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
             break;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Outside") {
-        switch (outside_option) {
+        if (outside_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           outside_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2776,14 +2520,6 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
                           nb_required + i + 1 , "Zero or Continuation");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -2937,9 +2673,12 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "Algorithm") {
-          switch (algorithm_option) {
+          if (algorithm_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             algorithm_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2967,21 +2706,16 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
                             nb_required + i + 1 , "BIC or LocalBIC");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Counting") {
-          switch (counting_option) {
+          if (counting_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             counting_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -2992,21 +2726,16 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
             else {
               counting_flag = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Estimator") {
-          switch (estimator_option) {
+          if (estimator_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             estimator_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3037,21 +2766,16 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
                             nb_required + i + 1 , "MaximumLikelihood or Laplace or AdaptativeLaplace or UniformSubset or UniformCardinality");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "GlobalInitialTransition") {
-          switch (global_initial_transition_option) {
+          if (global_initial_transition_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             global_initial_transition_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -3062,21 +2786,16 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
             else {
               global_initial_transition = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "GlobalSample") {
-          switch (global_sample_option) {
+          if (global_sample_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             global_sample_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -3087,21 +2806,16 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
             else {
               global_sample = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "MinOrder") {
-          switch (min_order_option) {
+          if (min_order_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             min_order_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -3112,21 +2826,16 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
             else {
               min_order = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if ((*pstr == "MaxOrder") || (*pstr == "Order")) {
-          switch (max_order_option) {
+          if (max_order_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             max_order_option = true;
 
             if (*pstr == "Order") {
@@ -3141,21 +2850,16 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
             else {
               max_order = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Threshold") {
-          switch (threshold_option) {
+          if (threshold_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             threshold_option = true;
 
             switch (args[nb_required + i * 2 + 1].tag()) {
@@ -3171,14 +2875,6 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
                           args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
               break;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -3241,17 +2937,15 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
       return AMObj(AMObjType::ERROR);
     }
 
-    switch (order_estimation) {
-    case false :
-      markov = seq->variable_order_markov_estimation(error , type , max_order ,
-                                                     global_initial_transition , counting_flag);
-      break;
-    case true :
+    if (order_estimation) {
       markov = seq->variable_order_markov_estimation(error , true , type , min_order ,
                                                      max_order , algorithm , threshold ,
                                                      estimator , global_initial_transition ,
                                                      global_sample , counting_flag);
-      break;
+    }
+    else {
+      markov = seq->variable_order_markov_estimation(error , type , max_order ,
+                                                     global_initial_transition , counting_flag);
     }
     break;
   }
@@ -3279,9 +2973,12 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "Counting") {
-          switch (counting_option) {
+          if (counting_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             counting_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -3292,21 +2989,16 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
             else {
               counting_flag = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "GlobalInitialTransition") {
-          switch (global_initial_transition_option) {
+          if (global_initial_transition_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             global_initial_transition_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -3317,14 +3009,6 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
             else {
               global_initial_transition = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -3381,9 +3065,12 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "Counting") {
-          switch (counting_option) {
+          if (counting_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             counting_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -3394,21 +3081,16 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
             else {
               counting_flag = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Order") {
-          switch (order_option) {
+          if (order_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             order_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -3419,21 +3101,16 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
             else {
               order = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Criterion") {
-          switch (criterion_option) {
+          if (criterion_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             criterion_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3455,14 +3132,6 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
                             nb_required + i + 1 , "AIC or AICc or BIC");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -3567,9 +3236,12 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Counting") {
-        switch (counting_option) {
+        if (counting_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           counting_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -3580,21 +3252,16 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
           else {
             counting_flag = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Estimator") {
-        switch (estimator_option) {
+        if (estimator_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           estimator_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3619,21 +3286,16 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
                           nb_required + i + 1 , "CompleteLikelihood or PartialLikelihood");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "NbIteration") {
-        switch (nb_iteration_option) {
+        if (nb_iteration_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           nb_iteration_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -3644,21 +3306,16 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
           else {
             nb_iter = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "OccupancyMean") {
-        switch (occupancy_mean_option) {
+        if (occupancy_mean_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           occupancy_mean_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3680,14 +3337,6 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
                           nb_required + i + 1 , "Computed or OneStepLate");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -3788,9 +3437,12 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Algorithm") {
-        switch (algorithm_option) {
+        if (algorithm_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           algorithm_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3812,21 +3464,16 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
                           nb_required + i + 1 , "EM or MCEM");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "CommonDispersion") {
-        switch (common_dispersion_option) {
+        if (common_dispersion_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           common_dispersion_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -3837,21 +3484,16 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
           else {
             common_dispersion = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Counting") {
-        switch (counting_option) {
+        if (counting_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           counting_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -3862,21 +3504,16 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
           else {
             counting_flag = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "GlobalInitialTransition") {
-        switch (global_initial_transition_option) {
+        if (global_initial_transition_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           global_initial_transition_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -3887,21 +3524,16 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
           else {
             global_initial_transition = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "NbIteration") {
-        switch (nb_iteration_option) {
+        if (nb_iteration_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           nb_iteration_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -3912,21 +3544,16 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
           else {
             nb_iter = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "MinNbStateSequence") {
-        switch (min_nb_state_sequence_option) {
+        if (min_nb_state_sequence_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           min_nb_state_sequence_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -3937,21 +3564,16 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
           else {
             min_nb_state_sequence = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "MaxNbStateSequence") {
-        switch (max_nb_state_sequence_option) {
+        if (max_nb_state_sequence_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           max_nb_state_sequence_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -3962,21 +3584,16 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
           else {
             max_nb_state_sequence = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Parameter") {
-        switch (parameter_option) {
+        if (parameter_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           parameter_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -3992,21 +3609,16 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
                         args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
             break;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "StateSequences") {
-        switch (state_sequences_option) {
+        if (state_sequences_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           state_sequences_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -4017,14 +3629,6 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
           else {
             state_sequence = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -4145,9 +3749,12 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "Algorithm") {
-          switch (algorithm_option) {
+          if (algorithm_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             algorithm_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -4169,21 +3776,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                             nb_required + i + 1 , "EM or MCEM");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "CommonDispersion") {
-          switch (common_dispersion_option) {
+          if (common_dispersion_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             common_dispersion_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -4194,21 +3796,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               common_dispersion = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Counting") {
-          switch (counting_option) {
+          if (counting_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             counting_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -4219,21 +3816,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               counting_flag = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Estimator") {
-          switch (estimator_option) {
+          if (estimator_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             estimator_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -4258,21 +3850,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                             nb_required + i + 1 , "CompleteLikelihood or PartialLikelihood");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "InitialOccupancyMean") {
-          switch (initial_occupancy_mean_option) {
+          if (initial_occupancy_mean_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             initial_occupancy_mean_option = true;
 
             switch (args[nb_required + i * 2 + 1].tag()) {
@@ -4288,21 +3875,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                           args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
               break;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "NbIteration") {
-          switch (nb_iteration_option) {
+          if (nb_iteration_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             nb_iteration_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -4313,21 +3895,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               nb_iter = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "MinNbStateSequence") {
-          switch (min_nb_state_sequence_option) {
+          if (min_nb_state_sequence_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             min_nb_state_sequence_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -4338,21 +3915,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               min_nb_state_sequence = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "MaxNbStateSequence") {
-          switch (max_nb_state_sequence_option) {
+          if (max_nb_state_sequence_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             max_nb_state_sequence_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -4363,21 +3935,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               max_nb_state_sequence = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Parameter") {
-          switch (parameter_option) {
+          if (parameter_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             parameter_option = true;
 
             switch (args[nb_required + i * 2 + 1].tag()) {
@@ -4393,21 +3960,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                           args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
               break;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "PoissonGeometric") {
-          switch (poisson_geometric_option) {
+          if (poisson_geometric_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             poisson_geometric_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -4418,21 +3980,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               poisson_geometric = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "OccupancyMean") {
-          switch (occupancy_mean_option) {
+          if (occupancy_mean_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             occupancy_mean_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -4454,21 +4011,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                             nb_required + i + 1 , "Computed or OneStepLate");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "StateSequences") {
-          switch (state_sequences_option) {
+          if (state_sequences_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             state_sequences_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -4479,14 +4031,6 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               state_sequence = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
@@ -4639,9 +4183,12 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
         pstr = (AMString*)args[nb_required + i * 2].val.p;
 
         if (*pstr == "Algorithm") {
-          switch (algorithm_option) {
+          if (algorithm_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             algorithm_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -4663,21 +4210,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                             nb_required + i + 1 , "EM or MCEM");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "CommonDispersion") {
-          switch (common_dispersion_option) {
+          if (common_dispersion_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             common_dispersion_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -4688,21 +4230,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               common_dispersion = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Counting") {
-          switch (counting_option) {
+          if (counting_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             counting_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -4713,21 +4250,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               counting_flag = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Estimator") {
-          switch (estimator_option) {
+          if (estimator_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             estimator_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -4752,21 +4284,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                             nb_required + i + 1 , "CompleteLikelihood or PartialLikelihood");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "NbIteration") {
-          switch (nb_iteration_option) {
+          if (nb_iteration_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             nb_iteration_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -4777,21 +4304,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               nb_iter = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "MinNbStateSequence") {
-          switch (min_nb_state_sequence_option) {
+          if (min_nb_state_sequence_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             min_nb_state_sequence_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -4802,21 +4324,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               min_nb_state_sequence = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "MaxNbStateSequence") {
-          switch (max_nb_state_sequence_option) {
+          if (max_nb_state_sequence_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             max_nb_state_sequence_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -4827,21 +4344,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               max_nb_state_sequence = args[nb_required + i * 2 + 1].val.i;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "Parameter") {
-          switch (parameter_option) {
+          if (parameter_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             parameter_option = true;
 
             switch (args[nb_required + i * 2 + 1].tag()) {
@@ -4857,21 +4369,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                           args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
               break;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "PoissonGeometric") {
-          switch (poisson_geometric_option) {
+          if (poisson_geometric_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             poisson_geometric_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -4882,21 +4389,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               poisson_geometric = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "OccupancyMean") {
-          switch (occupancy_mean_option) {
+          if (occupancy_mean_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             occupancy_mean_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -4918,21 +4420,16 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
                             nb_required + i + 1 , "Computed or OneStepLate");
               }
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 
         else if (*pstr == "StateSequences") {
-          switch (state_sequences_option) {
+          if (state_sequences_option) {
+            status = false;
+            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
+          }
 
-          case false : {
+          else {
             state_sequences_option = true;
 
             if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -4943,14 +4440,6 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
             else {
               state_sequence = args[nb_required + i * 2 + 1].val.b;
             }
-            break;
-          }
-
-          case true : {
-            status = false;
-            genAMLError(ERRORMSG(USED_OPTION_sd) , "Estimate" , nb_required + i + 1);
-            break;
-          }
           }
         }
 

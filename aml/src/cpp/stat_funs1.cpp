@@ -289,6 +289,8 @@ extern AMObj STAT_ContingencyTable(const AMObjVector &args);
 extern AMObj STAT_VarianceAnalysis(const AMObjVector &args);
 extern AMObj STAT_Regression(const AMObjVector &args);
 
+extern AMObj STAT_ComputeMeanError(const AMObjVector &args);
+
 extern AMObj STAT_ComputeCorrelation(const AMObjVector &args);
 extern AMObj STAT_ComputeAutoregressiveAutocorrelation(const AMObjVector &args);
 extern AMObj STAT_ComputeWhiteNoiseCorrelation(const AMObjVector &args);
@@ -429,9 +431,12 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "ViewPoint") {
-        switch (view_point_option) {
+        if (view_point_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           view_point_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -459,21 +464,16 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
                           nb_required + i + 1 , "Data or Survival or SegmentProfile or StateProfile");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Detail") {
-        switch (detail_option) {
+        if (detail_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           detail_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -496,21 +496,16 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
               break;
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Format") {
-        switch (format_option) {
+        if (format_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           format_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -532,21 +527,16 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
                           nb_required + i + 1 , "Column or Line");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "CommonContrast") {
-        switch (common_contrast_option) {
+        if (common_contrast_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           common_contrast_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -557,21 +547,16 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else {
             common_contrast = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Sequence") {
-        switch (sequence_option) {
+        if (sequence_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           sequence_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -582,21 +567,16 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else {
             identifier = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "ShapeParameter") {
-        switch (shape_parameter_option) {
+        if (shape_parameter_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           shape_parameter_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -612,21 +592,16 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
                         args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
             break;
           }          
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Segmentations") {
-        switch (segmentations_option) {
+        if (segmentations_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           segmentations_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -648,21 +623,16 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
                           nb_required + i + 1 , "DynamicProgramming or ForwardBackwardSampling");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "NbSegmentation") {
-        switch (nb_segmentation_option) {
+        if (nb_segmentation_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           nb_segmentation_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -673,21 +643,16 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else {
             nb_segmentation = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "StateSequences") {
-        switch (state_sequences_option) {
+        if (state_sequences_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           state_sequences_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -709,21 +674,16 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
                           nb_required + i + 1 , "GeneralizedViterbi or ForwardBackwardSampling");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "NbStateSequence") {
-        switch (nb_state_sequence_option) {
+        if (nb_state_sequence_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           nb_state_sequence_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -734,21 +694,16 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else {
             nb_state_sequence = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Output") {
-        switch (output_option) {
+        if (output_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           output_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -779,14 +734,6 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
                           nb_required + i + 1 , "ChangePoint or Segment or State or InState or OutState");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Display" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -839,9 +786,15 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
     genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Display");
   }
 
-  switch (output_option) {
+  if (output_option) {
+    if (((view_point == 'q') && (change_point_output != CHANGE_POINT) && (change_point_output != SEGMENT)) ||
+        ((view_point == 'p') && (state_output != SSTATE) && (state_output != IN_STATE) && (state_output != OUT_STATE))) {
+      status = false;
+      genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Display" , "ViewPoint" , "Output");
+    }
+  }
 
-  case false : {
+  else {
     switch (view_point) {
     case 'q' :
       change_point_output = SEGMENT;
@@ -850,17 +803,6 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       state_output = SSTATE;
       break;
     }
-    break;
-  }
-
-  case true : {
-    if (((view_point == 'q') && (change_point_output != CHANGE_POINT) && (change_point_output != SEGMENT)) ||
-        ((view_point == 'p') && (state_output != SSTATE) && (state_output != IN_STATE) && (state_output != OUT_STATE))) {
-      status = false;
-      genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Display" , "ViewPoint" , "Output");
-    }
-    break;
-  }
   }
 
   // argument obligatoire
@@ -1385,9 +1327,12 @@ AMObj STAT_model::save(const AMObjVector &args) const
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "ViewPoint") {
-        switch (view_point_option) {
+        if (view_point_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           view_point_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1415,21 +1360,16 @@ AMObj STAT_model::save(const AMObjVector &args) const
                           nb_required + i + 1 , "Data or Survival or SegmentProfile or StateProfile");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Detail") {
-        switch (detail_option) {
+        if (detail_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           detail_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1452,21 +1392,16 @@ AMObj STAT_model::save(const AMObjVector &args) const
               break;
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Format") {
-        switch (format_option) {
+        if (format_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           format_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1478,21 +1413,16 @@ AMObj STAT_model::save(const AMObjVector &args) const
             format_pstr = (AMString*)args[nb_required + i * 2 + 1].val.p;
             format_index = nb_required + i + 1;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "CommonContrast") {
-        switch (common_contrast_option) {
+        if (common_contrast_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           common_contrast_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -1503,21 +1433,16 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else {
             common_contrast = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Sequence") {
-        switch (sequence_option) {
+        if (sequence_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           sequence_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1528,21 +1453,16 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else {
             identifier = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "ShapeParameter") {
-        switch (shape_parameter_option) {
+        if (shape_parameter_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           shape_parameter_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -1558,21 +1478,16 @@ AMObj STAT_model::save(const AMObjVector &args) const
                         args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
             break;
           }          
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Segmentations") {
-        switch (segmentations_option) {
+        if (segmentations_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           segmentations_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1594,21 +1509,16 @@ AMObj STAT_model::save(const AMObjVector &args) const
                           nb_required + i + 1 , "DynamicProgramming or ForwardBackwardSampling");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "NbSegmentation") {
-        switch (nb_segmentation_option) {
+        if (nb_segmentation_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           nb_segmentation_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1619,21 +1529,16 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else {
             nb_segmentation = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "StateSequences") {
-        switch (state_sequences_option) {
+        if (state_sequences_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           state_sequences_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1655,21 +1560,16 @@ AMObj STAT_model::save(const AMObjVector &args) const
                           nb_required + i + 1 , "GeneralizedViterbi or ForwardBackwardSampling");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "NbStateSequence") {
-        switch (nb_state_sequence_option) {
+        if (nb_state_sequence_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           nb_state_sequence_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -1680,21 +1580,16 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else {
             nb_state_sequence = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Output") {
-        switch (output_option) {
+        if (output_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           output_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -1725,14 +1620,6 @@ AMObj STAT_model::save(const AMObjVector &args) const
                           nb_required + i + 1 , "ChangePoint or Segment or State or InState or OutState");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Save" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -1781,9 +1668,15 @@ AMObj STAT_model::save(const AMObjVector &args) const
     genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Save");
   }
 
-  switch (output_option) {
+  if (output_option) {
+    if (((view_point == 'q') && (change_point_output != CHANGE_POINT) && (change_point_output != SEGMENT)) ||
+        ((view_point == 'p') && (state_output != SSTATE) && (state_output != IN_STATE) && (state_output != OUT_STATE))) {
+      status = false;
+      genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Save" , "ViewPoint" , "Output");
+    }
+  }
 
-  case false : {
+  else {
     switch (view_point) {
     case 'q' :
       change_point_output = SEGMENT;
@@ -1792,17 +1685,6 @@ AMObj STAT_model::save(const AMObjVector &args) const
       state_output = SSTATE;
       break;
     }
-    break;
-  }
-
-  case true : {
-    if (((view_point == 'q') && (change_point_output != CHANGE_POINT) && (change_point_output != SEGMENT)) ||
-        ((view_point == 'p') && (state_output != SSTATE) && (state_output != IN_STATE) && (state_output != OUT_STATE))) {
-      status = false;
-      genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Save" , "ViewPoint" , "Output");
-    }
-    break;
-  }
   }
 
   // arguments obligatoires
@@ -2784,25 +2666,23 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       pstr = (AMString*)args[nb_required + i * 2].val.p;
 
       if (*pstr == "Window") {
-        switch (window_option) {
-
-        case false : {
-          window_option = true;
-          break;
-        }
-
-        case true : {
+        if (window_option) {
           status = false;
           genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
-          break;
         }
+
+        else {
+          window_option = true;
         }
       }
 
       else if (*pstr == "Mode") {
-        switch (mode_option) {
+        if (mode_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           mode_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -2824,21 +2704,16 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
                           nb_required + i + 1 , "Blocking or NonBlocking");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "ViewPoint") {
-        switch (view_point_option) {
+        if (view_point_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           view_point_option = true;
 
           if (nb_object == 0) {
@@ -2885,21 +2760,16 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               }
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Title") {
-        switch (title_option) {
+        if (title_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           title_option = true;
 
           if (nb_object == 0) {
@@ -2917,21 +2787,16 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               title = (char*)((AMString*)args[nb_required + i * 2 + 1].val.p)->data();
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "CommonContrast") {
-        switch (common_contrast_option) {
+        if (common_contrast_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           common_contrast_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::BOOL) {
@@ -2942,21 +2807,16 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           else {
             common_contrast = args[nb_required + i * 2 + 1].val.b;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Sequence") {
-        switch (sequence_option) {
+        if (sequence_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           sequence_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::INTEGER) {
@@ -2967,21 +2827,16 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
           else {
             identifier = args[nb_required + i * 2 + 1].val.i;
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "ShapeParameter") {
-        switch (shape_parameter_option) {
+        if (shape_parameter_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           shape_parameter_option = true;
 
           switch (args[nb_required + i * 2 + 1].tag()) {
@@ -2997,21 +2852,16 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
                         args[nb_required + i * 2 + 1].tag.string().data() , "INT or REAL");
             break;
           }          
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
       else if (*pstr == "Output") {
-        switch (output_option) {
+        if (output_option) {
+          status = false;
+          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
+        }
 
-        case false : {
+        else {
           output_option = true;
 
           if (args[nb_required + i * 2 + 1].tag() != AMObjType::STRING) {
@@ -3042,14 +2892,6 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
                           nb_required + i + 1 , "ChangePoint or Segment or State or InState or OutState");
             }
           }
-          break;
-        }
-
-        case true : {
-          status = false;
-          genAMLError(ERRORMSG(USED_OPTION_sd) , "Plot" , nb_required + i + 1);
-          break;
-        }
         }
       }
 
@@ -3089,9 +2931,15 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
     genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Plot");
   }
 
-  switch (output_option) {
+  if (output_option) {
+    if (((view_point == 'q') && (change_point_output != CHANGE_POINT) && (change_point_output != SEGMENT)) ||
+        ((view_point == 'p') && (state_output != SSTATE) && (state_output != IN_STATE) && (state_output != OUT_STATE))) {
+      status = false;
+      genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Plot" , "ViewPoint" , "Output");
+    }
+  }
 
-  case false : {
+  else {
     switch (view_point) {
     case 'q' :
       change_point_output = SEGMENT;
@@ -3100,17 +2948,6 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
       state_output = SSTATE;
       break;
     }
-    break;
-  }
-
-  case true : {
-    if (((view_point == 'q') && (change_point_output != CHANGE_POINT) && (change_point_output != SEGMENT)) ||
-        ((view_point == 'p') && (state_output != SSTATE) && (state_output != IN_STATE) && (state_output != OUT_STATE))) {
-      status = false;
-      genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_sss) , "Plot" , "ViewPoint" , "Output");
-    }
-    break;
-  }
   }
 
   if ((config) && (view_point != 'p') && ((args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
@@ -4062,6 +3899,10 @@ void installSTATModule()
   type[0] = AMObjType::VECTORS;
   type[1] = AMObjType::STRING;
   installFNode("Regression" , STAT_Regression , 2 , type , AMObjType::VOID);
+
+  type[0] = AMObjType::ANY;
+  type[1] = AMObjType::INTEGER;
+  installFNode("ComputeMeanError" , STAT_ComputeMeanError , 2 , type , AMObjType::VOID);
 
   type[0] = AMObjType::ANY;
   installFNode("ComputeCorrelation" , STAT_ComputeCorrelation , 1 , type , AMObjType::CORRELATION);
