@@ -4904,6 +4904,9 @@ AMObj STAT_Segmentation(const AMObjVector &args)
               if (*pstr == "Sequence") {
                 output = SEQUENCE;
               }
+              else if (*pstr == "SequenceSample") {
+                output = SEQUENCE_SAMPLE;
+              }
               else if ((*pstr == "SubtractionResidual") || (*pstr == "Residual")) {
                 output = SUBTRACTION_RESIDUAL;
               }
@@ -4925,7 +4928,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
               else {
                 status = false;
                 genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + i + 1 ,
-                            "Sequence or Residual or AbsoluteResidual or Entropy or Divergence or LogLikelihoodSlope");
+                            "Sequence or SequenceSample or Residual or AbsoluteResidual or Entropy or Divergence or LogLikelihoodSlope");
               }
             }
           }
@@ -5033,7 +5036,8 @@ AMObj STAT_Segmentation(const AMObjVector &args)
     }
 
     if (nb_segment_estimation) {
-      if ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL)) {
+      if ((output == SEQUENCE_SAMPLE) || (output == SUBTRACTION_RESIDUAL) ||
+          (output == ABSOLUTE_RESIDUAL) || (output == DIVISION_RESIDUAL)) {
         status = false;
         genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_ss) , "Segmentation" ,
                     "Sequence or Entropy or Divergence or LogLikelihoodSlope");
@@ -5221,6 +5225,9 @@ AMObj STAT_Segmentation(const AMObjVector &args)
               if (*pstr == "Sequence") {
                 output = SEQUENCE;
               }
+              else if (*pstr == "SequenceSample") {
+                output = SEQUENCE_SAMPLE;
+              }
               else if ((*pstr == "SubtractionResidual") || (*pstr == "Residual")) {
                 output = SUBTRACTION_RESIDUAL;
               }
@@ -5233,7 +5240,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
               else {
                 status = false;
                 genAMLError(ERRORMSG(SEGMENTATION_OUTPUT_sds) , "Segmentation" , nb_required + i + 1 ,
-                            "Sequence or Residual or AbsoluteResidual");
+                            "Sequence or SequenceSample or Residual or AbsoluteResidual");
               }
             }
           }
