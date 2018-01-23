@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -145,6 +145,7 @@ const char *STAT_err_msgs_aml[] = {
 
   "function %s: argument %d: bad clustering method: should be %s" ,
   "function %s: argument %d: bad rounding mode: should be %s" ,
+  "function %s: argument %d: bad logarithm base: should be %s" ,
   "function %s: bad number of classes" ,
   "function %s: argument %d: bad variable index: should be strictly positive" ,
   "function %s: argument %d: bad variable index" ,
@@ -229,9 +230,11 @@ extern AMObj STAT_ValueSelect(const AMObjVector &args);
 
 extern AMObj STAT_VariableScaling(const AMObjVector &args);
 extern AMObj STAT_Round(const AMObjVector &args);
+extern AMObj STAT_LogTransform(const AMObjVector &args);
 extern AMObj STAT_SelectBinWidth(const AMObjVector &args);
 extern AMObj STAT_SelectIndividual(const AMObjVector &args);
 extern AMObj STAT_SelectVariable(const AMObjVector &args);
+extern AMObj STAT_SumVariable(const AMObjVector &args);
 extern AMObj STAT_MergeVariable(const AMObjVector &args);
 
 extern AMObj STAT_NbEventSelect(const AMObjVector &args);
@@ -246,11 +249,11 @@ extern AMObj STAT_Reverse(const AMObjVector &args);
 extern AMObj STAT_RemoveIndexParameter(const AMObjVector &args);
 extern AMObj STAT_ExplicitIndexParameter(const AMObjVector &args);
 extern AMObj STAT_IndexParameterSelect(const AMObjVector &args);
+extern AMObj STAT_Truncate(const AMObjVector &args);
 extern AMObj STAT_IndexParameterExtract(const AMObjVector &args);
 extern AMObj STAT_SegmentationExtract(const AMObjVector &args);
 extern AMObj STAT_Cumulate(const AMObjVector &args);
 extern AMObj STAT_Difference(const AMObjVector &args);
-extern AMObj STAT_LogTransform(const AMObjVector &args);
 extern AMObj STAT_RelativeGrowthRate(const AMObjVector &args);
 extern AMObj STAT_SequenceNormalization(const AMObjVector &args);
 extern AMObj STAT_MovingAverage(const AMObjVector &args);
@@ -3720,6 +3723,9 @@ void installSTATModule()
   installFNode("Round" , STAT_Round , 1 , type , AMObjType::VECTORS);
 
   type[0] = AMObjType::ANY;
+  installFNode("LogTransform" , STAT_LogTransform , 1 , type , AMObjType::SEQUENCES);
+
+  type[0] = AMObjType::ANY;
   installFNode("SelectBinWidth" , STAT_SelectBinWidth , 1 , type , AMObjType::VECTORS);
 
   type[0] = AMObjType::ANY;
@@ -3729,6 +3735,10 @@ void installSTATModule()
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::INTEGER;
   installFNode("SelectVariable" , STAT_SelectVariable , 2 , type , AMObjType::VECTORS);
+
+  type[0] = AMObjType::ANY;
+  type[1] = AMObjType::ARRAY;
+  installFNode("SumVariable" , STAT_SumVariable , 2 , type , AMObjType::VECTORS);
 
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::ANY;
@@ -3782,6 +3792,10 @@ void installSTATModule()
 
   type[0] = AMObjType::ANY;
   type[1] = AMObjType::INTEGER;
+  installFNode("Truncate" , STAT_Truncate , 2 , type , AMObjType::SEQUENCES);
+
+  type[0] = AMObjType::ANY;
+  type[1] = AMObjType::INTEGER;
   installFNode("IndexParameterExtract" , STAT_IndexParameterExtract , 2 , type , AMObjType::SEQUENCES);
 
   type[0] = AMObjType::ANY;
@@ -3795,9 +3809,6 @@ void installSTATModule()
 
   type[0] = AMObjType::ANY;
   installFNode("Difference" , STAT_Difference , 1 , type , AMObjType::SEQUENCES);
-
-  type[0] = AMObjType::ANY;
-  installFNode("LogTransform" , STAT_LogTransform , 1 , type , AMObjType::SEQUENCES);
 
   type[0] = AMObjType::ANY;
   installFNode("RelativeGrowthRate" , STAT_RelativeGrowthRate , 1 , type , AMObjType::SEQUENCES);
