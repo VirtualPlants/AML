@@ -1085,7 +1085,6 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
             CHECKCONDVA(nb_required == 3 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
-            break;
           }
           else {
             CHECKCONDVA(nb_required == nb_variable + 2 ,
@@ -1118,9 +1117,6 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else if (*pstr == "LinearModel") {
             model_type[i] = LINEAR_MODEL_CHANGE;
           }
-          else if (*pstr == "InterceptSlope") {
-            model_type[i] = INTERCEPT_SLOPE_CHANGE;
-          }
           else if (*pstr == "AutoregressiveModel") {
             model_type[i] = AUTOREGRESSIVE_MODEL_CHANGE;
           }
@@ -1130,7 +1126,7 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Display" , i + 3 ,
-                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
+                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or AutoregressiveModel or StationaryAutoregressiveModel");
           }
         }
 
@@ -2127,7 +2123,6 @@ AMObj STAT_model::save(const AMObjVector &args) const
           if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
             CHECKCONDVA(nb_required == 4 ,
                         genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Save"));
-            break;
           }
           else {
             CHECKCONDVA(nb_required == nb_variable + 3 ,
@@ -2160,9 +2155,6 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else if (*pstr == "LinearModel") {
             model_type[i] = LINEAR_MODEL_CHANGE;
           }
-          else if (*pstr == "InterceptSlope") {
-            model_type[i] = INTERCEPT_SLOPE_CHANGE;
-          }
           else if (*pstr == "AutoregressiveModel") {
             model_type[i] = AUTOREGRESSIVE_MODEL_CHANGE;
           }
@@ -2172,7 +2164,7 @@ AMObj STAT_model::save(const AMObjVector &args) const
           else {
             status = false;
             genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Save" , i + 4 ,
-                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
+                        "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or AutoregressiveModel or StationaryAutoregressiveModel");
           }
         }
 
@@ -3232,7 +3224,6 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               if ((model_type[i] == MEAN_CHANGE) || (model_type[i] == INTERCEPT_SLOPE_CHANGE)) {
                 CHECKCONDVA(nb_required == 3 ,
                             genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot"));
-                break;
               }
               else {
                 CHECKCONDVA(nb_required == nb_variable + 2 ,
@@ -3265,9 +3256,6 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               else if (*pstr == "LinearModel") {
                 model_type[i] = LINEAR_MODEL_CHANGE;
               }
-              else if (*pstr == "InterceptSlope") {
-                model_type[i] = INTERCEPT_SLOPE_CHANGE;
-              }
               else if (*pstr == "AutoregressiveModel") {
                 model_type[i] = AUTOREGRESSIVE_MODEL_CHANGE;
               }
@@ -3277,7 +3265,7 @@ AMObj STAT_model::plot(GP_window &window , const AMObjVector &args) const
               else {
                 status = false;
                 genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Plot" , i + 3 ,
-                            "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
+                            "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or AutoregressiveModel or StationaryAutoregressiveModel");
               }
             }
           }
