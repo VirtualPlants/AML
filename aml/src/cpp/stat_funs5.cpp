@@ -4706,9 +4706,6 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         else if (*pstr == "LinearModel") {
           model_type[i] = LINEAR_MODEL_CHANGE;
         }
-        else if (*pstr == "InterceptSlope") {
-          model_type[i] = INTERCEPT_SLOPE_CHANGE;
-        }
         else if (*pstr == "AutoregressiveModel") {
           model_type[i] = AUTOREGRESSIVE_MODEL_CHANGE;
         }
@@ -4718,7 +4715,7 @@ AMObj STAT_Segmentation(const AMObjVector &args)
         else {
           status = false;
           genAMLError(ERRORMSG(CHANGE_POINT_MODEL_sds) , "Segmentation" , i + 3 ,
-                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or InterceptSlope or AutoregressiveModel or StationaryAutoregressiveModel");
+                      "Categorical or Poisson or NegativeBinomial or ShiftedNegativeBinomial or Ordinal or Gaussian or Variance or LinearModel or AutoregressiveModel or StationaryAutoregressiveModel");
         }
       }
 
