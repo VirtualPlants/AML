@@ -4,6 +4,8 @@ Import( "env" )
 import os
 pj = os.path.join
 
+WITHOUT_PLANTGL = True
+
 sources = env.ALEAGlob('*.cpp')
 
 if env['compiler'] == 'mingw':
@@ -19,16 +21,18 @@ env.EnableQt4Modules( [ 'QtCore', 'QtGui', 'QtOpenGL', 'QtNetwork', 'QtSql', 'Qt
 
 # STAT module
 LIBS += ['vpstat_tool','vpsequence']
-# PlantGL module
-LIBS += Split("""
-pgltool
-pglgui
-pglmath
-pglalgo
-pglsg""")
 
-# MTG module
-LIBS += ["vpmtg"]
+if not WITHOUT_PLANTGL:
+    # PlantGL module
+    LIBS += Split("""
+    pgltool
+    pglgui
+    pglmath
+    pglalgo
+    pglsg""")
+
+    # MTG module
+    LIBS += ["vpmtg"]
 # TreeMatching module
 #LIBS += ["vptree_matching"]
 # # MSVOXEL module

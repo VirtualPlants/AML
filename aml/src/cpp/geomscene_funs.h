@@ -45,6 +45,7 @@
 #include "aml/fnode.h"
 #include "aml/array.h"
 
+#ifndef WITHOUT_GEOM
 #include "plantgl/scenegraph/scene/scene.h"
 
 
@@ -97,5 +98,5 @@ public:
 };
 
 extern void installGEOMSCENEModule();
-
+#endif
 #endif

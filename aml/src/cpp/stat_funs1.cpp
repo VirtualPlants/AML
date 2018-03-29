@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: stat_funs1.cpp 18816 2016-09-09 12:15:40Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,7 +36,7 @@
 
 
 
-#include <stdio.h>
+#include <cstdio>
 #include <sys/types.h>
 #include <iostream>
 #include <fstream>

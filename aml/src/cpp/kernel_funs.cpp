@@ -53,7 +53,7 @@
 #include "aml/parseraml.h"
 #include "aml/fnode.h"
 
-#include "mtg/utils.h"
+#include "aml/amlrandom.h"
 #include "aml/date.h"
 
 #include "tool/dirnames.h"

@@ -42,19 +42,14 @@
 
 #include <string.h>
 
-#ifdef _WIN32
-#define random rand
-#endif
-
 #include "aml/defs.h"
+#include "aml/amlrandom.h"
 
 #ifndef _WIN32
 inline int max(int a, int b) {return (a<b ? b : a);}
 inline int min(int a, int b) {return (a>=b ? b : a);}
 #endif
 
-long randomNbInRange(long a, long b);
-double randomDouble();
 
 // La class String est utilisee partout ou il y a besoin de chaine de caracteres
 // de TAILLE FIXEE dans le code.

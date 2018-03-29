@@ -10,6 +10,8 @@ Import( "env" )
 
 env_aml = env.Clone()
 
+WITHOUT_PLANTGL = True
+
 includes = env_aml.ALEAGlob('*.h')
 env_aml.ALEAIncludes("aml",includes)
 
@@ -48,23 +50,28 @@ sources.extend(stat_src)
 
 
 # PlantGL module
-LIBS += Split("""
-pgltool
-pglgui
-pglmath
-pglalgo
-pglsg""")
+if WITHOUT_PLANTGL:
+    env_aml.AppendUnique(CPPDEFINES=['WITHOUT_GEOM'])
+    env_aml.AppendUnique(CPPDEFINES=['WITHOUT_MTG'])
+else:
+    LIBS += Split("""
+    pgltool
+    pglgui
+    pglmath
+    pglalgo
+    pglsg""")
 
-pgl_src= Split("""
-viewer_funs.cpp
-geomscene_funs.cpp
-""")
-sources.extend(pgl_src)
+    pgl_src= Split("""
+    viewer_funs.cpp
+    geomscene_funs.cpp
+    """)
+    sources.extend(pgl_src)
 
-# MTG module
-LIBS += ["vpmtg"]
-mtg_src= ["mtg_funs.cpp"]
-sources.extend(mtg_src)
+
+    # MTG module
+    LIBS += ["vpmtg"]
+    mtg_src= ["mtg_funs.cpp"]
+    sources.extend(mtg_src)
 
 # TreeMatching module
 #LIBS += ["vptree_matching"]
@@ -96,7 +103,7 @@ prefix = env_aml['build_prefix']
 sources= ["mainaml.cpp","guicon.cpp"]
 
 # Add LIBS dependencies
-if env_aml["WITH_CGAL"]:
+if env_aml.get("WITH_CGAL", False):
     LIBS.append("CGAL")
 aml_exe = env_aml.ALEAProgram("aml", sources, LIBS=LIBS)
 
