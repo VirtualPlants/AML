@@ -19,7 +19,7 @@ else:
     common_tools = [ 'vplants.tool', 'vplants.amlobj',
                     'vplants.stat_tool', 'vplants.sequence_analysis','boost_python']
 
-    tools = ['python','flex','install', 'qt4'] + common_tools
+    tools = ['python','flex', 'qt4', 'readline'] + common_tools
 
 env = ALEASolution(options, tools)
 

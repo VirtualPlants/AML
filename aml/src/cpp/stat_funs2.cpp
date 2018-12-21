@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -412,8 +412,8 @@ AMObj STAT_DiscreteMixture(const AMObjVector &args)
     }
 
     if (status) {
-//      mixt = DiscreteMixture::building(error , nb_component , weight , component);
-      mixt = DiscreteMixture::building(error , nb_component , vec_weight , vec_component);
+//      mixt = DiscreteMixture::build(error , nb_component , weight , component);
+      mixt = DiscreteMixture::build(error , vec_weight , vec_component);
     }
 
     for (i = 0;i < nb_component;i++) {
@@ -503,8 +503,8 @@ AMObj STAT_Convolution(const AMObjVector &args)
     }
 
     if (status) {
-//      convol = Convolution::building(error , nb_dist , dist);
-      convol = Convolution::building(error , nb_dist , vec_dist);
+//      convol = Convolution::build(error , nb_dist , dist);
+      convol = Convolution::build(error , vec_dist);
     }
 
     for (i = 0;i < nb_dist;i++) {
@@ -634,6 +634,7 @@ AMObj STAT_FrequencyDistribution(const AMObjVector &args)
     bool status = true;
     int i;
     int nb_element , *element;
+    vector<int> vec_element;
     Array* parray = (Array*)args[0].val.p;
 
 
@@ -666,6 +667,7 @@ AMObj STAT_FrequencyDistribution(const AMObjVector &args)
         }
         else {
           element[i] = (next.key()).val.i;
+          vec_element.push_back(element[i]);
         }
       }
 
@@ -675,7 +677,8 @@ AMObj STAT_FrequencyDistribution(const AMObjVector &args)
     delete pnext;
 
     if (status) {
-      histo = new DiscreteDistributionData(nb_element , element);
+//      histo = new DiscreteDistributionData(nb_element , element);
+      histo = new DiscreteDistributionData(vec_element);
     }
     delete [] element;
 
@@ -1619,19 +1622,19 @@ AMObj STAT_Renewal(const AMObjVector &args)
       if (scale_option) {
         // scaled_inter_event = new DiscreteParametric(*inter_event , scaling_coeff);
         scaled_inter_event = new DiscreteParametric((Distribution&)*inter_event , scaling_coeff);
-        renew = Renewal::building(error , *scaled_inter_event , type , time);
+        renew = Renewal::build(error , *scaled_inter_event , type , time);
         delete scaled_inter_event;
       }
 
       else {
-        renew = Renewal::building(error , *inter_event , type , time);
+        renew = Renewal::build(error , *inter_event , type , time);
       }
       delete inter_event;
     }
   }
 
   else {
-    renew = Renewal::building(error , *inter_event , type , time);
+    renew = Renewal::build(error , *inter_event , type , time);
     delete inter_event;
   }
 
@@ -1845,7 +1848,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
                 genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , 2 ,
                             args[1].tag.string().data() , "INT"));
 
-    timev = TimeEvents::building(error , *nb_event , args[1].val.i);
+    timev = TimeEvents::build(error , *nb_event , args[1].val.i);
 
     if (timev) {
       STAT_model* model = new STAT_model(timev);

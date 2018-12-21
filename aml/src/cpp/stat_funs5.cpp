@@ -3,7 +3,7 @@
  *
  *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -716,9 +716,9 @@ AMObj STAT_CompareFrequencyDistributions(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-//  status = phisto[0]->comparison(error , true , nb_required - 2 , phisto + 1 , var_type ,
+//  status = phisto[0]->comparison(error , &AMLOUTPUT , nb_required - 2 , phisto + 1 , var_type ,
 //                                file_name , format);
-  status = phisto[0]->comparison(error , true , nb_required - 2 , ihisto , var_type ,
+  status = phisto[0]->comparison(error , &AMLOUTPUT , nb_required - 2 , ihisto , var_type ,
                                  file_name , format);
   delete [] phisto;
 
@@ -1070,7 +1070,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
       return AMObj(AMObjType::ERROR);
     }
 
-    dist_matrix = iseq->alignment(error , true , ref_identifier , test_identifier , begin_free ,
+    dist_matrix = iseq->alignment(error , &AMLOUTPUT , ref_identifier , test_identifier , begin_free ,
                                   end_free , file_name , format , alignment_file_name);
 
     if (dist_matrix) {
@@ -1539,7 +1539,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
         indel_factor = INDEL_FACTOR_1;
       }
 
-      dist_matrix = iseq->alignment(error , true , *((VectorDistance*)((STAT_model*)args[1].val.p)->pt) ,
+      dist_matrix = iseq->alignment(error , &AMLOUTPUT , *((VectorDistance*)((STAT_model*)args[1].val.p)->pt) ,
                                     ref_identifier , test_identifier , begin_free , end_free ,
                                     indel_cost , indel_factor , transposition , transposition_factor ,
                                     file_name , format , alignment_file_name);
@@ -1561,7 +1561,7 @@ AMObj STAT_CompareSequences(const AMObjVector &args)
         indel_factor = INDEL_FACTOR_N;
       }
 
-      seq = iseq->multiple_alignment(error , true , *((VectorDistance*)((STAT_model*)args[1].val.p)->pt) ,
+      seq = iseq->multiple_alignment(error , &AMLOUTPUT , *((VectorDistance*)((STAT_model*)args[1].val.p)->pt) ,
                                      begin_free , end_free , indel_cost , indel_factor , algorithm , file_name);
 
       if (seq) {
@@ -1685,7 +1685,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
       }
 
       if (status) {
-        status = seq->comparison(error , true , nb_model , markov , file_name);
+        status = seq->comparison(error , &AMLOUTPUT , nb_model , markov , file_name);
       }
 
       delete [] markov;
@@ -1717,7 +1717,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
       }
 
       if (status) {
-        status = seq->comparison(error , true , nb_model , smarkov , file_name);
+        status = seq->comparison(error , &AMLOUTPUT , nb_model , smarkov , file_name);
       }
 
       delete [] smarkov;
@@ -1844,7 +1844,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
       }
 
       if (status) {
-        status = seq->comparison(error , true , nb_model , hmarkov , algorithm , file_name);
+        status = seq->comparison(error , &AMLOUTPUT , nb_model , hmarkov , algorithm , file_name);
       }
 
       delete [] hmarkov;
@@ -1876,7 +1876,7 @@ AMObj STAT_CompareSequencesMarkovianModels(const AMObjVector &args)
       }
 
       if (status) {
-        status = seq->comparison(error , true , nb_model , hsmarkov , algorithm , file_name);
+        status = seq->comparison(error , &AMLOUTPUT , nb_model , hsmarkov , algorithm , file_name);
       }
 
       delete [] hsmarkov;
@@ -2096,18 +2096,18 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
     if (status) {
       if ((args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[1].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
           (args[1].tag() == AMObjType::CONVOLUTION_DATA) || (args[1].tag() == AMObjType::COMPOUND_DATA)) {
-        dist_matrix = markov[0]->divergence_computation(error , true , nb_model , markov + 1 ,
+        dist_matrix = markov[0]->divergence_computation(error , &AMLOUTPUT , nb_model , markov + 1 ,
                                                         hlength , file_name);
       }
 
       else if (args[1].tag() == AMObjType::VARIABLE_ORDER_MARKOV) {
-        dist_matrix = markov[0]->divergence_computation(error , true , nb_model , markov + 1 ,
+        dist_matrix = markov[0]->divergence_computation(error , &AMLOUTPUT , nb_model , markov + 1 ,
                                                         nb_sequence , length , file_name);
       }
 
       else if ((args[1].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
                (args[1].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) || (args[1].tag() == AMObjType::SEMI_MARKOV_DATA)) {
-        dist_matrix = markov[0]->divergence_computation(error , true , nb_model , markov + 1 ,
+        dist_matrix = markov[0]->divergence_computation(error , &AMLOUTPUT , nb_model , markov + 1 ,
                                                         nb_sequence , seq , file_name);
       }
     }
@@ -2143,18 +2143,18 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
     if (status) {
       if ((args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[1].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
           (args[1].tag() == AMObjType::CONVOLUTION_DATA) || (args[1].tag() == AMObjType::COMPOUND_DATA)) {
-        dist_matrix = hmarkov[0]->divergence_computation(error , true , nb_model , hmarkov + 1 ,
+        dist_matrix = hmarkov[0]->divergence_computation(error , &AMLOUTPUT , nb_model , hmarkov + 1 ,
                                                          hlength , file_name);
       }
 
       else if (args[1].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
-        dist_matrix = hmarkov[0]->divergence_computation(error , true , nb_model , hmarkov + 1 ,
+        dist_matrix = hmarkov[0]->divergence_computation(error , &AMLOUTPUT , nb_model , hmarkov + 1 ,
                                                          nb_sequence , length , file_name);
       }
 
       else if ((args[1].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
                (args[1].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) || (args[1].tag() == AMObjType::SEMI_MARKOV_DATA)) {
-        dist_matrix = hmarkov[0]->divergence_computation(error , true , nb_model , hmarkov + 1 ,
+        dist_matrix = hmarkov[0]->divergence_computation(error , &AMLOUTPUT , nb_model , hmarkov + 1 ,
                                                          nb_sequence , seq , file_name);
       }
     }
@@ -2190,18 +2190,18 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
     if (status) {
       if ((args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[1].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
           (args[1].tag() == AMObjType::CONVOLUTION_DATA) || (args[1].tag() == AMObjType::COMPOUND_DATA)) {
-        dist_matrix = smarkov[0]->divergence_computation(error , true , nb_model , smarkov + 1 ,
+        dist_matrix = smarkov[0]->divergence_computation(error , &AMLOUTPUT , nb_model , smarkov + 1 ,
                                                          hlength , file_name);
       }
 
       else if (args[1].tag() == AMObjType::SEMI_MARKOV) {
-        dist_matrix = smarkov[0]->divergence_computation(error , true , nb_model , smarkov + 1 ,
+        dist_matrix = smarkov[0]->divergence_computation(error , &AMLOUTPUT , nb_model , smarkov + 1 ,
                                                          nb_sequence , length , file_name);
       }
 
       else if ((args[1].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
                (args[1].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) || (args[1].tag() == AMObjType::SEMI_MARKOV_DATA)) {
-        dist_matrix = smarkov[0]->divergence_computation(error , true , nb_model , smarkov + 1 ,
+        dist_matrix = smarkov[0]->divergence_computation(error , &AMLOUTPUT , nb_model , smarkov + 1 ,
                                                          nb_sequence , seq , file_name);
       }
     }
@@ -2237,18 +2237,18 @@ AMObj STAT_CompareMarkovianModels(const AMObjVector &args)
     if (status) {
       if ((args[1].tag() == AMObjType::FREQUENCY_DISTRIBUTION) || (args[1].tag() == AMObjType::DISCRETE_MIXTURE_DATA) ||
           (args[1].tag() == AMObjType::CONVOLUTION_DATA) || (args[1].tag() == AMObjType::COMPOUND_DATA)) {
-        dist_matrix = hsmarkov[0]->divergence_computation(error , true , nb_model , hsmarkov + 1 ,
+        dist_matrix = hsmarkov[0]->divergence_computation(error , &AMLOUTPUT , nb_model , hsmarkov + 1 ,
                                                           hlength , file_name);
       }
 
       else if (args[1].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
-        dist_matrix = hsmarkov[0]->divergence_computation(error , true , nb_model , hsmarkov + 1 ,
+        dist_matrix = hsmarkov[0]->divergence_computation(error , &AMLOUTPUT , nb_model , hsmarkov + 1 ,
                                                           nb_sequence , length , file_name);
       }
 
       else if ((args[1].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
                (args[1].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) || (args[1].tag() == AMObjType::SEMI_MARKOV_DATA)) {
-        dist_matrix = hsmarkov[0]->divergence_computation(error , true , nb_model , hsmarkov + 1 ,
+        dist_matrix = hsmarkov[0]->divergence_computation(error , &AMLOUTPUT , nb_model , hsmarkov + 1 ,
                                                           nb_sequence , seq , file_name);
       }
     }
@@ -2482,7 +2482,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
 
       if (status) {
         clusters = ((DistanceMatrix*)((STAT_model*)args[0].val.p)->pt)->
-        partitioning(error , true , nb_cluster , prototype , initialization , algorithm);
+        partitioning(error , &AMLOUTPUT , nb_cluster , prototype , initialization , algorithm);
       }
 
      delete [] prototype;
@@ -2580,7 +2580,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
       }
 
       if (status) {
-        clusters = ((DistanceMatrix*)((STAT_model*)args[0].val.p)->pt)->partitioning(error , true , nb_cluster ,
+        clusters = ((DistanceMatrix*)((STAT_model*)args[0].val.p)->pt)->partitioning(error , &AMLOUTPUT , nb_cluster ,
                                                                                      cluster_nb_pattern , cluster_pattern);
       }
 
@@ -2785,7 +2785,7 @@ AMObj STAT_Clustering(const AMObjVector &args)
       return AMObj(AMObjType::ERROR);
     }
 
-    status = ((DistanceMatrix*)((STAT_model*)args[0].val.p)->pt)->hierarchical_clustering(error , true ,
+    status = ((DistanceMatrix*)((STAT_model*)args[0].val.p)->pt)->hierarchical_clustering(error , &AMLOUTPUT ,
                                                                                           algorithm , criterion ,
                                                                                           file_name , format);
 
@@ -2880,15 +2880,15 @@ AMObj STAT_ComparisonTest(const AMObjVector &args)
   }
 
   if (*pstr == "F") {
-    histo1->F_comparison(true , *histo2);
+    histo1->F_comparison(AMLOUTPUT , *histo2);
   }
 
   else if (*pstr == "T") {
-    histo1->t_comparison(true , *histo2);
+    histo1->t_comparison(AMLOUTPUT , *histo2);
   }
 
   else if (*pstr == "W") {
-    status = histo1->wilcoxon_mann_whitney_comparison(error , true , *histo2);
+    status = histo1->wilcoxon_mann_whitney_comparison(error , AMLOUTPUT , *histo2);
 
     if (!status) {
       AMLOUTPUT << "\n" << error;
@@ -3133,7 +3133,7 @@ AMObj STAT_ComputeRankCorrelation(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  status = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->rank_correlation_computation(error , true ,
+  status = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->rank_correlation_computation(error , &AMLOUTPUT ,
                                                                                       type , file_name);
 
   if (status) {
@@ -3180,7 +3180,7 @@ AMObj STAT_SupNormDistance(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  status = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->sup_norm_distance(error , true ,
+  status = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->sup_norm_distance(error , &AMLOUTPUT ,
                                                                            *((Vectors*)((STAT_model*)args[1].val.p)->pt));
 
   if (status) {
@@ -3318,7 +3318,7 @@ AMObj STAT_ContingencyTable(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  status = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->contingency_table(error , true , args[1].val.i ,
+  status = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->contingency_table(error , &AMLOUTPUT , args[1].val.i ,
                                                                            args[2].val.i , file_name , format);
 
   if (status) {
@@ -3478,7 +3478,7 @@ AMObj STAT_VarianceAnalysis(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  status = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->variance_analysis(error , true , args[1].val.i ,
+  status = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->variance_analysis(error , &AMLOUTPUT , args[1].val.i ,
                                                                            args[2].val.i , type , file_name , format);
 
   if (status) {
@@ -3920,7 +3920,7 @@ AMObj STAT_ComputeMeanError(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  status = seq->mean_error_computation(error , true , variable , identifier , robust);
+  status = seq->mean_error_computation(error , &AMLOUTPUT , variable , identifier , robust);
 
   if (status) {
     return AMObj(AMObjType::VOID);
@@ -5093,31 +5093,31 @@ AMObj STAT_Segmentation(const AMObjVector &args)
     }
 
     if (nb_segment_estimation) {
-//      seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
+//      seq = iseq->segmentation(error , &AMLOUTPUT , identifier , args[1].val.i ,
 //                               model_type , common_contrast , shape_parameter ,
 //                               criterion , min_nb_segment , penalty_shape , output);
-      seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
+      seq = iseq->segmentation(error , &AMLOUTPUT , identifier , args[1].val.i ,
                                vec_model_type , common_contrast , vec_shape_parameter ,
                                criterion , min_nb_segment , penalty_shape , output);
     }
 
     else {
       if (args[1].val.i == 1) {
-//        seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
+//        seq = iseq->segmentation(error , &AMLOUTPUT , identifier , args[1].val.i ,
 //                                 NULL , model_type , common_contrast ,
 //                                 shape_parameter , output);
         vector<int> vec_change_point;
 
-        seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
+        seq = iseq->segmentation(error , &AMLOUTPUT , identifier , args[1].val.i ,
                                  vec_change_point , vec_model_type , common_contrast ,
                                  vec_shape_parameter , output);
       }
 
       else {
-//        seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
+//        seq = iseq->segmentation(error , &AMLOUTPUT , identifier , args[1].val.i ,
 //                                 model_type , common_contrast , shape_parameter ,
 //                                 output , continuity);
-        seq = iseq->segmentation(error , true , identifier , args[1].val.i ,
+        seq = iseq->segmentation(error , &AMLOUTPUT , identifier , args[1].val.i ,
                                  vec_model_type , common_contrast , vec_shape_parameter ,
                                  output , continuity);
       }
@@ -5349,10 +5349,10 @@ AMObj STAT_Segmentation(const AMObjVector &args)
       vec_shape_parameter.push_back(ishape_parameter);
     }
 
-//    seq = iseq->segmentation(error , true , identifier , nb_segment ,
+//    seq = iseq->segmentation(error , &AMLOUTPUT , identifier , nb_segment ,
 //                             change_point , model_type , common_contrast ,
 //                             shape_parameter , output , continuity);
-    seq = iseq->segmentation(error , true , identifier , nb_segment ,
+    seq = iseq->segmentation(error , &AMLOUTPUT , identifier , nb_segment ,
                              vec_change_point , vec_model_type , common_contrast ,
                              vec_shape_parameter , output , continuity);
     delete [] change_point;
@@ -5636,7 +5636,7 @@ AMObj STAT_TransitionCount(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  status = seq->transition_count(error , true , args[1].val.i , begin , estimator , file_name);
+  status = seq->transition_count(error , &AMLOUTPUT , args[1].val.i , begin , estimator , file_name);
 //  status = seq->transition_count_0(error , AMLOUTPUT , args[1].val.i , begin , file_name , format);
 
   if (status) {
@@ -5809,7 +5809,7 @@ AMObj STAT_WordCount(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  status = seq->word_count(error , true , variable , args[offset].val.i ,
+  status = seq->word_count(error , &AMLOUTPUT , variable , args[offset].val.i ,
                            begin_state , end_state , min_frequency);
 
   if (status) {
@@ -5912,7 +5912,7 @@ AMObj STAT_LumpabilityTest(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  status = seq->lumpability_test(error , true , category , order);
+  status = seq->lumpability_test(error , AMLOUTPUT , category , order);
   delete [] category;
 
   if (status) {
@@ -6278,7 +6278,7 @@ AMObj STAT_ComputeStateSequences(const AMObjVector &args)
     SemiMarkovData *seq;
 
 
-    seq = ((HiddenSemiMarkov*)((STAT_model*)args[1].val.p)->pt)->state_sequence_computation(error , true , *iseq ,
+    seq = ((HiddenSemiMarkov*)((STAT_model*)args[1].val.p)->pt)->state_sequence_computation(error , &AMLOUTPUT , *iseq ,
                                                                                             characteristic_flag);
 
     if (seq) {
