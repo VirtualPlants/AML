@@ -110,19 +110,13 @@ static int parameter_input(const AMObjVector &args , int ident , int &inf_bound 
   else {
     inf_bound = args[1].val.i;
 
-    if (((ident == BINOMIAL) || (ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC) ||
-         (ident == UNIFORM)) && ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND))) {
-      status = false;
-      genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 2);
-    }
-
-    if ((ident == PRIOR_SEGMENT_LENGTH) && (inf_bound < 2)) {
+    if ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND)) {
       status = false;
       genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 2);
     }
   }
 
-  if ((ident == BINOMIAL) || (ident == UNIFORM) || (ident == PRIOR_SEGMENT_LENGTH)) {
+  if ((ident == BINOMIAL) || (ident == UNIFORM)) {
     if (args[2].tag() != AMObjType::INTEGER) {
       status = false;
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , function , 3 ,
@@ -145,14 +139,6 @@ static int parameter_input(const AMObjVector &args , int ident , int &inf_bound 
 
         case UNIFORM : {
           if ((sup_bound < inf_bound) || (sup_bound - inf_bound > MAX_DIFF_BOUND)) {
-            status = false;
-            genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 3);
-          }
-          break;
-        }
-
-        case PRIOR_SEGMENT_LENGTH : {
-          if (sup_bound <= inf_bound) {
             status = false;
             genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 3);
           }
@@ -280,7 +266,7 @@ AMObj STAT_Distribution(const AMObjVector &args)
     bool status = true;
     int i;
     discrete_parametric ident;
-    int inf_bound , sup_bound;
+    int inf_bound , sup_bound , no_segment , sequence_length;
     double parameter , probability;
     DiscreteParametricModel *dist;
 
@@ -301,13 +287,13 @@ AMObj STAT_Distribution(const AMObjVector &args)
     }
 
     else {
-      if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
+      if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC) || (ident == PRIOR_SEGMENT_LENGTH)) {
         if (args.length() != 4) {
           status = false;
           genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Distribution" , 4);
         }
       }
-      else if ((ident == POISSON) || (ident == UNIFORM) || (ident == PRIOR_SEGMENT_LENGTH)) {
+      else if ((ident == POISSON) || (ident == UNIFORM)) {
         if (args.length() != 3) {
           status = false;
           genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Distribution" , 3);
@@ -316,15 +302,66 @@ AMObj STAT_Distribution(const AMObjVector &args)
     }
 
     if (status) {
-      status = parameter_input(args , ident , inf_bound , sup_bound , parameter ,
-                               probability , "Distribution" , 0);
+      if (ident != PRIOR_SEGMENT_LENGTH) {
+        status = parameter_input(args , ident , inf_bound , sup_bound , parameter ,
+                                 probability , "Distribution" , 0);
+      }
+
+      else {
+        if (args[1].tag() != AMObjType::INTEGER) {
+          status = false;
+          genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Distribution" , 2 ,
+                      args[1].tag.string().data() , "INT");
+        }
+        else {
+          inf_bound = args[1].val.i;
+
+          if ((inf_bound < 1) || (inf_bound > MAX_INF_BOUND)) {
+            status = false;
+            genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , "Distribution" , 2);
+          }
+        }
+
+        if (args[2].tag() != AMObjType::INTEGER) {
+          status = false;
+          genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Distribution" , 3 ,
+                      args[2].tag.string().data() , "INT");
+        }
+
+        else {
+          no_segment = args[2].val.i;
+          if (no_segment < 2) {
+            status = false;
+            genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , "Distribution" , 3);
+          }
+        }
+
+        if (args[3].tag() != AMObjType::INTEGER) {
+          status = false;
+          genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Distribution" , 4 ,
+                      args[3].tag.string().data() , "INT");
+        }
+
+        else {
+          sequence_length = args[3].val.i;
+          if (sequence_length <= no_segment) {
+            status = false;
+            genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , "Distribution" , 4);
+          }
+        }
+      }
     }
 
     if (!status) {
       return AMObj(AMObjType::ERROR);
     }
 
-    dist = new DiscreteParametricModel(ident , inf_bound , sup_bound , parameter , probability);
+    if (ident != PRIOR_SEGMENT_LENGTH) {
+      dist = new DiscreteParametricModel(ident , inf_bound , sup_bound , parameter , probability);
+    }
+    else {
+      dist = new DiscreteParametricModel(inf_bound , no_segment , sequence_length);
+    }
 
     STAT_model* model = new STAT_model(dist);
     return AMObj(AMObjType::DISTRIBUTION , model);
@@ -364,9 +401,9 @@ AMObj STAT_DiscreteMixture(const AMObjVector &args)
     int i;
     int nb_component = args.length() / 2;
     double weight[DISCRETE_MIXTURE_NB_COMPONENT];
-    vector<double> vec_weight(DISCRETE_MIXTURE_NB_COMPONENT);
-    const DiscreteParametric *component[DISCRETE_MIXTURE_NB_COMPONENT];
-    vector<DiscreteParametric> vec_component(DISCRETE_MIXTURE_NB_COMPONENT);
+    vector<double> vec_weight(nb_component);
+    const DiscreteParametric *component[nb_component];
+    vector<DiscreteParametric> vec_component(nb_component);
 
 
     CHECKCONDVA(args.length() % 2 == 0 ,
@@ -468,8 +505,8 @@ AMObj STAT_Convolution(const AMObjVector &args)
     bool status = true;
     int i;
     int nb_dist = args.length();
-    const DiscreteParametric *dist[CONVOLUTION_NB_DISTRIBUTION];
-    vector<DiscreteParametric> vec_dist(CONVOLUTION_NB_DISTRIBUTION);
+    const DiscreteParametric *dist[nb_dist];
+    vector<DiscreteParametric> vec_dist(nb_dist);
 
 
     CHECKCONDVA((nb_dist >= 2) && (nb_dist <= CONVOLUTION_NB_DISTRIBUTION) ,

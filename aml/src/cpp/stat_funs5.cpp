@@ -3180,7 +3180,7 @@ AMObj STAT_SupNormDistance(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  status = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->sup_norm_distance(error , &AMLOUTPUT ,
+  status = ((Vectors*)((STAT_model*)args[0].val.p)->pt)->sup_norm_distance(error , AMLOUTPUT ,
                                                                            *((Vectors*)((STAT_model*)args[1].val.p)->pt));
 
   if (status) {

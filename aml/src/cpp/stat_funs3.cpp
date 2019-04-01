@@ -8130,7 +8130,7 @@ AMObj STAT_ConsecutiveValues(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->consecutive_values(error , true , variable , add_variable);
+  seq = iseq->consecutive_values(error , &AMLOUTPUT , variable , add_variable);
 
   if (seq) {
     STAT_model* model = new STAT_model(seq);
