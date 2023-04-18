@@ -44,6 +44,7 @@ array.cpp
 kernel_err.cpp
 gnuplot_pipe.cpp
 date.cpp
+amlrandom.cpp
 """)
 
 bflex = BisonFlex(lib_env, "parseraml.y", "scanneraml.l", prefix="aml")

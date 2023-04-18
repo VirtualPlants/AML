@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: stat_funs3.cpp 18820 2016-09-09 12:18:22Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -2371,7 +2371,7 @@ AMObj STAT_Cluster(const AMObjVector &args)
         return AMObj(AMObjType::ERROR);
       }
 
-      histo = ihisto->cluster(error , ratio , true);
+      histo = ihisto->cluster(error , ratio , &AMLOUTPUT);
     }
 
     else if (*pstr == "Limit") {
@@ -3466,11 +3466,11 @@ AMObj STAT_ValueSelect(const AMObjVector &args)
 
 
       if (args[offset].tag() == AMObjType::INTEGER) {
-        vec = ivec->value_select(error , true , variable ,
+        vec = ivec->value_select(error , &AMLOUTPUT , variable ,
                                  int_min_value , int_max_value , keep);
       }
       else if (args[offset].tag() == AMObjType::REAL) {
-        vec = ivec->value_select(error , true , variable ,
+        vec = ivec->value_select(error , &AMLOUTPUT , variable ,
                                  real_min_value , real_max_value , keep);
       }
 
@@ -3494,11 +3494,11 @@ AMObj STAT_ValueSelect(const AMObjVector &args)
 
 
       if (args[offset].tag() == AMObjType::INTEGER) {
-        seq = iseq->value_select(error , true , variable ,
+        seq = iseq->value_select(error , &AMLOUTPUT , variable ,
                                  int_min_value , int_max_value , keep);
       }
       else if (args[offset].tag() == AMObjType::REAL) {
-        seq = iseq->value_select(error , true , variable ,
+        seq = iseq->value_select(error , &AMLOUTPUT , variable ,
                                  real_min_value , real_max_value , keep);
       }
 
@@ -5290,7 +5290,7 @@ AMObj STAT_LengthSelect(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->length_select(error , true , min_length , max_length , keep);
+  seq = iseq->length_select(error , &AMLOUTPUT , min_length , max_length , keep);
 
   if (seq) {
     markovian_seq = seq->markovian_sequences(error);
@@ -6086,7 +6086,7 @@ AMObj STAT_IndexParameterSelect(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->index_parameter_select(error , true , min_index_parameter ,
+  seq = iseq->index_parameter_select(error , &AMLOUTPUT , min_index_parameter ,
                                      max_index_parameter , keep);
 
   if (seq) {
@@ -8130,7 +8130,7 @@ AMObj STAT_ConsecutiveValues(const AMObjVector &args)
     return AMObj(AMObjType::ERROR);
   }
 
-  seq = iseq->consecutive_values(error , true , variable , add_variable);
+  seq = iseq->consecutive_values(error , &AMLOUTPUT , variable , add_variable);
 
   if (seq) {
     STAT_model* model = new STAT_model(seq);

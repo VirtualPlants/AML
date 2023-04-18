@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: stat_funs4.cpp 18819 2016-09-09 12:17:47Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -517,9 +517,9 @@ static AMObj STAT_EstimateDiscreteMixture(const FrequencyDistribution *histo , c
     }
 
     else {
-//      mixt = histo->discrete_mixture_estimation(error , true , 1 , nb_component , ident ,
+//      mixt = histo->discrete_mixture_estimation(error , &AMLOUTPUT , 1 , nb_component , ident ,
 //                                                min_inf_bound , flag , component_flag , criterion);
-      mixt = histo->discrete_mixture_estimation(error , true , 1 , nb_component , vec_ident ,
+      mixt = histo->discrete_mixture_estimation(error , &AMLOUTPUT , 1 , nb_component , vec_ident ,
                                                 min_inf_bound , flag , component_flag , criterion);
     }
   }
@@ -838,11 +838,11 @@ static AMObj STAT_EstimateConvolution(const FrequencyDistribution *histo , const
 
   if (status) {
     if (unknown_dist) {
-      convol = histo->convolution_estimation(error , true , *known_dist , *unknown_dist ,
+      convol = histo->convolution_estimation(error , &AMLOUTPUT , *known_dist , *unknown_dist ,
                                              estimator , nb_iter , weight , pen_type , outside);
     }
     else {
-      convol = histo->convolution_estimation(error , true , *known_dist , min_inf_bound ,
+      convol = histo->convolution_estimation(error , &AMLOUTPUT , *known_dist , min_inf_bound ,
                                              estimator , nb_iter , weight , pen_type , outside);
     }
   }
@@ -1182,18 +1182,18 @@ static AMObj STAT_EstimateCompound(const FrequencyDistribution *histo , const AM
     if (unknown_dist) {
       switch (type) {
       case SUM :
-        cdist = histo->compound_estimation(error , true , *unknown_dist , *known_dist , type ,
+        cdist = histo->compound_estimation(error , &AMLOUTPUT , *unknown_dist , *known_dist , type ,
                                            estimator , nb_iter , weight , pen_type , outside);
         break;
       case ELEMENTARY :
-        cdist = histo->compound_estimation(error , true , *known_dist , *unknown_dist , type ,
+        cdist = histo->compound_estimation(error , &AMLOUTPUT , *known_dist , *unknown_dist , type ,
                                            estimator , nb_iter , weight , pen_type , outside);
         break;
       }
     }
 
     else {
-      cdist = histo->compound_estimation(error , true , *known_dist , type , min_inf_bound ,
+      cdist = histo->compound_estimation(error , &AMLOUTPUT , *known_dist , type , min_inf_bound ,
                                          estimator , nb_iter , weight , pen_type , outside);
     }
   }
@@ -1470,12 +1470,12 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
 
     switch (algorithm) {
     case EM :
-      mixt = vec->mixture_estimation(error , true , *imixt ,
+      mixt = vec->mixture_estimation(error , &AMLOUTPUT , *imixt ,
                                      known_component , common_dispersion ,
                                      INDEPENDENT , assignment , nb_iter);
       break;
     case MCEM :
-      mixt = vec->mixture_stochastic_estimation(error , true , *imixt ,
+      mixt = vec->mixture_stochastic_estimation(error , &AMLOUTPUT , *imixt ,
                                                 known_component , common_dispersion ,
                                                 INDEPENDENT , min_nb_assignment ,
                                                 max_nb_assignment , parameter ,
@@ -1728,12 +1728,12 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
 
       switch (algorithm) {
       case EM :
-        mixt = vec->mixture_estimation(error , true , args[2].val.i ,
+        mixt = vec->mixture_estimation(error , &AMLOUTPUT , args[2].val.i ,
                                        offset , mean , standard_deviation , 
                                        common_dispersion , assignment , nb_iter);
         break;
       case MCEM :
-        mixt = vec->mixture_stochastic_estimation(error , true , args[2].val.i ,
+        mixt = vec->mixture_stochastic_estimation(error , &AMLOUTPUT , args[2].val.i ,
                                                   offset , mean , standard_deviation , 
                                                   common_dispersion , min_nb_assignment ,
                                                   max_nb_assignment , parameter ,
@@ -2031,12 +2031,12 @@ static AMObj STAT_EstimateMixture(const Vectors *vec , const AMObjVector &args)
 
       switch (algorithm) {
       case EM :
-        mixt = vec->mixture_estimation(error , true , args[2].val.i ,
+        mixt = vec->mixture_estimation(error , &AMLOUTPUT , args[2].val.i ,
                                        ident , mean , standard_deviation , tied_location ,
                                        variance_factor , assignment , nb_iter);
         break;
       case MCEM :
-        mixt = vec->mixture_stochastic_estimation(error , true , args[2].val.i ,
+        mixt = vec->mixture_stochastic_estimation(error , &AMLOUTPUT , args[2].val.i ,
                                                   ident , mean , standard_deviation , tied_location ,
                                                   variance_factor , min_nb_assignment ,
                                                   max_nb_assignment , parameter ,
@@ -2401,7 +2401,7 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
 
     case AMObjType::FREQUENCY_DISTRIBUTION : {
       if (iinter_event) {
-        inter_event = ((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt))->estimation(error , true ,
+        inter_event = ((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt))->estimation(error , &AMLOUTPUT ,
                                                                                                               *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[1].val.p)->pt)) ,
                                                                                                               *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[2].val.p)->pt)) ,
                                                                                                               histo , *iinter_event , estimator ,
@@ -2409,7 +2409,7 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
                                                                                                               weight , pen_type , outside);
       }
       else {
-        inter_event = ((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt))->estimation(error , true ,
+        inter_event = ((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[0].val.p)->pt))->estimation(error , &AMLOUTPUT ,
                                                                                                               *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[1].val.p)->pt)) ,
                                                                                                               *((FrequencyDistribution*)((DiscreteDistributionData*)((STAT_model*)args[2].val.p)->pt)) ,
                                                                                                               histo , estimator ,
@@ -2421,13 +2421,13 @@ static AMObj STAT_EstimateRenewalIntervalData(const AMObjVector &args)
 
     case AMObjType::RENEWAL_DATA : {
       if (iinter_event) {
-        renew = ((RenewalData*)((STAT_model*)args[0].val.p)->pt)->estimation(error , true ,
+        renew = ((RenewalData*)((STAT_model*)args[0].val.p)->pt)->estimation(error , &AMLOUTPUT ,
                                                                              *iinter_event , estimator ,
                                                                              nb_iter , mean_estimator ,
                                                                              weight , pen_type , outside);
       }
       else {
-        renew = ((RenewalData*)((STAT_model*)args[0].val.p)->pt)->estimation(error , true , estimator ,
+        renew = ((RenewalData*)((STAT_model*)args[0].val.p)->pt)->estimation(error , &AMLOUTPUT , estimator ,
                                                                              nb_iter , mean_estimator ,
                                                                              weight , pen_type , outside);
       }
@@ -2831,12 +2831,12 @@ static AMObj STAT_EstimateRenewalCountData(const AMObjVector &args)
 
   if (status) {
     if (inter_event) {
-      renew = timev->estimation(error , true , type , *inter_event , estimator ,
+      renew = timev->estimation(error , &AMLOUTPUT , type , *inter_event , estimator ,
                                 nb_iter , equilibrium_estimator , mean_estimator ,
                                 weight , pen_type , outside);
     }
     else {
-      renew = timev->estimation(error , true , type , estimator , nb_iter ,
+      renew = timev->estimation(error , &AMLOUTPUT , type , estimator , nb_iter ,
                                 equilibrium_estimator , mean_estimator , weight ,
                                 pen_type , outside);
     }
@@ -3196,7 +3196,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
     }
 
     if (order_estimation) {
-      markov = seq->variable_order_markov_estimation(error , true , type , min_order ,
+      markov = seq->variable_order_markov_estimation(error , &AMLOUTPUT , type , min_order ,
                                                      max_order , algorithm , threshold ,
                                                      estimator , global_initial_transition ,
                                                      global_sample , counting_flag);
@@ -3406,7 +3406,7 @@ static AMObj STAT_EstimateVariableOrderMarkov(const MarkovianSequences *seq , co
       return AMObj(AMObjType::ERROR);
     }
 
-    markov = seq->lumpability_estimation(error , true , category , criterion ,
+    markov = seq->lumpability_estimation(error , &AMLOUTPUT , category , criterion ,
                                          order , counting_flag);
     delete [] category;
     break;
@@ -3622,7 +3622,7 @@ static AMObj STAT_EstimateSemiMarkov(const MarkovianSequences *seq , const AMObj
     return AMObj(AMObjType::ERROR);
   }
 
-  smarkov = seq->semi_markov_estimation(error , true , type , estimator , counting_flag ,
+  smarkov = seq->semi_markov_estimation(error , &AMLOUTPUT , type , estimator , counting_flag ,
                                         nb_iter , mean_estimator);
 
   if (smarkov) {
@@ -3921,13 +3921,13 @@ static AMObj STAT_EstimateHiddenVariableOrderMarkov(const MarkovianSequences *se
 
   switch (algorithm) {
   case EM :
-    hmarkov = seq->hidden_variable_order_markov_estimation(error , true , *ihmarkov ,
+    hmarkov = seq->hidden_variable_order_markov_estimation(error , &AMLOUTPUT , *ihmarkov ,
                                                            global_initial_transition ,
                                                            common_dispersion , counting_flag ,
                                                            state_sequence , nb_iter);
     break;
   case MCEM :
-    hmarkov = seq->hidden_variable_order_markov_stochastic_estimation(error , true , *ihmarkov ,
+    hmarkov = seq->hidden_variable_order_markov_stochastic_estimation(error , &AMLOUTPUT , *ihmarkov ,
                                                                       global_initial_transition ,
                                                                       common_dispersion ,
                                                                       min_nb_state_sequence ,
@@ -4397,13 +4397,13 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
 
     switch (algorithm) {
     case EM :
-      hsmarkov = seq->hidden_semi_markov_estimation(error , true, type , nb_state ,
+      hsmarkov = seq->hidden_semi_markov_estimation(error , &AMLOUTPUT, type , nb_state ,
                                                     left_right , occupancy_mean , poisson_geometric ,
                                                     common_dispersion , estimator , counting_flag ,
                                                     state_sequence , nb_iter , mean_estimator);
       break;
     case MCEM :
-      hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , true , type , nb_state ,
+      hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , &AMLOUTPUT , type , nb_state ,
                                                                left_right , occupancy_mean , poisson_geometric ,
                                                                common_dispersion , min_nb_state_sequence ,
                                                                max_nb_state_sequence , parameter , estimator ,
@@ -4736,12 +4736,12 @@ static AMObj STAT_EstimateHiddenSemiMarkov(const MarkovianSequences *seq , const
 
     switch (algorithm) {
     case EM :
-      hsmarkov = seq->hidden_semi_markov_estimation(error , true , *ihsmarkov , poisson_geometric ,
+      hsmarkov = seq->hidden_semi_markov_estimation(error , &AMLOUTPUT , *ihsmarkov , poisson_geometric ,
                                                     common_dispersion , estimator , counting_flag ,
                                                     state_sequence , nb_iter , mean_estimator);
       break;
     case MCEM :
-      hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , true , *ihsmarkov , poisson_geometric ,
+      hsmarkov = seq->hidden_semi_markov_stochastic_estimation(error , &AMLOUTPUT , *ihsmarkov , poisson_geometric ,
                                                                common_dispersion , min_nb_state_sequence ,
                                                                max_nb_state_sequence , parameter , estimator ,
                                                                counting_flag , state_sequence , nb_iter);

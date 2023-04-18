@@ -37,18 +37,15 @@
 
 
 
-#include <stdlib.h>
-#include "tool/util_math.h"
+#ifndef AMLRANDOM_HEADER
+#define AMLRANDOM_HEADER
 
-#include "utils.h"
+#ifdef _WIN32
+#define random rand
+#endif
 
-using namespace std;
 
-//static const char rcsid[] = "$Id$";
+long randomNbInRange(long a, long b);
+double randomDouble();
 
-ostream& operator<<(ostream& o, const String& obj) {
-
-  return obj.print(o);
-
-}
-
+#endif

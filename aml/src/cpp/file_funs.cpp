@@ -82,7 +82,9 @@
 
 #include "tool/dirnames.h"
 #include "tool/util_enviro.h"
+#ifndef WITHOUT_GEOM
 #include "plantgl/gui/viewer/pglapplication.h"
+#endif
 
 VPTOOLS_USING_NAMESPACE
 using namespace std;

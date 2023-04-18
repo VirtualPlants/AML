@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: stat_funs2.cpp 18818 2016-09-09 12:17:16Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -110,19 +110,13 @@ static int parameter_input(const AMObjVector &args , int ident , int &inf_bound 
   else {
     inf_bound = args[1].val.i;
 
-    if (((ident == BINOMIAL) || (ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC) ||
-         (ident == UNIFORM)) && ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND))) {
-      status = false;
-      genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 2);
-    }
-
-    if ((ident == PRIOR_SEGMENT_LENGTH) && (inf_bound < 2)) {
+    if ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND)) {
       status = false;
       genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 2);
     }
   }
 
-  if ((ident == BINOMIAL) || (ident == UNIFORM) || (ident == PRIOR_SEGMENT_LENGTH)) {
+  if ((ident == BINOMIAL) || (ident == UNIFORM)) {
     if (args[2].tag() != AMObjType::INTEGER) {
       status = false;
       genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , function , 3 ,
@@ -145,14 +139,6 @@ static int parameter_input(const AMObjVector &args , int ident , int &inf_bound 
 
         case UNIFORM : {
           if ((sup_bound < inf_bound) || (sup_bound - inf_bound > MAX_DIFF_BOUND)) {
-            status = false;
-            genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 3);
-          }
-          break;
-        }
-
-        case PRIOR_SEGMENT_LENGTH : {
-          if (sup_bound <= inf_bound) {
             status = false;
             genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , function , 3);
           }
@@ -280,7 +266,7 @@ AMObj STAT_Distribution(const AMObjVector &args)
     bool status = true;
     int i;
     discrete_parametric ident;
-    int inf_bound , sup_bound;
+    int inf_bound , sup_bound , no_segment , sequence_length;
     double parameter , probability;
     DiscreteParametricModel *dist;
 
@@ -301,13 +287,13 @@ AMObj STAT_Distribution(const AMObjVector &args)
     }
 
     else {
-      if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
+      if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC) || (ident == PRIOR_SEGMENT_LENGTH)) {
         if (args.length() != 4) {
           status = false;
           genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Distribution" , 4);
         }
       }
-      else if ((ident == POISSON) || (ident == UNIFORM) || (ident == PRIOR_SEGMENT_LENGTH)) {
+      else if ((ident == POISSON) || (ident == UNIFORM)) {
         if (args.length() != 3) {
           status = false;
           genAMLError(ERRORMSG(K_NB_ARG_ERR_sd) , "Distribution" , 3);
@@ -316,15 +302,66 @@ AMObj STAT_Distribution(const AMObjVector &args)
     }
 
     if (status) {
-      status = parameter_input(args , ident , inf_bound , sup_bound , parameter ,
-                               probability , "Distribution" , 0);
+      if (ident != PRIOR_SEGMENT_LENGTH) {
+        status = parameter_input(args , ident , inf_bound , sup_bound , parameter ,
+                                 probability , "Distribution" , 0);
+      }
+
+      else {
+        if (args[1].tag() != AMObjType::INTEGER) {
+          status = false;
+          genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Distribution" , 2 ,
+                      args[1].tag.string().data() , "INT");
+        }
+        else {
+          inf_bound = args[1].val.i;
+
+          if ((inf_bound < 1) || (inf_bound > MAX_INF_BOUND)) {
+            status = false;
+            genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , "Distribution" , 2);
+          }
+        }
+
+        if (args[2].tag() != AMObjType::INTEGER) {
+          status = false;
+          genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Distribution" , 3 ,
+                      args[2].tag.string().data() , "INT");
+        }
+
+        else {
+          no_segment = args[2].val.i;
+          if (no_segment < 2) {
+            status = false;
+            genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , "Distribution" , 3);
+          }
+        }
+
+        if (args[3].tag() != AMObjType::INTEGER) {
+          status = false;
+          genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "Distribution" , 4 ,
+                      args[3].tag.string().data() , "INT");
+        }
+
+        else {
+          sequence_length = args[3].val.i;
+          if (sequence_length <= no_segment) {
+            status = false;
+            genAMLError(ERRORMSG(PARAMETER_VALUE_sd) , "Distribution" , 4);
+          }
+        }
+      }
     }
 
     if (!status) {
       return AMObj(AMObjType::ERROR);
     }
 
-    dist = new DiscreteParametricModel(ident , inf_bound , sup_bound , parameter , probability);
+    if (ident != PRIOR_SEGMENT_LENGTH) {
+      dist = new DiscreteParametricModel(ident , inf_bound , sup_bound , parameter , probability);
+    }
+    else {
+      dist = new DiscreteParametricModel(inf_bound , no_segment , sequence_length);
+    }
 
     STAT_model* model = new STAT_model(dist);
     return AMObj(AMObjType::DISTRIBUTION , model);
@@ -364,9 +401,9 @@ AMObj STAT_DiscreteMixture(const AMObjVector &args)
     int i;
     int nb_component = args.length() / 2;
     double weight[DISCRETE_MIXTURE_NB_COMPONENT];
-    vector<double> vec_weight(DISCRETE_MIXTURE_NB_COMPONENT);
-    const DiscreteParametric *component[DISCRETE_MIXTURE_NB_COMPONENT];
-    vector<DiscreteParametric> vec_component(DISCRETE_MIXTURE_NB_COMPONENT);
+    vector<double> vec_weight(nb_component);
+    const DiscreteParametric *component[nb_component];
+    vector<DiscreteParametric> vec_component(nb_component);
 
 
     CHECKCONDVA(args.length() % 2 == 0 ,
@@ -412,8 +449,8 @@ AMObj STAT_DiscreteMixture(const AMObjVector &args)
     }
 
     if (status) {
-//      mixt = DiscreteMixture::building(error , nb_component , weight , component);
-      mixt = DiscreteMixture::building(error , nb_component , vec_weight , vec_component);
+//      mixt = DiscreteMixture::build(error , nb_component , weight , component);
+      mixt = DiscreteMixture::build(error , vec_weight , vec_component);
     }
 
     for (i = 0;i < nb_component;i++) {
@@ -468,8 +505,8 @@ AMObj STAT_Convolution(const AMObjVector &args)
     bool status = true;
     int i;
     int nb_dist = args.length();
-    const DiscreteParametric *dist[CONVOLUTION_NB_DISTRIBUTION];
-    vector<DiscreteParametric> vec_dist(CONVOLUTION_NB_DISTRIBUTION);
+    const DiscreteParametric *dist[nb_dist];
+    vector<DiscreteParametric> vec_dist(nb_dist);
 
 
     CHECKCONDVA((nb_dist >= 2) && (nb_dist <= CONVOLUTION_NB_DISTRIBUTION) ,
@@ -503,8 +540,8 @@ AMObj STAT_Convolution(const AMObjVector &args)
     }
 
     if (status) {
-//      convol = Convolution::building(error , nb_dist , dist);
-      convol = Convolution::building(error , nb_dist , vec_dist);
+//      convol = Convolution::build(error , nb_dist , dist);
+      convol = Convolution::build(error , vec_dist);
     }
 
     for (i = 0;i < nb_dist;i++) {
@@ -634,6 +671,7 @@ AMObj STAT_FrequencyDistribution(const AMObjVector &args)
     bool status = true;
     int i;
     int nb_element , *element;
+    vector<int> vec_element;
     Array* parray = (Array*)args[0].val.p;
 
 
@@ -666,6 +704,7 @@ AMObj STAT_FrequencyDistribution(const AMObjVector &args)
         }
         else {
           element[i] = (next.key()).val.i;
+          vec_element.push_back(element[i]);
         }
       }
 
@@ -675,7 +714,8 @@ AMObj STAT_FrequencyDistribution(const AMObjVector &args)
     delete pnext;
 
     if (status) {
-      histo = new DiscreteDistributionData(nb_element , element);
+//      histo = new DiscreteDistributionData(nb_element , element);
+      histo = new DiscreteDistributionData(vec_element);
     }
     delete [] element;
 
@@ -1619,19 +1659,19 @@ AMObj STAT_Renewal(const AMObjVector &args)
       if (scale_option) {
         // scaled_inter_event = new DiscreteParametric(*inter_event , scaling_coeff);
         scaled_inter_event = new DiscreteParametric((Distribution&)*inter_event , scaling_coeff);
-        renew = Renewal::building(error , *scaled_inter_event , type , time);
+        renew = Renewal::build(error , *scaled_inter_event , type , time);
         delete scaled_inter_event;
       }
 
       else {
-        renew = Renewal::building(error , *inter_event , type , time);
+        renew = Renewal::build(error , *inter_event , type , time);
       }
       delete inter_event;
     }
   }
 
   else {
-    renew = Renewal::building(error , *inter_event , type , time);
+    renew = Renewal::build(error , *inter_event , type , time);
     delete inter_event;
   }
 
@@ -1845,7 +1885,7 @@ AMObj STAT_TimeEvents(const AMObjVector &args)
                 genAMLError(ERRORMSG(K_F_ARG_TYPE_ERR_sdss) , "TimeEvents" , 2 ,
                             args[1].tag.string().data() , "INT"));
 
-    timev = TimeEvents::building(error , *nb_event , args[1].val.i);
+    timev = TimeEvents::build(error , *nb_event , args[1].val.i);
 
     if (timev) {
       STAT_model* model = new STAT_model(timev);

@@ -387,12 +387,16 @@ int GnuplotWindow::echo(ostream &os) const
 
           else
             {
+            
             if (strcmp(echo , "<Return>: continue") == 0)
               {
               plot_end = FALSE;
               }
             else
+              {
+              // CPL os << std::string(echo) << std::endl;
               plot_end = GNUPLOT_KILL;
+              }
             }
           break;
           }
@@ -497,7 +501,9 @@ int GnuplotWindow::session(const char *prefix , ostream &os , int output , unsig
         else
         if( end == GNUPLOT_KILL )
           {
-          kill_process(os);
+          os << "An error? q to quit  <Return>: continue, <p>: print, <s>: suspend, <q>: quit" << flush;
+	  
+          //kill_process(os);
           }
         else
           {

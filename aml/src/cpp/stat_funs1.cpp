@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2018 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: stat_funs1.cpp 18816 2016-09-09 12:15:40Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,7 +36,7 @@
 
 
 
-#include <stdio.h>
+#include <cstdio>
 #include <sys/types.h>
 #include <iostream>
 #include <fstream>
@@ -1212,14 +1212,14 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       CHECKCONDVA(nb_required == 2 ,
                   genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
-      status = ((HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , args[1].val.i , state_sequence , nb_state_sequence);
+      status = ((HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , AMLOUTPUT , args[1].val.i , state_sequence , nb_state_sequence);
     }
 
     else if (args[0].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
       CHECKCONDVA(nb_required == 2 ,
                   genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Display"));
 
-      status = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , args[1].val.i , state_output , state_sequence , nb_state_sequence);
+      status = ((HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt)->state_profile_ascii_write(error , AMLOUTPUT , args[1].val.i , state_output , state_sequence , nb_state_sequence);
     }
 
     else {
@@ -1249,11 +1249,11 @@ AMObj STAT_model::display(ostream &os , const AMObjVector &args) const
       }
 
       if (args[2].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) {
-        status = ((HiddenVariableOrderMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_ascii_write(error , *seq , args[1].val.i , state_sequence , nb_state_sequence);
+        status = ((HiddenVariableOrderMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_ascii_write(error , AMLOUTPUT , *seq , args[1].val.i , state_sequence , nb_state_sequence);
       }
 
       else if (args[2].tag() == AMObjType::HIDDEN_SEMI_MARKOV) {
-        status = ((HiddenSemiMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_ascii_write(error , *seq , args[1].val.i , state_output , state_sequence , nb_state_sequence);
+        status = ((HiddenSemiMarkov*)((STAT_model*)args[2].val.p)->pt)->state_profile_ascii_write(error , AMLOUTPUT , *seq , args[1].val.i , state_output , state_sequence , nb_state_sequence);
       }
 
       else {

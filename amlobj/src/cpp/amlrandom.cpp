@@ -35,20 +35,36 @@
  */
 
 
-
-
-#include <stdlib.h>
 #include "tool/util_math.h"
 
-#include "utils.h"
+#include "amlrandom.h"
+#include <climits>
+#include <cstdlib>
+
+#ifndef MAXLONG
+#define MAXLONG LONG_MAX
+#endif
 
 using namespace std;
 
 //static const char rcsid[] = "$Id$";
 
-ostream& operator<<(ostream& o, const String& obj) {
 
-  return obj.print(o);
+const long MAXRANDOM = MAXLONG;
+
+// returns a random long between a and b (included) uniformely.
+long randomNbInRange(long a, long b) {
+
+  double r = ((double)random())/(double)MAXRANDOM;
+
+  return (long) (a+ (long) rint((b-a)*r)) ; // rint takes the nearest integer
+}
+
+
+// returns a random double between 0 and 1 (included) uniformely.
+double randomDouble() {
+
+  return ((double)random())/(double)MAXRANDOM;
 
 }
 
