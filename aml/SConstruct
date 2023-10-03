@@ -11,13 +11,13 @@ options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 # Dependencies
 WITHOUT_PLANTGL=True
 if not WITHOUT_PLANTGL:
-    common_tools = ['vplants.mtg', 'vplants.plantgl', 'vplants.tool', 'vplants.amlobj',
-                    'vplants.stat_tool', 'vplants.sequence_analysis','boost_python']
+    common_tools = ['openalea.libmtg', 'openalea.plantgl', 'openalea.tool', 'openalea.amlobj',
+                    'openalea.stat_tool', 'openalea.sequence_analysis','boost_python']
 
     tools = ['python','flex','install', 'qt4', 'cgal'] + common_tools
 else:
-    common_tools = [ 'vplants.tool', 'vplants.amlobj',
-                    'vplants.stat_tool', 'vplants.sequence_analysis','boost_python']
+    common_tools = [ 'openalea.tool', 'openalea.amlobj',
+                    'openalea.stat_tool', 'openalea.sequence_analysis','boost_python']
 
     tools = ['python','flex', 'qt4', 'readline'] + common_tools
 

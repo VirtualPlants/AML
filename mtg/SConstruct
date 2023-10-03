@@ -8,7 +8,7 @@ ALEASolution = config.ALEASolution
 
 
 options = Variables(['../options.py', 'options.py'], ARGUMENTS)
-tools = ['flex', 'bison','qt4', 'opengl', 'boost_python', 'vplants.tool', 'vplants.plantgl', 'vplants.amlobj']
+tools = ['flex', 'bison','qt4', 'opengl', 'boost_python', 'openalea.tool', 'openalea.plantgl', 'openalea.amlobj']
 
 env = ALEASolution(options, tools)
 

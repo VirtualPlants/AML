@@ -6,11 +6,19 @@ from openalea.deploy.binary_deps import binary_deps
 import os, sys
 from os.path import join as pj
 
-from openalea.deploy.metainfo import read_metainfo
-metadata = read_metainfo('metainfo.ini', verbose=True)
-for key,value in metadata.iteritems():
-    exec("%s = '%s'" % (key, value))
+# from openalea.deploy.metainfo import read_metainfo
+# metadata = read_metainfo('metainfo.ini', verbose=True)
+# for key,value in metadata.iteritems():
+#     exec("%s = '%s'" % (key, value))
 
+# Meta Information
+name = "OpenAlea.Aml"
+version = "1.2.0"
+authors="C. Godin, Y. Guedon, C.Pradal"
+description="aml and amlPy libraries"
+url="https://github.com/VirtualPlants/AML/"
+license="CeCILL-C"
+namespace='openalea'
 
 build_prefix = "build-scons"
 
@@ -46,8 +54,8 @@ if __name__ == '__main__':
           
         
           # Packages
-          namespace_packages = ['openalea', 'vplants'],
-          create_namespaces = True,
+          namespace_packages = ['openalea'],
+          #create_namespaces = True,
 
           packages=[namespace+".aml", namespace+".aml_wralea", 
                     namespace+".aml.amldoc",
@@ -67,7 +75,6 @@ if __name__ == '__main__':
                        namespace+".aml_wralea.demo.mtg": "src/aml_wralea/demo/mtg", 
 
                        "amlPy" : "src/amlPy",
-                       "vplants": "src/vplants",
                        "" : 'src',
                        },
       
@@ -85,7 +92,7 @@ if __name__ == '__main__':
           # Dependencies
           setup_requires = setup_requires ,
 #          install_requires = install_requires,
-          dependency_links = ['http://openalea.gforge.inria.fr/pi'],
+          #dependency_links = ['http://openalea.gforge.inria.fr/pi'],
 
           # entry_points
           entry_points = {
@@ -93,7 +100,7 @@ if __name__ == '__main__':
                        "demo = openalea.aml_wralea.demo"]
             },
 
-          pylint_packages = ['.']
+          #pylint_packages = ['.']
           )
 
 
