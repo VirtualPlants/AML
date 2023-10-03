@@ -17,7 +17,7 @@ if not WITHOUT_PLANTGL:
     tools = ['python','flex','install', 'qt4', 'cgal'] + common_tools
 else:
     common_tools = [ 'openalea.tool', 'openalea.amlobj',
-                    'openalea.stat_tool', 'openalea.sequence_analysis','boost_python']
+                    'openalea.stattool', 'openalea.sequenceanalysis','boost_python']
 
     tools = ['python','flex', 'qt4', 'readline'] + common_tools
 
