@@ -29,10 +29,10 @@ scons_parameters=["build_prefix="+build_prefix]
 # platform dependencies
 install_requires=[]
 """
-install_requires = [binary_deps('vplants.amlobj'), 
-                    binary_deps('vplants.sequence_analysis'),
-                    binary_deps('vplants.tree_matching'), 
-                    binary_deps('vplants.mtg'), 
+install_requires = [binary_deps('openalea.amlobj'), 
+                    binary_deps('openalea.sequenceanalysis'),
+                    binary_deps('openalea.treematching'), 
+                    binary_deps('openalea.libmtg'), 
                     ]
 
 """
